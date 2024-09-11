@@ -147,19 +147,17 @@ class EditHeaderAction
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part)
                     {
                         $value = Parser::dos2unix(trim($value));
-                        if (!is_null($value)) {
-                            $lines = explode("\n", $value);
-                            if ($value !== '' && count($lines) != mb_substr_count($value, '0 !HISTORY')) {
-                                $fail('partcheck.history.invalid')->translate();
-                                return;
-                            }  
-                
-                            $history = app(Parser::class)->getHistory($value);
-                            if (! is_null($history)) {
-                                foreach ($history as $hist) {
-                                    if (is_null(User::fromAuthor($hist['user'])->first())) {
-                                        $fail('partcheck.history.author')->translate();
-                                    }
+                        $lines = explode("\n", $value);
+                        if ($value !== '' && count($lines) != mb_substr_count($value, '0 !HISTORY')) {
+                            $fail('partcheck.history.invalid')->translate();
+                            return;
+                        }  
+            
+                        $history = app(Parser::class)->getHistory($value);
+                        if (! is_null($history)) {
+                            foreach ($history as $hist) {
+                                if (is_null(User::fromAuthor($hist['user'])->first())) {
+                                    $fail('partcheck.history.author')->translate();
                                 }
                             }
                         }
