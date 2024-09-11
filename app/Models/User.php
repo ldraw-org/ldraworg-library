@@ -71,7 +71,7 @@ class User extends Authenticatable
         return $this->belongsToMany(Part::class, 'user_part_notifications');
     }
     
-    public function authorString(): Attribute
+    protected function authorString(): Attribute
     {       
         return Attribute::make(
             get: function(mixed $value, array $attributes) {

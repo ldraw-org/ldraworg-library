@@ -28,7 +28,7 @@ class PartRelease extends Model
         ];
     }
     
-    public function notes(): Attribute
+    protected function notes(): Attribute
     {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
