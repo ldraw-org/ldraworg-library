@@ -88,7 +88,7 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
-        public_path('images') => storage_path('app/images'),
+        public_path('images/library') => storage_path('app/images/library'),
         public_path('library') => storage_path('app/library'),
     ],
 
