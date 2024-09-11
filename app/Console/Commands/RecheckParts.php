@@ -35,6 +35,7 @@ class RecheckParts extends Command
         Part::chunkById($div, function (Collection $parts) use ($manager, $num, &$iter) {
             $this->info("Processing chunk {$iter} of {$num}");
             foreach($parts as $part) {
+                /** @var $part Part */
                 $manager->checkPart($part);
             }
             $iter += 1;
