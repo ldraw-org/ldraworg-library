@@ -101,7 +101,7 @@ class EditNumberAction
                 PartSubmitted::dispatch($upart, Auth::user());
             }
             $mpart = $manager->addMovedTo($part, $upart);
-            $part->unofficial_part->associate($mpart);
+            $part->unofficial_part()->associate($mpart);
             $part->save();
             $mpart->save();
             PartSubmitted::dispatch($mpart, Auth::user());
