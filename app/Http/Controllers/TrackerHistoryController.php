@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TrackerHistory;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class TrackerHistoryController extends Controller
 {
-    public function __invoke(Request $request) {
-        $history = \App\Models\TrackerHistory::latest()->get();
+    public function __invoke(Request $request): View {
+        $history = TrackerHistory::latest()->get();
         $data = [];
         foreach($history as $h) {  
             $data[] = [
