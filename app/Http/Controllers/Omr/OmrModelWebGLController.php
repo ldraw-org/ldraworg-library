@@ -31,6 +31,7 @@ class OmrModelWebGLController extends Controller
         $oparts = $oparts->unique();
         $webgl = [$model->filename() => 'data:text/plain;base64,' .  base64_encode($file)];
         foreach($oparts as $p) {
+            /** @var $p Part */
             if ($p->isTexmap()) {
                 $pn = str_replace(["parts/textures/","p/textures/"], '', $p->filename);
                 $webgl[$pn] = 'data:image/png;base64,' .  base64_encode($p->get());
