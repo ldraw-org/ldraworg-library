@@ -234,7 +234,7 @@ class Part extends Model
 
     public function scopeAdminReady(Builder $query): void
     {
-        $query->unofficial()
+        $query->whereNull('part_release_id')
             ->whereRelation('type', 'folder', 'parts/')
             ->where('ready_for_admin', true)
             ->whereHas('descendantsAndSelf', function ($q) {
@@ -370,10 +370,12 @@ class Part extends Model
         $this->help()->delete();
         if ($help instanceof Collection) {
             foreach($help as $h) {
+                /** @var PartHelp $h */
                 PartHelp::create(['part_id' => $this->id, 'order' => $h->order, 'text' => $h->text]);
             }    
         } else {
             foreach($help as $index => $h) {
+                /** @var PartHelp $h */
                 PartHelp::create(['part_id' => $this->id, 'order' => $index, 'text' => $h]);
             }    
         }
@@ -384,6 +386,7 @@ class Part extends Model
         $this->history()->delete();
         if ($history instanceof Collection) {
             foreach ($history as $hist) {
+                /** @var PartHistory $hist */
                 PartHistory::create([
                     'user_id' => $hist->user->id, 
                     'part_id' => $this->id, 
@@ -393,6 +396,7 @@ class Part extends Model
             }
         } else {
             foreach ($history as $hist) {
+                /** @var PartHistory $hist */
                 $u = User::fromAuthor($hist['user'])->first();
                 PartHistory::create([
                     'user_id' => $u->id, 

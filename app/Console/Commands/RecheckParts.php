@@ -8,23 +8,10 @@ use Illuminate\Database\Eloquent\Collection;
 
 class RecheckParts extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'pt:recheck';
+    protected string $signature = 'pt:recheck';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Recheck all parts';
+    protected string $description = 'Recheck all parts';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         $manager = app(\App\LDraw\PartManager::class);
@@ -35,7 +22,7 @@ class RecheckParts extends Command
         Part::chunkById($div, function (Collection $parts) use ($manager, $num, &$iter) {
             $this->info("Processing chunk {$iter} of {$num}");
             foreach($parts as $part) {
-                /** @var $part Part */
+                /** @var Part $part */
                 $manager->checkPart($part);
             }
             $iter += 1;
