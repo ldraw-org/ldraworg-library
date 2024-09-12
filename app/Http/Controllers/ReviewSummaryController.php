@@ -3,16 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\ReviewSummary\ReviewSummary;
+use Illuminate\View\View;
 
 class ReviewSummaryController extends Controller
 {
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function __invoke(ReviewSummary $summary)
+    public function __invoke(ReviewSummary $summary): View
     {
         return view('tracker.review-summary-show', compact('summary'));
     }
