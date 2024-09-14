@@ -5,9 +5,12 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \App\Models\Part
+ */
 class PartSearchResource extends JsonResource
 {
-    public static string $wrap = 'results';
+    public static $wrap = 'results';
 
     public function toArray(Request $request): array
     {
