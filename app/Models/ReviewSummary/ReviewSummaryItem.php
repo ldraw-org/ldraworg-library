@@ -11,21 +11,21 @@ class ReviewSummaryItem extends Model
 {
     use HasPart;
     use HasOrder;
-    
+
     protected $fillable = [
         'order',
         'review_summary_id',
         'part_id',
         'heading',
     ];
-    
+
     protected $with = ['part'];
 
     public function review_summary(): BelongsTo
     {
         return $this->belongsTo(ReviewSummary::class);
     }
-    
+
     public function toString(): string
     {
         if (is_null($this->part) && is_null($this->heading)) {
@@ -34,7 +34,7 @@ class ReviewSummaryItem extends Model
         if (is_null($this->part)) {
             return "/ {$this->heading}";
         }
-        
+
         return $this->part->filename;
     }
 }

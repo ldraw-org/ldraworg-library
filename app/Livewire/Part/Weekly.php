@@ -31,10 +31,10 @@ class Weekly extends Component implements HasForms, HasTable
                 Group::make('week')
                     ->date(),
             ])
-            ->actions(PartTable::actions()) 
-            ->defaultGroup('week')   
+            ->actions(PartTable::actions())
+            ->defaultGroup('week')
             ->recordUrl(
-                fn (Part $p): string => 
+                fn (Part $p): string =>
                     route($p->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $p])
             );
     }

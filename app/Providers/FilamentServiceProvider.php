@@ -29,7 +29,7 @@ class FilamentServiceProvider extends ServiceProvider
             'yellow' => Color::Yellow,
             'blue' => Color::Blue,
         ]);
-        
+
         Select::configureUsing(function (Select $select): void {
             $select
                 ->optionsLimit(1000)

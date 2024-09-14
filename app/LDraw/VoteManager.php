@@ -28,7 +28,7 @@ class VoteManager
         $oldVoteIsAdminCert = in_array($vote->vote_type_code ?? null, ['A', 'T']);
         $newVoteIsAdminCert = in_array($vote_type_code, ['A', 'T']);
 
-        switch($vote_type_code) {
+        switch ($vote_type_code) {
             case 'N':
                 $vote->delete();
                 PartReviewed::dispatch($part, $user, null, $comment);
@@ -40,14 +40,13 @@ class VoteManager
                 if (!is_null($vote)) {
                     $vote->vote_type_code = $vote_type_code;
                     $vote->save();
-                }
-                else {
+                } else {
                     Vote::create([
                         'part_id' => $part->id,
                         'user_id' => $user->id,
                         'vote_type_code' => $vote_type_code,
                     ]);
-                }                
+                }
                 PartReviewed::dispatch($part, $user, $vote_type_code, $comment);
         }
 
@@ -65,8 +64,8 @@ class VoteManager
 
     public function adminCertifyAll(Part $part, User $user): void
     {
-        if (!$part->isUnofficial() || 
-            !$part->type->folder == 'parts/' || 
+        if (!$part->isUnofficial() ||
+            !$part->type->folder == 'parts/' ||
             $part->descendantsAndSelf->where('vote_sort', '>', 2)->count() > 0 ||
             $user->cannot('create', [Vote::class, $part, 'A']) ||
             $user->cannot('allAdmin', Vote::class)) {
@@ -81,8 +80,8 @@ class VoteManager
 
     public function certifyAll(Part $part, User $user): void
     {
-        if (!$part->isUnofficial() || 
-            !$part->type->folder == 'parts/' || 
+        if (!$part->isUnofficial() ||
+            !$part->type->folder == 'parts/' ||
             $part->descendantsAndSelf->where('vote_sort', '>', 3)->count() > 0 ||
             $user->cannot('create', [Vote::class, $part, 'C']) ||
             $user->cannot('all', Vote::class)) {
@@ -91,9 +90,9 @@ class VoteManager
         $part
             ->descendantsAndSelf()
             ->where('vote_sort', 3)
-            ->whereDoesntHave('votes', fn(Builder $q) => $q->where('user_id', $user->id)->whereIn('vote_type_code', ['A', 'T']))
+            ->whereDoesntHave('votes', fn (Builder $q) => $q->where('user_id', $user->id)->whereIn('vote_type_code', ['A', 'T']))
             ->unofficial()
             ->each(fn (Part $p) => $this->postVote($p, $user, 'C'));
-        
+
     }
 }

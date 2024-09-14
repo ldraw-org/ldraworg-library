@@ -25,7 +25,7 @@ test('get description', function (string $input, ?string $expected) {
     'multi-word' => ["0 Test Description", "Test Description"],
     'with line ending' => ["0 Test Description\n", "Test Description"],
     'multi-line' => ["0 Test Description\n0 Name: 12345.dat", "Test Description"],
-    'unicode' =>["0 Tile 1 x 8 with Chinese \"长城\" (Great Wall) Pattern\n0 Name: 12345.dat\n", "Tile 1 x 8 with Chinese \"长城\" (Great Wall) Pattern"],
+    'unicode' => ["0 Tile 1 x 8 with Chinese \"长城\" (Great Wall) Pattern\n0 Name: 12345.dat\n", "Tile 1 x 8 with Chinese \"长城\" (Great Wall) Pattern"],
     'no 0' => ["Test", null],
     'blank 0' => ["0\n0 Name: 12345.dat", null],
     'empty file' => ["", null],
@@ -125,7 +125,7 @@ test('get type', function (string $input, ?array $expected) {
     'unofficial with qualifier' => ["0 !LDRAW_ORG Unofficial_Part Flexible_Section", ['unofficial' => true, 'type' => 'Part', 'qual' => 'Flexible_Section', 'releasetype' => '', 'release' => '']],
     'official update, no qualifier' => ["0 !LDRAW_ORG Part UPDATE 2022-01", ['unofficial' => false, 'type' => 'Part', 'qual' => '', 'releasetype' => 'UPDATE', 'release' => '2022-01']],
     'official update with qualifier' => ["0 !LDRAW_ORG Part Alias UPDATE 2022-01", ['unofficial' => false, 'type' => 'Part', 'qual' => 'Alias', 'releasetype' => 'UPDATE', 'release' => '2022-01']],
-    'official original with qualifier' =>["0 !LDRAW_ORG Part Alias ORIGINAL", ['unofficial' => false, 'type' => 'Part', 'qual' => 'Alias', 'releasetype' => 'ORIGINAL', 'release' => 'original']],
+    'official original with qualifier' => ["0 !LDRAW_ORG Part Alias ORIGINAL", ['unofficial' => false, 'type' => 'Part', 'qual' => 'Alias', 'releasetype' => 'ORIGINAL', 'release' => 'original']],
     'with line ending' => ["0 !LDRAW_ORG Part UPDATE 2022-01\n", ['unofficial' => false, 'type' => 'Part', 'qual' => '', 'releasetype' => 'UPDATE', 'release' => '2022-01']],
     'multi-line' => ["0 Test\n0 !LDRAW_ORG Part UPDATE 2022-01", ['unofficial' => false, 'type' => 'Part', 'qual' => '', 'releasetype' => 'UPDATE', 'release' => '2022-01']],
     'blank' => ["0 !LDRAW_ORG", null],
@@ -187,7 +187,7 @@ test('get subparts', function (string $input, ?array $expected) {
     'texmap spherical' => ["0 !TEXMAP START SPHERICAL 1 2 3 1 2 3 1 2 3 4 5 test.png", ['subparts' => null, 'textures' => ['test.png']]],
     'texmap spherical with glossmap' => ["0 !TEXMAP START SPHERICAL 1 2 3 1 2 3 1 2 3 test.png GLOSSMAP test2.png", ['subparts' => null, 'textures' => ['test.png', 'test2.png']]],
     'texmap and type 1 lines' => [
-        "1 0 0 0 0 1 0 0 0 1 0 0 0 1 test.dat\n1 0 0 0 0 1 0 0 0 1 0 0 0 1 test2.dat\n0 !TEXMAP START PLANAR 1 2 3 1 2 3 1 2 3 test.png GLOSSMAP test2.png", 
+        "1 0 0 0 0 1 0 0 0 1 0 0 0 1 test.dat\n1 0 0 0 0 1 0 0 0 1 0 0 0 1 test2.dat\n0 !TEXMAP START PLANAR 1 2 3 1 2 3 1 2 3 test.png GLOSSMAP test2.png",
         ['subparts' => ['test.dat', 'test2.dat'], 'textures' => ['test.png', 'test2.png']]
     ],
     'same subparts' => ["1 0 0 0 0 1 0 0 0 1 0 0 0 1 test.dat\n1 0 0 0 0 1 0 0 0 1 0 0 0 1 test.dat", ['subparts' => ['test.dat'], 'textures' => null]],

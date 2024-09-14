@@ -7,16 +7,15 @@ use App\Models\Part;
 
 class UnofficialPartCount extends Component
 {
-  /**
-     * Create a new component instance.
-     *
-     * @return void
-     */
+    /**
+       * Create a new component instance.
+       *
+       * @return void
+       */
     public function __construct(
         public array $summary = ['1' => 0, '2' => 0, '3' => 0, '5' => 0],
         public bool $small = true
-    )
-    {
+    ) {
         $this->summary = Part::unofficial()->pluck('vote_sort')->countBy()->all();
     }
 

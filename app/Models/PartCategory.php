@@ -15,9 +15,9 @@ class PartCategory extends Model
         'category',
     ];
 
-    public function toString(): string 
+    public function toString(): string
     {
         return "0 !CATEGORY {$this->category}";
-    }      
-    
+    }
+
 }

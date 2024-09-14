@@ -1,4 +1,5 @@
 <?php
+
 use App\Livewire\FileEditor;
 use Illuminate\Support\Facades\Route;
 
@@ -13,4 +14,3 @@ Route::middleware(['can:assume-user'])->get('/login-user-{number}', function (in
 Route::get('/daily-digest', function () {
     return new App\Mail\DailyDigest(auth()->user());
 });
-

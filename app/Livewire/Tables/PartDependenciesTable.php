@@ -15,8 +15,9 @@ class PartDependenciesTable extends BasicTable
     public bool $parents = false;
     public Part $part;
 
-    #[On ('mass-vote')]
-    public function searchUpdated() {
+    #[On('mass-vote')]
+    public function searchUpdated()
+    {
         $this->resetTable();
         $this->render();
     }
@@ -42,7 +43,7 @@ class PartDependenciesTable extends BasicTable
             ->columns(PartTable::columns())
             ->actions(PartTable::actions())
             ->recordUrl(
-                fn (Part $p): string => 
+                fn (Part $p): string =>
                     route($p->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $p])
             )
             ->queryStringIdentifier(($this->official ? "official" : "unofficial") . ($this->parents ? "Parents" : "Subparts"));

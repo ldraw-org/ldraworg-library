@@ -9,12 +9,15 @@ use Illuminate\Queue\SerializesModels;
 
 class PartUpdateProcessingComplete
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance.
      */
     public function __construct(
         public PartRelease $release,
-    ) {}
+    ) {
+    }
 }

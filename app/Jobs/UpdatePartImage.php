@@ -12,15 +12,18 @@ use Illuminate\Queue\SerializesModels;
 
 class UpdatePartImage implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
      */
     public function __construct(
         protected Part $part
-    )
-    {}
+    ) {
+    }
 
     /**
      * Execute the job.

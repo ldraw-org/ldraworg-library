@@ -33,16 +33,16 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'part.vote.fasttrack']);
 
         Permission::create(['name' => 'part.comment']);
-        
+
         Permission::create(['name' => 'part.own.vote.hold']);
         Permission::create(['name' => 'part.own.vote.certify']);
         Permission::create(['name' => 'part.own.comment']);
         Permission::create(['name' => 'part.own.edit.header']);
-      
+
         Permission::create(['name' => 'user.add']);
         Permission::create(['name' => 'user.add.nonadmin']);
         Permission::create(['name' => 'user.delete']);
-        
+
         Permission::create(['name' => 'user.modify']);
         Permission::create(['name' => 'user.modify.email']);
         Permission::create(['name' => 'user.modify.role.nonadmin']);
@@ -52,11 +52,11 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'role.add']);
         Permission::create(['name' => 'role.modify']);
         Permission::create(['name' => 'role.delete']);
-        
+
         // Wildcard permissions
         Permission::create(['name' => 'user']);
         Permission::create(['name' => 'role']);
         Permission::create(['name' => 'part']);
-        
+
     }
 }

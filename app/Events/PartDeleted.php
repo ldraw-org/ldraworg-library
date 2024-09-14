@@ -9,7 +9,9 @@ use Illuminate\Queue\SerializesModels;
 
 class PartDeleted
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance.
@@ -19,5 +21,6 @@ class PartDeleted
         public string $deleted_filename,
         public string $deleted_description,
         public array $parentIds,
-    ) {}
+    ) {
+    }
 }

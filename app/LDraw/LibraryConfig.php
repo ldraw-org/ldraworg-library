@@ -4,18 +4,18 @@ namespace App\LDraw;
 
 class LibraryConfig
 {
-    static function partLicenses(): array
+    public static function partLicenses(): array
     {
         return [
             ['name' => 'CC_BY_2', 'text' => 'Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt'],
             ['name' => 'CC_BY_4', 'text' => 'Licensed under CC BY 4.0 : see CAreadme.txt'],
             ['name' => 'CC0', 'text' => 'Marked with CC0 1.0 : see CAreadme.txt'],
             ['name' => 'CA', 'text' => 'Redistributable under CCAL version 2.0 : see CAreadme.txt'],
-            ['name' => 'NonCA', 'text' => 'Not redistributable : see NonCAreadme.txt'],        
+            ['name' => 'NonCA', 'text' => 'Not redistributable : see NonCAreadme.txt'],
         ];
     }
 
-    static function partTypes(): array
+    public static function partTypes(): array
     {
         return [
             ['type' => 'Part', 'name' => 'Part', 'folder' => 'parts/', 'format' => 'dat'],
@@ -29,11 +29,11 @@ class LibraryConfig
             ['type' => 'Subpart_Texmap', 'name' => 'Subpart TEXMAP Image', 'folder' => 'parts/textures/s/', 'format' => 'png'],
             ['type' => 'Primitive_Texmap', 'name' => 'Primitive TEXMAP Image', 'folder' => 'p/textures/', 'format' => 'png'],
             ['type' => '8_Primitive_Texmap', 'name' => '8 Segment Primitive TEXMAP Image', 'folder' => 'p/textures/8/', 'format' => 'png'],
-            ['type' => '48_Primitive_Texmap', 'name' => '48 Segment Primitive TEXMAP Image', 'folder' => 'p/textures/48/', 'format' => 'png'],          
-        ];        
+            ['type' => '48_Primitive_Texmap', 'name' => '48 Segment Primitive TEXMAP Image', 'folder' => 'p/textures/48/', 'format' => 'png'],
+        ];
     }
 
-    static function partTypeQualifiers(): array
+    public static function partTypeQualifiers(): array
     {
         return [
             ['type' => 'Alias', 'name' => 'Alias'],
@@ -42,7 +42,7 @@ class LibraryConfig
         ];
     }
 
-    static function partCategories(): array
+    public static function partCategories(): array
     {
         return [
             ['category' => 'Animal'],
@@ -138,7 +138,7 @@ class LibraryConfig
         ];
     }
 
-    static function partEventTypes(): array
+    public static function partEventTypes(): array
     {
         return [
             ['slug' => 'review', 'name' => 'Review'],
@@ -147,19 +147,19 @@ class LibraryConfig
             ['slug' => 'rename', 'name' => 'Rename'],
             ['slug' => 'release', 'name' => 'Release'],
             ['slug' => 'delete', 'name' => 'Delete'],
-            ['slug' => 'comment', 'name' => 'Comment'],      
+            ['slug' => 'comment', 'name' => 'Comment'],
         ];
     }
 
-    static function voteTypes(): array
+    public static function voteTypes(): array
     {
         return [
-            ['code' => 'C', 'short'=>'certify', 'name' => 'Certify', 'phrase' => 'Certify (Yes).  This file is ready for general release.', 'order' => 4],
-            ['code' => 'A', 'short'=>'admincertify', 'name' => 'Admin Certify', 'phrase' => 'Admin Certify (Approve).  This file is approved for release.', 'order' => 3],
-            ['code' => 'T', 'short'=>'fasttrack', 'name' => 'Admin Fast Track', 'phrase' => 'Fast-track (Yes).  This file is eligible for fast-track review and is approved release.', 'order' => 6],
-            ['code' => 'H', 'short'=>'hold', 'name' => 'Hold', 'phrase' => 'Hold (No).  It\'s getting there, but not yet.', 'order' => 5],
-            ['code' => 'N', 'short'=>'cancel', 'name' => 'Cancel Vote', 'phrase' => 'Cancel Vote.  This will clear your vote on this part.', 'order' => 2],
-            ['code' => 'M', 'short'=>'comment', 'name' => 'Comment', 'phrase' => 'Comment.  Comment on this part without voting or changing your vote.', 'order' => 1],      
+            ['code' => 'C', 'short' => 'certify', 'name' => 'Certify', 'phrase' => 'Certify (Yes).  This file is ready for general release.', 'order' => 4],
+            ['code' => 'A', 'short' => 'admincertify', 'name' => 'Admin Certify', 'phrase' => 'Admin Certify (Approve).  This file is approved for release.', 'order' => 3],
+            ['code' => 'T', 'short' => 'fasttrack', 'name' => 'Admin Fast Track', 'phrase' => 'Fast-track (Yes).  This file is eligible for fast-track review and is approved release.', 'order' => 6],
+            ['code' => 'H', 'short' => 'hold', 'name' => 'Hold', 'phrase' => 'Hold (No).  It\'s getting there, but not yet.', 'order' => 5],
+            ['code' => 'N', 'short' => 'cancel', 'name' => 'Cancel Vote', 'phrase' => 'Cancel Vote.  This will clear your vote on this part.', 'order' => 2],
+            ['code' => 'M', 'short' => 'comment', 'name' => 'Comment', 'phrase' => 'Comment.  Comment on this part without voting or changing your vote.', 'order' => 1],
         ];
     }
 }

@@ -31,7 +31,7 @@ class Document extends Model
 
     }
 
-    public function category(): BelongsTo 
+    public function category(): BelongsTo
     {
         return $this->belongsTo(DocumentCategory::class, 'document_category_id', 'id');
     }

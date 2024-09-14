@@ -12,7 +12,7 @@ class Tracker extends Component
      * Create a new component instance.
      */
     public function __construct()
-    { 
+    {
         // Nothing yet
     }
 

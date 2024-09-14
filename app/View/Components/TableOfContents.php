@@ -16,8 +16,7 @@ class TableOfContents extends Component
      */
     public function __construct(
         protected Document $document
-    )
-    {
+    ) {
         $this->toc = $this->table_of_contents();
     }
 

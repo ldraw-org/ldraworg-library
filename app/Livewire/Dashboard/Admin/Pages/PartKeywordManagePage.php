@@ -54,9 +54,9 @@ class PartKeywordManagePage extends BasicResourceManagePage
                                 UpdatePartHeader::dispatch($keyword->parts);
                             }
                         }
-                ),
+                    ),
                 DeleteAction::make()
-                    ->hidden(fn (PartKeyword $keyword) => $keyword->parts->count() > 0), 
+                    ->hidden(fn (PartKeyword $keyword) => $keyword->parts->count() > 0),
             ]);
     }
 

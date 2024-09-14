@@ -13,7 +13,7 @@ use Filament\Forms\Components\Split;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
-use Livewire\Attributes\Url; 
+use Livewire\Attributes\Url;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Livewire\Component;
 use Illuminate\Contracts\View\View;
@@ -24,7 +24,7 @@ class Parts extends Component implements HasForms
     use InteractsWithForms;
 
     public ?array $data = [];
-    
+
     #[Url(as: 's')]
     public ?string $search = '';
     #[Url(except: 'header')]
@@ -39,12 +39,12 @@ class Parts extends Component implements HasForms
     public ?string $status = '';
     #[Url]
     public ?array $part_type_id = [];
-    
+
 
     public function mount(): void
     {
         $this->data = [
-            'search' => $this->search, 
+            'search' => $this->search,
             'scope' => $this->scope,
             'user_id' => $this->user_id,
             'exclude_user' => $this->exclude_user,
@@ -70,7 +70,7 @@ class Parts extends Component implements HasForms
                                 'filename' => 'Filename only',
                                 'description' => 'Filename and description',
                                 'header' => 'File header',
-                                'file' => 'Entire file (very slow)'            
+                                'file' => 'Entire file (very slow)'
                             ])
                             ->default('header')
                             ->selectablePlaceholder(false)
@@ -92,16 +92,16 @@ class Parts extends Component implements HasForms
                                 ->nullable(),
                             Split::make([
                                 Toggle::make('exclude_user'),
-                                Toggle::make('include_history'),    
+                                Toggle::make('include_history'),
                             ]),
                         ])
                             ->columnSpan(1),
                         Select::make('status')
                             ->options([
-                                'certified' => 'Certified', 
-                                'adminreview' => 'Needs Admin Review', 
-                                'memberreview' => 'Needs More Votes', 
-                                'held' => 'Hold', 
+                                'certified' => 'Certified',
+                                'adminreview' => 'Needs Admin Review',
+                                'memberreview' => 'Needs More Votes',
+                                'held' => 'Hold',
                             ])
                             ->native(false)
                             ->nullable(),
@@ -120,7 +120,7 @@ class Parts extends Component implements HasForms
     {
         $this->form->getState();
         $this->data = [
-            'search' => $this->search, 
+            'search' => $this->search,
             'scope' => $this->scope,
             'user_id' => $this->user_id,
             'exclude_user' => $this->exclude_user,
@@ -130,7 +130,7 @@ class Parts extends Component implements HasForms
         ];
         $this->dispatch('search-updated');
     }
- 
+
     #[Layout('components.layout.tracker')]
     public function render(): View
     {

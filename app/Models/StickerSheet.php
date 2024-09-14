@@ -23,5 +23,5 @@ class StickerSheet extends Model
     {
         return $this->HasMany(Part::class, 'sticker_sheet_id', 'id');
     }
-    
+
 }

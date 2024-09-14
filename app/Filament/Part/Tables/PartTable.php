@@ -24,9 +24,10 @@ class PartTable
     {
         return $table
             ->query(
-                Part::when($official,
-                    fn(Builder $q) => $q->official(),
-                    fn(Builder $q) => $q->unofficial()
+                Part::when(
+                    $official,
+                    fn (Builder $q) => $q->official(),
+                    fn (Builder $q) => $q->unofficial()
                 )
             )
             ->defaultSort(fn (Builder $q) => $q->orderBy('vote_sort', 'asc')->orderBy('part_type_id', 'asc')->orderBy('description', 'asc'))
@@ -91,7 +92,7 @@ class PartTable
             ], layout: FiltersLayout::AboveContent)
             ->actions(self::actions())
             ->recordUrl(
-                fn (Part $p): string => 
+                fn (Part $p): string =>
                     route($p->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $p])
             );
     }
@@ -101,7 +102,7 @@ class PartTable
         return [
             Split::make([
                 ImageColumn::make('image')
-                    ->state( 
+                    ->state(
                         fn (Part $p): string => version("images/library/{$p->libFolder()}/" . substr($p->filename, 0, -4) . '_thumb.png')
                     )
                     ->grow(false)
@@ -126,23 +127,23 @@ class PartTable
     {
         return [
             Action::make('download')
-                ->url(fn(Part $part) => route($part->isUnofficial() ? 'unofficial.download' : 'official.download', $part->filename))
+                ->url(fn (Part $part) => route($part->isUnofficial() ? 'unofficial.download' : 'official.download', $part->filename))
                 ->button()
                 ->outlined()
                 ->color('info'),
             Action::make('download')
                 ->label('Download zip')
-                ->url(fn(Part $part) => route('unofficial.download.zip', str_replace('.dat', '.zip', $part->filename)))
+                ->url(fn (Part $part) => route('unofficial.download.zip', str_replace('.dat', '.zip', $part->filename)))
                 ->button()
                 ->outlined()
                 ->color('info')
-                ->visible(fn(Part $part) => $part->isUnofficial() && $part->type->folder == 'parts/'),
+                ->visible(fn (Part $part) => $part->isUnofficial() && $part->type->folder == 'parts/'),
             Action::make('updated')
-                ->url(fn(Part $part) => route('tracker.show', $part->unofficial_part->id))
-                ->label(fn(Part $part) => ' Tracker Update: ' . $part->unofficial_part->statusCode())
+                ->url(fn (Part $part) => route('tracker.show', $part->unofficial_part->id))
+                ->label(fn (Part $part) => ' Tracker Update: ' . $part->unofficial_part->statusCode())
                 ->button()
                 ->outlined()
-                ->visible(fn(Part $part) => !is_null($part->unofficial_part)),
+                ->visible(fn (Part $part) => !is_null($part->unofficial_part)),
         ];
     }
 }

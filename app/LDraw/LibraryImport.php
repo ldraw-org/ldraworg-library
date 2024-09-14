@@ -2,9 +2,9 @@
 
 namespace App\LDraw;
 
-class LibraryImport {
-  
-  // Current as of 2206
+class LibraryImport
+{
+    // Current as of 2206
     public static $official_texture_authors = [
         'parts/textures/13710a.png' => ['Philippe Hurbain', '2202'],
         'parts/textures/13710b.png' => ['Philippe Hurbain', '2202'],

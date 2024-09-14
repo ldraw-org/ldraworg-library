@@ -44,7 +44,7 @@ class Index extends Component implements HasForms, HasTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('name')
-                    ->state(fn(OmrModel $m) => $m->alt_model_name ?? 'Main Model'),
+                    ->state(fn (OmrModel $m) => $m->alt_model_name ?? 'Main Model'),
                 TextColumn::make('user.author_string')
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query
@@ -53,7 +53,7 @@ class Index extends Component implements HasForms, HasTable
                     })
             ])
             ->recordUrl(
-                fn (OmrModel $m): string => 
+                fn (OmrModel $m): string =>
                     route('omr.sets.show', $m->set)
             )
             ->striped();

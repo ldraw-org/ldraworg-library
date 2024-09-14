@@ -8,10 +8,11 @@ use App\Models\Part;
 use App\Settings\LibrarySettings;
 
 class VotePolicy
-{    
+{
     public function __construct(
         protected LibrarySettings $settings
-    ) {}
+    ) {
+    }
 
     public function vote(User $user, Part $part): bool
     {
@@ -27,7 +28,7 @@ class VotePolicy
                     'part.comment',
             ]);
         }
-        
+
         return $user->canAny([
                 'part.vote.admincertify',
                 'part.vote.fasttrack',
@@ -46,7 +47,7 @@ class VotePolicy
             case 'M':
                 return $user->can('part.comment');
                 break;
-            case 'A': 
+            case 'A':
                 return $user->can('part.vote.admincertify');
                 break;
             case 'T':
@@ -82,7 +83,7 @@ class VotePolicy
             case 'N':
                 return true;
                 break;
-            case 'A': 
+            case 'A':
                 return $user->can('part.vote.admincertify');
                 break;
             case 'T':
@@ -111,11 +112,13 @@ class VotePolicy
         return !$this->settings->tracker_locked && $vote->user_id === $user->id ;
     }
 
-    public function all(User $user): bool {
+    public function all(User $user): bool
+    {
         return !$this->settings->tracker_locked && $user->can('part.vote.certify.all');
     }
 
-    public function allAdmin(User $user): bool {
+    public function allAdmin(User $user): bool
+    {
         return !$this->settings->tracker_locked && $user->can('part.vote.admincertify.all');
     }
 }

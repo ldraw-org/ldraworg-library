@@ -17,10 +17,10 @@ class LibrarySettings extends Settings
 
     public array $allowed_header_metas;
     public array $allowed_body_metas;
-    
+
     public int $default_part_license_id;
     public int $quick_search_limit;
-    
+
     public array $pattern_codes;
 
     public bool $tracker_locked;

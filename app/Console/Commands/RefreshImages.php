@@ -41,6 +41,6 @@ class RefreshImages extends Command
                 $parts = Part::lazy();
         }
 
-        $parts->each(fn(Part $p) => UpdatePartImage::dispatch($p));
+        $parts->each(fn (Part $p) => UpdatePartImage::dispatch($p));
     }
 }

@@ -38,20 +38,20 @@ class DailyMaintenance extends Command
         $this->info('Removing orphan images');
         $images = Storage::disk('images')->allFiles('library/unofficial');
         $files = collect($images)
-            ->map( function(string $file): string {
+            ->map(function (string $file): string {
                 $file = str_replace('_thumb.png', '.png', $file);
                 if (strpos($file, 'textures/') !== false) {
                     return str_replace('library/unofficial/', '', $file);
                 } else {
                     return str_replace(['library/unofficial/', '.png'], ['', '.dat'], $file);
-                }                
+                }
             })
             ->unique()
             ->all();
         $in_use_files = Part::unofficial()
             ->whereIn('filename', $files)
             ->pluck('filename')
-            ->map( 
+            ->map(
                 fn (string $filename): string =>
                     strpos($filename, 'textures/') !== false ? "library/unofficial/{$filename}" : str_replace('.dat', '.png', "library/unofficial/{$filename}")
             );
@@ -70,6 +70,6 @@ class DailyMaintenance extends Command
             }
         });
 
-        
+
     }
 }

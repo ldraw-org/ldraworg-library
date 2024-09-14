@@ -10,7 +10,9 @@ use Illuminate\Queue\SerializesModels;
 
 class PartHeaderEdited
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance.
@@ -20,5 +22,6 @@ class PartHeaderEdited
         public User $user,
         public array $changes,
         public ?string $comment = null,
-    ) {}
+    ) {
+    }
 }

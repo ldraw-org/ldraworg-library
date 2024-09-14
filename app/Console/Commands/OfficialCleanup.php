@@ -27,10 +27,10 @@ class OfficialCleanup extends Command
     public function handle()
     {
         Part::official()->update([
-            'uncertified_subpart_count' => 0, 
-            'vote_summary' => null, 
-            'vote_sort' => 1, 
-            'delete_flag' => 0, 
+            'uncertified_subpart_count' => 0,
+            'vote_summary' => null,
+            'vote_sort' => 1,
+            'delete_flag' => 0,
             'minor_edit_data' => null,
             'missing_parts' => null,
             'manual_hold_flag' => 0,

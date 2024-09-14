@@ -48,7 +48,7 @@ return [
         'mailersend' => [
             'transport' => 'mailersend',
         ],
-        
+
         'ses' => [
             'transport' => 'ses',
         ],

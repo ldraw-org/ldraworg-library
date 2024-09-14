@@ -55,7 +55,7 @@ class Submit extends Component implements HasForms
                                 $fail('File errors');
                                 return;
                             }
-                            
+
                             // Error check based on file type
                             if ($mimeType == 'text/plain') {
                                 $part = app(\App\LDraw\Parse\Parser::class)->parse($value->get());
@@ -65,17 +65,17 @@ class Submit extends Component implements HasForms
                                 $errors = app(\App\LDraw\Check\PartChecker::class)->check($part, $value->getClientOriginalName());
 
                                 // A part in the p and parts folder cannot have the same name
-                                if (!is_null($pparts) && !is_null($part->type) && !is_null($part->name) && 
-                                    $pparts->where('filename', "p/{$part->name}")->count() > 0 && 
+                                if (!is_null($pparts) && !is_null($part->type) && !is_null($part->name) &&
+                                    $pparts->where('filename', "p/{$part->name}")->count() > 0 &&
                                     ($part->type == 'Part' || $part->type == 'Shortcut')) {
                                     $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('duplicate', ['type' => 'Primitive']);
-                                } elseif(!is_null($pparts) && !is_null($part->type) && !is_null($part->name) && 
-                                    $pparts->where('filename', "parts/{$part->name}")->count() > 0 && 
+                                } elseif (!is_null($pparts) && !is_null($part->type) && !is_null($part->name) &&
+                                    $pparts->where('filename', "parts/{$part->name}")->count() > 0 &&
                                     $part->type == 'Primitive') {
                                     $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('duplicate', ['type' => 'Parts']);
                                 }
 
-                                foreach($errors ?? [] as $error) {
+                                foreach ($errors ?? [] as $error) {
                                     $this->part_errors[] = "{$value->getClientOriginalName()}: {$error}";
                                 }
                             } elseif ($mimeType == 'image/png') {
@@ -85,19 +85,17 @@ class Submit extends Component implements HasForms
                             }
 
                             // Check if the part already exists on the tracker
-                            if ($unofficial_exists && $get('replace') !== true)
-                            {
+                            if ($unofficial_exists && $get('replace') !== true) {
                                 $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.replace');
                             }
 
-                            if ($official_exists && !$unofficial_exists && $get('official_fix') !== true)
-                            {
+                            if ($official_exists && !$unofficial_exists && $get('official_fix') !== true) {
                                 $this->part_errors[] = "{$value->getClientOriginalName()}: You must select Official File Fix to submit official part fixes";
                             }
 
                             if (count($this->part_errors) > 0) {
                                 $fail('File errors');
-                            }  
+                            }
                         },
                     ]),
                 Toggle::make('replace')
@@ -135,13 +133,12 @@ class Submit extends Component implements HasForms
             $user = Auth::user();
         }
         $files = [];
-        foreach($data['partfiles'] as $file) {
+        foreach ($data['partfiles'] as $file) {
             $detector = new \League\MimeTypeDetection\FinfoMimeTypeDetector();
             $mimeType = $detector->detectMimeTypeFromPath($file->getPath() . '/' . $file->getFilename()) ?: 'text/plain';
             if ($mimeType == 'text/plain') {
                 $files[] = ['type' => 'text', 'filename' => $file->getClientOriginalName(), 'contents' => $file->get()];
-            }
-            else if ($mimeType == 'image/png') {
+            } elseif ($mimeType == 'image/png') {
                 $files[] = ['type' => 'image', 'filename' => $file->getClientOriginalName(), 'contents' => $file->get()];
             }
         }
@@ -162,7 +159,7 @@ class Submit extends Component implements HasForms
         $this->render();
         $this->dispatch('open-modal', id: 'post-submit');
     }
- 
+
     public function postSubmit()
     {
         $this->submitted_parts = [];

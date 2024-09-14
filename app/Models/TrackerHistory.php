@@ -11,6 +11,6 @@ class TrackerHistory extends Model
     {
         return [
             'history_data' => AsArrayObject::class,
-        ]; 
-    } 
+        ];
+    }
 }

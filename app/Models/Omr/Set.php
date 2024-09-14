@@ -18,9 +18,9 @@ class Set extends Model
     {
         return $this->belongsTo(Theme::class, 'theme_id', 'id');
     }
-    
+
     public function models(): HasMany
     {
         return $this->hasMany(OmrModel::class, 'set_id', 'id');
-    }    
+    }
 }

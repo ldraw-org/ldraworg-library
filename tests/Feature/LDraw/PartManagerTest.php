@@ -2,7 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
- 
+
 uses(RefreshDatabase::class);
 
 test('add or change part', function () {

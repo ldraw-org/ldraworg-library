@@ -15,9 +15,9 @@ class UpdatePartHeader implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        private Collection $parts 
-    )
-    {}
+        private Collection $parts
+    ) {
+    }
 
     /**
      * Execute the job.
@@ -31,7 +31,7 @@ class UpdatePartHeader implements ShouldQueue
                 $md['header'] = 'Header edited';
                 $part->minor_edit_data = $md;
                 $part->save();
-            }    
+            }
         });
     }
 }

@@ -4,7 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Part;
-use App\Models\VoteType;
 use App\Models\User;
 
 class CreateVotesTable extends Migration
@@ -26,7 +25,7 @@ class CreateVotesTable extends Migration
             $table->index('user_id');
             $table->index('part_id');
             $table->unique(['part_id', 'user_id']);
-       });
+        });
     }
 
     /**

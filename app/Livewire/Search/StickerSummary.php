@@ -36,7 +36,8 @@ class StickerSummary extends Component implements HasForms
         return $form
             ->schema([
                 Select::make('sheet')
-                    ->options(fn(): array =>
+                    ->options(
+                        fn (): array =>
                         StickerSheet::all()->mapWithKeys(function (StickerSheet $s, int $key) {
                             if (is_null($s->rebrickable_part)) {
                                 return [$s->number => "Sticker Sheet {$s->number}"];
@@ -53,7 +54,7 @@ class StickerSummary extends Component implements HasForms
     public function doSearch()
     {
         $this->form->getState();
-        $this->parts = StickerSheet::firstWhere('number', $this->sheet ?? '')->parts->whereNull('unofficial_part')->sortBy('filename');    
+        $this->parts = StickerSheet::firstWhere('number', $this->sheet ?? '')->parts->whereNull('unofficial_part')->sortBy('filename');
     }
 
     #[Layout('components.layout.tracker')]

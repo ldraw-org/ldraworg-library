@@ -21,7 +21,6 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -62,7 +61,7 @@ class Show extends Component implements HasForms, HasActions
                             ->validationMessages([
                                 'required_if' => 'A comment is required',
                             ]),
-                ])    
+                ])
             ]);
     }
 
@@ -71,16 +70,18 @@ class Show extends Component implements HasForms, HasActions
     {
         return VoteType::ordered()->get();
     }
-    
+
     #[Computed]
     public function voteOptions(): array
     {
-        if (!Auth::check()) return [];
-        $options = [];                                
+        if (!Auth::check()) {
+            return [];
+        }
+        $options = [];
         $u = Auth::user();
         $v = $this->part->votes->firstWhere('user_id', $u->id);
-        foreach($this->voteTypes() as $vt) {
-            switch($vt->code) {
+        foreach ($this->voteTypes() as $vt) {
+            switch ($vt->code) {
                 case 'N':
                     if (!is_null($v) && $u->can('update', [$v, $vt->code])) {
                         $options[$vt->code] = $vt->name;
@@ -91,9 +92,10 @@ class Show extends Component implements HasForms, HasActions
                         (is_null($v) && $u->can('create', [Vote::class, $this->part, $vt->code])) ||
                         $u->can('update', [$v, $vt->code])
                     ) {
-                        if (is_null($v) || $v->vote_type_code != $vt->code )
-                        $options[$vt->code] = $vt->name;
-                    }    
+                        if (is_null($v) || $v->vote_type_code != $vt->code) {
+                            $options[$vt->code] = $vt->name;
+                        }
+                    }
             }
         }
         return $options;
@@ -109,7 +111,7 @@ class Show extends Component implements HasForms, HasActions
         } else {
             return response(404);
         }
-        $this->image = 
+        $this->image =
             $this->part->isTexmap() ? route("{$this->part->libFolder()}.download", $this->part->filename) : version("images/library/{$this->part->libFolder()}/" . substr($this->part->filename, 0, -4) . '.png');
         $this->form->fill();
     }
@@ -147,7 +149,7 @@ class Show extends Component implements HasForms, HasActions
     public function patternPartAction(): Action
     {
         return Action::make('patternPart')
-                ->url(fn() => route('search.suffix', ['basepart' => $this->part->basepart()]))
+                ->url(fn () => route('search.suffix', ['basepart' => $this->part->basepart()]))
                 ->visible($this->hasSuffixParts)
                 ->label('View patterns/composites/shortcuts')
                 ->color('gray')
@@ -157,7 +159,7 @@ class Show extends Component implements HasForms, HasActions
     public function stickerSearchAction(): Action
     {
         return Action::make('stickerSearch')
-                ->url(fn() => route('search.sticker', ['sheet' => $this->part->sticker_sheet->number ?? '']))
+                ->url(fn () => route('search.sticker', ['sheet' => $this->part->sticker_sheet->number ?? '']))
                 ->visible(!is_null($this->part->sticker_sheet_id))
                 ->label('View sticker sheet parts')
                 ->color('gray')
@@ -181,13 +183,13 @@ class Show extends Component implements HasForms, HasActions
     public function updateImageAction(): Action
     {
         return Action::make('updateImage')
-                ->action(function() {
+                ->action(function () {
                     app(PartManager::class)->updatePartImage($this->part);
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Image Updated')
                         ->success()
-                        ->send();    
+                        ->send();
                 })
                 ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
@@ -195,28 +197,28 @@ class Show extends Component implements HasForms, HasActions
     public function recheckPartAction(): Action
     {
         return Action::make('recheckPart')
-                ->action(function() {
+                ->action(function () {
                     app(PartManager::class)->checkPart($this->part);
                     $this->part->updateVoteSort();
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Part Error Checked')
                         ->success()
-                        ->send();    
+                        ->send();
                 })
                 ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 
-    public function updateSubpartsAction(): Action 
+    public function updateSubpartsAction(): Action
     {
         return Action::make('updateSubparts')
-                ->action(function() {
+                ->action(function () {
                     app(PartManager::class)->loadSubpartsFromBody($this->part);
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Subparts Reloaded')
                         ->success()
-                        ->send();    
+                        ->send();
                 })
                 ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
@@ -225,7 +227,7 @@ class Show extends Component implements HasForms, HasActions
     {
         return Action::make('retieFix')
                 ->label('Retie part fix')
-                ->action(function() {
+                ->action(function () {
                     if ($this->part->isUnofficial()) {
                         $fixpart = Part::official()->firstWhere('filename', $this->part->filename);
                         $fixpart->unofficial_part()->associate($this->part);
@@ -238,8 +240,8 @@ class Show extends Component implements HasForms, HasActions
                     $this->part->refresh();
                 })
                 ->visible(function (): bool {
-                    if (!Auth::check() || 
-                        Auth::user()?->cannot('update', $this->part) || 
+                    if (!Auth::check() ||
+                        Auth::user()?->cannot('update', $this->part) ||
                         Part::where('filename', $this->part->filename)->count() <= 1
                     ) {
                         return false;
@@ -248,29 +250,29 @@ class Show extends Component implements HasForms, HasActions
                 });
     }
 
-    public function downloadAction(): Action 
+    public function downloadAction(): Action
     {
         return Action::make('download')
-                ->url(fn() => route($this->part->isUnofficial() ? 'unofficial.download' : 'official.download', $this->part->filename))
+                ->url(fn () => route($this->part->isUnofficial() ? 'unofficial.download' : 'official.download', $this->part->filename))
                 ->color('gray')
                 ->outlined();
     }
 
-    public function downloadZipAction(): Action 
+    public function downloadZipAction(): Action
     {
         return Action::make('zipdownload')
                 ->label('Download zip file')
-                ->url(fn() => route($this->part->isUnofficial() ? 'unofficial.download.zip' : 'official.download.zip', str_replace('.dat', '.zip', $this->part->filename)))
+                ->url(fn () => route($this->part->isUnofficial() ? 'unofficial.download.zip' : 'official.download.zip', str_replace('.dat', '.zip', $this->part->filename)))
                 ->visible($this->part->type->folder == 'parts/')
                 ->color('gray')
                 ->outlined();
     }
 
-    public function webglViewAction(): Action 
+    public function webglViewAction(): Action
     {
         return Action::make('webglView')
                 ->label('3D View')
-                ->action(fn() => $this->dispatch('open-modal', id: 'ldbi'))
+                ->action(fn () => $this->dispatch('open-modal', id: 'ldbi'))
                 ->color('gray')
                 ->outlined();
     }
@@ -286,11 +288,11 @@ class Show extends Component implements HasForms, HasActions
                     Notification::make()
                         ->title('Quickvote action complete')
                         ->success()
-                        ->send();            
+                        ->send();
                 })
                 ->visible(
-                    $this->part->isUnofficial() && 
-                    $this->part->type->folder == 'parts/' && 
+                    $this->part->isUnofficial() &&
+                    $this->part->type->folder == 'parts/' &&
                     $this->part->ready_for_admin === true &&
                     $this->part->descendantsAndSelf->where('vote_sort', 2)->count() > 0 &&
                     (Auth::user()?->can('create', [Vote::class, $this->part, 'A']) ?? false) &&
@@ -311,10 +313,10 @@ class Show extends Component implements HasForms, HasActions
                     Notification::make()
                         ->title('Quickvote action complete')
                         ->success()
-                        ->send();            
+                        ->send();
                 })
                 ->visible(
-                    $this->part->isUnofficial() && 
+                    $this->part->isUnofficial() &&
                     $this->part->type->folder == 'parts/' &&
                     $this->part->descendantsAndSelf->where('vote_sort', '>', 3)->count() == 0 &&
                     $this->part->descendantsAndSelf->where('vote_sort', 3)->count() > 0 &&
@@ -325,7 +327,8 @@ class Show extends Component implements HasForms, HasActions
                 ->outlined();
     }
 
-    public function postVote() {
+    public function postVote()
+    {
         $this->form->getState();
         $vm = new VoteManager();
         $vm->postVote($this->part, Auth::user(), $this->vote_type_code, $this->comment);
@@ -340,7 +343,7 @@ class Show extends Component implements HasForms, HasActions
             ->color(Auth::user()?->notification_parts->contains($this->part->id) ? 'yellow' : 'gray')
             ->icon('fas-bell')
             ->label(Auth::user()?->notification_parts->contains($this->part->id) ? 'Tracking' : 'Track')
-            ->action(function() {
+            ->action(function () {
                 Auth::user()->notification_parts()->toggle([$this->part->id]);
             })
             ->visible(Auth::check());
@@ -353,7 +356,7 @@ class Show extends Component implements HasForms, HasActions
             ->color($this->part->delete_flag ? 'red' : 'gray')
             ->icon('fas-flag')
             ->label($this->part->delete_flag ? 'Flagged for Deletion' : 'Flag for Deletion')
-            ->action(function() {
+            ->action(function () {
                 $this->part->delete_flag = !$this->part->delete_flag;
                 $this->part->save();
             })
@@ -367,7 +370,7 @@ class Show extends Component implements HasForms, HasActions
             ->color($this->part->manual_hold_flag ? 'red' : 'gray')
             ->icon('fas-flag')
             ->label($this->part->manual_hold_flag ? 'On Administrative Hold' : 'Place on Administrative Hold')
-            ->action(function() {
+            ->action(function () {
                 $this->part->manual_hold_flag = !$this->part->manual_hold_flag;
                 $this->part->save();
             })
@@ -382,8 +385,7 @@ class Show extends Component implements HasForms, HasActions
             ->icon('fas-copy')
             ->label('View ' . ($this->part->isUnofficial() ? 'official' : 'unofficial')  . ' version of part')
             ->url(function () {
-                if ($this->part->isUnofficial())
-                {
+                if ($this->part->isUnofficial()) {
                     return route('official.show', $this->part->official_part->id ?? 0);
                 }
                 return route('tracker.show', $this->part->unofficial_part->id ?? 0);

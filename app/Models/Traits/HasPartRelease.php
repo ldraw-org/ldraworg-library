@@ -17,7 +17,7 @@ trait HasPartRelease
         $query->whereNotNull('part_release_id');
     }
 
-    public function scopeUnofficial(Builder $query): void 
+    public function scopeUnofficial(Builder $query): void
     {
         $query->whereNull('part_release_id');
     }

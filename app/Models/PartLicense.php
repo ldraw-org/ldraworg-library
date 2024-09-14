@@ -10,7 +10,7 @@ class PartLicense extends Model
     use HasParts;
 
     public $timestamps = false;
-    
+
     public $fillable = [
         'name',
         'text',
@@ -23,7 +23,7 @@ class PartLicense extends Model
             'in_use' => 'boolean',
         ];
     }
-    
+
     public function toString(): string
     {
         return "0 !LICENSE {$this->text}";

@@ -1,6 +1,7 @@
 <?php
+
 namespace App\Livewire\PartEvent;
- 
+
 use App\Models\PartEvent;
 use App\Filament\Part\Tables\Filters\AuthorFilter;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -30,7 +31,7 @@ class Index extends Component implements HasForms, HasTable
 
     #[Url]
     public $tableRecordsPerPage = null;
-    
+
     public function table(Table $table): Table
     {
         return $table
@@ -127,10 +128,10 @@ class Index extends Component implements HasForms, HasTable
             ->persistSortInSession()
             ->extremePaginationLinks()
             ->recordUrl(
-                fn (PartEvent $e): string => 
+                fn (PartEvent $e): string =>
                     !is_null($e->part) ? route($e->part->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $e->part]) : ''
             )
-            ->recordClasses(fn (PartEvent $e) => !is_null($e->part) && !$e->part->isUnofficial() ? '!bg-green-300' : '' );
+            ->recordClasses(fn (PartEvent $e) => !is_null($e->part) && !$e->part->isUnofficial() ? '!bg-green-300' : '');
     }
 
     public function updatedPaginators($page, $pageName)

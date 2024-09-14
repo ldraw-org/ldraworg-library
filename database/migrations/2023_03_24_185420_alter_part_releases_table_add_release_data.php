@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      *
@@ -13,10 +12,10 @@ return new class extends Migration
      */
     public function up()
     {
-      Schema::table('part_releases', function (Blueprint $table) {
-        $table->json('part_data')->nullable();
-        $table->dropColumn('notes');
-      });
+        Schema::table('part_releases', function (Blueprint $table) {
+            $table->json('part_data')->nullable();
+            $table->dropColumn('notes');
+        });
     }
 
     /**
@@ -26,9 +25,9 @@ return new class extends Migration
      */
     public function down()
     {
-      Schema::table('part_releases', function (Blueprint $table) {
-        $table->dropColumn('part_data');
-        $table->text('notes');
-      });
+        Schema::table('part_releases', function (Blueprint $table) {
+            $table->dropColumn('part_data');
+            $table->text('notes');
+        });
     }
 };

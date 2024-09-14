@@ -3,21 +3,21 @@
 namespace App\View\Components\Part;
 
 use Illuminate\View\Component;
-
 use App\Models\Part;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 class Attribution extends Component
 {
-  /**
-     * Create a new component instance.
-     *
-     * @return void
-     */
+    /**
+       * Create a new component instance.
+       *
+       * @return void
+       */
     public function __construct(
         protected Part $part
-    ) {}
+    ) {
+    }
 
     /**
      * Get the view / contents that represent the component.

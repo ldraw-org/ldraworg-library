@@ -20,7 +20,7 @@ class ConfirmCA extends Component
         $user->save();
         if (session('ca_route_redirect')) {
             return $this->redirectRoute(session('ca_route_redirect'));
-        }    
+        }
         return $this->redirectRoute('tracker.main');
     }
 

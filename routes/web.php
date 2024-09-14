@@ -45,7 +45,7 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/library.csv', [SupportFilesController::class, 'librarycsv'])->name('library-csv');
     Route::get('/ptreleases/{output}', [SupportFilesController::class, 'ptreleases'])->name('ptreleases');
     Route::redirect('/ptreleases', '/ptreleases/tab');
-    Route::get('/ldbi/part/{part}', PartWebGLController::class)->name('part.ldbi');    
+    Route::get('/ldbi/part/{part}', PartWebGLController::class)->name('part.ldbi');
     Route::get('/tracker/latest-parts', LatestPartsController::class)->name('part.latest');
     Route::get('/tracker/ldrawunf-last-day.zip', LastDayDownloadZipController::class)->name('tracker.last-day');
     Route::get('/library/official/{officialpart}', PartDownloadController::class)->name('official.download');
@@ -76,7 +76,7 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::view('/next-release', 'part.nextrelease')->name('next-release');
 
     Route::middleware(['can:release.create'])->get('/release/create', Create::class)->name('release.create');
-    
+
     Route::get('/{unofficialpart}', Show::class)->name('show.filename');
     Route::get('/{part}', Show::class)->name('show');
 });
@@ -138,6 +138,3 @@ Route::middleware(['auth'])->get('/logout', function () {
     auth()->logout();
     return back();
 });
-
-
-

@@ -32,12 +32,12 @@ class EditHeaderAction
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
                 $data['keywords'] = $part->keywords()->orderBy('keyword')->get()->implode('keyword', ", ");
                 $data['history'] = '';
-                foreach($part->history as $h) {
+                foreach ($part->history as $h) {
                     $data['history'] .= $h->toString() . "\n";
                 }
                 return $data;
             })
-            ->using(fn(Part $p, array $data) => self::updateHeader($p, $data))
+            ->using(fn (Part $p, array $data) => self::updateHeader($p, $data))
             ->successNotificationTitle('Header updated')
             ->visible(Auth::user()?->can('update', $part) ?? false);
     }
@@ -49,16 +49,15 @@ class EditHeaderAction
                 ->required()
                 ->string()
                 ->rules([
-                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part)
-                    {
+                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
                         if (! app(\App\LDraw\Check\PartChecker::class)->checkLibraryApprovedDescription($value)) {
                             $fail('partcheck.description.invalidchars')->translate();
                         }
                         if (
-                            $part->type->folder == 'parts/' && 
-                            $part->category->category !== 'Moved' && 
-                            $part->category->category !== 'Sticker' && 
-                            $part->category->category !== 'Sticker Shortcut' && 
+                            $part->type->folder == 'parts/' &&
+                            $part->category->category !== 'Moved' &&
+                            $part->category->category !== 'Sticker' &&
+                            $part->category->category !== 'Sticker Shortcut' &&
                             ! app(\App\LDraw\Check\PartChecker::class)->checkDescriptionForPatternText($part->name(), $value)
                         ) {
                             $fail('partcheck.description.patternword')->translate();
@@ -101,14 +100,13 @@ class EditHeaderAction
                 ->selectablePlaceholder(false)
                 ->native(false)
                 ->rules([
-                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part)
-                    {
-                        if($part->type->folder == 'parts/') {
+                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
+                        if ($part->type->folder == 'parts/') {
                             $c = app(\App\LDraw\Parse\Parser::class)->getDescriptionCategory($get('description'));
                             $cat = PartCategory::firstWhere('category', $c);
                             if (is_null($cat) && is_null($value)) {
                                 $fail('partcheck.category.invalid')->translate(['value' => $c]);
-                            } 
+                            }
                         }
                     }
                 ]),
@@ -119,15 +117,14 @@ class EditHeaderAction
                 ->nullable()
                 ->string()
                 ->rules([
-                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part)
-                    {
+                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
                         $keywords = "0 !KEYWORDS " . str_replace(["\n","\r"], [', ',''], $value);
                         $keywords = app(\App\LDraw\Parse\Parser::class)->getKeywords($keywords) ?? [];
                         if (
-                            $part->type->folder == 'parts/' && 
-                            $part->category->category !== 'Moved' && 
-                            $part->category->category !== 'Sticker' && 
-                            $part->category->category !== 'Sticker Shortcut' && 
+                            $part->type->folder == 'parts/' &&
+                            $part->category->category !== 'Moved' &&
+                            $part->category->category !== 'Sticker' &&
+                            $part->category->category !== 'Sticker Shortcut' &&
                             ! app(\App\LDraw\Check\PartChecker::class)->checkPatternForSetKeyword($part->name(), $keywords)
                         ) {
                             $fail('partcheck.keywords')->translate();
@@ -144,15 +141,14 @@ class EditHeaderAction
                 ->nullable()
                 ->string()
                 ->rules([
-                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part)
-                    {
+                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
                         $value = Parser::dos2unix(trim($value));
                         $lines = explode("\n", $value);
                         if ($value !== '' && count($lines) != mb_substr_count($value, '0 !HISTORY')) {
                             $fail('partcheck.history.invalid')->translate();
                             return;
-                        }  
-            
+                        }
+
                         $history = app(Parser::class)->getHistory($value);
                         if (! is_null($history)) {
                             foreach ($history as $hist) {
@@ -161,7 +157,7 @@ class EditHeaderAction
                                 }
                             }
                         }
-                                                
+
                         $hist = '';
                         foreach ($part->history()->oldest()->get() as $h) {
                             $hist .= $h->toString() . "\n";
@@ -170,7 +166,7 @@ class EditHeaderAction
                         if (((!empty($hist) && empty($value)) || $hist !== $value) && empty($get('editcomment'))) {
                             $fail('partcheck.history.alter')->translate();
                         }
-                    }                    
+                    }
                 ]),
             TextArea::make('editcomment')
                 ->label('Comment')
@@ -194,12 +190,12 @@ class EditHeaderAction
                 $cat = PartCategory::firstWhere('category', $cat);
                 if (!is_null($cat) && $part->part_category_id !== $cat->id) {
                     $part->part_category_id = $cat->id;
-                }    
+                }
             }
         }
 
-        if ($part->type->folder === 'parts/' && 
-            !is_null($data['part_category_id']) && 
+        if ($part->type->folder === 'parts/' &&
+            !is_null($data['part_category_id']) &&
             $part->part_category_id !== (int)$data['part_category_id']
         ) {
             $cat = PartCategory::find($data['part_category_id']);
@@ -214,7 +210,7 @@ class EditHeaderAction
             $changes['new']['type'] = $pt->type;
             $part->part_type_id = $pt->id;
         }
-        
+
         if (!is_null($data['part_type_qualifier_id'] ?? null)) {
             $pq = PartTypeQualifier::find($data['part_type_qualifier_id']);
         } else {
@@ -237,7 +233,7 @@ class EditHeaderAction
         if ($partHelp !== $newHelp) {
             $changes['old']['help'] = "0 !HELP " . implode("\n0 !HELP ", $partHelp);
             $changes['new']['help'] = "0 !HELP " . implode("\n0 !HELP ", $newHelp);
-            $part->setHelp($newHelp);    
+            $part->setHelp($newHelp);
         }
 
         if (!is_null($data['keywords'] ?? null)) {
@@ -251,13 +247,13 @@ class EditHeaderAction
         if ($partKeywords !== $newKeywords) {
             $changes['old']['keywords'] = implode(", ", $partKeywords);
             $changes['new']['keywords'] = implode(", ", $newKeywords);
-            $part->setKeywords($newKeywords);    
+            $part->setKeywords($newKeywords);
         }
 
         $newHistory = $manager->parser->getHistory($data['history'] ?? '');
         $partHistory = [];
         if ($part->history->count() > 0) {
-            foreach($part->history as $h) {
+            foreach ($part->history as $h) {
                 $partHistory[] = $h->toString();
             }
         }
@@ -265,10 +261,10 @@ class EditHeaderAction
         if ($manager->parser->getHistory($partHistory) !== $newHistory) {
             $changes['old']['history'] = $partHistory;
             $part->setHistory($newHistory ?? []);
-            $part->refresh();    
+            $part->refresh();
             $changes['new']['history'] = '';
             if ($part->history->count() > 0) {
-                foreach($part->history as $h) {
+                foreach ($part->history as $h) {
                     $changes['new']['history'] .= $h->toString() . "\n";
                 }
             }
@@ -288,7 +284,7 @@ class EditHeaderAction
             // Post an event
             PartHeaderEdited::dispatch($part, Auth::user(), $changes, $data['editcomment'] ?? null);
             Auth::user()->notification_parts()->syncWithoutDetaching([$part->id]);
-            UpdateZip::dispatch($part);    
+            UpdateZip::dispatch($part);
         }
 
         return $part;

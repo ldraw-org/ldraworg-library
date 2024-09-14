@@ -10,7 +10,9 @@ use Illuminate\Queue\SerializesModels;
 
 class PartReviewed
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance.
@@ -20,5 +22,6 @@ class PartReviewed
         public User $user,
         public ?string $vote_type_code,
         public ?string $comment = null,
-    ) {}
+    ) {
+    }
 }

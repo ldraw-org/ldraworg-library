@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Vote extends Model
 {
-    use HasUser, HasPart;
+    use HasUser;
+    use HasPart;
 
     protected $with = ['type'];
-    
+
     protected $fillable = ['user_id', 'part_id', 'vote_type_code', 'comment'];
 
     public function type(): BelongsTo

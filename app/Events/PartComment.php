@@ -10,7 +10,9 @@ use Illuminate\Queue\SerializesModels;
 
 class PartComment
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance.
@@ -19,5 +21,6 @@ class PartComment
         public Part $part,
         public User $user,
         public ?string $comment = null,
-    ) {}
+    ) {
+    }
 }

@@ -22,7 +22,7 @@ use Livewire\Component;
 class LibrarySettingsPage extends Component implements HasForms
 {
     use InteractsWithForms;
-    
+
     public ?array $data = [];
 
     public function form(Form $form): Form
@@ -86,11 +86,11 @@ class LibrarySettingsPage extends Component implements HasForms
                                         TextInput::make('max_thumb_width')
                                             ->required()
                                             ->integer(),
-                                        
+
                                     ])
                                     ->columns(2)
                             ]),
-                            
+
                     ])
             ])
             ->statePath('data');
@@ -114,7 +114,7 @@ class LibrarySettingsPage extends Component implements HasForms
         ];
         $this->form->fill($form_data);
     }
-    
+
     public function saveSettings(LibrarySettings $settings)
     {
         $form_data = $this->form->getState();
@@ -145,7 +145,7 @@ class LibrarySettingsPage extends Component implements HasForms
         }
 
     }
-    
+
     #[Layout('components.layout.admin')]
     public function render()
     {

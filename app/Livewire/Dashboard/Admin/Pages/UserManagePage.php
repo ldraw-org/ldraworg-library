@@ -71,7 +71,7 @@ class UserManagePage extends BasicResourceManagePage
                     ->form($this->formSchema())
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['password'] = bcrypt(Str::random(40));
-                        return $data;            
+                        return $data;
                     })
                     ->visible(fn () => Auth::user()?->can('create', User::class))
             ])
@@ -97,12 +97,12 @@ class UserManagePage extends BasicResourceManagePage
                 ->live()
                 ->searchable()
                 ->afterStateUpdated(function (Set $set, int $state) {
-                        $user = MybbUser::find($state);
-                        if (!is_null($user)) {
-                            $set('realname', $user->username);
-                            $set('name', $user->loginname);
-                            $set('email', $user->email);
-                        }
+                    $user = MybbUser::find($state);
+                    if (!is_null($user)) {
+                        $set('realname', $user->username);
+                        $set('name', $user->loginname);
+                        $set('email', $user->email);
+                    }
                 })
                 ->hiddenOn('edit'),
             TextInput::make('name')
@@ -133,7 +133,7 @@ class UserManagePage extends BasicResourceManagePage
                     Checkbox::make('is_synthetic')
                         ->label('Synthetic User'),
                     Checkbox::make('is_ptadmin')
-                        ->label('Parts Tracker Automated User'),        
+                        ->label('Parts Tracker Automated User'),
                 ])
                 ->columns(3),
         ];

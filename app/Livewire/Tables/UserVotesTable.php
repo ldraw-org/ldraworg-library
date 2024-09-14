@@ -31,7 +31,7 @@ class UserVotesTable extends BasicTable
                     ->grow(false)
                     ->label('My Vote'),
                     ImageColumn::make('image')
-                        ->state( 
+                        ->state(
                             fn (Vote $v): string => version('images/library/unofficial/' . substr($v->part->filename, 0, -4) . '_thumb.png')
                         )
                         ->grow(false)
@@ -56,10 +56,10 @@ class UserVotesTable extends BasicTable
                     ->options(VoteType::whereIn('code', ['A', 'C', 'T', 'H'])->ordered()->pluck('name', 'code'))
                     ->preload()
                     ->multiple()
-                    ->label('My Vote'),   
+                    ->label('My Vote'),
             ])
             ->recordUrl(
-                fn (Vote $v): string => 
+                fn (Vote $v): string =>
                     route('tracker.show', ['part' => $v->part])
             )
             ->queryStringIdentifier('userVotes');

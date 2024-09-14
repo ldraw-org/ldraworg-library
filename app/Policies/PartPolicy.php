@@ -10,8 +10,9 @@ class PartPolicy
 {
     public function __construct(
         protected LibrarySettings $settings
-    ) {}
-    
+    ) {
+    }
+
     public function create(User $user)
     {
         return !$this->settings->tracker_locked &&
@@ -21,7 +22,7 @@ class PartPolicy
     public function update(User $user, Part $part)
     {
         return !$this->settings->tracker_locked &&
-            $part->isUnofficial() && 
+            $part->isUnofficial() &&
             $user->can('part.edit.header') && $user->ca_confirm === true;
     }
 

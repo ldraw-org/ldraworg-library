@@ -30,7 +30,7 @@ class PbgGenerator extends Component implements HasForms
     {
         $this->form->fill();
     }
-    
+
     public function form(Form $form): Form
     {
         return $form
@@ -62,13 +62,15 @@ class PbgGenerator extends Component implements HasForms
 
     public function pbgDownload()
     {
-        return response()->streamDownload(function() { 
-            echo $this->pbg; 
-        }, 
-        basename($this->data['set-number'] . '.pbg'), 
-        [
+        return response()->streamDownload(
+            function () {
+                echo $this->pbg;
+            },
+            basename($this->data['set-number'] . '.pbg'),
+            [
             'Content-Type' => 'text/plain',
-        ]);
+        ]
+        );
     }
 
     #[Layout('components.layout.base')]

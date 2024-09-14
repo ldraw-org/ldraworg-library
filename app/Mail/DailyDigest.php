@@ -15,7 +15,9 @@ use MailerSend\LaravelDriver\MailerSendTrait;
 
 class DailyDigest extends Mailable
 {
-    use Queueable, SerializesModels, MailerSendTrait;
+    use Queueable;
+    use SerializesModels;
+    use MailerSendTrait;
 
     protected $parts;
 

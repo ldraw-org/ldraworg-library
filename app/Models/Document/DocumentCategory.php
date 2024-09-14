@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DocumentCategory extends Model
 {
     use HasOrder;
-    
+
     protected $fillable = [
         'category',
         'order'
@@ -17,7 +17,7 @@ class DocumentCategory extends Model
 
     public $timestamps = false;
 
-    public function documents(): HasMany 
+    public function documents(): HasMany
     {
         return $this->HasMany(Document::class, 'document_category_id', 'id');
     }

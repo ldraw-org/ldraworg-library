@@ -33,49 +33,49 @@ class UpdateConfig extends Command
      */
     public function handle()
     {
-        foreach(LibraryConfig::partLicenses() as $license) {
+        foreach (LibraryConfig::partLicenses() as $license) {
             PartLicense::updateOrCreate(
                 ['name' => $license['name']],
                 $license
             );
         }
 
-        foreach(LibraryConfig::partTypes() as $type) {
+        foreach (LibraryConfig::partTypes() as $type) {
             PartType::updateOrCreate(
                 ['type' => $type['type']],
                 $type
             );
         }
 
-        foreach(LibraryConfig::partTypeQualifiers() as $type) {
+        foreach (LibraryConfig::partTypeQualifiers() as $type) {
             PartTypeQualifier::updateOrCreate(
                 ['type' => $type['type']],
                 $type
             );
         }
 
-        foreach(LibraryConfig::partCategories() as $category) {
+        foreach (LibraryConfig::partCategories() as $category) {
             PartCategory::updateOrCreate(
                 ['category' => $category['category']],
                 $category
             );
         }
 
-        foreach(LibraryConfig::partEventTypes() as $et) {
+        foreach (LibraryConfig::partEventTypes() as $et) {
             PartEventType::updateOrCreate(
                 ['slug' => $et['slug']],
                 $et
             );
         }
 
-        foreach(LibraryConfig::voteTypes() as $vt) {
+        foreach (LibraryConfig::voteTypes() as $vt) {
             VoteType::updateOrCreate(
                 ['code' => $vt['code']],
                 $vt
             );
         }
 
-        foreach(PartType::getDirectories() as $dir) {
+        foreach (PartType::getDirectories() as $dir) {
             $dir = substr($dir, 0, -1);
             if (!Storage::disk('images')->exists("library/official/{$dir}")) {
                 Storage::disk('images')->makeDirectory("library/official/{$dir}");

@@ -28,7 +28,8 @@ class PartManager
         public Parser $parser,
         public LDView $render,
         protected LibrarySettings $settings
-    ) {}
+    ) {
+    }
 
     public function submit(array $files, User $user): Collection
     {
@@ -88,7 +89,7 @@ class PartManager
     protected function makePartFromText(string $text): Part
     {
         $part = $this->parser->parse($text);
-        
+
         $user = User::fromAuthor($part->username, $part->realname)->first();
         $type = PartType::firstWhere('type', $part->type);
         $qual = PartTypeQualifier::firstWhere('type', $part->qual);
@@ -114,7 +115,7 @@ class PartManager
         $upart->refresh();
         return $upart;
     }
-    
+
     protected function makePart(array $values): Part
     {
         $upart = Part::unofficial()->firstWhere('filename', $values['filename']);
@@ -160,14 +161,14 @@ class PartManager
 
     protected function imageOptimize(string $path, string $newPath = ''): void
     {
-        $optimizerChain = (new OptimizerChain)->addOptimizer(new Optipng([]));
+        $optimizerChain = (new OptimizerChain())->addOptimizer(new Optipng([]));
         if ($newPath !== '') {
             $optimizerChain->optimize($path, $newPath);
         } else {
             $optimizerChain->optimize($path);
         }
     }
-   
+
     public function finalizePart(Part $part): void
     {
         $part->updateVoteSort();
@@ -181,9 +182,9 @@ class PartManager
         $this->checkPart($part);
         $this->addStickerSheet($part);
         $part->updateReadyForAdmin();
-        UpdateParentParts::dispatch($part);        
+        UpdateParentParts::dispatch($part);
     }
-    
+
     public function updatePartImage(Part $part): void
     {
         if ($part->isTexmap()) {
@@ -203,7 +204,7 @@ class PartManager
 
     protected function updateMissing(string $filename): void
     {
-        Part::unofficial()->whereJsonContains('missing_parts', $filename)->each(function(Part $p) {
+        Part::unofficial()->whereJsonContains('missing_parts', $filename)->each(function (Part $p) {
             $this->loadSubpartsFromBody($p);
         });
     }
@@ -214,14 +215,15 @@ class PartManager
             return $query->where('id', $officialPart->id);
         })->each(function (Part $p) {
             $this->loadSubpartsFromBody($p);
-        });    
+        });
     }
 
-    public function addMovedTo(Part $oldPart, Part $newPart): ?Part {
+    public function addMovedTo(Part $oldPart, Part $newPart): ?Part
+    {
         if (
-            $oldPart->isUnofficial() || 
-            !$newPart->isUnofficial() || 
-            !is_null($oldPart->unofficial_part) || 
+            $oldPart->isUnofficial() ||
+            !$newPart->isUnofficial() ||
+            !is_null($oldPart->unofficial_part) ||
             $oldPart->type->folder != 'parts/'
         ) {
             return null;
@@ -244,10 +246,10 @@ class PartManager
         $oldPart->save();
         $upart->refresh();
         $this->finalizePart($upart);
-        return $upart;    
+        return $upart;
     }
 
-    public function movePart(Part $part, string $newName, PartType $newType): bool 
+    public function movePart(Part $part, string $newName, PartType $newType): bool
     {
         $oldname = $part->name();
         if ($newName == '.dat') {
@@ -255,8 +257,7 @@ class PartManager
         }
         $newName = "{$newType->folder}{$newName}";
         $upart = Part::unofficial()->where('filename', $newName)->first();
-        if (!$part->isUnofficial() || !is_null($upart))
-        {
+        if (!$part->isUnofficial() || !is_null($upart)) {
             return false;
         }
         if ($part->type->folder !== 'parts/' && $newType->folder == 'parts/') {
@@ -294,7 +295,7 @@ class PartManager
             $this->updatePartImage($part);
             $this->checkPart($part);
             $this->addStickerSheet($part);
-            $part->updateReadyForAdmin();    
+            $part->updateReadyForAdmin();
         }
     }
 
@@ -317,7 +318,8 @@ class PartManager
         $part->save();
     }
 
-    public function addStickerSheet(Part $p) {
+    public function addStickerSheet(Part $p)
+    {
         $p->refresh();
         $sticker = $p->descendantsAndSelf->where('category.category', 'Sticker')->where('type.folder', 'parts/')->first();
         if (is_null($sticker)) {
@@ -353,7 +355,7 @@ class PartManager
                 $p->ancestorsAndSelf()->update(['sticker_sheet_id' => $sheet->id]);
             } else {
                 $p->sticker_sheet_id = null;
-            }    
+            }
         }
         if (!is_null($p->sticker_sheet_id) && $p->category->category != 'Sticker') {
             $p->category()->associate(PartCategory::firstWhere('category', 'Sticker Shortcut'));

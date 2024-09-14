@@ -18,8 +18,7 @@ class Message extends Component
         public bool $centered = false,
         public bool $compact = false,
         public bool $icon = false,
-    )
-    {
+    ) {
         if (in_array($this->type, ['warning', 'error', 'info']) === false) {
             $this->type = 'info';
         }

@@ -19,7 +19,9 @@ class UserPartEventsTable extends BasicTable
         return $table
             ->query(
                 PartEvent::unofficial()
-                    ->whereHas('part', fn (Builder $q) =>
+                    ->whereHas(
+                        'part',
+                        fn (Builder $q) =>
                         $q->doesntHave('official_part')->where('user_id', Auth::user()->id)
                     )
             )
@@ -78,7 +80,7 @@ class UserPartEventsTable extends BasicTable
                 ])
             ])
             ->recordUrl(
-                fn (PartEvent $e): string => 
+                fn (PartEvent $e): string =>
                     !is_null($e->part) ? route($e->part->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $e->part]) : ''
             )
             ->queryStringIdentifier('userPartEvents');

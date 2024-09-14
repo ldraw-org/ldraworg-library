@@ -12,7 +12,9 @@ use MailerSend\LaravelDriver\MailerSendTrait;
 
 class TestEmail extends Mailable
 {
-    use Queueable, SerializesModels, MailerSendTrait;
+    use Queueable;
+    use SerializesModels;
+    use MailerSendTrait;
 
     /**
      * Create a new message instance.
@@ -22,7 +24,8 @@ class TestEmail extends Mailable
     public function __construct(
         public Carbon $date,
         public string $note,
-    ) {}
+    ) {
+    }
 
     /**
      * Get the message envelope.

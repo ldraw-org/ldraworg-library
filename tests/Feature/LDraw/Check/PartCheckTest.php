@@ -2,7 +2,7 @@
 
 use App\Models\User;
 
-function validLineProvider() : array
+function validLineProvider(): array
 {
     return [
         ["0 Free for comment 112341904.sfsfkajf", true],

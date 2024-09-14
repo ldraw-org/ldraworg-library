@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OmrModel extends Model
 {
-    use HasUser, HasLicense;
+    use HasUser;
+    use HasLicense;
 
     protected $guarded = [];
 
@@ -28,8 +29,8 @@ class OmrModel extends Model
         ];
     }
 
-    
-    public function set(): BelongsTo 
+
+    public function set(): BelongsTo
     {
         return $this->belongsTo(Set::class, 'set_id', 'id');
     }

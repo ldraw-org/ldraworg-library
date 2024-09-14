@@ -14,8 +14,9 @@ class SearchParts extends BasicTable
     public array $data;
     public $unofficial;
 
-    #[On ('search-updated')]
-    public function searchUpdated() {
+    #[On('search-updated')]
+    public function searchUpdated()
+    {
         $this->resetTable();
         $this->render();
     }
@@ -36,14 +37,15 @@ class SearchParts extends BasicTable
                         $opr = ($this->data['exclude_user'] ?? false) ? '!=' : '=';
                         if ($this->data['include_history'] ?? false) {
                             $q->where(function ($q) use ($opr) {
-                                $q->orWhere('user_id', $opr, $this->data['user_id'])->orWhereHas('history', function($qu) use ($opr) {
+                                $q->orWhere('user_id', $opr, $this->data['user_id'])->orWhereHas('history', function ($qu) use ($opr) {
                                     $qu->where('user_id', $opr, $this->data['user_id']);
                                 });
                             });
                         } else {
                             $q->where('user_id', $opr, $this->data['user_id']);
-                        }        
-                    })
+                        }
+                    }
+                )
                 ->when(
                     $this->unofficial && ($this->data['status'] ?? '') != '',
                     fn ($q) => $q->partStatus($this->data['status'])
@@ -59,7 +61,7 @@ class SearchParts extends BasicTable
         ->columns(PartTable::columns())
         ->actions(PartTable::actions())
         ->recordUrl(
-            fn (Part $p): string => 
+            fn (Part $p): string =>
                 route($p->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $p])
         )
         ->queryStringIdentifier($this->unofficial === true ? 'unofficialPartSearch' : 'officialPartSearch')

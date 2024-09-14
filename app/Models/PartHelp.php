@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PartHelp extends Model
 {
-    use HasPart,
-        HasOrder;
+    use HasPart;
+    use HasOrder;
 
     protected $fillable = [
         'order',

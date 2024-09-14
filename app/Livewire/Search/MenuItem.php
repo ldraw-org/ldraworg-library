@@ -26,13 +26,13 @@ class MenuItem extends Component
         $oparts = Part::official()->searchPart($this->search, 'header')->orderBy('filename')->take($limit)->get();
         if ($uparts->count() > 0) {
             $this->hasResults = true;
-            foreach($uparts as $part) {
+            foreach ($uparts as $part) {
                 $this->results['Unofficial Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
             }
         }
         if ($oparts->count() > 0) {
             $this->hasResults = true;
-            foreach($oparts as $part) {
+            foreach ($oparts as $part) {
                 $this->results['Official Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
             }
         }
@@ -44,7 +44,7 @@ class MenuItem extends Component
         })->orderBy('name')->take($limit)->get();
         if ($sets->count() > 0) {
             $this->hasResults = true;
-            foreach($sets as $set) {
+            foreach ($sets as $set) {
                 $this->results['OMR Models'][$set->id] = ['name' => $set->name, 'description' => $set->number];
             }
         }

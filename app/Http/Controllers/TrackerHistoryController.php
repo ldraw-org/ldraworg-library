@@ -8,17 +8,18 @@ use Illuminate\View\View;
 
 class TrackerHistoryController extends Controller
 {
-    public function __invoke(Request $request): View {
+    public function __invoke(Request $request): View
+    {
         $history = TrackerHistory::latest()->get();
         $data = [];
-        foreach($history as $h) {  
+        foreach ($history as $h) {
             $data[] = [
                 'certified' => $h->history_data[1],
                 'needsreview' => $h->history_data[2],
                 'needsvotes' => $h->history_data[3],
                 'subparts' => $h->history_data[4] ?? 0,
                 'held' => $h->history_data[5],
-                'date' => date_format($h->created_at, 'Y-m-d'),          
+                'date' => date_format($h->created_at, 'Y-m-d'),
             ];
         }
         $chart = app()->chartjs

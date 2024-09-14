@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Part;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
 class DeployUpdate extends Command
@@ -28,11 +27,11 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        foreach(Storage::files('db') as $file) {
+        foreach (Storage::files('db') as $file) {
             $id = basename($file, '.txt');
-            if ($id == 'lib.sql' || $id == 'lib2.sql'){
+            if ($id == 'lib.sql' || $id == 'lib2.sql') {
                 continue;
-            } 
+            }
             $this->info($id);
             $p = Part::find($id);
             $body = Storage::get($file);

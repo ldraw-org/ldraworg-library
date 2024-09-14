@@ -13,13 +13,13 @@ class RelatedParts extends Migration
      */
     public function up()
     {
-      Schema::create('related_parts', function (Blueprint $table) {
-          $table->foreignId('parent_id')->references('id')->on('parts')->cascadeOnDelete()->cascadeOnUpdate();
-          $table->foreignId('subpart_id')->references('id')->on('parts')->cascadeOnDelete()->cascadeOnUpdate();
-          $table->index('parent_id');
-          $table->index('subpart_id');            
-          $table->unique(['parent_id', 'subpart_id']);          
-      });
+        Schema::create('related_parts', function (Blueprint $table) {
+            $table->foreignId('parent_id')->references('id')->on('parts')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('subpart_id')->references('id')->on('parts')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->index('parent_id');
+            $table->index('subpart_id');
+            $table->unique(['parent_id', 'subpart_id']);
+        });
     }
 
     /**
@@ -29,6 +29,6 @@ class RelatedParts extends Migration
      */
     public function down()
     {
-      Schema::dropIfExists('related_parts');
+        Schema::dropIfExists('related_parts');
     }
 }

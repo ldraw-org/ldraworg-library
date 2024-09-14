@@ -13,7 +13,8 @@ class Latest extends Component
      */
     public function __construct(
         public int $limit = 5
-    ) {}
+    ) {
+    }
 
     /**
      * Get the view / contents that represent the component.

@@ -28,8 +28,9 @@ class ParsedPart
         public ?string $body,
         public ?string $rawText,
         public int $header_length = 0,
-    ) {}
-    
+    ) {
+    }
+
     public static function fromPart(Part $part): self
     {
         if (!is_null($part->release) && $part->release->name == 'original') {
@@ -41,10 +42,9 @@ class ParsedPart
         }
         if (!is_null($part->category)) {
             $d = trim($part->description);
-            if ($d !== '' && in_array($d[0], ['~', '|', '=', '_']))
-            {
+            if ($d !== '' && in_array($d[0], ['~', '|', '=', '_'])) {
                 $d = trim(substr($d, 1));
-            }    
+            }
             $cat = mb_strstr($d, " ", true);
             if ($cat != $part->category->category) {
                 $metaCategory = $part->category->category;
@@ -56,7 +56,7 @@ class ParsedPart
         foreach ($part->history as $h) {
             $history[] = [
                 'user' => $h->user->name,
-                'date' => date_format(date_create($h->created_at), "Y-m-d"), 
+                'date' => date_format(date_create($h->created_at), "Y-m-d"),
                 'comment' => $h->comment
             ];
         }

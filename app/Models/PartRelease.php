@@ -10,13 +10,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PartRelease extends Model
 {
-    use HasParts, HasFactory;
-    
+    use HasParts;
+    use HasFactory;
+
     protected $fillable = [
-        'name', 
-        'short', 
+        'name',
+        'short',
         'created_at',
-        'part_list', 
+        'part_list',
         'part_data'
     ];
 
@@ -27,7 +28,7 @@ class PartRelease extends Model
             'part_data' => AsArrayObject::class,
         ];
     }
-    
+
     protected function notes(): Attribute
     {
         return Attribute::make(
@@ -36,7 +37,7 @@ class PartRelease extends Model
                     return '';
                 }
                 $data = json_decode($attributes['part_data'] ?? "{}", true);
-                $notes = "Total files: {$data['total_files']}\n" . 
+                $notes = "Total files: {$data['total_files']}\n" .
                     "New files: {$data['new_files']}\n";
                 foreach ($data['new_types'] as $t) {
                     $notes .= "New {$t['name']}s: {$t['count']}\n";
@@ -46,12 +47,12 @@ class PartRelease extends Model
         );
     }
 
-    public function toString(): string 
+    public function toString(): string
     {
         return $this->short == 'original' ? " ORIGINAL" : " UPDATE {$this->name}";
     }
 
-    public static function current(): ?self 
+    public static function current(): ?self
     {
         return self::latest()?->first();
     }
@@ -60,4 +61,4 @@ class PartRelease extends Model
     {
         return self::current()?->id === $this->id;
     }
- }
+}

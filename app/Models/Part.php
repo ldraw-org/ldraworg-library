@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasLicense;
 use App\Models\Traits\HasUser;
-use App\Models\StickerSheet;
 use App\Observers\PartObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,12 +23,12 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 #[ObservedBy([PartObserver::class])]
 class Part extends Model
 {
-    use 
-        HasGraphRelationships,
-        //Searchable,
-        HasLicense, 
-        HasPartRelease, 
-        HasUser; 
+    use
+        HasGraphRelationships;
+    //Searchable,
+    use HasLicense;
+    use HasPartRelease;
+    use HasUser;
 
     protected $fillable = [
         'user_id',
@@ -64,18 +63,18 @@ class Part extends Model
             'ready_for_admin' => 'boolean',
         ];
     }
-/*
-    public function toSearchableArray()
-    {
-        return [
-            'id' => (int) $this->id,
-            'filename' => $this->filename,
-            'description' => $this->description,
-            'header' => $this->header,
-            'body' => $this->body->body
-        ];
-    }
-*/    
+    /*
+        public function toSearchableArray()
+        {
+            return [
+                'id' => (int) $this->id,
+                'filename' => $this->filename,
+                'description' => $this->description,
+                'header' => $this->header,
+                'body' => $this->body->body
+            ];
+        }
+    */
     public function getPivotTableName(): string
     {
         return 'related_parts';
@@ -85,67 +84,67 @@ class Part extends Model
     {
         return 'parent_id';
     }
-  
+
     public function getChildKeyName(): string
     {
         return 'subpart_id';
     }
 
-    public function category(): BelongsTo 
+    public function category(): BelongsTo
     {
         return $this->belongsTo(PartCategory::class, 'part_category_id', 'id');
     }
 
-    public function type(): BelongsTo 
+    public function type(): BelongsTo
     {
         return $this->belongsTo(PartType::class, 'part_type_id', 'id');
     }
 
-    public function type_qualifier(): BelongsTo 
+    public function type_qualifier(): BelongsTo
     {
         return $this->belongsTo(PartTypeQualifier::class, 'part_type_qualifier_id', 'id');
     }
 
-    public function subparts(): BelongsToMany 
+    public function subparts(): BelongsToMany
     {
         return $this->children();
     }
 
-    public function keywords(): BelongsToMany 
+    public function keywords(): BelongsToMany
     {
         return $this->belongsToMany(PartKeyword::class, 'parts_part_keywords', 'part_id', 'part_keyword_id')->orderBy('keyword');
     }
 
-    public function notification_users(): BelongsToMany 
+    public function notification_users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_part_notifications');
     }
 
-    public function votes(): HasMany 
+    public function votes(): HasMany
     {
         return $this->hasMany(Vote::class, 'part_id', 'id');
     }
 
-    public function events(): HasMany 
+    public function events(): HasMany
     {
         return $this->hasMany(PartEvent::class, 'part_id', 'id');
     }
 
-    public function history(): HasMany 
+    public function history(): HasMany
     {
         return $this->hasMany(PartHistory::class, 'part_id', 'id')->oldest();
     }
 
-    public function help(): HasMany 
+    public function help(): HasMany
     {
         return $this->hasMany(PartHelp::class, 'part_id', 'id')->ordered();
     }
 
-    public function body(): HasOne 
+    public function body(): HasOne
     {
         return $this->hasOne(PartBody::class, 'part_id', 'id');
     }
-    
+
     public function unofficial_part(): BelongsTo
     {
         return $this->BelongsTo(Part::class, 'unofficial_part_id', 'id');
@@ -159,7 +158,7 @@ class Part extends Model
     public function sticker_sheet(): BelongsTo
     {
         return $this->BelongsTo(StickerSheet::class, 'sticker_sheet_id', 'id');
-        
+
     }
 
     public function scopeName(Builder $query, string $name): void
@@ -179,55 +178,54 @@ class Part extends Model
         switch ($status) {
             case 'certified':
                 $query->where('vote_sort', 1);
-                break; 
+                break;
             case 'adminreview':
                 $query->where('vote_sort', 2);
-                break; 
+                break;
             case 'memberreview':
                 $query->where('vote_sort', 3);
-                break; 
+                break;
             case 'held':
                 $query->where('vote_sort', 5);
-                break; 
-        } 
+                break;
+        }
     }
-    
-    public function scopeSearchPart (Builder $query, string $search, string $scope): void 
+
+    public function scopeSearchPart(Builder $query, string $search, string $scope): void
     {
         if ($search !== '') {
             //Pull the terms out of the search string
             $pattern = '#([^\s"]+)|"([^"]*)"#u';
             preg_match_all($pattern, $search, $matches, PREG_SET_ORDER);
 
-            foreach($matches as $m) {
+            foreach ($matches as $m) {
                 $char = '\\';
                 $term = str_replace(
                     [$char, '%', '_'],
                     [$char.$char, $char.'%', $char.'_'],
-                    $m[count($m)-1]
+                    $m[count($m) - 1]
                 );
                 switch ($scope) {
-                case 'description':
-                    $query->where(function(Builder $q) use ($term) {
-                        $q->orWhere('filename', 'LIKE', "%{$term}%")->orWhere('description', 'LIKE', "%{$term}%");
-                    });
-                    break;
-                case 'filename':
-                case 'header':
-                    $query->where($scope, 'LIKE', "%{$term}%");
-                    break;
-                case 'file':
-                    $query->where(function(Builder $q) use ($term) {
-                        $q->orWhere('header', 'LIKE', "%{$term}%")->orWhereRelation('body', 'body', 'LIKE', "%{$term}%");
-                    });
-                    break;
-                default:  
-                    $query->where('header', 'LIKE', "%{$term}%");
-                    break;
+                    case 'description':
+                        $query->where(function (Builder $q) use ($term) {
+                            $q->orWhere('filename', 'LIKE', "%{$term}%")->orWhere('description', 'LIKE', "%{$term}%");
+                        });
+                        break;
+                    case 'filename':
+                    case 'header':
+                        $query->where($scope, 'LIKE', "%{$term}%");
+                        break;
+                    case 'file':
+                        $query->where(function (Builder $q) use ($term) {
+                            $q->orWhere('header', 'LIKE', "%{$term}%")->orWhereRelation('body', 'body', 'LIKE', "%{$term}%");
+                        });
+                        break;
+                    default:
+                        $query->where('header', 'LIKE', "%{$term}%");
+                        break;
                 }
             }
-        }
-        else {
+        } else {
             $query->where('filename', '');
         }
     }
@@ -242,12 +240,12 @@ class Part extends Model
             });
     }
 
-    public function isTexmap(): bool 
+    public function isTexmap(): bool
     {
         return $this->type->format == 'png';
     }
 
-    public function isUnofficial(): bool 
+    public function isUnofficial(): bool
     {
         return is_null($this->part_release_id);
     }
@@ -265,25 +263,25 @@ class Part extends Model
         }
         return $recent_change->created_at;
     }
-    
-    public function basePart(): string 
+
+    public function basePart(): string
     {
         $number = basename($this->filename);
         preg_match(config('ldraw.patterns.basepart'), $number, $matches);
         return $matches[1] ?? '';
     }
-    
-    public function libFolder(): string 
+
+    public function libFolder(): string
     {
         return $this->isUnofficial() ? 'unofficial' : 'official';
     }
-        
-    public function name(): string 
+
+    public function name(): string
     {
         return str_replace('/', '\\', str_replace(["parts/", "p/"], '', $this->filename));
     }
 
-    public function get(bool $dos = true, bool $dataFile = false): string 
+    public function get(bool $dos = true, bool $dataFile = false): string
     {
         if ($this->isTexmap()) {
             if ($dataFile === true) {
@@ -296,8 +294,7 @@ class Part extends Model
             } else {
                 $file = base64_decode($this->body->body);
             }
-        }
-        else {
+        } else {
             $file = rtrim($this->header) . "\n\n" . ($this->body->body ?? '');
             if ($dos === true) {
                 $file = preg_replace('#\R#us', "\r\n", $file);
@@ -305,26 +302,26 @@ class Part extends Model
         }
         return $file;
     }
-    
-    public function updateVoteSort(): void 
+
+    public function updateVoteSort(): void
     {
         if (!$this->isUnofficial()) {
             return;
         }
         $old_sort = $this->vote_sort;
-        $data = array_merge(['A' => 0, 'C' =>0, 'H' => 0, 'T' => 0], $this->votes->pluck('vote_type_code')->countBy()->all());
+        $data = array_merge(['A' => 0, 'C' => 0, 'H' => 0, 'T' => 0], $this->votes->pluck('vote_type_code')->countBy()->all());
         if ($data['H'] != 0) {
             $this->vote_sort = 5;
         }
-        // Needs votes      
+        // Needs votes
         elseif (($data['C'] + $data['A'] < 2) && $data['T'] == 0) {
             $this->vote_sort = 3;
-        }  
-        // Awaiting Admin      
+        }
+        // Awaiting Admin
         elseif ($data['T'] == 0 && $data['A'] == 0 && $data['C'] >= 2) {
             $this->vote_sort = 2;
         }
-        // Certified      
+        // Certified
         elseif (($data['A'] > 0 && ($data['C'] + $data['A']) > 2) || $data['T'] > 0) {
             $this->vote_sort = 1;
         }
@@ -336,14 +333,14 @@ class Part extends Model
             $this->updateReadyForAdmin();
         }
     }
-    
+
     public function updateReadyForAdmin(): void
     {
         $old = $this->ready_for_admin;
         $this->ready_for_admin = $this->vote_sort <= 2 && $this->descendants->where('vote_sort', '>', 2)->count() == 0;
         if ($old != $this->ready_for_admin) {
             $this->saveQuietly();
-            foreach($this->ancestors as $p) {
+            foreach ($this->ancestors as $p) {
                 $p->ready_for_admin = $p->vote_sort <= 2 && $p->descendants->where('vote_sort', '>', 2)->count() == 0;
                 $p->saveQuietly();
             }
@@ -358,10 +355,10 @@ class Part extends Model
             $kws = PartKeyword::whereIn('keyword', $keywords)->get();
             $ids = $kws->pluck('id')->all();
             $new_keywords = array_udiff($keywords, $kws->pluck('keyword')->all(), 'strcasecmp');
-            foreach($new_keywords as $kw) {
+            foreach ($new_keywords as $kw) {
                 $ids[] = PartKeyword::create(['keyword' => $kw])->id;
             }
-            $this->keywords()->sync($ids);    
+            $this->keywords()->sync($ids);
         }
     }
 
@@ -369,28 +366,28 @@ class Part extends Model
     {
         $this->help()->delete();
         if ($help instanceof Collection) {
-            foreach($help as $h) {
+            foreach ($help as $h) {
                 /** @var PartHelp $h */
                 PartHelp::create(['part_id' => $this->id, 'order' => $h->order, 'text' => $h->text]);
-            }    
+            }
         } else {
-            foreach($help as $index => $h) {
+            foreach ($help as $index => $h) {
                 /** @var PartHelp $h */
                 PartHelp::create(['part_id' => $this->id, 'order' => $index, 'text' => $h]);
-            }    
+            }
         }
     }
 
-    public function setHistory(array|Collection $history): void 
+    public function setHistory(array|Collection $history): void
     {
         $this->history()->delete();
         if ($history instanceof Collection) {
             foreach ($history as $hist) {
                 /** @var PartHistory $hist */
                 PartHistory::create([
-                    'user_id' => $hist->user->id, 
-                    'part_id' => $this->id, 
-                    'created_at' => $hist->created_at, 
+                    'user_id' => $hist->user->id,
+                    'part_id' => $this->id,
+                    'created_at' => $hist->created_at,
                     'comment' => $hist->comment
                 ]);
             }
@@ -399,16 +396,16 @@ class Part extends Model
                 /** @var PartHistory $hist */
                 $u = User::fromAuthor($hist['user'])->first();
                 PartHistory::create([
-                    'user_id' => $u->id, 
-                    'part_id' => $this->id, 
-                    'created_at' => $hist['date'], 
+                    'user_id' => $u->id,
+                    'part_id' => $this->id,
+                    'created_at' => $hist['date'],
                     'comment' => $hist['comment']
                 ]);
-            }                
+            }
         }
     }
 
-    public function setSubparts(array|Collection $subparts): void 
+    public function setSubparts(array|Collection $subparts): void
     {
         if ($subparts instanceof Collection) {
             $this->subparts()->sync($subparts->pluck('id')->all());
@@ -477,7 +474,7 @@ class Part extends Model
         $header[] = '';
 
         if ($this->help->count() > 0) {
-            foreach($this->help as $h) {
+            foreach ($this->help as $h) {
                 $header[] = "0 !HELP {$h->text}";
             }
             $header[] = '';
@@ -494,10 +491,9 @@ class Part extends Model
         $addBlank = false;
         if (!is_null($this->category) && ($this->type->type === 'Part' || $this->type->type === 'Shortcut')) {
             $d = trim($this->description);
-            if ($d !== '' && in_array($d[0], ['~', '|', '=', '_']))
-            {
+            if ($d !== '' && in_array($d[0], ['~', '|', '=', '_'])) {
                 $d = trim(substr($d, 1));
-            }    
+            }
             $cat = mb_strstr($d, " ", true);
             if ($cat != $this->category->category) {
                 $header[] = $this->category->toString();
@@ -522,7 +518,7 @@ class Part extends Model
                     $header[] = $kwline;
                     $addBlank = true;
                 }
-            }  
+            }
         }
         if ($addBlank === true) {
             $header[] = '';
@@ -534,7 +530,7 @@ class Part extends Model
         }
 
         if ($this->history->count() > 0) {
-            foreach($this->history as $h) {
+            foreach ($this->history as $h) {
                 $header[] = $h->toString();
             }
         }
@@ -543,7 +539,7 @@ class Part extends Model
         $this->saveQuietly();
     }
 
-    public function deleteRelationships(): void 
+    public function deleteRelationships(): void
     {
         $this->history()->delete();
         $this->votes()->delete();
@@ -560,14 +556,15 @@ class Part extends Model
         }
     }
 
-    public function putDeletedBackup(): void 
+    public function putDeletedBackup(): void
     {
         $t = time();
         Storage::disk('local')->put("deleted/library/{$this->filename}.{$t}", $this->get());
         Storage::disk('local')->put('deleted/library/' . str_replace(['.png', '.dat'], '.evt', $this->filename). ".{$t}", $this->events->toJson());
     }
 
-    public function statusText(): string {
+    public function statusText(): string
+    {
         if ($this->isUnofficial()) {
             $codes = array_merge(['A' => 0, 'C' => 0, 'H' => 0, 'T' => 0], $this->votes->pluck('vote_type_code')->countBy()->all());
             return match ($this->vote_sort) {
@@ -581,17 +578,18 @@ class Part extends Model
         }
     }
 
-    public function statusCode(): string {
+    public function statusCode(): string
+    {
         if ($this->isUnofficial()) {
             $code = '(';
             $codes = array_merge(['A' => 0, 'C' => 0, 'H' => 0, 'T' => 0], $this->votes->pluck('vote_type_code')->countBy()->all());
-            foreach(['T', 'A', 'C', 'H'] as $letter) {
+            foreach (['T', 'A', 'C', 'H'] as $letter) {
                 $code .= str_repeat($letter, $codes[$letter]);
             }
             return $code .= is_null($this->official_part) ? 'N)' : 'F)';
         } else {
             return $this->statusText();
-        }  
+        }
     }
 
 }

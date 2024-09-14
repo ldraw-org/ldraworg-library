@@ -42,7 +42,7 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
                     ->using(fn (ReviewSummary $summary, array $data) => $this->saveEditData($summary, $data)),
                 DeleteAction::make()
                     ->before(fn (ReviewSummary $summary) => $summary->items()->delete())
-                    
+
             ])
             ->headerActions([
                 CreateAction::make()
@@ -66,18 +66,18 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
 
     protected function saveEditData(ReviewSummary $summary, array $data)
     {
-        if(is_null($summary->id)) {
+        if (is_null($summary->id)) {
             $summary->header = $data['header'];
             $summary->order = ReviewSummary::nextOrder();
             $summary->save();
         }
-        $summary->header = $data['header'];      
+        $summary->header = $data['header'];
         $summary->save();
-        if(isset($data['manualEntry'])) {
+        if (isset($data['manualEntry'])) {
             $summary->items()->delete();
             $lines = explode("\n", $data['manualEntry']);
             $order = 1;
-            foreach($lines as $line) {
+            foreach ($lines as $line) {
                 $line = trim($line);
                 if (empty($line)) {
                     continue;
@@ -88,7 +88,7 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
                         'heading' => empty($heading) ? '' : $heading,
                         'order' => $order + 1,
                         'review_summary_id' => $summary->id
-                    ]);            
+                    ]);
                 } else {
                     $part = Part::unofficial()->firstWhere('filename', $line) ?? Part::official()->firstWhere('filename', $line);
                     if (!empty($part)) {
@@ -96,7 +96,7 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
                             'part_id' => $part->id,
                             'order' => $order + 1,
                             'review_summary_id' => $summary->id
-                        ]);            
+                        ]);
                     }
                 }
                 $order++;

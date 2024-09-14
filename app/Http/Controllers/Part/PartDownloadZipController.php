@@ -8,7 +8,8 @@ use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class PartDownloadZipController extends Controller
 {
-    public function __invoke(Part $part) {
+    public function __invoke(Part $part)
+    {
         if ($part->type->folder !== 'parts/') {
             return response()->redirectToRoute('unofficial.download', $part->filename);
         }
@@ -23,15 +24,17 @@ class PartDownloadZipController extends Controller
         }
         $zipparts->each(function (Part $part) use ($zip) {
             $zip->addFromString($part->filename, $part->get());
-        });        
+        });
         $zip->close();
         $contents = file_get_contents($dir->path($name));
-        return response()->streamDownload(function() use ($contents) { 
-                echo $contents; 
-            }, 
-            $name, 
+        return response()->streamDownload(
+            function () use ($contents) {
+                echo $contents;
+            },
+            $name,
             [
                 'Content-Type' => 'application/zip',
-            ]);
+            ]
+        );
     }
 }

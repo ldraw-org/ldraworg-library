@@ -2,7 +2,7 @@
 
 use App\Models\PartRelease;
 use Illuminate\Foundation\Testing\RefreshDatabase;
- 
+
 uses(RefreshDatabase::class);
 
 // Public Routes

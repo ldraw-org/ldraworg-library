@@ -49,7 +49,7 @@ class LDrawModelMaker
             $subs[] = "p/textures/{$s}";
         }
         $oparts = new Collection();
-        foreach(Part::official()->whereIn('filename', $subs)->get() as $part) {
+        foreach (Part::official()->whereIn('filename', $subs)->get() as $part) {
             $oparts = $oparts->merge($part->descendantsAndSelf()->official()->get());
         }
         $oparts = $oparts->unique();
@@ -63,27 +63,28 @@ class LDrawModelMaker
         return $file;
     }
 
-    public function diff(Part $part1, Part $part2): string {
+    public function diff(Part $part1, Part $part2): string
+    {
         $lines = collect(explode("\n", $part1->body->body))->filter(function (string $value) {
-          return !empty($value) && $value[0] != "0";
+            return !empty($value) && $value[0] != "0";
         });
         $lines2 = collect(explode("\n", $part2->body->body))->filter(function (string $value) {
-          return !empty($value) && $value[0] != "0";
+            return !empty($value) && $value[0] != "0";
         });
         $pattern = '#^([12345]) (\d+)#';
         $delcolor   = ['1' => '36', '2' => '12', '3' => '36', '4' => '36', '5' => '12'];
         $addcolor   = ['1' =>  '2', '2' => '10', '3' =>  '2', '4' =>  '2', '5' => '10'];
         $matchcolor = ['1' => '15', '2' =>  '8', '3' => '15', '4' => '15', '5' =>  '8'];
         $same = $lines->intersect($lines2)->transform(function (string $item) use ($pattern, $matchcolor) {
-          return preg_replace($pattern, '$1 '. $matchcolor[$item[0]], $item);
+            return preg_replace($pattern, '$1 '. $matchcolor[$item[0]], $item);
         });
         $added = $lines2->diff($lines)->transform(function (string $item) use ($pattern, $addcolor) {
-          return preg_replace($pattern, '$1 '. $addcolor[$item[0]], $item);
+            return preg_replace($pattern, '$1 '. $addcolor[$item[0]], $item);
         });
         $removed = $lines->diff($lines2)->transform(function (string $item) use ($pattern, $delcolor) {
-          return preg_replace($pattern, '$1 '. $delcolor[$item[0]], $item);
+            return preg_replace($pattern, '$1 '. $delcolor[$item[0]], $item);
         });
         return implode("\n", array_merge($same->toArray(), $added->toArray(), $removed->toArray()));
     }
-  
+
 }

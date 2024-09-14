@@ -84,7 +84,7 @@ class DocumentManagePage extends BasicResourceManagePage
                 }),
             Section::make([
                 Toggle::make('published'),
-                Toggle::make('restricted'),    
+                Toggle::make('restricted'),
             ])->columns(2),
             TextInput::make('maintainer')
                 ->string()

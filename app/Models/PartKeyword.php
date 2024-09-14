@@ -13,7 +13,7 @@ class PartKeyword extends Model
 
     public $timestamps = false;
 
-    public function parts(): BelongsToMany 
+    public function parts(): BelongsToMany
     {
         return $this->belongsToMany(Part::class, 'parts_part_keywords', 'part_keyword_id', 'part_id');
     }

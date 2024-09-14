@@ -33,7 +33,8 @@ class Create extends Component implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Part::unofficial()
+            ->query(
+                Part::unofficial()
                 ->where('vote_sort', 1)
                 ->orderBy('part_type_id')
                 ->orderBy('filename')
@@ -44,7 +45,7 @@ class Create extends Component implements HasForms, HasTable
                     ToggleColumn::make('marked_for_release')
                         ->grow(false),
                     ImageColumn::make('image')
-                        ->state( 
+                        ->state(
                             fn (Part $p): string => asset("images/library/{$p->libFolder()}/" . substr($p->filename, 0, -4) . '_thumb.png')
                         )
                         ->grow(false)
@@ -63,7 +64,7 @@ class Create extends Component implements HasForms, HasTable
                             ->grow(false)
                             ->label('Status'),
                         TextColumn::make('part_check_messages')
-                            ->state(fn(Part $part) => implode(", ", $part->part_check_messages['errors']))
+                            ->state(fn (Part $part) => implode(", ", $part->part_check_messages['errors']))
                             ->wrap()
                             ->alignment(Alignment::End),
                     ])->alignment(Alignment::End),
@@ -97,8 +98,8 @@ class Create extends Component implements HasForms, HasTable
                     })
             ]);
     }
-    
-    protected function createRelease(array $data) : void 
+
+    protected function createRelease(array $data): void
     {
         $this->authorize('store', PartRelease::class);
         $addFiles = [];
@@ -109,9 +110,9 @@ class Create extends Component implements HasForms, HasTable
         }
         $parts = Part::unofficial()->where('marked_for_release', true)->get();
         MakePartRelease::dispatch($parts, Auth::user(), $data['include-ldconfig'] ?? false, $addFiles);
-        $this->redirectRoute('tracker.activity');        
+        $this->redirectRoute('tracker.activity');
     }
-    #[Layout('components.layout.tracker')]    
+    #[Layout('components.layout.tracker')]
     public function render()
     {
         return view('livewire.release.create');

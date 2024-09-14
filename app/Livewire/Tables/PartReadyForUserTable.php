@@ -32,13 +32,16 @@ class PartReadyForUserTable extends BasicTable
                     // No votes from user
                     ->whereDoesntHave('votes', fn (Builder $qu) => $qu->where('user_id', Auth::user()->id))
                     // No submit events from user
-                    ->whereDoesntHave('events', fn (Builder $qu) =>
+                    ->whereDoesntHave(
+                        'events',
+                        fn (Builder $qu) =>
                         $qu->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit')->unofficial()
                     )
                     // Not authored by user unless a fix
                     ->where(function (Builder $q) {
                         $q->orHas('official_part')
-                        ->orWhere(fn (Builder $qu) =>
+                        ->orWhere(
+                            fn (Builder $qu) =>
                             $qu->doesntHave('official_part')->where('user_id', '<>', Auth::user()->id)
                         );
                     });
@@ -50,7 +53,7 @@ class PartReadyForUserTable extends BasicTable
                     ->form([
                         Select::make('author')
                             ->relationship(
-                                name: 'user', 
+                                name: 'user',
                                 titleAttribute: 'name'
                             )
                             ->getOptionLabelFromRecordUsing(fn (User $u) => $u->authorString)
@@ -79,6 +82,7 @@ class PartReadyForUserTable extends BasicTable
             ->columns(PartTable::columns())
             ->recordUrl(fn (Part $p): string => route('tracker.show', ['part' => $p]))
             ->queryStringIdentifier('readyForUser')
-            ->persistFiltersInSession();;
+            ->persistFiltersInSession();
+        ;
     }
 }

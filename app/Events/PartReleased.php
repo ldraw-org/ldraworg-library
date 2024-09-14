@@ -11,7 +11,9 @@ use Illuminate\Queue\SerializesModels;
 
 class PartReleased
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance.
@@ -20,5 +22,6 @@ class PartReleased
         public Part $part,
         public User $user,
         public PartRelease $release,
-    ) {}
+    ) {
+    }
 }

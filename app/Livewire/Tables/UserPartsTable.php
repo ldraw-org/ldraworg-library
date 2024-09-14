@@ -17,7 +17,8 @@ class UserPartsTable extends BasicTable
         return $table
             ->query(
                 Part::unofficial()
-                    ->where(fn (Builder $q) =>
+                    ->where(
+                        fn (Builder $q) =>
                         $q->orWhere(fn (Builder $qu) => $qu->doesntHave('official_part')->where('user_id', Auth::user()->id))
                             ->orWhereHas('events', fn (Builder $qu) => $qu->unofficial()->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit'))
                     )

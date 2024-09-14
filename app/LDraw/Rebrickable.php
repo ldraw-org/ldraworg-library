@@ -13,7 +13,8 @@ class Rebrickable
 
     public function __construct(
         public readonly string $api_key,
-    ) {}
+    ) {
+    }
 
     protected function makeApiCall(string $url): ?array
     {
@@ -28,8 +29,8 @@ class Rebrickable
         ])
         ->acceptJson()
         ->get($url);
-        
-        if($response->status() == 429) {
+
+        if ($response->status() == 429) {
             dd($response);
         } elseif (!$response->successful()) {
             return null;
@@ -37,21 +38,22 @@ class Rebrickable
 
         if (!is_null($response->json('next')) && !is_null($response->json('results'))) {
             $result = array_merge($response->json('results'), $this->makeApiCall($response->json('next')));
-            return $result;           
+            return $result;
         } elseif (!is_null($response->json('results'))) {
             return $response->json('results');
         }
-        return $response->json();   
+        return $response->json();
     }
 
-    public function getSetParts(string $setnumber): ?Collection 
+    public function getSetParts(string $setnumber): ?Collection
     {
         $parts = $this->makeApiCall("{$this->api_url}/sets/{$setnumber}/parts/?inc_minifig_parts=1");
         if (is_null($parts)) {
             return null;
         }
         $parts = collect($parts);
-        $parts = $parts->map(fn (array $part, int $key) =>
+        $parts = $parts->map(
+            fn (array $part, int $key) =>
             [
                 'rb_part_number' => $part['part']['part_num'],
                 'rb_part_name' => $part['part']['name'],
@@ -67,21 +69,21 @@ class Rebrickable
         return $parts;
     }
 
-    public function getSet(string $setnumber): ?array 
+    public function getSet(string $setnumber): ?array
     {
         return $this->makeApiCall("{$this->api_url}/sets/{$setnumber}/");
-    }  
+    }
 
-    public function getPart(string $partnumber): ?array 
+    public function getPart(string $partnumber): ?array
     {
         $part = $this->makeApiCall("{$this->api_url}/parts/{$partnumber}/");
         if (is_null($part)) {
             return null;
         }
         return $this->makePartArray($part);
-    }  
+    }
 
-    public function getParts(array $partnumbers): ?Collection 
+    public function getParts(array $partnumbers): ?Collection
     {
         $parts = implode(',', $partnumbers);
         $parts = $this->makeApiCall("{$this->api_url}/parts/?part_nums={$parts}");
@@ -89,13 +91,14 @@ class Rebrickable
             return null;
         }
         $parts = collect($parts);
-        $parts = $parts->map(fn (array $part, int $key) =>
+        $parts = $parts->map(
+            fn (array $part, int $key) =>
             $this->makePartArray($part)
         );
         return $parts;
     }
 
-    public function getPartBySearch(string $search): ?array 
+    public function getPartBySearch(string $search): ?array
     {
         $part = $this->makeApiCall("{$this->api_url}/parts/?search={$search}");
         if (is_null($part) || count($part) !== 1) {

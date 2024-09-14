@@ -10,7 +10,9 @@ use Illuminate\Queue\SerializesModels;
 
 class PartRenamed
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance.
@@ -20,5 +22,6 @@ class PartRenamed
         public User $user,
         public string $moved_from,
         public string $moved_to,
-    ) {}
+    ) {
+    }
 }
