@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Collection;
 
 class RecheckParts extends Command
 {
-    protected string $signature = 'pt:recheck';
+    protected $signature = 'pt:recheck';
 
-    protected string $description = 'Recheck all parts';
+    protected $description = 'Recheck all parts';
 
     public function handle()
     {
