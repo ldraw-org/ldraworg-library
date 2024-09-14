@@ -63,6 +63,7 @@ class ParsedPart
         $subs = [];
         $textures = [];
         foreach ($part->subparts as $s) {
+            /** @var Part $s */
             if ($s->isTexmap()) {
                 $textures[] = str_replace('textures/', '', $s->name());
             } else {

@@ -21,6 +21,12 @@ class PartRelease extends Model
         'part_data'
     ];
 
+    /**
+    * @return array{
+    *     part_list: 'array', 
+    *     part_data: 'Illuminate\Database\Eloquent\Casts\AsArrayObject'
+    * }
+    */
     protected function casts(): array
     {
         return  [

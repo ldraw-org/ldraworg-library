@@ -8,6 +8,7 @@ use App\Models\Part;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\PartCategory;
 use App\Settings\LibrarySettings;
+use Illuminate\Database\Eloquent\Builder;
 
 class PartChecker
 {
@@ -226,13 +227,6 @@ class PartChecker
         return count($errors) > 0 ? $errors : null;
     }
 
-    /**
-     * validLine
-     *
-     * @param string $line
-     *
-     * @return bool
-     */
     public function validLine(string $line): bool
     {
         $line = trim(preg_replace('#\h{2,}#u', ' ', $line));
@@ -278,80 +272,25 @@ class PartChecker
         return $name === $aname;
     }
 
-    /**
-     * checkAuthorInUsers
-     *
-     * @param string $file
-     *
-     * @return bool
-     */
     public function checkAuthorInUsers(string $username, string $realname): bool
     {
         return !is_null(User::fromAuthor($username, $realname)->first());
     }
 
-    /**
-     * checkLibraryApprovedLicense
-     *
-     * @param string $file
-     *
-     * @return bool
-     */
     public function checkLibraryApprovedLicense(string $license): bool
     {
         $liblic = \App\Models\PartLicense::firstWhere('text', $license);
         return !is_null($liblic) && $liblic->name !== 'NonCA';
     }
 
-    /**
-     * checkLibraryBFCCertify
-     *
-     * @param string $file
-     *
-     * @return bool
-     */
     public function checkLibraryBFCCertify(?string $bfc): bool
     {
         return $bfc === 'CCW';
     }
 
-    /**
-     * checkCategory
-     *
-     * @param string $file
-     *
-     * @return bool
-     */
     public function checkCategory(string $category): bool
     {
         return !is_null(PartCategory::firstWhere('category', $category));
-    }
-
-    /**
-     * historyEventsCrossCheck
-     *
-     * @param Part $part
-     *
-     * @return array
-     */
-    public function historyEventsCrossCheck(Part $part): array
-    {
-        $id = $part->id;
-        $eusers = User::whereNotIn('name', ['OrionP', 'cwdee', 'sbliss', 'PTadmin'])->
-          whereHas('part_events', function (\Illuminate\Database\Eloquent\Builder $query) use ($id) {
-              $query->whereRelation('part_event_type', 'slug', 'submit')->unofficial()->where('part_id', $id);
-          })->
-          get();
-        $husers = $part->editHistoryUsers();
-        if (! $husers->find($part->user->id)) {
-            $husers->add($part->user);
-        }
-        $ediff = $eusers->diff($husers);
-        if ($ediff->count() > 0) {
-            return [__('partcheck.history.eventmismatch', ['users' => implode(', ', $ediff->pluck('name')->all())])];
-        }
-
-        return [];
     }
 
     public function checkPatternForSetKeyword(string $name, array $keywords): bool

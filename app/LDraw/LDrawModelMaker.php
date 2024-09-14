@@ -54,6 +54,7 @@ class LDrawModelMaker
         }
         $oparts = $oparts->unique();
         foreach ($oparts ?? [] as $s) {
+            /** @var Part $s */
             if ($s->isTexmap()) {
                 $file .= $s->get(true, true);
             } else {

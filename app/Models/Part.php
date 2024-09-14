@@ -50,6 +50,18 @@ class Part extends Model
 
     protected $with = ['release', 'type'];
 
+    /**
+    * @return array{
+    *     delete_flag: 'boolean', 
+    *     manual_hold_flag: 'boolean', 
+    *     minor_edit_data: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
+    *     missing_parts: 'array', 
+    *     can_release: 'boolean', 
+    *     marked_for_release: 'boolean', 
+    *     part_check_messages: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
+    *     ready_for_admin: 'boolean'
+    * }
+    */
     protected function casts(): array
     {
         return [

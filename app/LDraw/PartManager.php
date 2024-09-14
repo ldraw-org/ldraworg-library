@@ -58,7 +58,7 @@ class PartManager
         }
         // Texmap is used in one of the submitted files, use the type appropriate for that part
         foreach ($partfiles as $file) {
-            if ($file['type'] == 'text' && $filename !== $file['filename'] && stripos($filename, $file['contents'] !== false)) {
+            if ($file['type'] == 'text' && $filename !== $file['filename'] && stripos($filename, $file['contents']) !== false) {
                 $type = $this->parser->parse($file['contents'])->type;
                 $pt = PartType::firstWhere('type', $type);
                 $textype = PartType::firstWhere('type', "{$pt->type}_Texmap");

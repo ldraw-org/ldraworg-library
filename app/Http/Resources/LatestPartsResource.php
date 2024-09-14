@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Part
+ * @mixin \App\Models\PartEvent
  */
 class LatestPartsResource extends JsonResource
 {

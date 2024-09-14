@@ -32,9 +32,9 @@ class PartDependenciesTable extends BasicTable
         return $table
             ->query(function () {
                 if ($this->parents !== false) {
-                    $q = $this->official !== false ? $this->part->parents()->official() : $this->part->parents()->unofficial();
+                    $q = $this->official !== false ? $this->part->parents()->whereNotNull('part_release_id') : $this->part->parents()->whereNull('part_release_id');
                 } else {
-                    $q = $this->official !== false ? $this->part->subparts()->official() : $this->part->subparts()->unofficial();
+                    $q = $this->official !== false ? $this->part->subparts()->whereNotNull('part_release_id') : $this->part->subparts()->whereNull('part_release_id');
                 }
                 return $q;
             })

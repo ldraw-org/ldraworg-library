@@ -45,11 +45,11 @@ class PartsUpdateProcessor
     protected function makeNextRelease(): void
     {
         //Figure out next update number
-        extract($this->getNextUpdateNumber());
+        $next = $this->getNextUpdateNumber();
         // create release
         $this->release = PartRelease::create([
-            'name' => $name,
-            'short' => $short,
+            'name' => $next['name'],
+            'short' => $next['short'],
             'part_data' => $this->getReleaseData(),
         ]);
         $notes = $this->tempDir->path("Note{$this->release->short}CA.txt");
@@ -63,7 +63,7 @@ class PartsUpdateProcessor
         if ($now->format('Y') !== $current->created_at->format('Y')) {
             $update = '01';
         } else {
-            $num = substr($current->name, -2) + 1;
+            $num = (int) substr($current->name, -2) + 1;
             if ((int) $num <= 9) {
                 $update = "0{$num}";
             } else {
@@ -100,6 +100,7 @@ class PartsUpdateProcessor
         $data['moved_parts'] = [];
         $moved = $this->parts->where('category.category', 'Moved');
         foreach ($moved as $part) {
+            /** @var Part $part */
             $data['moved_parts'][] = ['name' => $part->name(),  'movedto' => $part->description];
         }
         $data['fixes'] = [];
@@ -108,6 +109,7 @@ class PartsUpdateProcessor
             ->whereNotNull('official_part')
             ->where('category.category', '!=', 'Moved');
         foreach ($notMoved as $part) {
+            /** @var Part $part */
             if ($part->description != $part->official_part->description) {
                 $data['rename'][] = ['name' => $part->name(), 'decription' => $part->description, 'old_description' => $part->official_part->description];
             } else {
@@ -164,6 +166,7 @@ class PartsUpdateProcessor
     protected function releaseParts(): void
     {
         foreach ($this->parts as $part) {
+            /** @var Part $part */
             $this->updatePartsList($part);
             $this->releasePart($part);
         }
@@ -293,7 +296,7 @@ class PartsUpdateProcessor
             if ($zip->getFromName($filename) !== false) {
                 $zip->deleteName($filename);
             }
-            $zip->addFromString($filename, $content);
+            $zip->addFromString($filename, $contents);
         }
 
         $notes = file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt"));
@@ -387,6 +390,7 @@ class PartsUpdateProcessor
     {
         $affectedParts = new Collection();
         foreach ($this->release->parts as $part) {
+            /** @var Part $part */
             $affectedParts = $affectedParts->concat($part->ancestorsAndSelf)->unique();
         }
         $affectedParts->each(function (Part $p) {

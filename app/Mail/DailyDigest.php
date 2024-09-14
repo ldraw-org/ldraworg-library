@@ -31,7 +31,7 @@ class DailyDigest extends Mailable
     ) {
         $this->parts = Part::unofficial()
             ->whereHas('notification_users', fn (Builder $q) => $q->where('id', $this->user->id))
-            ->whereHas('events', fn (Builder $q) => $q->unofficial()->whereBetween('created_at', [Carbon::yesterday(), Carbon::today()]))
+            ->whereHas('events', fn (Builder $q) => $q->whereNull('part_release_id')->whereBetween('created_at', [Carbon::yesterday(), Carbon::today()]))
             ->get();
     }
 

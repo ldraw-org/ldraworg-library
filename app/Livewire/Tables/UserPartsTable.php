@@ -20,7 +20,7 @@ class UserPartsTable extends BasicTable
                     ->where(
                         fn (Builder $q) =>
                         $q->orWhere(fn (Builder $qu) => $qu->doesntHave('official_part')->where('user_id', Auth::user()->id))
-                            ->orWhereHas('events', fn (Builder $qu) => $qu->unofficial()->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit'))
+                            ->orWhereHas('events', fn (Builder $qu) => $qu->whereNull('part_release_id')->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit'))
                     )
             )
             ->defaultSort('created_at', 'desc')

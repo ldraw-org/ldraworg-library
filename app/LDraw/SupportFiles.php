@@ -12,7 +12,7 @@ class SupportFiles
 {
     public static function categoriesText()
     {
-        return implode("\n", PartCategory::all()->pluck('category')->all());
+        return implode("\n", PartCategory::pluck('category')->all());
     }
 
     public static function libaryCsv(): string
