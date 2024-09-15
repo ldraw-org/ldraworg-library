@@ -26,7 +26,7 @@ class TrackerHistoryController extends Controller
             ->name('ptHistory')
             ->type('bar')
             ->labels(array_column($data, 'date'))
-            ->size(['width' => '100%', 'height' => min(count($data), 5010)])
+            ->size(['width' => '100%', 'height' => min(count($data), 4875)])
             ->datasets([
                 [
                     'label' => 'Held',
