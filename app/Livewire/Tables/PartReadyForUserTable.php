@@ -35,7 +35,7 @@ class PartReadyForUserTable extends BasicTable
                     ->whereDoesntHave(
                         'events',
                         fn (Builder $qu) =>
-                        $qu->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit')->unofficial()
+                        $qu->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit')->whereNull('part_release_id')
                     )
                     // Not authored by user unless a fix
                     ->where(function (Builder $q) {

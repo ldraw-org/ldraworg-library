@@ -514,6 +514,7 @@ class Part extends Model
         }
         if ($this->keywords->count() > 0) {
             $kws = $this->keywords->pluck('keyword')->all();
+            $kwline = '';
             foreach ($kws as $index => $kw) {
                 if (array_key_first($kws) == $index) {
                     $kwline = "0 !KEYWORDS ";

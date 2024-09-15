@@ -24,6 +24,7 @@ class LDrawModelMaker
             $sparts = $sparts->whereNotNull('part_release_id');
         }
         foreach ($sparts->get() ?? [] as $s) {
+            /** @var Part $s */
             if ($s->isTexmap()) {
                 $file .= $s->get(true, true);
             } else {
