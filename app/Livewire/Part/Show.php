@@ -27,6 +27,11 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+/**
+ * @property Form $form
+ * @property Collection $baseparts
+ * @property bool $hasSuffixParts
+ */
 class Show extends Component implements HasForms, HasActions
 {
     use InteractsWithForms;

@@ -13,6 +13,10 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
+/**
+ * @property Form $form
+ * @property Collection $baseparts
+ */
 class Suffix extends Component implements HasForms
 {
     use InteractsWithForms;

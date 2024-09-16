@@ -15,6 +15,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 
+/**
+ * @property Form $form
+ */
 class ReviewSummaryManagePage extends BasicResourceManagePage
 {
     use InteractsWithForms;

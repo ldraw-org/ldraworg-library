@@ -13,6 +13,9 @@ use RecursiveIteratorIterator;
 use RecursiveRegexIterator;
 use RegexIterator;
 
+/**
+ * @property Form $form
+ */
 class FileEditor extends Component implements HasForms
 {
     use InteractsWithForms;

@@ -8,6 +8,9 @@ use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
 
+/**
+ * @property Form $form
+ */
 class MenuItem extends Component
 {
     public string $search;

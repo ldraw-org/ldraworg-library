@@ -21,6 +21,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 
+/**
+ * @property Form $form
+ */
 class Submit extends Component implements HasForms
 {
     use InteractsWithForms;

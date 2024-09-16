@@ -19,6 +19,9 @@ use Filament\Forms\Form;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+/**
+ * @property Form $form
+ */
 class LibrarySettingsPage extends Component implements HasForms
 {
     use InteractsWithForms;

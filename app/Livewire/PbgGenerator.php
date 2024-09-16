@@ -11,6 +11,9 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+/**
+ * @property Form $form
+ */
 class PbgGenerator extends Component implements HasForms
 {
     use InteractsWithForms;

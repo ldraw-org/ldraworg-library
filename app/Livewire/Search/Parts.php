@@ -19,6 +19,9 @@ use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 
+/**
+ * @property Form $form
+ */
 class Parts extends Component implements HasForms
 {
     use InteractsWithForms;

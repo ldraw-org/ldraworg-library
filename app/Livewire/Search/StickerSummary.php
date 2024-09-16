@@ -12,6 +12,9 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
+/**
+ * @property Form $form
+ */
 class StickerSummary extends Component implements HasForms
 {
     use InteractsWithForms;
