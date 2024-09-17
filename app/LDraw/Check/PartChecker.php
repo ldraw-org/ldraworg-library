@@ -249,7 +249,7 @@ class PartChecker
     {
         $isPattern = preg_match('#^[a-z0-9_-]+?p[a-z0-9]{2,3}\.dat$#i', $name, $matches);
         $hasPatternText = preg_match('#^.*?\sPattern(\s\((Obsolete|Needs Work|Hollow Stud|Blocked Hollow Stud|Solid Stud)\))?$#ui', $description, $matches);
-        return !$isPattern || ($isPattern && $hasPatternText);
+        return !$isPattern || $hasPatternText;
     }
 
     public function checkLibraryApprovedName(string $name): bool
@@ -322,8 +322,7 @@ class PartChecker
     public function checkLineAllowedBodyMeta(string $line): bool
     {
         $words = explode(' ', trim($line));
-        return $words === false ||
-            $words[0] !== '0' ||
+        return $words[0] !== '0' ||
             trim($line) === '0' ||
             ($words[0] === '0' && count($words) > 1 && in_array($words[1], $this->settings->allowed_body_metas, true));
     }

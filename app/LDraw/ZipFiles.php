@@ -19,7 +19,7 @@ class ZipFiles
             }
             $path = $tempDir->path($part->filename);
             file_put_contents($path, $part->get());
-            $time = $part->lastChange()->format('U');
+            $time = (int) $part->lastChange()->format('U');
             touch($path, $time);
             $zip->addFile($path, $part->filename);
             $zip->setMtimeName($part->filename, $time);
@@ -30,7 +30,7 @@ class ZipFiles
             Part::unofficial()->each(function (Part $part) use ($zip, $tempDir) {
                 $path = $tempDir->path($part->filename);
                 file_put_contents($path, $part->get());
-                $time = $part->lastChange()->format('U');
+                $time = (int) $part->lastChange()->format('U');
                 touch($path, $time);
                 $zip->addFile($path, $part->filename);
                 $zip->setMtimeName($part->filename, $time);

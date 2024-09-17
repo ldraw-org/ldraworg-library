@@ -114,7 +114,7 @@ class Show extends Component implements HasForms, HasActions
         } elseif (!is_null($officialpart) && $officialpart->exists) {
             $this->part = $officialpart;
         } else {
-            return response(404);
+            return response('404');
         }
         $this->image =
             $this->part->isTexmap() ? route("{$this->part->libFolder()}.download", $this->part->filename) : version("images/library/{$this->part->libFolder()}/" . substr($this->part->filename, 0, -4) . '.png');
@@ -178,7 +178,7 @@ class Show extends Component implements HasForms, HasActions
                 ->visible(
                     $this->part->isUnofficial() &&
                     (!is_null($this->part->official_part) || $this->part->parents->count() === 0) &&
-                    Auth::user()?->can('delete', $this->part) ?? false
+                    (Auth::user()?->can('delete', $this->part) ?? false)
                 )
                 ->modalDescription('Are you sure you\'d like to delete this part? This cannot be easily undone.')
                 ->successRedirectUrl(route('tracker.activity'))

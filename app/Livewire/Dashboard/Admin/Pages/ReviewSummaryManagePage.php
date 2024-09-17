@@ -69,7 +69,7 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
 
     protected function saveEditData(ReviewSummary $summary, array $data)
     {
-        if (is_null($summary->id)) {
+        if ($summary->exists === false) {
             $summary->header = $data['header'];
             $summary->order = ReviewSummary::nextOrder();
             $summary->save();
