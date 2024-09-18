@@ -17,15 +17,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Laravel\Scout\Searchable;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 
 #[ObservedBy([PartObserver::class])]
 class Part extends Model
 {
-    use
-        HasGraphRelationships;
-    //Searchable,
+    use HasGraphRelationships;
     use HasLicense;
     use HasPartRelease;
     use HasUser;
@@ -75,18 +72,7 @@ class Part extends Model
             'ready_for_admin' => 'boolean',
         ];
     }
-    /*
-        public function toSearchableArray()
-        {
-            return [
-                'id' => (int) $this->id,
-                'filename' => $this->filename,
-                'description' => $this->description,
-                'header' => $this->header,
-                'body' => $this->body->body
-            ];
-        }
-    */
+
     public function getPivotTableName(): string
     {
         return 'related_parts';
