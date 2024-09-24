@@ -11,6 +11,7 @@ use App\Http\Controllers\Part\PartDownloadController;
 use App\Http\Controllers\Part\PartDownloadZipController;
 use App\Http\Controllers\Part\PartWebGLController;
 use App\Http\Controllers\ReviewSummaryController;
+use App\Http\Controllers\StickerSheet\StickerSheetShowController;
 use App\Http\Controllers\TrackerHistoryController;
 use App\Livewire\Dashboard\Admin\Index as AdminIndex;
 use App\Livewire\Dashboard\Admin\Pages\DocumentCategoryManagePage;
@@ -33,8 +34,8 @@ use App\Livewire\PartEvent\Index as PartEventIndex;
 use App\Livewire\PbgGenerator;
 use App\Livewire\Release\Create;
 use App\Livewire\Search\Parts;
-use App\Livewire\Search\StickerSummary;
 use App\Livewire\Search\Suffix;
+use App\Livewire\Tables\StickerSheetIndex;
 use App\Livewire\Tracker\ConfirmCA;
 
 Route::view('/', 'index')->name('index');
@@ -55,6 +56,8 @@ Route::middleware(['throttle:file'])->group(function () {
 });
 
 Route::get('/pbg', PbgGenerator::class)->name('pbg');
+Route::view('/sticker-sheets', 'sticker-sheet.index')->name('sticker-sheet.index');
+Route::get('/sticker-sheets/{sheet}', StickerSheetShowController::class)->name('sticker-sheet.show');
 
 Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::view('/', 'tracker.main')->name('main');
@@ -121,7 +124,7 @@ Route::get('/updates/view{release:short}', [PartUpdateController::class, 'view']
 Route::redirect('/search', '/search/part');
 Route::get('/search/part', Parts::class)->name('search.part');
 Route::get('/search/suffix', Suffix::class)->name('search.suffix');
-Route::get('/search/sticker', StickerSummary::class)->name('search.sticker');
+Route::redirect('/search/sticker', '/sticker-sheets');
 
 Route::prefix('official')->name('official.')->group(function () {
     Route::redirect('/search', '/search/part');

@@ -8,7 +8,7 @@
         <x-menu.item label="Official Part List" link="{{route('official.index')}}" />
         <x-menu.item label="Part Search" link="{{route('search.part')}}" />
         <x-menu.item label="Pattern/Shortcut Part Summary" link="{{route('search.suffix')}}" /> 
-        <x-menu.item label="Sticker Sheet Parts Search" link="{{route('search.sticker')}}" /> 
+        <x-menu.item label="Sticker Sheet Lookup" link="{{route('sticker-sheet.index')}}" /> 
         <x-menu.item label="PBG Generator" link="{{route('pbg')}}" />
     </x-menu.dropdown>    
 </x-menu.dropdown>
