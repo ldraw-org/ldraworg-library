@@ -45,7 +45,7 @@ class StickerSheetIndex extends BasicTable
                     ->counts([
                         'parts as shortcut_count' => 
                             function (Builder $q) { 
-                                $q->whereRelation('category', 'category', '!=', 'Sticker');
+                                $q->whereRelation('category', 'category', 'Sticker Shortcut');
                             }
                     ]),
                 TextColumn::make('stickers_need_votes_count')
@@ -69,10 +69,12 @@ class StickerSheetIndex extends BasicTable
                     ->counts([
                         'parts as shortcut_fast_track_ready_count' => 
                             function (Builder $q) { 
-                                $q->whereRelation('category', 'category', '!=', 'Sticker')
+                                $q->whereRelation('category', 'category', 'Sticker Shortcut')
                                 ->unofficial()
-                                ->where('vote_sort', [2, 4])
-                                ->whereDoesntHave('subparts', fn (Builder $q) => $q->where('vote_sort', '>', 1)->where('can_release', 'true'));
+                                ->whereBetween('vote_sort', [2, 4])
+                                ->whereDoesntHave('subparts', function (Builder $q) {
+                                    $q->where('vote_sort', '>', '1');
+                                }); 
                             }
                     ])
                     ->visible(auth()->user()?->can('part.vote.fasttrack')),
