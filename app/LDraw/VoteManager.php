@@ -21,7 +21,7 @@ class VoteManager
             $canVote = $user->can('update', [$vote, $vote_type_code]);
         }
 
-        if (!$canVote || !$part->isUnofficial()) {
+        if (!$canVote || !$part->isUnofficial() || $vote?->vote_type_code == $vote_type_code) {
             return;
         }
 
