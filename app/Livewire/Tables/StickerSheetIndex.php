@@ -60,7 +60,7 @@ class StickerSheetIndex extends BasicTable
                                     ->where('vote_sort', '3');
                             }
                     ])
-                    ->visible(auth()->user()?->can('part.vote.certify')),
+                    ->visible(auth()->user()?->can('part.vote.certify') ?? false),
                 TextColumn::make('shortcut_fast_track_ready_count')
                     ->sortable()
                     ->label('Shortcuts Can Be Fast Tracked')
@@ -70,14 +70,14 @@ class StickerSheetIndex extends BasicTable
                         'parts as shortcut_fast_track_ready_count' => 
                             function (Builder $q) { 
                                 $q->whereRelation('category', 'category', 'Sticker Shortcut')
-                                ->unofficial()
+                                ->whereNull('part_release_id')
                                 ->whereBetween('vote_sort', [2, 4])
                                 ->whereDoesntHave('subparts', function (Builder $q) {
                                     $q->where('vote_sort', '>', '1');
                                 }); 
                             }
                     ])
-                    ->visible(auth()->user()?->can('part.vote.fasttrack')),
+                    ->visible(auth()->user()?->can('part.vote.fasttrack') ?? false),
             ])
             ->persistSortInSession()
             ->persistSearchInSession()
