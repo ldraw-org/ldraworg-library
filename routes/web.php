@@ -35,7 +35,6 @@ use App\Livewire\PbgGenerator;
 use App\Livewire\Release\Create;
 use App\Livewire\Search\Parts;
 use App\Livewire\Search\Suffix;
-use App\Livewire\Tables\StickerSheetIndex;
 use App\Livewire\Tracker\ConfirmCA;
 
 Route::view('/', 'index')->name('index');
@@ -51,7 +50,6 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/tracker/ldrawunf-last-day.zip', LastDayDownloadZipController::class)->name('tracker.last-day');
     Route::get('/library/official/{officialpart}', PartDownloadController::class)->name('official.download');
     Route::get('/library/official/{officialpartzip}', PartDownloadZipController::class)->name('official.download.zip');
-//    Route::get('/library/official/{file}', OfficialFileController::class)->name('official.file.download');
     Route::get('/library/unofficial/{unofficialpart}', PartDownloadController::class)->name('unofficial.download');
     Route::get('/library/unofficial/{unofficialpartzip}', PartDownloadZipController::class)->name('unofficial.download.zip');
 });
