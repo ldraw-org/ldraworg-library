@@ -11,10 +11,12 @@
         </div>  
         <div class="space-y-2">
             @if (!is_null($sheet->parts))
-                <div class="rounded text-xl font-bold bg-gray-200 p-2">Stickers</div>
-                <x-part.grid :parts="$sheet->parts->where('category.category', 'Sticker')" />
+                <div class="rounded text-xl font-bold bg-gray-200 p-2">Flat Stickers</div>
+                <x-part.grid :parts="$flat" />
+                <div class="rounded text-xl font-bold bg-gray-200 p-2">Formed Stickers</div>
+                <x-part.grid :parts="$formed" />
                 <div class="rounded text-xl font-bold bg-gray-200 p-2">Shortcuts</div>
-                <x-part.grid :parts="$sheet->parts->where('category.category', '<>', 'Sticker')" />
+                <x-part.grid :parts="$shortcuts" />
             @endif
         </div>
     </div>
