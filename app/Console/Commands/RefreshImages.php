@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdatePartImage;
+use App\Jobs\UpdateImage;
 use App\Models\Part;
 use Illuminate\Console\Command;
 
@@ -41,6 +41,6 @@ class RefreshImages extends Command
                 $parts = Part::lazy();
         }
 
-        $parts->each(fn (Part $p) => UpdatePartImage::dispatch($p));
+        $parts->each(fn (Part $p) => UpdateImage::dispatch($p));
     }
 }

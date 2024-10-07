@@ -178,14 +178,14 @@ class PartManager
         if (!is_null($part->official_part)) {
             $this->updateUnofficialWithOfficialFix($part->official_part);
         };
-        $this->updatePartImage($part);
+        $this->updateImage($part);
         $this->checkPart($part);
         $this->addStickerSheet($part);
         $part->updateReadyForAdmin();
         UpdateParentParts::dispatch($part);
     }
 
-    public function updatePartImage(Part $part): void
+    public function updateImage(Part $part): void
     {
         if ($part->isTexmap()) {
             $image = imagecreatefromstring($part->get());
@@ -270,7 +270,7 @@ class PartManager
         $part->filename = $newName;
         $part->save();
         $part->generateHeader();
-        $this->updatePartImage($part);
+        $this->updateImage($part);
         foreach ($part->parents()->unofficial()->get() as $p) {
             if ($p->type->folder === 'parts/' && $p->category->category === "Moved") {
                 $p->description = str_replace($oldname, $part->name(), $p->description);
@@ -292,7 +292,7 @@ class PartManager
         $part->setSubparts($this->parser->getSubparts($part->body->body) ?? []);
         if ($hadMissing) {
             $part->refresh();
-            $this->updatePartImage($part);
+            $this->updateImage($part);
             $this->checkPart($part);
             $this->addStickerSheet($part);
             $part->updateReadyForAdmin();

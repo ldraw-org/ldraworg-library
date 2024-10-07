@@ -2,7 +2,9 @@
 
 namespace App\Jobs;
 
+use App\LDraw\OmrModelManager;
 use App\LDraw\PartManager;
+use App\Models\Omr\OmrModel;
 use App\Models\Part;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,7 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class UpdatePartImage implements ShouldQueue
+class UpdateImage implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -21,7 +23,7 @@ class UpdatePartImage implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        protected Part $part
+        protected Part|OmrModel $m
     ) {
     }
 
@@ -30,6 +32,12 @@ class UpdatePartImage implements ShouldQueue
      */
     public function handle(): void
     {
-        app(PartManager::class)->updatePartImage($this->part);
+        if ($this->m instanceof Part) {
+            app(PartManager::class)->updateImage($this->m);
+        }
+        elseif ($this->m instanceof OmrModel) {
+            app(OmrModelManager::class)->updateImage($this->m);
+        }   
+
     }
 }

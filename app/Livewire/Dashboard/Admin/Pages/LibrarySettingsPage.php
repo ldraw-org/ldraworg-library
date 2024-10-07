@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
-use App\Jobs\UpdatePartImage;
+use App\Jobs\UpdateImage;
 use App\Models\Part;
 use App\Models\PartLicense;
 use App\Settings\LibrarySettings;
@@ -77,10 +77,16 @@ class LibrarySettingsPage extends Component implements HasForms
                                     ->valueLabel('Matrix'),
                                 FieldSet::make('Image Size')
                                     ->schema([
-                                        TextInput::make('max_render_height')
+                                        TextInput::make('max_part_render_height')
                                             ->required()
                                             ->integer(),
-                                        TextInput::make('max_render_width')
+                                        TextInput::make('max_part_render_width')
+                                            ->required()
+                                            ->integer(),
+                                        TextInput::make('max_model_render_height')
+                                            ->required()
+                                            ->integer(),
+                                        TextInput::make('max_model_render_width')
                                             ->required()
                                             ->integer(),
                                         TextInput::make('max_thumb_height')
@@ -105,8 +111,10 @@ class LibrarySettingsPage extends Component implements HasForms
             'tracker_locked' => $settings->tracker_locked,
             'ldview_options' => $settings->ldview_options,
             'default_render_views' => $settings->default_render_views,
-            'max_render_height' => $settings->max_render_height,
-            'max_render_width' => $settings->max_render_width,
+            'max_part_render_height' => $settings->max_part_render_height,
+            'max_part_render_width' => $settings->max_part_render_width,
+            'max_model_render_height' => $settings->max_model_render_height,
+            'max_model_render_width' => $settings->max_model_render_width,
             'max_thumb_height' => $settings->max_thumb_height,
             'max_thumb_width' => $settings->max_thumb_width,
             'allowed_header_metas' => $settings->allowed_header_metas,
@@ -131,8 +139,10 @@ class LibrarySettingsPage extends Component implements HasForms
             $settings->default_render_views = $form_data['default_render_views'];
         }
         $settings->default_render_views = $form_data['default_render_views'];
-        $settings->max_render_height = $form_data['max_render_height'];
-        $settings->max_render_width = $form_data['max_render_width'];
+        $settings->max_part_render_height = $form_data['max_part_render_height'];
+        $settings->max_part_render_width = $form_data['max_part_render_width'];
+        $settings->max_model_render_height = $form_data['max_model_render_height'];
+        $settings->max_model_render_width = $form_data['max_model_render_width'];
         $settings->max_thumb_height = $form_data['max_thumb_height'];
         $settings->max_thumb_width = $form_data['max_thumb_width'];
         $settings->allowed_header_metas = $form_data['allowed_header_metas'];
@@ -144,7 +154,7 @@ class LibrarySettingsPage extends Component implements HasForms
         foreach ($view_changes as $part) {
             Part::whereRelation('type', 'folder', 'parts/')
                 ->where('filename', 'LIKE', "%{$part}%")
-                ->each(fn (Part $p) => UpdatePartImage::dispatch($p));
+                ->each(fn (Part $p) => UpdateImage::dispatch($p));
         }
 
     }

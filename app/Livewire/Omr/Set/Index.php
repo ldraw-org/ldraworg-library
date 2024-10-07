@@ -28,9 +28,12 @@ class Index extends Component implements HasForms, HasTable
             ->defaultSort('set.number')
             ->emptyState(view('tables.empty', ['none' => 'None']))
             ->columns([
-                ImageColumn::make('set.rb_url')
-                    ->extraImgAttributes(['class' => 'object-scale-down'])
-                    ->label('Image'),
+                ImageColumn::make('image')
+                    ->state(
+                        fn (OmrModel $m): string => version("images/omr/models/" . substr($m->filename(), 0, -4) . '_thumb.png')
+                    )
+                    ->grow(false)
+                    ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]']),
                 TextColumn::make('set.number')
                     ->label('Set Number')
                     ->searchable()

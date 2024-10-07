@@ -9,8 +9,11 @@ class LibrarySettings extends Settings
     public array $ldview_options;
     public array $default_render_views;
 
-    public int $max_render_height;
-    public int $max_render_width;
+    public int $max_part_render_height;
+    public int $max_part_render_width;
+
+    public int $max_model_render_height;
+    public int $max_model_render_width;
 
     public int $max_thumb_height;
     public int $max_thumb_width;

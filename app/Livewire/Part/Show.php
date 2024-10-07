@@ -189,7 +189,7 @@ class Show extends Component implements HasForms, HasActions
     {
         return Action::make('updateImage')
                 ->action(function () {
-                    app(PartManager::class)->updatePartImage($this->part);
+                    app(PartManager::class)->updateImage($this->part);
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Image Updated')

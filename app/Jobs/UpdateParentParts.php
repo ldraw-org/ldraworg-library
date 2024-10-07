@@ -41,7 +41,7 @@ class UpdateParentParts implements ShouldQueue
         }
         $this->part->ancestors()->each(
             function (Part $p) {
-                app(PartManager::class)->updatePartImage($p);
+                app(PartManager::class)->updateImage($p);
                 app(PartManager::class)->checkPart($p);
             }
         );

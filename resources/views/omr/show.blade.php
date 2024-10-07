@@ -7,7 +7,8 @@
         <div class="rounded border text-xl font-bold bg-gray-200 p-2">{{$set->number}} - {{$set->name}}</div>
         <div class="grid grid-cols-12 gap-2">
             <div class="col-span-8">
-                <img class="object-scale-down" src="{{$set->rb_url}}">
+                <img class = 'object-scale-down'
+                src="{{version("images/omr/models/" . substr($set->mainModel()->filename(), 0, -4) . '.png')}}" alt="{{$set->number}} - {{$set->name}}" title="{{$set->number}} - {{$set->name}}">
             </div>
             <div class="flex flex-col col-span-4 space-y-2">
                 <div class="rounded border text-lg font-bold bg-gray-200 p-2">Models</div>

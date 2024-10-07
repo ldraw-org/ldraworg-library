@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdatePartImage;
+use App\Jobs\UpdateImage;
 use App\LDraw\PartManager;
 use App\Models\Part;
 use Illuminate\Console\Command;
@@ -66,7 +66,7 @@ class DailyMaintenance extends Command
             $image = str_replace('.dat', '.png', "library/unofficial/{$p->filename}");
             $thumb = str_replace('.png', '_thumb.png', $image);
             if (!Storage::disk('images')->exists($image) || !Storage::disk('images')->exists($thumb)) {
-                UpdatePartImage::dispatch($p);
+                UpdateImage::dispatch($p);
             }
         });
 

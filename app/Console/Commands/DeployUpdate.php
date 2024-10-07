@@ -2,9 +2,16 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Part;
+use App\Jobs\UpdateImage;
+use App\LDraw\OmrModelManager;
+use App\Models\Omr\OmrModel;
+use App\Models\Omr\Set;
+use App\Settings\LibrarySettings;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Image\Image;
+use Spatie\Image\Enums\Fit;
 
 class DeployUpdate extends Command
 {
@@ -27,17 +34,11 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        foreach (Storage::files('db') as $file) {
-            $id = basename($file, '.txt');
-            if ($id == 'lib.sql' || $id == 'lib2.sql') {
-                continue;
-            }
-            $this->info($id);
-            $p = Part::find($id);
-            $body = Storage::get($file);
-            $p->body->body = $body;
-            $p->body->save();
-            app(\App\LDraw\PartManager::class)->loadSubpartsFromBody($p);
+        if (!Storage::disk('images')->exists('omr/models')) {
+            Storage::disk('images')->makeDirectory('omr/models');
         }
+        Set::each(function (Set $s) {
+            $s->models->each(fn (OmrModel $m) => UpdateImage::dispatch($m));
+        });
     }
 }

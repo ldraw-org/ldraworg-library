@@ -50,7 +50,11 @@ class LDView
             file_put_contents($filename, $this->modelmaker->modelMpd($part));
         }
 
-        $normal_size = "-SaveWidth={$this->settings->max_render_width} -SaveHeight={$this->settings->max_render_height}";
+        if ($part instanceof Part) {
+            $normal_size = "-SaveWidth={$this->settings->max_part_render_width} -SaveHeight={$this->settings->max_part_render_height}";
+        } else {
+            $normal_size = "-SaveWidth={$this->settings->max_model_render_width} -SaveHeight={$this->settings->max_model_render_height}";
+        }
         $imagepath = $tempDir->path("part.png");
 
         // Make the ldview.ini
