@@ -103,7 +103,7 @@
           <div class="flex flex-col md:flex-row-reverse w-full">
             <div class="flex w-full justify-center items-center md:w-1/3">            
               <img class = 'w-80 h-80 object-contain'
-                wire:click="$dispatch('open-modal', { id: 'ldbi' })"
+                @if(!$part->isTexmap()) wire:click="$dispatch('open-modal', { id: 'ldbi' })" @endif
                 src="{{$image}}" alt="{{ $part->description }}" title="{{ $part->description }}">
             </div>
             <div class="w-full md:w-2/3">            
