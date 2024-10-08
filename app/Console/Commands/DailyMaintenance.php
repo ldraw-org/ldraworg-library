@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\UpdateImage;
 use App\LDraw\PartManager;
+use App\Models\Omr\OmrModel;
 use App\Models\Part;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
@@ -67,6 +68,13 @@ class DailyMaintenance extends Command
             $thumb = str_replace('.png', '_thumb.png', $image);
             if (!Storage::disk('images')->exists($image) || !Storage::disk('images')->exists($thumb)) {
                 UpdateImage::dispatch($p);
+            }
+        });
+        OmrModel::lazy()->each(function (OmrModel $m) {
+            $image = str_replace(['.dat','.mpd','.ldr'], '.png', "omr/models/{$m->filename()}");
+            $thumb = str_replace('.png', '_thumb.png', $image);
+            if (!Storage::disk('images')->exists($image) || !Storage::disk('images')->exists($thumb)) {
+                UpdateImage::dispatch($m);
             }
         });
 
