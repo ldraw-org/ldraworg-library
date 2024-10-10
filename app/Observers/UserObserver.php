@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\MassHeaderGenerate;
 use App\Models\MybbUser;
 use App\Models\Part;
 use App\Models\PartLicense;
@@ -14,32 +15,13 @@ class UserObserver
     public function saved(User $user): void
     {
         if ($user->wasChanged(['name', 'realname', 'part_license_id'])) {
-            $user->parts->each(function (Part $p) use ($user) {
-                $md = $p->minor_edit_data;
-                if ($user->wasChanged('part_license_id')) {
-                    $ol = PartLicense::find($user->getOriginal('part_license_id'));
-                    $p->license()->associate($user->license);
-                    $md['license'] = "{$ol->name} to {$user->license->name}";
-                }
-                if ($user->wasChanged(['name', 'realname'])) {
-                    $md['user'] = "User {$user->name} data changed";
-                }
-                if (!$p->isUnofficial()) {
-                    $p->minor_edit_data = $md;
-                }
-                $p->generateHeader();
-            });
-            if ($user->wasChanged(['name', 'realname'])) {
-                Part::whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))
-                    ->each(function (Part $p) use ($user) {
-                        if (!$p->isUnofficial()) {
-                            $md = $p->minor_edit_data;
-                            $md['user'] = "User {$user->name} data changed";
-                            $p->minor_edit_data = $md;
-                        }
-                        $p->generateHeader();
-                    });
+            if ($user->wasChanged('part_license_id')) {
+                $user->parts()->update(['part_license_id' => $user->part_license_id]);
             }
+            $user->parts()->official()->update(['has_minor_edit' => true]);
+            Part::official()->whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))->update(['has_minor_edit' => true]);
+            MassHeaderGenerate::dispatch($user->parts);
+            MassHeaderGenerate::dispatch(Part::whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))->get());
         }
         if (app()->environment() == 'production') {
             $mybb = MybbUser::find($user->forum_user_id);

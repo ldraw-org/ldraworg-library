@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Jobs\MassHeaderGenerate;
 use App\Jobs\UpdatePartHeader;
+use App\Models\Part;
 use App\Models\PartKeyword;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -51,7 +53,8 @@ class PartKeywordManagePage extends BasicResourceManagePage
                                     $keyword->keyword = trim($data['keyword']);
                                     $keyword->save();
                                 }
-                                UpdatePartHeader::dispatch($keyword->parts);
+                                $keyword->parts()->official()->update(['has_minor_edit' => true]);
+                                MassHeaderGenerate::dispatch($keyword->parts);
                             }
                         }
                     ),

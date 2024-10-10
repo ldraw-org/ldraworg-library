@@ -51,7 +51,7 @@ class Part extends Model
     * @return array{
     *     delete_flag: 'boolean', 
     *     manual_hold_flag: 'boolean', 
-    *     minor_edit_data: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
+    *     has_minor_edit: 'boolean',
     *     missing_parts: 'array', 
     *     can_release: 'boolean', 
     *     marked_for_release: 'boolean', 
@@ -64,7 +64,7 @@ class Part extends Model
         return [
             'delete_flag' => 'boolean',
             'manual_hold_flag' => 'boolean',
-            'minor_edit_data' => AsArrayObject::class,
+            'has_minor_edit' => 'boolean',
             'missing_parts' => 'array',
             'can_release' => 'boolean',
             'marked_for_release' => 'boolean',

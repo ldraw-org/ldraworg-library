@@ -116,8 +116,7 @@ class PartsUpdateProcessor
                 $data['fixed'][] = ['name' => $part->name(), 'decription' => $part->description];
             }
         }
-        $data['minor_edits']['license'] = Part::official()->whereJsonLength('minor_edit_data->license', '>', 0)->count();
-        $data['minor_edits']['header'] = Part::official()->whereJsonLength('minor_edit_data->header', '>', 0)->count();
+        $data['minor_edits'] = Part::official()->where('has_minor_edit', true)->count();
         return $data;
     }
 
@@ -151,14 +150,9 @@ class PartsUpdateProcessor
         foreach ($data['fixed'] as $m) {
             $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['decription']}\n";
         }
-        if ($data['minor_edits']['license'] > 0) {
+        if ($data['minor_edits'] > 0) {
             $notes .= "\nMinor Edits\n";
-            if ($data['minor_edits']['license'] > 0) {
-                $notes .=  "   {$data['minor_edits']['license']} Part licenses changed\n";
-            }
-            if ($data['minor_edits']['header'] > 0) {
-                $notes .=  "   {$data['minor_edits']['header']} Minor header edits\n";
-            }
+            $notes .=  "   {$data['minor_edits']} Parts with minor adminstrative edits and/or license changes\n";
         }
         return $notes;
     }
@@ -317,7 +311,7 @@ class PartsUpdateProcessor
             foreach ($parts as $part) {
                 $content = $part->get();
                 $zip->addFromString('ldraw/' . $part->filename, $content);
-                if ($part->part_release_id == $this->release->id || ($part->part_release_id != $this->release->id && !is_null($part->minor_edit_data))) {
+                if ($part->part_release_id == $this->release->id || ($part->part_release_id != $this->release->id && $part->has_minor_edit === true)) {
                     $uzip->addFromString('ldraw/' . $part->filename, $content);
                 }
             }
@@ -366,7 +360,7 @@ class PartsUpdateProcessor
             'vote_summary' => null,
             'vote_sort' => 1,
             'delete_flag' => 0,
-            'minor_edit_data' => null,
+            'has_minor_edit' => false,
             'missing_parts' => null,
             'manual_hold_flag' => 0,
             'marked_for_release' => false

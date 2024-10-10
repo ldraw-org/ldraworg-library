@@ -31,7 +31,7 @@ class OfficialCleanup extends Command
             'vote_summary' => null,
             'vote_sort' => 1,
             'delete_flag' => 0,
-            'minor_edit_data' => null,
+            'has_minor_edit' => false,
             'missing_parts' => null,
             'manual_hold_flag' => 0,
             'marked_for_release' => false
