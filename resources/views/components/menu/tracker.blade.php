@@ -20,15 +20,11 @@
                     <x-menu.item label="LDraw.org Official Parts Library Specifications" link="https://www.ldraw.org/article/512.html" />
                     <x-menu.item label="Official Library Part Number Specification" link="https://www.ldraw.org/part-number-spec.html" />
                     <x-menu.item label="Official Library Header Specification" link="https://www.ldraw.org/article/398.html" />
+                    <x-menu.item label="LDraw.org Library Policies and FAQ" link="https://www.ldraw.org/pt-policies.html" />
             </x-menu.dropdown>
             <x-menu.dropdown label="Official Model Repository (OMR) Standards " level="1">
                     <x-menu.item label="Official Model Repository (OMR) Specification" link="https://www.ldraw.org/article/593.html" />
                     <x-menu.item label="Rules and procedures for the Official Model Repository" link="https://www.ldraw.org/docs-main/official-model-repository-omr/rules-and-procedures-for-the-official-model-repository.html" />
-            </x-menu.dropdown>
-            <x-menu.dropdown label="FAQs" level="1">
-                    <x-menu.item label="Parts Tracker FAQ" link="https://www.ldraw.org/ptfaq.html" />
-                    <x-menu.item label="Parts Authoring FAQ" link="https://www.ldraw.org/authorfaq.html" />
-                    <x-menu.item label="Parts Reviewing FAQ" link="https://www.ldraw.org/reviewfaq.html" />
             </x-menu.dropdown>
             <x-menu.dropdown label="Quick Reference Guides" level="1">
                     <x-menu.item label="Primitive Reference" link="https://wiki.ldraw.org/wiki/Primitives_Reference" />
