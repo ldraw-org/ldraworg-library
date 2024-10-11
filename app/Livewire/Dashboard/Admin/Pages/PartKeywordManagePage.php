@@ -3,7 +3,6 @@
 namespace App\Livewire\Dashboard\Admin\Pages;
 
 use App\Jobs\MassHeaderGenerate;
-use App\Jobs\UpdatePartHeader;
 use App\Models\Part;
 use App\Models\PartKeyword;
 use Filament\Forms\Components\Select;

@@ -6,6 +6,7 @@ use App\Jobs\UpdateImage;
 use App\LDraw\PartManager;
 use App\Models\Omr\OmrModel;
 use App\Models\Part;
+use App\Models\PartKeyword;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -35,6 +36,9 @@ class DailyMaintenance extends Command
 
         $this->info('Recounting all votes');
         Part::unofficial()->lazy()->each(fn (Part $p) => $p->updateVoteSort());
+
+        $this->info('Removing orphan keywords');
+        PartKeyword::doesntHave('parts')->delete();
 
         $this->info('Removing orphan images');
         $images = Storage::disk('images')->allFiles('library/unofficial');
