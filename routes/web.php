@@ -106,7 +106,7 @@ Route::middleware(['auth', 'can:admin.view-dashboard'])->prefix('admin')->name('
     Route::middleware(['can:documentation.edit'])->get('/documents', DocumentManagePage::class)->name('documents.index');
     Route::middleware(['can:documentation.edit'])->get('/document-categories', DocumentCategoryManagePage::class)->name('document-categories.index');
     Route::middleware(['can:create,App\Models\PartCategory'])->get('/part-categories', PartCategoryManagePage::class)->name('part-categories.index');
-    Route::middleware(['can:create,App\Models\PartKeyword'])->get('/part-keywords', PartKeywordManagePage::class)->name('part-keywords.index');
+    Route::middleware(['can:manage,App\Models\PartKeyword'])->get('/part-keywords', PartKeywordManagePage::class)->name('part-keywords.index');
     Route::middleware(['can:create,App\Models\PartType'])->get('/part-types', PartTypeManagePage::class)->name('part-types.index');
     Route::middleware(['can:settings.edit'])->get('/settings', LibrarySettingsPage::class)->name('settings.index');
 });
