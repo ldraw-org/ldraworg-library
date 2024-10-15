@@ -57,7 +57,9 @@ class Parser
      */
     protected function fixEncoding(string $text): string
     {
-        return mb_convert_encoding($text, 'UTF-8');
+        $old_encode = mb_detect_encoding($text, ['ASCII', 'ISO-8859-1', 'UTF-8']);
+        $new_text = mb_convert_encoding($text, 'UTF-8', $old_encode);
+        return $new_text;
     }
 
     /**
