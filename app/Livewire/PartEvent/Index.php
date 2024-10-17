@@ -44,7 +44,7 @@ class Index extends Component implements HasForms, HasTable
                         ->grow(false),
                     TextColumn::make('created_at')
                         ->since()
-                        ->sortable()
+                        ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('created_at', $direction)->orderBy('id', 'asc'))
                         ->label('Date/Time')
                         ->grow(false),
                     ImageColumn::make('image')
