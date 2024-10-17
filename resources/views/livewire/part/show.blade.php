@@ -138,8 +138,8 @@
                                         <li>{{$error}}</li>
                                     </x-slot>
                                     <div class="px-4">
-                                        @foreach($part->descendants->where('vote_sort', '>', '2') as $p)
-                                            <a href="{{route('tracker.show', $p)}}" class="underline decoration-dotted hover:decoration-solid hover:text-gray-500">{{$p->filename}}</a><br/>
+                                        @foreach($part->descendants->where('vote_sort', '!=', '1') as $p)
+                                            <a href="{{route('tracker.show', $p)}}" class="underline decoration-dotted hover:decoration-solid hover:text-gray-500">{{$p->filename}} ({{$part->statusText()}})</a><br/>
                                         @endforeach
                                     </div>
                                 </x-accordion>
