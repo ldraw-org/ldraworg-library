@@ -132,7 +132,20 @@
                     </x-slot:header>
                     <ul>
                         @foreach($part->part_check_messages['errors'] as $error)
-                            <li>{{$error}}</li>
+                            @if($error == "Has uncertified subfiles")
+                                <x-accordion id="showContents">
+                                    <x-slot name="header">
+                                        <li>{{$error}}</li>
+                                    </x-slot>
+                                    <div class="px-4">
+                                        @foreach($part->descendants->where('vote_sort', '>', '2') as $p)
+                                            <a href="{{route('tracker.show', $p)}}" class="underline decoration-dotted hover:decoration-solid hover:text-gray-500">{{$p->filename}}</a><br/>
+                                        @endforeach
+                                    </div>
+                                </x-accordion>
+                            @else
+                                <li>{{$error}}</li>
+                            @endif
                         @endforeach
                     </ul>
                 </x-message>        
