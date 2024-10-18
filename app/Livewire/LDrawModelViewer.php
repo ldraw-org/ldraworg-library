@@ -40,29 +40,31 @@ class LDrawModelViewer extends Component implements HasForms
     {
         $model = array_pop($this->data['ldraw-model'])->get();
         $this->modeltext = 'data:text/plain;base64,' . base64_encode($model);
-        $refs = app(Parser::class)->getSubparts($model);
+        $parts = app(\App\LDraw\Parse\Parser::class)->getSubparts($model);
         $subs = [];
-        foreach ($refs['subparts'] ?? [] as $s) {
+        foreach ($parts['subparts'] ?? [] as $s) {
             $s = str_replace('\\', '/', $s);
             $subs[] = "parts/{$s}";
             $subs[] = "p/{$s}";
         }
-        foreach ($refs['textures'] ?? [] as $s) {
+        foreach ($parts['textures'] ?? [] as $s) {
             $s = str_replace('\\', '/', $s);
             $subs[] = "parts/textures/{$s}";
             $subs[] = "p/textures/{$s}";
         }
-        $subps = Part::whereIn('filename', $subs)->get();
-        foreach($subps as $ref) {
-            $ref->descendantsAndSelf->each(function (Part $p) {
-                if ($p->isTexmap()) {
-                    $pn = str_replace(["parts/textures/","p/textures/"], '', $p->filename);
-                    $this->parts[$pn] = 'data:image/png;base64,' .  base64_encode($p->get());
-                } else {
-                    $pn = str_replace(["parts/","p/"], '', $p->filename);
-                    $this->parts[$pn] = 'data:text/plain;base64,' .  base64_encode($p->get());
-                }
-            });        
+        $mparts = new \Illuminate\Database\Eloquent\Collection();
+        foreach (Part::with('descendantsAndSelf')->whereIn('filename', $subs)->get() as $part) {
+            $mparts = $mparts->merge($part->descendantsAndSelf);
+        }
+        $mparts = $mparts->unique();
+        foreach($mparts as $p) {
+            if ($p->isTexmap()) {
+                $pn = str_replace(["parts/textures/","p/textures/"], '', $p->filename);
+                $this->parts[$pn] = 'data:image/png;base64,' .  base64_encode($p->get());
+            } else {
+                $pn = str_replace(["parts/","p/"], '', $p->filename);
+                $this->parts[$pn] = 'data:text/plain;base64,' .  base64_encode($p->get());
+            }
         }
         $this->dispatch('render-model');
     }
