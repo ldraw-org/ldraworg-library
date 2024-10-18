@@ -10,5 +10,6 @@
         <x-menu.item label="Pattern/Shortcut Part Summary" link="{{route('search.suffix')}}" /> 
         <x-menu.item label="Sticker Sheet Lookup" link="{{route('sticker-sheet.index')}}" /> 
         <x-menu.item label="PBG Generator" link="{{route('pbg')}}" />
+        <x-menu.item label="LDraw Model Viewer" link="{{route('model-viewer')}}" />
     </x-menu.dropdown>    
 </x-menu>

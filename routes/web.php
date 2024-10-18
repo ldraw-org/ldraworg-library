@@ -25,6 +25,7 @@ use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
 use App\Livewire\Dashboard\Admin\Pages\PartLicenseManagePage;
 use App\Livewire\Dashboard\Admin\Pages\PartTypeManagePage;
 use App\Livewire\Dashboard\User;
+use App\Livewire\LDrawModelViewer;
 use App\Livewire\Omr\Set\Index;
 use App\Livewire\Part\Index as PartIndex;
 use App\Livewire\Part\Show;
@@ -55,6 +56,7 @@ Route::middleware(['throttle:file'])->group(function () {
 });
 
 Route::get('/pbg', PbgGenerator::class)->name('pbg');
+Route::get('/model-viewer', LDrawModelViewer::class)->name('model-viewer');
 Route::view('/sticker-sheets', 'sticker-sheet.index')->name('sticker-sheet.index');
 Route::get('/sticker-sheets/{sheet}', StickerSheetShowController::class)->name('sticker-sheet.show');
 
