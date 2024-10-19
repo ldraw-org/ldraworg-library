@@ -53,8 +53,13 @@ class LDrawModelViewer extends Component implements HasForms
             $subs[] = "p/textures/{$s}";
         }
         $mparts = new \Illuminate\Database\Eloquent\Collection();
-        foreach (Part::with('descendantsAndSelf')->whereIn('filename', $subs)->get() as $part) {
-            $mparts = $mparts->merge($part->descendantsAndSelf);
+        $refs = Part::with('descendantsAndSelf')->whereIn('filename', $subs)->get();
+        foreach ($refs->whereNotNull('part_release_id') as $part) {
+            $mparts = $mparts->merge($part->descendantsAndSelf->whereNotNull('part_release_id'));
+        }
+        $mparts = $mparts->unique();
+        foreach ($refs->whereNull('part_release_id') as $part) {
+            $mparts = $mparts->merge($part->descendantsAndSelf->whereNull('part_release_id'));
         }
         $mparts = $mparts->unique();
         foreach($mparts as $p) {
