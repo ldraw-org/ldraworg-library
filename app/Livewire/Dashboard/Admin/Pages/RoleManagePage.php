@@ -28,12 +28,16 @@ class RoleManagePage extends BasicResourceManagePage
             ->heading('Role Management')
             ->paginated(false)
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('name'),
+                TextColumn::make('users_count')
+                    ->counts('users')
+                    ->sortable()
             ])
             ->actions([
                 EditAction::make()
                     ->form($this->formSchema()),
                 DeleteAction::make()
+                    ->hidden(fn (Role $r) => $r->users->count() == 0)
             ])
             ->headerActions([
                 CreateAction::make()

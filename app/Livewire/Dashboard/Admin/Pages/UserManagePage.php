@@ -93,8 +93,8 @@ class UserManagePage extends BasicResourceManagePage
                 ->options(
                     MybbUser::whereNotIn('usergroup', [5,7])
                         ->whereNotIn('uid', User::whereNotNull('forum_user_id')->pluck('forum_user_id')->all())
-                        ->orderBy('loginname')
-                        ->pluck('loginname', 'uid')
+                        ->orderBy('username')
+                        ->pluck('username', 'uid')
                 )
                 ->required()
                 ->live()
