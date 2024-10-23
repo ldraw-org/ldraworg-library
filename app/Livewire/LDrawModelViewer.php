@@ -31,13 +31,16 @@ class LDrawModelViewer extends Component implements HasForms
             ->schema([
                 FileUpload::make('ldraw-model')
                     ->storeFiles(false)
-                    ->required()
+                    ->minFiles(1)
             ])
             ->statePath('data');
     }
 
     public function makeModel()
     {
+        if (count($this->data['ldraw-model']) != 1) {
+            return;
+        }
         $model = array_pop($this->data['ldraw-model'])->get();
         $this->modeltext = 'data:text/plain;base64,' . base64_encode($model);
         $parts = app(\App\LDraw\Parse\Parser::class)->getSubparts($model);
