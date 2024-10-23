@@ -32,14 +32,14 @@
                 Download Links
             </div>
             @if ($release->isLatest())
-                <a class="hover:underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="{{asset('library/updates/complete.zip')}}">
+                <a class="hover:underline text-blue-600 hover:text-blue-800 visited:text-purple-600" data-pan="update-complete-zip-{{$release->short}}" href="{{asset('library/updates/complete.zip')}}">
                     Complete LDraw.org Library Zip archive (complete.zip)
                 </a>
-                <a class="hover:underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="{{asset('library/updates/LDrawParts.exe')}}">
+                <a class="hover:underline text-blue-600 hover:text-blue-800 visited:text-purple-600" data-pan="update-complete-exe-{{$release->short}}" href="{{asset('library/updates/LDrawParts.exe')}}">
                     Complete LDraw.org Library Windows installer (LDrawParts.exe)
                 </a>
             @endif
-            <a class="hover:underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="{{asset('library/updates/lcad' . $release->short . '.zip')}}">
+            <a class="hover:underline text-blue-600 hover:text-blue-800 visited:text-purple-600" data-pan="update-zip-{{$release->short}}" href="{{asset('library/updates/lcad' . $release->short . '.zip')}}">
                 Zip archive of the updated files ({{$release->short}}.zip)
             </a>
         </div>

@@ -21,6 +21,7 @@
         "mailersend/laravel-driver": "^2.7.0",
         "markrogoyski/math-php": "^2.10",
         "owenvoke/blade-fontawesome": "^2.6",
+        "panphp/pan": "^0.1.5",
         "riodwanto/filament-ace-editor": "^1.1",
         "spatie/image": "^3.7.3",
         "spatie/laravel-backup": "^9.1",
