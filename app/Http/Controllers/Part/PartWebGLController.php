@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Part;
 
 use App\Models\Part;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 
 class PartWebGLController extends Controller
 {
@@ -25,6 +26,7 @@ class PartWebGLController extends Controller
                 $webgl[$pn] = 'data:text/plain;base64,' .  base64_encode($p->get());
             }
         });
+        $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::disk('library')->get('official/LDConfig.ldr'));
         return $webgl;
     }
 }

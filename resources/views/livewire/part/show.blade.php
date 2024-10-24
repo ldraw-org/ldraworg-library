@@ -301,6 +301,7 @@
                         .then(response => response.json())
                         .then((response) => {
                             part_paths = response;
+                            LDR.Colors.load(() => {},() => {},part_paths['ldconfig.ldr']);
                             scene = new LDrawOrg.Model(
                                 document.getElementById('ldbi-canvas'), 
                                 document.getElementById('filename').innerHTML.replace(/^(parts\/|p\/)/, ''),

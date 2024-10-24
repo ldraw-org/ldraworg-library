@@ -2,12 +2,12 @@
 
 namespace App\Livewire;
 
-use App\LDraw\Parse\Parser;
 use App\Models\Part;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -74,6 +74,7 @@ class LDrawModelViewer extends Component implements HasForms
                 $this->parts[$pn] = 'data:text/plain;base64,' .  base64_encode($p->get());
             }
         }
+        $this->parts['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::disk('library')->get('official/LDConfig.ldr'));
         $this->dispatch('render-model');
     }
 

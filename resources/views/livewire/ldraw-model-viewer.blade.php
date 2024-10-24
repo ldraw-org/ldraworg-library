@@ -92,6 +92,7 @@
                     }
                 };
                 if (WEBGL.isWebGLAvailable()) {
+                    LDR.Colors.load(() => {},() => {},$wire.parts['ldconfig.ldr']);
                     if (scene) {
                         scene = null;
                     }
