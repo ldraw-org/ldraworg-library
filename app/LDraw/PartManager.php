@@ -255,6 +255,9 @@ class PartManager
         if ($newName == '.dat') {
             $newName = basename($part->filename);
         }
+        if ($part->isTexmap()) {
+            $part->description = "{$newType->name} {$newName}";
+        }
         $newName = "{$newType->folder}{$newName}";
         $upart = Part::unofficial()->where('filename', $newName)->first();
         if (!$part->isUnofficial() || !is_null($upart)) {
@@ -276,7 +279,13 @@ class PartManager
                 $p->description = str_replace($oldname, $part->name(), $p->description);
                 $p->save();
             }
-            $p->body->body = str_replace($oldname, $part->name(), $p->body->body);
+            if ($part->isTexmap()) {
+                $toldname = str_replace('textures\\', '', $oldname);
+                $tnewname = str_replace('textures\\', '', $part->name());
+                $p->body->body = str_replace($toldname, $tnewname, $p->body->body);
+            } else {
+                $p->body->body = str_replace($oldname, $part->name(), $p->body->body);
+            }
             $p->body->save();
         }
         $this->updateMissing($part->name());
