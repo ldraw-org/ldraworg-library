@@ -7,7 +7,7 @@ return [
          * The name of this application. You can use this name to monitor
          * the backups.
          */
-        'name' => env('APP_NAME', 'laravel-backup'),
+        'name' => 'library-backup',
 
         'source' => [
             'files' => [
@@ -15,8 +15,9 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    base_path('storage\app\library'),
-                    base_path('storage\app\deleted'),
+                    base_path('storage/app/library'),
+                    base_path('storage/app/images/library/updates'),
+                    base_path('storage/app/deleted'),
                     base_path('.env')
                 ],
 
