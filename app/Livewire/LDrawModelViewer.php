@@ -66,6 +66,7 @@ class LDrawModelViewer extends Component implements HasForms
         }
         $mparts = $mparts->unique();
         foreach($mparts as $p) {
+            /** var Part $p */
             if ($p->isTexmap()) {
                 $pn = str_replace(["parts/textures/","p/textures/"], '', $p->filename);
                 $this->parts[$pn] = 'data:image/png;base64,' .  base64_encode($p->get());
