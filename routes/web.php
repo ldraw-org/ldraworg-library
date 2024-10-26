@@ -36,6 +36,7 @@ use App\Livewire\PbgGenerator;
 use App\Livewire\Release\Create;
 use App\Livewire\Search\Parts;
 use App\Livewire\Search\Suffix;
+use App\Livewire\Tables\PartListTable;
 use App\Livewire\Tracker\ConfirmCA;
 
 Route::view('/', 'index')->name('index');
@@ -65,7 +66,7 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
 
     Route::middleware(['auth', 'currentlic'])->get('/submit', Submit::class)->name('submit');
 
-    Route::get('/list', PartIndex::class)->name('index');
+    Route::get('/list', PartListTable::class)->name('index');
     Route::get('/weekly', Weekly::class)->name('weekly');
     Route::get('/history', TrackerHistoryController::class)->name('history');
     Route::get('/summary/{summary}', ReviewSummaryController::class)->name('summary.view');
@@ -130,7 +131,7 @@ Route::redirect('/search/sticker', '/sticker-sheets');
 Route::prefix('official')->name('official.')->group(function () {
     Route::redirect('/search', '/search/part');
     Route::redirect('/suffixsearch', '/search/suffix');
-    Route::get('/list', PartIndex::class)->name('index');
+    Route::get('/list', PartListTable::class)->name('index');
     Route::get('/{officialpart}', Show::class)->name('show.filename');
     Route::get('/{part}', Show::class)->name('show');
 });

@@ -32,64 +32,7 @@ class PartTable
             )
             ->defaultSort(fn (Builder $q) => $q->orderBy('vote_sort', 'asc')->orderBy('part_type_id', 'asc')->orderBy('description', 'asc'))
             ->columns(self::columns())
-            ->filters([
-                SelectFilter::make('vote_sort')
-                    ->options([
-                        '1' => 'Certified',
-                        '2' => 'Needs Admin Review',
-                        '3' => 'Needs More Votes',
-                        '5' => 'Errors Found'
-                    ])
-                    ->native(false)
-                    ->multiple()
-                    ->preload()
-                    ->label('Unofficial Status')
-                    ->visible(!$official),
-                AuthorFilter::make('user_id'),
-                SelectFilter::make('part_type_id')
-                    ->relationship('type', 'name')
-                    ->native(false)
-                    ->multiple()
-                    ->preload()
-                    ->label('Part Type'),
-                SelectFilter::make('part_category_id')
-                    ->relationship('category', 'category')
-                    ->native(false)
-                    ->multiple()
-                    ->preload()
-                    ->label('Category'),
-                SelectFilter::make('keywords')
-                    ->relationship('keywords', 'keyword')
-                    ->native(false)
-                    ->multiple()
-                    ->label('Keywords'),
-                SelectFilter::make('part_license_id')
-                    ->relationship('license', 'name')
-                    ->native(false)
-                    ->searchable()
-                    ->preload()
-                    ->label('Part License'),
-                TernaryFilter::make('part_class')
-                    ->label('Part Class')
-                    ->placeholder('All Parts')
-                    ->trueLabel('Third Party Parts')
-                    ->falseLabel('Alias Parts')
-                    ->queries(
-                        true: fn (Builder $q) => $q->where('description', 'LIKE', '|%'),
-                        false: fn (Builder $q) => $q->whereRelation('type_qualifier', 'type', 'Alias'),
-                        blank: fn (Builder $q) => $q,
-                    ),
-                TernaryFilter::make('exclude_fixes')
-                    ->label('Fix Status')
-                    ->placeholder('All Parts')
-                    ->trueLabel($official ? 'Exclude parts with active fixes' : 'Exclude official part fixes')
-                    ->falseLabel($official ? 'Only parts with active fixes' : 'Only official part fixes')
-                    ->queries(
-                        true: fn (Builder $q) => $q->doesntHave($official ? 'unofficial_part' : 'official_part'),
-                        false: fn (Builder $q) => $q->has($official ? 'unofficial_part' : 'official_part'),
-                        blank: fn (Builder $q) => $q,
-                    ),
-            ], layout: FiltersLayout::AboveContent)
+            ->filters(self::filters($official), layout: FiltersLayout::AboveContent)
             ->actions(self::actions())
             ->recordUrl(
                 fn (Part $p): string =>
@@ -144,6 +87,68 @@ class PartTable
                 ->button()
                 ->outlined()
                 ->visible(fn (Part $part) => !is_null($part->unofficial_part)),
+        ];
+    }
+
+    public static function filters(bool $official = true): array
+    {
+        return [
+            SelectFilter::make('vote_sort')
+                ->options([
+                    '1' => 'Certified',
+                    '2' => 'Needs Admin Review',
+                    '3' => 'Needs More Votes',
+                    '5' => 'Errors Found'
+                ])
+                ->native(false)
+                ->multiple()
+                ->preload()
+                ->label('Unofficial Status')
+                ->visible(!$official),
+            AuthorFilter::make('user_id'),
+            SelectFilter::make('part_type_id')
+                ->relationship('type', 'name')
+                ->native(false)
+                ->multiple()
+                ->preload()
+                ->label('Part Type'),
+            SelectFilter::make('part_category_id')
+                ->relationship('category', 'category')
+                ->native(false)
+                ->multiple()
+                ->preload()
+                ->label('Category'),
+            SelectFilter::make('keywords')
+                ->relationship('keywords', 'keyword')
+                ->native(false)
+                ->multiple()
+                ->label('Keywords'),
+            SelectFilter::make('part_license_id')
+                ->relationship('license', 'name')
+                ->native(false)
+                ->searchable()
+                ->preload()
+                ->label('Part License'),
+            TernaryFilter::make('part_class')
+                ->label('Part Class')
+                ->placeholder('All Parts')
+                ->trueLabel('Third Party Parts')
+                ->falseLabel('Alias Parts')
+                ->queries(
+                    true: fn (Builder $q) => $q->where('description', 'LIKE', '|%'),
+                    false: fn (Builder $q) => $q->whereRelation('type_qualifier', 'type', 'Alias'),
+                    blank: fn (Builder $q) => $q,
+                ),
+            TernaryFilter::make('exclude_fixes')
+                ->label('Fix Status')
+                ->placeholder('All Parts')
+                ->trueLabel($official ? 'Exclude parts with active fixes' : 'Exclude official part fixes')
+                ->falseLabel($official ? 'Only parts with active fixes' : 'Only official part fixes')
+                ->queries(
+                    true: fn (Builder $q) => $q->doesntHave($official ? 'unofficial_part' : 'official_part'),
+                    false: fn (Builder $q) => $q->has($official ? 'unofficial_part' : 'official_part'),
+                    blank: fn (Builder $q) => $q,
+                ),
         ];
     }
 }
