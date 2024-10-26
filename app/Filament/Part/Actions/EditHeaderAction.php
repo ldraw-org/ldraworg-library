@@ -8,12 +8,14 @@ use App\LDraw\Parse\Parser;
 use App\LDraw\PartManager;
 use App\Models\Part;
 use App\Models\PartCategory;
+use App\Models\PartKeyword;
 use App\Models\PartType;
 use App\Models\PartTypeQualifier;
 use App\Models\User;
 use Closure;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
@@ -30,7 +32,7 @@ class EditHeaderAction
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
-                $data['keywords'] = $part->keywords()->orderBy('keyword')->get()->implode('keyword', ", ");
+                $data['keywords'] = $part->keywords->sortBy('keyword')->pluck('keyword')->all();
                 $data['history'] = '';
                 foreach ($part->history as $h) {
                     $data['history'] .= $h->toString() . "\n";
@@ -110,22 +112,18 @@ class EditHeaderAction
                         }
                     }
                 ]),
-            TextArea::make('keywords')
-                ->helperText('Do not include 0 !KEYWORDS; the number of keyword lines and keyword order will not be preserved')
-                ->extraAttributes(['class' => 'font-mono'])
-                ->rows(3)
-                ->nullable()
-                ->string()
+            TagsInput::make('keywords')
+                ->helperText('Note: keyword order will not be preserved')
+                ->placeholder('New Keyword')
+                ->suggestions(PartKeyword::query()->pluck('keyword'))
                 ->rules([
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
-                        $keywords = "0 !KEYWORDS " . str_replace(["\n","\r"], [', ',''], $value);
-                        $keywords = app(\App\LDraw\Parse\Parser::class)->getKeywords($keywords) ?? [];
                         if (
                             $part->type->folder == 'parts/' &&
                             $part->category->category !== 'Moved' &&
                             $part->category->category !== 'Sticker' &&
                             $part->category->category !== 'Sticker Shortcut' &&
-                            ! app(\App\LDraw\Check\PartChecker::class)->checkPatternForSetKeyword($part->name(), $keywords)
+                            ! app(\App\LDraw\Check\PartChecker::class)->checkPatternForSetKeyword($part->name(), $value)
                         ) {
                             $fail('partcheck.keywords')->translate();
                         }
@@ -236,18 +234,14 @@ class EditHeaderAction
             $part->setHelp($newHelp);
         }
 
-        if (!is_null($data['keywords'] ?? null)) {
-            $newKeywords = '0 !KEYWORDS ' . str_replace(["\n","\r"], [', ',''], $data['keywords']);
-            $newKeywords = $manager->parser->getKeywords($newKeywords);
-        } else {
-            $newKeywords = [];
+        if (!array_key_exists('keywords', $data)) {
+            $data['keywords'] = [];
         }
-
         $partKeywords = $part->keywords->pluck('keyword')->all();
-        if ($partKeywords !== $newKeywords) {
+        if ($partKeywords !== $data['keywords']) {
             $changes['old']['keywords'] = implode(", ", $partKeywords);
-            $changes['new']['keywords'] = implode(", ", $newKeywords);
-            $part->setKeywords($newKeywords);
+            $changes['new']['keywords'] = implode(", ", $data['keywords']);
+            $part->setKeywords($data['keywords']);
         }
 
         $newHistory = $manager->parser->getHistory($data['history'] ?? '');
