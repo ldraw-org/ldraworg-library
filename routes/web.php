@@ -35,6 +35,7 @@ use App\Livewire\PbgGenerator;
 use App\Livewire\Release\Create;
 use App\Livewire\Search\Parts;
 use App\Livewire\Search\Suffix;
+use App\Livewire\TorsoShortcutHelper;
 use App\Livewire\Tracker\ConfirmCA;
 
 Route::view('/', 'index')->name('index');
@@ -63,12 +64,12 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::view('/', 'tracker.main')->name('main');
 
     Route::middleware(['auth', 'currentlic'])->get('/submit', Submit::class)->name('submit');
+    Route::middleware(['auth', 'can:create,App\Models\Part', 'currentlic'])->get('/torso-helper', TorsoShortcutHelper::class)->name('torso-helper');
 
     Route::view('/list', 'part.index')->name('index');
     Route::get('/weekly', Weekly::class)->name('weekly');
     Route::get('/history', TrackerHistoryController::class)->name('history');
     Route::get('/summary/{summary}', ReviewSummaryController::class)->name('summary.view');
-
     Route::middleware(['auth'])->get('/confirmCA', ConfirmCA::class)->name('confirmCA.show');
 
     Route::redirect('/search', '/search/part');
