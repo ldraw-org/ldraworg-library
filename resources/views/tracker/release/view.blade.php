@@ -4,12 +4,14 @@
     <div class="flex flex-col space-y-2">
         @isset($release->part_list) 
             @foreach($release->part_list as list($description, $filename))
-                <div class="rounded border w-fit">
-                    <div class="font-bold bg-gray-200 p-2">
-                        {{$filename}} - {{$description}}
+                <a href="{{route('tracker.show', App\Models\Part::official()->where('filename', $filename)->first())}}">
+                    <div class="rounded border w-fit">
+                        <div class="font-bold bg-gray-200 p-2">
+                            {{$filename}} - {{$description}}
+                        </div>
+                        <img class="p-2" src="{{asset('images/library/updates/view' . $release->short . '/' . substr($filename, 0, -4) . '.png')}}">
                     </div>
-                    <img class="p-2" src="{{asset('images/library/updates/view' . $release->short . '/' . substr($filename, 0, -4) . '.png')}}">
-                </div>
+                </a>
             @endforeach  
         @else
             <p>
