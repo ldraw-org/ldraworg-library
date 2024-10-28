@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Events\PartSubmitted;
+use App\Jobs\UpdateZip;
 use App\Models\Part;
 use Closure;
 use Filament\Forms\Components\Fieldset;
@@ -167,7 +169,10 @@ class TorsoShortcutHelper extends Component implements HasForms
             ]
         ];
         $p = $pm->submit($file, auth()->user());
-        $this->redirectRoute('tracker.show', $p->first());
+        $newpart = $p->first();
+        UpdateZip::dispatch($newpart);
+        PartSubmitted::dispatch($newpart, auth()->user());
+        $this->redirectRoute('tracker.show', $newpart);
     }
     
     protected function partInput(int $index): Fieldset
