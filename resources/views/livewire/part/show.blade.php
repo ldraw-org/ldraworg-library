@@ -45,6 +45,7 @@
             {{ $this->webglViewAction }}
             @if ($this->editHeaderAction->isVisible() ||
                 $this->editNumberAction->isVisible() ||
+                $this->editBasePartAction->isVisible() ||
                 $this->updateImageAction->isVisible() ||
                 $this->recheckPartAction->isVisible() ||
                 $this->updateSubpartsAction->isVisible() ||
@@ -55,6 +56,7 @@
                     :actions="[
                         $this->editHeaderAction,
                         $this->editNumberAction,
+                        $this->editBasePartAction,
                         $this->updateImageAction,
                         $this->recheckPartAction,
                         $this->updateSubpartsAction,
@@ -97,6 +99,38 @@
                 @if ($this->toggleManualHoldAction->isVisible())
                     {{ $this->toggleManualHold }}
                 @endif
+            @endif
+        </div>
+        <div>
+            @if ($this->toggleIsPatternAction->isVisible())
+                {{ $this->toggleIsPatternAction }}
+            @else
+                <x-filament::button
+                    color="gray"
+                >
+                  {{$this->part->is_pattern ? 'Printed' : 'Not Printed'}}
+                </x-filament::button>
+            @endif
+            @if ($this->toggleIsCompositeAction->isVisible())
+                {{ $this->toggleIsCompositeAction }}
+            @else
+                <x-filament::button
+                    color="gray"
+                >
+                    {{$this->part->is_composite ? 'Assembly' : 'Single Part'}}
+                </x-filament::button>
+            @endif
+            @if ($this->toggleIsDualMouldAction->isVisible())
+                {{ $this->toggleIsDualMouldAction }}
+            @else
+                <x-filament::button
+                    color="gray"
+                >
+                    {{$this->part->is_dual_mould ? 'Dual Moulded' : 'Single Mould'}}
+                </x-filament::button>
+            @endif
+            @if ($this->viewBasePartAction->isVisible())
+                {{ $this->viewBasePartAction }}
             @endif
         </div>
         <div class="w-full p-4 border rounded-md">

@@ -28,6 +28,7 @@ class FilamentServiceProvider extends ServiceProvider
             'red' => Color::Red,
             'yellow' => Color::Yellow,
             'blue' => Color::Blue,
+            'green' => Color::Green,
         ]);
 
         Select::configureUsing(function (Select $select): void {

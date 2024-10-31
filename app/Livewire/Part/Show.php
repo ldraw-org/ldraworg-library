@@ -17,6 +17,7 @@ use Filament\Actions\EditAction;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -368,6 +369,81 @@ class Show extends Component implements HasForms, HasActions
                 $this->part->save();
             })
             ->visible(Auth::user()?->can('flagManualHold', $this->part) ?? false);
+    }
+
+    public function toggleIsPatternAction(): Action
+    {
+        return Action::make('toggleIsPattern')
+            ->button()
+            ->color(fn() => $this->part->is_pattern ? 'green' : 'gray')
+            ->label($this->part->is_pattern ? 'Printed' : 'Not Printed')
+            ->action(function () {
+                $this->part->is_pattern = !$this->part->is_pattern;
+                $this->part->save();
+            })
+            ->visible(Auth::user()?->can('part.edit.header', $this->part) ?? false);
+    }
+
+    public function toggleIsCompositeAction(): Action
+    {
+        return Action::make('toggleIsComposite')
+            ->button()
+            ->color($this->part->is_composite ? 'green' : 'gray')
+            ->label($this->part->is_composite ? 'Assembly' : 'Single Part')
+            ->action(function () {
+                $this->part->is_composite = !$this->part->is_composite;
+                $this->part->save();
+            })
+            ->visible(Auth::user()?->can('part.edit.header', $this->part) ?? false);
+    }
+
+    public function toggleIsDualMouldAction(): Action
+    {
+        return Action::make('toggleIsDualMould')
+            ->button()
+            ->color($this->part->is_dual_mould ? 'green' : 'gray')
+            ->label($this->part->is_dual_mould ? 'Dual Moulded' : 'Single Mould')
+            ->action(function () {
+                $this->part->is_dual_mould = !$this->part->is_dual_mould;
+                $this->part->save();
+            })
+            ->visible(Auth::user()?->can('part.edit.header', $this->part) ?? false);
+    }
+
+    public function editBasePartAction(): Action
+    {
+        return EditAction::make('editBasePart')
+            ->label('Edit Base Part')
+            ->record($this->part)
+            ->form([
+                Select::make('base_part_id')
+                    ->searchable()
+                    ->options(
+                        Part::whereRelation('type', 'folder', 'parts/')
+                            ->doesntHave('official_part')
+                            ->where('is_pattern', false)
+                            ->whereRelation('category', 'category', '!=', 'Moved')
+                            ->where('description', 'NOT LIKE', '%Obsolete%')
+                            ->pluck('filename', 'id')
+                    )
+                    ->optionsLimit(50000),
+            ])
+            ->visible(Auth::user()?->can('part.edit.header', $this->part) ?? false);
+    }
+
+    public function viewBasePartAction(): Action
+    {
+        return Action::make('viewBasePart')
+            ->button()
+            ->color('gray')
+            ->label("Base Part: {$this->part->base_part?->name()}")
+            ->url(function () {
+                if ($this->part->base_part?->isUnofficial()) {
+                    return route('official.show', $this->part->base_part?->id ?? 0);
+                }
+                return route('tracker.show', $this->part->base_part?->id ?? 0);
+            })
+            ->visible(!is_null($this->part->base_part));
     }
 
     public function viewFixAction(): Action

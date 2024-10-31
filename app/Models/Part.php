@@ -44,6 +44,7 @@ class Part extends Model
         'can_release',
         'part_check_messages',
         'ready_for_admin',
+        'base_part_id',
     ];
 
     protected $with = ['release', 'type'];
