@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasLicense;
@@ -153,12 +154,45 @@ class Part extends Model
         return $this->HasOne(Part::class, 'unofficial_part_id', 'id');
     }
 
+    public function base_part(): BelongsTo
+    {
+        return $this->BelongsTo(Part::class, 'base_part_id', 'id');
+    }
+
+    public function suffix_parts(): HasMany
+    {
+        return $this->HasMany(Part::class, 'base_part_id', 'id');
+    }
+
+    public function patterns(): HasMany
+    {
+        return $this->HasMany(Part::class, 'base_part_id', 'id')->where('is_pattern', true);
+    }
+
+    public function composites(): HasMany
+    {
+        return $this->HasMany(Part::class, 'base_part_id', 'id')->where('is_composite', true);
+    }
+
+    public function shortcuts(): HasMany
+    {
+        return $this->HasMany(Part::class, 'base_part_id', 'id')->whereRelation('category', 'category', 'Sticker Shortcut');
+    }
+
     public function sticker_sheet(): BelongsTo
     {
         return $this->BelongsTo(StickerSheet::class, 'sticker_sheet_id', 'id');
 
     }
 
+    protected function errors(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value, array $attributes) => $attributes['part_check_messages']['errors'] ?? [],
+            set: fn (array $value, array $attributes) => $attributes['part_check_messages']['errors'] = $value,
+        );
+    }
+    
     public function scopeName(Builder $query, string $name): void
     {
         $name = str_replace('\\', '/', $name);
@@ -260,13 +294,6 @@ class Part extends Model
             return $recent_change->created_at->subSecond();
         }
         return $recent_change->created_at;
-    }
-
-    public function basePart(): string
-    {
-        $number = basename($this->filename);
-        preg_match(config('ldraw.patterns.basepart'), $number, $matches);
-        return $matches[1] ?? '';
     }
 
     public function libFolder(): string

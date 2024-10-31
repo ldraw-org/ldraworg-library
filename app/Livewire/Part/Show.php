@@ -121,24 +121,12 @@ class Show extends Component implements HasForms, HasActions
         $this->form->fill();
     }
 
-    #[Computed]
-    public function baseparts()
-    {
-        if ($this->part->type->folder != 'parts/' || $this->part->basepart() == '') {
-            return new Collection();
-        }
-        return Part::doesntHave('unofficial_part')
-            ->whereRelation('type', 'folder', 'parts/')
-            ->where('filename', 'LIKE', "parts/{$this->part->basepart()}%.dat")
-            ->get();
-    }
-
-    #[Computed]
     public function hasSuffixParts(): bool
     {
-        return $this->baseparts->composites($this->part->basepart())->count() > 0 ||
-            $this->baseparts->patterns($this->part->basepart())->count() > 0 ||
-            $this->baseparts->sticker_shortcuts($this->part->basepart())->count() > 0;
+        if ($this->part->suffix_parts->count() > 0) {
+            return true;
+        }
+        return $this->part->base_part?->suffix_parts->count() > 0 ?? false;
     }
 
     public function editHeaderAction(): EditAction
@@ -154,8 +142,8 @@ class Show extends Component implements HasForms, HasActions
     public function patternPartAction(): Action
     {
         return Action::make('patternPart')
-                ->url(fn () => route('search.suffix', ['basepart' => $this->part->basepart()]))
-                ->visible($this->hasSuffixParts)
+                ->url(fn () => route('search.suffix', ['basepart' => basename(($this->part->base_part?->filename ?? ''), '.dat')]))
+                ->visible($this->hasSuffixParts())
                 ->label('View patterns/composites/shortcuts')
                 ->color('gray')
                 ->outlined();
@@ -396,6 +384,22 @@ class Show extends Component implements HasForms, HasActions
                 return route('tracker.show', $this->part->unofficial_part->id ?? 0);
             })
             ->visible(!is_null($this->part->unofficial_part) || !is_null($this->part->official_part));
+    }
+
+    public function adminErrorAction(): Action
+    {
+        return Action::make('adminError')
+            ->button()
+            ->color('gray')
+            ->icon('fas-copy')
+            ->label(true ? 'Edit/Clear Admin Error' : 'Add Admin Error')
+            ->url(function () {
+                if ($this->part->isUnofficial()) {
+                    return route('official.show', $this->part->official_part->id ?? 0);
+                }
+                return route('tracker.show', $this->part->unofficial_part->id ?? 0);
+            })
+            ->visible(false);
     }
 
     #[Layout('components.layout.tracker')]

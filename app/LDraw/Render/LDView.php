@@ -35,8 +35,8 @@ class LDView
         if ($part instanceof Part) {
             if (array_key_exists(basename($part->filename, '.dat'), $this->settings->default_render_views)) {
                 $matrix = $this->settings->default_render_views[basename($part->filename, '.dat')];
-            } elseif (array_key_exists($part->basePart(), $this->settings->default_render_views)) {
-                $matrix = $this->settings->default_render_views[$part->basePart()];
+            } elseif (array_key_exists(basename($part?->base_part->filename ?? '', '.dat'), $this->settings->default_render_views)) {
+                $matrix = $this->settings->default_render_views[basename($part->base_part->filename, '.dat')];
             } else {
                 $matrix = '1 0 0 0 1 0 0 0 1';
             }

@@ -178,6 +178,7 @@ class PartManager
         if (!is_null($part->official_part)) {
             $this->updateUnofficialWithOfficialFix($part->official_part);
         };
+        $this->updateBasePart($part);
         $this->updateImage($part);
         $this->checkPart($part);
         $this->addStickerSheet($part);
@@ -216,6 +217,43 @@ class PartManager
         })->each(function (Part $p) {
             $this->loadSubpartsFromBody($p);
         });
+    }
+
+    function updateBasePart(Part $part): void {
+        $pattern = '#^(((([0-9a-z]+?)((?:p[0-9a-z]{2,3}|p\d{4}|d[0-9a-z]{2}|d\d{4}|c[0-9a-z]{2}|c\d{4})?))((?:p[0-9a-z]{2,3}|p\d{4}|d[0-9a-z]{2}|d\d{4}|c[0-9a-z]{2}|c\d{4})?))((?:p[0-9a-z]{2,3}|p\d{4}|d[0-9a-z]{2}|d\d{4}|c[0-9a-z]{2}|c\d{4})?))(?:-f\d)?\.(?:dat|png)$#i';
+        $result = preg_match($pattern, basename($part->filename), $matches);
+        if (!$result) {
+            return;
+        }
+        
+        $bp = null;
+        for ($i = 7, $j = 2; $i >= 5; $i--, $j++) {
+            if ($matches[$i] != '') {
+                $bp = Part::doesntHave('official_part')
+                    ->where(
+                        fn ($q) => $q
+                            ->orWhere('filename', "parts/{$matches[$j]}.dat")
+                            ->orWhere('filename', "parts/{$matches[$j]}-f1.dat")
+                    )->first();
+                if (!is_null($bp)) {
+                    break;
+                }
+            }
+        }
+        if (!is_null($bp) && $matches[5] != '') {
+            $part->base_part()->associate($bp);
+        }
+        if($matches[5] != '') {
+            $part->is_pattern = mb_substr($matches[5], 0, 1) == 'p' || 
+                mb_substr($matches[6], 0, 1) == 'p' ||
+                mb_substr($matches[7], 0, 1) == 'p';
+            $part->is_composite = mb_substr($matches[5], 0, 1) == 'c' || 
+                mb_substr($matches[6], 0, 1) == 'c' ||
+                mb_substr($matches[7], 0, 1) == 'c';
+        }
+        if ($part->isDirty()) {
+            $part->save();
+        }
     }
 
     public function addMovedTo(Part $oldPart, Part $newPart): ?Part
@@ -273,6 +311,7 @@ class PartManager
         $part->filename = $newName;
         $part->save();
         $part->generateHeader();
+        $this->updateBasePart($part);
         $this->updateImage($part);
         foreach ($part->parents()->unofficial()->get() as $p) {
             if ($p->type->folder === 'parts/' && $p->category->category === "Moved") {
@@ -310,20 +349,24 @@ class PartManager
 
     public function checkPart(Part $part): void
     {
+        $messages = $part->part_check_messages ?? [];
         if (!$part->isUnofficial()) {
             $part->can_release == true;
             $check = app(\App\LDraw\Check\PartChecker::class)->checkCanRelease($part);
-            $part->part_check_messages = ['errors' => $check['errors'], 'warnings' => []];
+            $messages['errors'] = $check['errors'];
+            $messages['warnings'] = [];
+            $part->part_check_messages = $messages;
             $part->save();
             return;
         }
         $check = app(\App\LDraw\Check\PartChecker::class)->checkCanRelease($part);
-        $warnings = [];
+        $messages['warnings'] = [];
         if (isset($part->category) && $part->category->category == "Minifig") {
-            $warnings[] = "Check Minifig category: {$part->category->category}";
+            $messages['warnings'] = "Check Minifig category: {$part->category->category}";
         }
         $part->can_release = $check['can_release'];
-        $part->part_check_messages = ['errors' => $check['errors'], 'warnings' => $warnings];
+        $messages['errors'] = $check['errors'];
+        $part->part_check_messages = $messages;
         $part->save();
     }
 

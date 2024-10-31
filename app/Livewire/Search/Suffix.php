@@ -8,7 +8,6 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Collection;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -22,7 +21,8 @@ class Suffix extends Component implements HasForms
     use InteractsWithForms;
 
     public string $activeTab = 'patterns';
-
+    public ?Part $part;
+    
     #[Url]
     public ?string $basepart = null;
 
@@ -45,44 +45,10 @@ class Suffix extends Component implements HasForms
             ]);
     }
 
-    #[Computed(persist: true)]
-    public function baseparts()
-    {
-        if (empty($this->basepart)) {
-            return new Collection();
-        }
-        return Part::with(['votes', 'official_part'])
-            ->doesntHave('unofficial_part')
-            ->whereRelation('type', 'folder', 'parts/')
-            ->where('filename', 'LIKE', "parts/{$this->basepart}%.dat")
-            ->orderBy('filename', 'asc')
-            ->get();
-    }
-
-    #[Computed]
-    public function patterns()
-    {
-        return $this->baseparts->patterns($this->basepart);
-    }
-
-    #[Computed]
-    public function composites()
-    {
-        return $this->baseparts->composites($this->basepart);
-    }
-
-    #[Computed]
-    public function shortcuts()
-    {
-        return $this->baseparts->sticker_shortcuts($this->basepart);
-    }
-
     public function doSearch()
     {
         $this->form->getState();
-        unset($this->patterns);
-        unset($this->composites);
-        unset($this->baseparts);
+        $this->part = Part::with('patterns', 'composites', 'shortcuts')->where('filename', "parts/{$this->basepart}.dat")->first();
     }
 
     #[Layout('components.layout.tracker')]

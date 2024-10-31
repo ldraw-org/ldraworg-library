@@ -12,13 +12,17 @@
             Submit
         </x-filament::button>
     </form>
-    @if($this->patterns->count() === 0 && $this->composites->count() === 0 && $this->shortcuts->count() === 0)
+    @if(is_null($part) && !is_null($basepart))
         <div class="rounded border p-2">
             Part Not Found
         </div>
-    @else
+    @elseif(!is_null($part) && $part->patterns->count() === 0 && $part->composites->count() === 0 && $part->shortcuts->count() === 0)
+        <div class="rounded border p-2">
+            No Patterns/Composites/Sticker Shortcuts Found
+        </div>
+    @elseif (!is_null($part) && ($part->patterns->count() !== 0 || $part->composites->count() !== 0 || $part->shortcuts->count() !== 0))
         <div class="text-xl font-bold p-2">
-            Pattern/Composite/Sticker Shortcut Reference for 
+            Pattern/Composite/Sticker Shortcut Reference for {{$part->name()}} - {{$part->description}}
         </div>
         <x-filament::tabs class="p-2">
             <x-filament::tabs.item 
@@ -26,7 +30,7 @@
                 wire:click="$set('activeTab', 'patterns')"
             >
                 <x-slot name="badge">
-                    {{$this->patterns->count()}}
+                    {{$part->patterns->count()}}
                 </x-slot>
                 Patterns
             </x-filament::tabs.item>
@@ -35,7 +39,7 @@
                 wire:click="$set('activeTab', 'composites')"
             >
                 <x-slot name="badge">
-                    {{$this->composites->count()}}
+                    {{$part->composites->count()}}
                 </x-slot>
                 Composites
             </x-filament::tabs.item>
@@ -45,7 +49,7 @@
                 wire:click="$set('activeTab', 'shortcuts')"
             >
                 <x-slot name="badge">
-                    {{$this->shortcuts->count()}}
+                    {{$part->shortcuts->count()}}
                 </x-slot>
                 Shortcuts
             </x-filament::tabs.item>
@@ -55,13 +59,13 @@
         <div class="rounded border p-2">
             @switch($activeTab)
                 @case('patterns')
-                    <x-part.grid :parts="$this->patterns" />
+                    <x-part.grid :parts="$part->patterns->load('votes', 'official_part')" />
                     @break
                 @case('composites')
-                    <x-part.grid :parts="$this->composites" />
+                    <x-part.grid :parts="$part->composites->load('votes', 'official_part')" />
                     @break
                 @case('shortcuts')
-                    <x-part.grid :parts="$this->shortcuts" />
+                    <x-part.grid :parts="$part->shortcuts->load('votes', 'official_part')" />
                     @break
             @endswitch
         </div>

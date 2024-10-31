@@ -6,6 +6,7 @@ use App\Models\Part;
 use App\Filament\Part\Tables\Filters\AuthorFilter;
 use App\Filament\Part\Tables\PartTable;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Grouping\Group;
@@ -110,6 +111,20 @@ class PartListTable extends BasicTable
                     false: fn (Builder $q) => $q->has('official_part'),
                     blank: fn (Builder $q) => $q,
                 ),
+            Filter::make('no_basepart')
+                ->label('Patterns/Composites/Shortcut without Basepart')
+                ->toggle()
+                ->query(
+                    function (Builder $query): Builder {
+                        return $query
+                            ->whereDoesntHave('base_part')
+                            ->where(function (Builder $query): Builder {
+                                return $query
+                                    ->orWhere('is_composite', true)
+                                    ->orWhere('is_pattern', true)
+                                    ->orWhereRelation('category', 'category','Sticker Shortcut');
+                            });
+                    }),
             SelectFilter::make('scope')
                 ->label('Search Scope')
                 ->options([

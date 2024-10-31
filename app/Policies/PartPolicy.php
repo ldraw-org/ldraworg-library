@@ -42,6 +42,11 @@ class PartPolicy
         return $part->isUnofficial() && $user->can('part.flag.delete');
     }
 
+    public function flagError(User $user, Part $part)
+    {
+        return $user->can('part.flag.error');
+    }
+
     public function delete(User $user, Part $part)
     {
         return !$this->settings->tracker_locked &&

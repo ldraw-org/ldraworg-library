@@ -227,12 +227,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                 if ($subpart->filename != 'parts/973.dat') {
                     $name = basename($subpart->filename);
                     $parts[$name] = ['default' => $subpart->id, 'subs' => [$subpart->id => "{$name} - {$subpart->description}"]];
-                    $pats = Part::doesntHave('unofficial_part')
-                        ->whereRelation('type', 'folder', 'parts/')
-                        ->where('filename', 'LIKE', "parts/{$subpart->basepart()}%.dat")
-                        ->where('description', 'NOT LIKE', '~%')
-                        ->get()
-                        ->patterns($subpart->basepart());
+                    $pats = $subpart->suffix_parts->where('is_pattern', true)->where('category.category', '!=', 'Moved');
                     foreach($pats as $pat) {
                         $patname = basename($pat->filename);
                         $parts[$name]['subs'][$pat->id] = "{$patname} - {$pat->description}";

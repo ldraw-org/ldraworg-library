@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Part;
 use Illuminate\Console\Command;
 
 class DeployUpdate extends Command
@@ -25,5 +26,11 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
+        $pm = app(\App\LDraw\PartManager::class);
+        $parts = Part::whereRelation('type', 'folder', 'parts/');
+        foreach($parts->lazy() as $p) {
+            /** var Part $p */
+            $pm->updateBasePart($p);
+        }
     }
 }
