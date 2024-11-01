@@ -219,7 +219,10 @@ class PartManager
         });
     }
 
-    function updateBasePart(Part $part): void {
+    function updateBasePart(Part $part, bool $force = false): void {
+        if (!$force && ($part->is_pattern || $part->is_composite || $part->is_dual_mould || !is_null($part->base_part))) {
+            return;
+        }
         $pattern = '#^(((([0-9a-z]+?)((?:p[0-9a-z]{2,3}|p\d{4}|d[0-9a-z]{2}|d\d{4}|c[0-9a-z]{2}|c\d{4})?))((?:p[0-9a-z]{2,3}|p\d{4}|d[0-9a-z]{2}|d\d{4}|c[0-9a-z]{2}|c\d{4})?))((?:p[0-9a-z]{2,3}|p\d{4}|d[0-9a-z]{2}|d\d{4}|c[0-9a-z]{2}|c\d{4})?))(?:-f\d)?\.(?:dat|png)$#i';
         $result = preg_match($pattern, basename($part->filename), $matches);
         if (!$result) {
@@ -311,7 +314,7 @@ class PartManager
         $part->filename = $newName;
         $part->save();
         $part->generateHeader();
-        $this->updateBasePart($part);
+        $this->updateBasePart($part, true);
         $this->updateImage($part);
         foreach ($part->parents()->unofficial()->get() as $p) {
             if ($p->type->folder === 'parts/' && $p->category->category === "Moved") {
