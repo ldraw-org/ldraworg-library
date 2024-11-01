@@ -1,5 +1,3 @@
 <div>
-    @if($getRecord()->isUnofficial())
-        <x-part.status :part="$getRecord()" show-status />
-    @endif
+    <x-part.status :part="$getRecord()" show-status />
 </div>
