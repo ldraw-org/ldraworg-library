@@ -62,7 +62,7 @@ class PartListTable extends BasicTable
             QueryBuilder::make()
                 ->constraintPickerColumns(['md' => 2, 'xl' => 4])
                 ->constraints([
-                    // TODO: Part Fixes, Alias, Third Party 
+                    // TODO: History Author, Part Fixes, Alias, Third Party 
                     Constraint::make('part_release')
                         ->label('Library Status')
                         ->operators([
@@ -122,13 +122,6 @@ class PartListTable extends BasicTable
                         ),
                     TextConstraint::make('help')
                         ->relationship(name: 'help', titleAttribute: 'help'),
-                    SelectConstraint::make('history.user')
-                        ->label('History Author')
-                        ->relationship(name: 'user', titleAttribute: 'name')
-                        ->getOptionLabelFromRecordUsing(fn (User $u) => $u->authorString)
-                        //->preload()
-                        ->searchable()
-                        ->multiple(),
                     DateConstraint::make('history_date')
                         ->relationship(name: 'history', titleAttribute: 'created_at'),
                     TextConstraint::make('history_comment')
