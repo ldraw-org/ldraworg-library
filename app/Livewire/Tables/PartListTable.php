@@ -17,6 +17,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -59,6 +60,24 @@ class PartListTable extends BasicTable
     protected function filters(): array
     {
         return [
+            SelectFilter::make('vote_sort')
+                ->label('Vote Status')
+                ->options([
+                    '1' => 'Certified/Official',
+                    '2' => 'Needs Admin Review',
+                    '3' => 'Needs More Votes',
+                    '5' => 'Errors Found'
+                ]),
+            SelectFilter::make('category')
+                ->relationship('category', 'category')
+                ->searchable()
+                ->preload()
+                ->multiple(),
+            SelectFilter::make('type')
+                ->label('!LDRAW_ORG Type')
+                ->relationship('type', 'type')
+                ->preload()
+                ->multiple(),
             QueryBuilder::make()
                 ->constraintPickerColumns(['md' => 2, 'xl' => 4])
                 ->constraints([
