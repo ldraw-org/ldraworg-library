@@ -19,7 +19,7 @@ class UserVotesTable extends BasicTable
     {
         return $table
             ->query(
-                Auth::user()->votes()->getQuery()
+                Auth::user()->votes()->getQuery()->with('part', 'part.votes', 'part.official_part')
             )
             ->defaultSort('created_at', 'desc')
             ->heading('My Votes')
@@ -45,7 +45,7 @@ class UserVotesTable extends BasicTable
                             ->sortable(),
                     ]),
                     ViewColumn::make('part.vote_status')
-                        ->view('tables.columns.event-part-status')
+                        ->view('tables.columns.part-status')
                         ->grow(false)
                         ->sortable()
                         ->label('Status'),

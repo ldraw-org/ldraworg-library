@@ -35,7 +35,7 @@ class Index extends Component implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(PartEvent::query()->with(['part', 'part.votes', 'part.official_part']))
+            ->query(PartEvent::query()->with('part', 'part.votes', 'part.official_part'))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Split::make([
@@ -60,8 +60,8 @@ class Index extends Component implements HasForms, HasTable
                         )
                         ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]'])
                         ->grow(false),
-                    TextColumn::make('user.name')
-                        ->description(fn (PartEvent $e): string => $e->user->realname ?? '')
+                    TextColumn::make('user.realname')
+                        ->description(fn (PartEvent $e): string => $e->user->name ?? '')
                         ->grow(false)
                         ->visibleFrom('md'),
                     TextColumn::make('part.filename')
@@ -73,8 +73,8 @@ class Index extends Component implements HasForms, HasTable
                         ->label('Part')
                         ->visibleFrom('md'),
                     Stack::make([
-                        TextColumn::make('user.name')
-                            ->description(fn (PartEvent $e): string => $e->user->realname ?? '')
+                        TextColumn::make('user.realname')
+                            ->description(fn (PartEvent $e): string => $e->user->name ?? '')
                             ->grow(false),
                         TextColumn::make('part.filename')
                             ->state(
@@ -85,7 +85,7 @@ class Index extends Component implements HasForms, HasTable
                             ->label('Part'),
                     ])->hiddenFrom('sm'),
                     ViewColumn::make('status')
-                        ->view('tables.columns.event-part-status')
+                        ->view('tables.columns.part-status')
                         ->label('Status')
                         ->grow(false),
                 ])

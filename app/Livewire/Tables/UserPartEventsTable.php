@@ -18,7 +18,8 @@ class UserPartEventsTable extends BasicTable
     {
         return $table
             ->query(
-                PartEvent::unofficial()
+                PartEvent::with('part', 'part.votes', 'part.official_part')
+                    ->unofficial()
                     ->whereHas(
                         'part',
                         fn (Builder $q) =>
@@ -74,7 +75,7 @@ class UserPartEventsTable extends BasicTable
                             ->label('Part'),
                     ])->hiddenFrom('sm'),
                     ViewColumn::make('status')
-                        ->view('tables.columns.event-part-status')
+                        ->view('tables.columns.part-status')
                         ->label('Status')
                         ->grow(false),
                 ])

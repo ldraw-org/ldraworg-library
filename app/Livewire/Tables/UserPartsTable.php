@@ -16,11 +16,12 @@ class UserPartsTable extends BasicTable
     {
         return $table
             ->query(
-                Part::unofficial()
+                Part::with('votes', 'official_part')
+                    ->unofficial()
                     ->where(
-                        fn (Builder $q) =>
-                        $q->orWhere(fn (Builder $qu) => $qu->doesntHave('official_part')->where('user_id', Auth::user()->id))
-                            ->orWhereHas('events', fn (Builder $qu) => $qu->whereNull('part_release_id')->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit'))
+                        fn (Builder $query) =>
+                        $query->orWhere(fn (Builder $query2): Builder => $query2->doesntHave('official_part')->where('user_id', Auth::user()->id))
+                            ->orWhereHas('events', fn (Builder $query2): Builder => $query2->whereNull('part_release_id')->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit'))
                     )
             )
             ->defaultSort('created_at', 'desc')
@@ -50,9 +51,9 @@ class UserPartsTable extends BasicTable
                     ->trueLabel('Exclude official part fixes')
                     ->falseLabel('Only official part fixes')
                     ->queries(
-                        true: fn (Builder $q) => $q->doesntHave('official_part'),
-                        false: fn (Builder $q) => $q->has('official_part'),
-                        blank: fn (Builder $q) => $q,
+                        true: fn (Builder $query): Builder => $query->doesntHave('official_part'),
+                        false: fn (Builder $query): Builder => $query->has('official_part'),
+                        blank: fn (Builder $query): Builder => $query,
                     ),
             ])
             ->recordUrl(fn (Part $p): string => route('tracker.show', ['part' => $p]))
