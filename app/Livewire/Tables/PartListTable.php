@@ -132,6 +132,13 @@ class PartListTable extends BasicTable
                                 ->titleAttribute('keyword')
                                 ->multiple(),
                         ),
+                    SelectConstraint::make('bfc')
+                        ->label('BFC Status')
+                        ->options([
+                            'CW' => 'CW',
+                            'CCW' => 'CCW',
+                        ])
+                        ->multiple(),
                     RelationshipConstraint::make('license')
                         ->selectable(
                             IsRelatedToOperator::make()
