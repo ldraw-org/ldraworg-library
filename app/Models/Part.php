@@ -378,6 +378,7 @@ class Part extends Model
         if ($keywords instanceof Collection) {
             $this->keywords()->sync($keywords->pluck('id')->all());
         } else {
+            $keywords = array_filter($keywords, fn(string $value) => strlen(trim($value)) > 0);
             $kws = PartKeyword::whereIn('keyword', $keywords)->get();
             $ids = $kws->pluck('id')->all();
             $new_keywords = array_udiff($keywords, $kws->pluck('keyword')->all(), 'strcasecmp');

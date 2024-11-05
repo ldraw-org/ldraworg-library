@@ -32,7 +32,7 @@ class EditHeaderAction
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
-                $data['keywords'] = $part->keywords->sortBy('keyword')->pluck('keyword')->all();
+                $data['keywords'] = implode(', ', $part->keywords->sortBy('keyword')->pluck('keyword')->all());
                 $data['history'] = '';
                 foreach ($part->history as $h) {
                     $data['history'] .= $h->toString() . "\n";
@@ -112,18 +112,19 @@ class EditHeaderAction
                         }
                     }
                 ]),
-            TagsInput::make('keywords')
+            Textarea::make('keywords')
                 ->helperText('Note: keyword order will not be preserved')
-                ->placeholder('New Keyword')
-                ->suggestions(PartKeyword::query()->pluck('keyword'))
+                ->extraAttributes(['class' => 'font-mono'])
+                ->rows(3)
                 ->rules([
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
+                        $keywords = array_map(fn(string $kw) => trim($kw), explode(',', str_replace("\n", ",", $value)));
                         if (
                             $part->type->folder == 'parts/' &&
                             $part->category->category !== 'Moved' &&
                             $part->category->category !== 'Sticker' &&
                             $part->category->category !== 'Sticker Shortcut' &&
-                            ! app(\App\LDraw\Check\PartChecker::class)->checkPatternForSetKeyword($part->name(), $value)
+                            ! app(\App\LDraw\Check\PartChecker::class)->checkPatternForSetKeyword($part->name(), $keywords)
                         ) {
                             $fail('partcheck.keywords')->translate();
                         }
@@ -236,6 +237,8 @@ class EditHeaderAction
 
         if (!array_key_exists('keywords', $data)) {
             $data['keywords'] = [];
+        } else {
+            $data['keywords'] = array_map(fn(string $kw) => trim($kw), explode(',', str_replace("\n", ",", $data['keywords'])));
         }
         $partKeywords = $part->keywords->pluck('keyword')->all();
         if ($partKeywords !== $data['keywords']) {
