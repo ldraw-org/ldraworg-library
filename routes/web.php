@@ -45,13 +45,12 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/categories.txt', [SupportFilesController::class, 'categories'])->name('categories-txt');
     Route::get('/library.csv', [SupportFilesController::class, 'librarycsv'])->name('library-csv');
     Route::get('/ptreleases/{output}', [SupportFilesController::class, 'ptreleases'])->name('ptreleases');
-    Route::redirect('/ptreleases', '/ptreleases/tab');
     Route::get('/ldbi/part/{part}', PartWebGLController::class)->name('part.ldbi');
     Route::get('/tracker/latest-parts', LatestPartsController::class)->name('part.latest');
     Route::get('/tracker/ldrawunf-last-day.zip', LastDayDownloadZipController::class)->name('tracker.last-day');
-    Route::get('/library/official/{officialpart}', PartDownloadController::class)->name('official.download');
+    Route::get('/library/official/{opartfile}', PartDownloadController::class)->name('official.download');
     Route::get('/library/official/{officialpartzip}', PartDownloadZipController::class)->name('official.download.zip');
-    Route::get('/library/unofficial/{unofficialpart}', PartDownloadController::class)->name('unofficial.download');
+    Route::get('/library/unofficial/{upartfile}', PartDownloadController::class)->name('unofficial.download');
     Route::get('/library/unofficial/{unofficialpartzip}', PartDownloadZipController::class)->name('unofficial.download.zip');
 });
 
@@ -135,26 +134,28 @@ Route::middleware(['auth'])->get('/logout', function () {
     return back();
 });
 
-// Redirects
-Route::redirect('/login', 'https://forums.ldraw.org/member.php?action=login');
-Route::redirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
+// permanentRedirects
+Route::permanentRedirect('/login', 'https://forums.ldraw.org/member.php?action=login');
+Route::permanentRedirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
 
-Route::redirect('/official/search', '/parts/list');
-Route::redirect('/official/suffixsearch', '/search/suffix');
-Route::redirect('/official/list', '/parts/list');
-Route::redirect('/official/{part:id}', 'parts/{part:id}');
-Route::redirect('/official/{partfile}', '/parts/{partfile}');
+Route::permanentRedirect('/official/search', '/parts/list');
+Route::permanentRedirect('/official/suffixsearch', '/search/suffix');
+Route::permanentRedirect('/official/list', '/parts/list');
+Route::permanentRedirect('/official/{part:id}', 'parts/{part:id}');
+Route::permanentRedirect('/official/{partfile}', '/parts/{partfile}');
 
-Route::redirect('/search', '/parts/list');
-Route::redirect('/search/part', '/parts/list');
-Route::redirect('/search/sticker', '/sticker-sheets');
-Route::redirect('/search/suffix', '/parts/search/suffix');
+Route::permanentRedirect('/ptreleases', '/ptreleases/tab');
 
-Route::redirect('/sticker-sheets', '/parts/sticker-sheets');
-Route::redirect('/sticker-sheets/{sheet}', '/parts/sticker-sheets/{sheet}');
+Route::permanentRedirect('/search', '/parts/list');
+Route::permanentRedirect('/search/part', '/parts/list');
+Route::permanentRedirect('/search/sticker', '/sticker-sheets');
+Route::permanentRedirect('/search/suffix', '/parts/search/suffix');
 
-Route::redirect('/tracker/list', '/parts/list');
-Route::redirect('/tracker/search', '/parts/list');
-Route::redirect('/tracker/suffixsearch', '/search/suffix');
-Route::redirect('/tracker/{part:id}', '/parts/{part:id}');
-Route::redirect('/tracker/{partfile}', '/parts/{partfile}');
+Route::permanentRedirect('/sticker-sheets', '/parts/sticker-sheets');
+Route::permanentRedirect('/sticker-sheets/{sheet}', '/parts/sticker-sheets/{sheet}');
+
+Route::permanentRedirect('/tracker/list', '/parts/list');
+Route::permanentRedirect('/tracker/search', '/parts/list');
+Route::permanentRedirect('/tracker/suffixsearch', '/search/suffix');
+Route::permanentRedirect('/tracker/{part:id}', '/parts/{part:id}');
+Route::permanentRedirect('/tracker/{partfile}', '/parts/{partfile}');

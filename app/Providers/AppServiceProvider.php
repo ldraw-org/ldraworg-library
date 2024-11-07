@@ -44,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
         $zipPattern = "{$namePattern}\.(zip)";
         Route::pattern('partfile', $filenamePattern);
         Route::pattern('upartfile', $filenamePattern);
+        Route::pattern('opartfile', $filenamePattern);
         Route::pattern('officialpartzip', '[a-z0-9_/-]+\.zip');
         Route::pattern('unofficialpart', '[a-z0-9_/-]+\.(dat|png)');
         Route::pattern('unofficialpartzip', '[a-z0-9_/-]+\.zip');
@@ -61,6 +62,11 @@ class AppServiceProvider extends ServiceProvider
             'upartfile',
             fn (string $value): Part =>
                 Part::unofficial()->where('filename', $value)->firstOrFail()
+        );
+        Route::bind(
+            'opartfile',
+            fn (string $value): Part =>
+                Part::official()->where('filename', $value)->firstOrFail()
         );
         Route::bind(
             'officialpartzip',

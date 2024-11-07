@@ -81,6 +81,6 @@ class StickerSheetIndex extends BasicTable
             ])
             ->persistSortInSession()
             ->persistSearchInSession()
-            ->recordUrl(fn (StickerSheet $s): string => route('sticker-sheet.show', $s));
+            ->recordUrl(fn (StickerSheet $s): string => route('parts.sticker-sheet.show', $s));
     }
 }
