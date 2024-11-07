@@ -4,7 +4,7 @@
     <div class="flex flex-col space-y-2">
         @isset($release->part_list) 
             @foreach($release->part_list as list($description, $filename))
-                <a href="{{route('official.show', App\Models\Part::official()->where('filename', $filename)->first())}}">
+                <a href="{{route('parts.show', App\Models\Part::official()->where('filename', $filename)->first())}}">
                     <div class="rounded border w-fit">
                         <div class="font-bold bg-gray-200 p-2">
                             {{$filename}} - {{$description}}

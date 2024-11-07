@@ -1,7 +1,7 @@
 @props(['part'])
 <div >
     @if(stripos($part->description, "obsolete") === false)
-        <a href="{{route(($part->isUnofficial() ? 'tracker.show' : 'official.show'), $part)}}">
+        <a href="{{route(('parts.show', $part)}}">
     @endif
             <div @class([
                 'flex flex-col rounded border h-full',

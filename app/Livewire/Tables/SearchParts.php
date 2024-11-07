@@ -62,7 +62,7 @@ class SearchParts extends BasicTable
         ->actions(PartTable::actions())
         ->recordUrl(
             fn (Part $p): string =>
-                route($p->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $p])
+                route('parts.show', $p)
         )
         ->queryStringIdentifier($this->unofficial === true ? 'unofficialPartSearch' : 'officialPartSearch')
         ->striped();

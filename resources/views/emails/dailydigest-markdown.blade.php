@@ -2,7 +2,7 @@
 # Parts Tracker Daily Summary for {{$date->format('Y-m-d')}}
 @foreach($parts as $part)
 ![{{$part->description}}]({{$message->embed(storage_path("app/images/library/{$part->libFolder()}/" . substr($part->filename, 0, -4) . '_thumb.png'))}})
-## [{{$part->filename}} - {{$part->description}}]({{route('tracker.show', $part)}})
+## [{{$part->filename}} - {{$part->description}}]({{route('parts.show', $part)}})
 @foreach ($part->events->whereBetween('created_at', [$date, $next]) as $event)
 ### On {{$event->created_at}}: 
 @switch($event->part_event_type->slug)
@@ -28,7 +28,7 @@ The part was moved/renamed
 @endswitch
 @endforeach
 
-See [{{route('tracker.show', $part)}}]({{route('tracker.show', $part)}})
+See [{{route('parts.show', $part)}}]({{route('parts.show', $part)}})
 
 ---
 @endforeach

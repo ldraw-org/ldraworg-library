@@ -31,7 +31,7 @@ class OfficialPartsWithErrorsTable extends BasicTable
                     ->state(fn (Part $part) => implode(", ", $part->part_check_messages['errors']))
                     ->wrap()
             ])
-            ->recordUrl(fn (Part $p): string => route('tracker.show', ['part' => $p]))
+            ->recordUrl(fn (Part $p): string => route('parts.show', $p))
             ->queryStringIdentifier('officialErrors');
     }
 }

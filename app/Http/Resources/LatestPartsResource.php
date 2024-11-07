@@ -19,7 +19,7 @@ class LatestPartsResource extends JsonResource
     {
         return [
             'image' => $this->part->isTexmap() ? route('unofficial.download', $this->part->filename) : asset('images/library/unofficial/' . substr($this->part->filename, 0, -4) . '.png'),
-            'url' => route('tracker.show', $this->part),
+            'url' => route('parts.show', $this->part),
             'description' => $this->part->description,
         ];
     }

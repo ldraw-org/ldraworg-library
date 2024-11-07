@@ -34,7 +34,7 @@
       </td>
       <td><img class="ui image" src="{{asset('images/library/unofficial/' . substr($filename, 0, -4) . '_thumb.png')}}" alt='part thumb image' title="part_thumb" ></td>
       <td>{{$name}}</td>
-      <td><a href="{{route('tracker.show', $id)}}">{{$description}}</a></td>
+      <td><a href="{{route('parts.show', $id)}}">{{$description}}</a></td>
       <td>
         @foreach($check['errors'] as $error)
           {{$error}}<br>
@@ -47,7 +47,7 @@
       <td @class([
         'bg-green-200' => $fix && $ft,
       ])>{{$ft ? 'Yes' : 'No'}}
-      <td><a href="{{route('tracker.show', $id)}}">Edit</a></td>
+      <td><a href="{{route('parts.show', $id)}}">Edit</a></td>
     </tr>      
   @if($loop->last)
   </tbody>  

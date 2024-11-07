@@ -55,34 +55,46 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/library/unofficial/{unofficialpartzip}', PartDownloadZipController::class)->name('unofficial.download.zip');
 });
 
-Route::get('/pbg', PbgGenerator::class)->name('pbg');
+// Tools
 Route::get('/model-viewer', LDrawModelViewer::class)->name('model-viewer');
-Route::view('/sticker-sheets', 'sticker-sheet.index')->name('sticker-sheet.index');
-Route::get('/sticker-sheets/{sheet}', StickerSheetShowController::class)->name('sticker-sheet.show');
+Route::get('/pbg', PbgGenerator::class)->name('pbg');
+
+
+// Updates
+Route::get('/updates', [PartUpdateController::class, 'index'])->name('part-update.index');
+Route::get('/updates/view{release:short}', [PartUpdateController::class, 'view'])->name('part-update.view');
+
+Route::prefix('parts')->name('parts.')->group(function () {
+    Route::view('/list', 'part.index')->name('list');
+
+    // Stickers
+    Route::view('/sticker-sheets', 'sticker-sheet.index')->name('sticker-sheet.index');
+    Route::get('/sticker-sheets/{sheet}', StickerSheetShowController::class)->name('sticker-sheet.show');
+
+    // Search
+    Route::get('/search/suffix', Suffix::class)->name('search.suffix');
+
+    Route::get('/{part:id}', Show::class)->name('show');
+    Route::get('/unofficial/{upartfile}', Show::class)->name('show.ufile');
+    Route::get('/{partfile}', Show::class)->name('show.file');
+});
 
 Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::view('/', 'tracker.main')->name('main');
 
-    Route::middleware(['auth', 'currentlic'])->get('/submit', Submit::class)->name('submit');
+    Route::middleware(['auth', 'can:create,App\Models\Part', 'currentlic'])->get('/submit', Submit::class)->name('submit');
     Route::middleware(['auth', 'can:create,App\Models\Part', 'currentlic'])->get('/torso-helper', TorsoShortcutHelper::class)->name('torso-helper');
 
-    Route::view('/list', 'part.index')->name('index');
     Route::get('/weekly', Weekly::class)->name('weekly');
     Route::get('/history', TrackerHistoryController::class)->name('history');
     Route::get('/summary/{summary}', ReviewSummaryController::class)->name('summary.view');
     Route::middleware(['auth'])->get('/confirmCA', ConfirmCA::class)->name('confirmCA.show');
-
-    Route::redirect('/search', '/search/part');
-    Route::redirect('/suffixsearch', '/search/suffix');
 
     Route::get('/activity', PartEventIndex::class)->name('activity');
 
     Route::view('/next-release', 'part.nextrelease')->name('next-release');
 
     Route::middleware(['can:release.create'])->get('/release/create', Create::class)->name('release.create');
-
-    Route::get('/{unofficialpart}', Show::class)->name('show.filename');
-    Route::get('/{part}', Show::class)->name('show');
 });
 
 Route::prefix('omr')->name('omr.')->group(function () {
@@ -118,27 +130,31 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/', User::class)->name('index');
 });
 
-
-Route::get('/updates', [PartUpdateController::class, 'index'])->name('part-update.index');
-Route::get('/updates/view{release:short}', [PartUpdateController::class, 'view'])->name('part-update.view');
-
-Route::redirect('/search', '/search/part');
-Route::get('/search/part', Parts::class)->name('search.part');
-Route::get('/search/suffix', Suffix::class)->name('search.suffix');
-Route::redirect('/search/sticker', '/sticker-sheets');
-
-Route::prefix('official')->name('official.')->group(function () {
-    Route::redirect('/search', '/search/part');
-    Route::redirect('/suffixsearch', '/search/suffix');
-    Route::view('/list', 'part.index')->name('index');
-    Route::get('/{officialpart}', Show::class)->name('show.filename');
-    Route::get('/{part}', Show::class)->name('show');
-});
-
-Route::redirect('/login', 'https://forums.ldraw.org/member.php?action=login');
-Route::redirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
-
 Route::middleware(['auth'])->get('/logout', function () {
     auth()->logout();
     return back();
 });
+
+// Redirects
+Route::redirect('/login', 'https://forums.ldraw.org/member.php?action=login');
+Route::redirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
+
+Route::redirect('/official/search', '/parts/list');
+Route::redirect('/official/suffixsearch', '/search/suffix');
+Route::redirect('/official/list', '/parts/list');
+//Route::redirect('/official/{officialpart}', 'parts/official/{officialpart}');
+Route::redirect('/official/{part:id}', 'parts/{part:id}');
+
+Route::redirect('/search', '/parts/list');
+Route::redirect('/search/part', '/parts/list');
+Route::redirect('/search/sticker', '/sticker-sheets');
+Route::redirect('/search/suffix', '/parts/search/suffix');
+
+Route::redirect('/sticker-sheets', '/parts/sticker-sheets');
+Route::redirect('/sticker-sheets/{sheet}', '/parts/sticker-sheets/{sheet}');
+
+Route::redirect('/tracker/list', '/parts/list');
+Route::redirect('/tracker/search', '/parts/list');
+Route::redirect('/tracker/suffixsearch', '/search/suffix');
+Route::redirect('/tracker/{part:id}', 'parts/{part:id}');
+//Route::redirect('/tracker/{unofficialpart}', 'parts/{unofficialpart}');

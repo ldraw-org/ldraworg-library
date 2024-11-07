@@ -82,7 +82,7 @@ class UserPartEventsTable extends BasicTable
             ])
             ->recordUrl(
                 fn (PartEvent $e): string =>
-                    !is_null($e->part) ? route($e->part->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $e->part]) : ''
+                    !is_null($e->part) ? route('parts.show', $e->part) : ''
             )
             ->queryStringIdentifier('userPartEvents');
     }

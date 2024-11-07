@@ -42,10 +42,7 @@ class PartListTable extends BasicTable
                     ->slideOver()
             )
             ->filtersFormWidth(MaxWidth::FourExtraLarge)
-            ->recordUrl(
-                fn (Part $p): string =>
-                    route($p->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $p])
-            );
+            ->recordUrl(fn(Part $p) => route('parts.show', ['part' => $p]));
     }
 
     protected function applySearchToTableQuery(Builder $query): Builder

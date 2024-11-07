@@ -106,14 +106,14 @@ class Show extends Component implements HasForms, HasActions
         }
         return $options;
     }
-    public function mount(?Part $part, ?Part $unofficialpart, ?Part $officialpart)
+    public function mount(?Part $part, ?Part $partfile, ?Part $upartfile)
     {
         if (!is_null($part) && $part->exists) {
             $this->part = $part;
-        } elseif (!is_null($unofficialpart) && $unofficialpart->exists) {
-            $this->part = $unofficialpart;
-        } elseif (!is_null($officialpart) && $officialpart->exists) {
-            $this->part = $officialpart;
+        } elseif (!is_null($partfile) && $partfile->exists) {
+            $this->part = $partfile;
+        } elseif (!is_null($upartfile) && $upartfile->exists) {
+            $this->part = $upartfile;
         } else {
             return response('404');
         }
@@ -126,8 +126,12 @@ class Show extends Component implements HasForms, HasActions
     {
         if ($this->part->suffix_parts->count() > 0) {
             return true;
+        } elseif (!is_null($this->part->base_part)) {
+            return $this->part->base_part->suffix_parts->count() > 0;
+        } elseif (!is_null($this->part->official_part) && $this->part->official_part->suffix_parts->count() > 0) {
+            return true;
         }
-        return $this->part->base_part?->suffix_parts->count() > 0 ?? false;
+        return false;
     }
 
     public function editHeaderAction(): EditAction
@@ -143,7 +147,7 @@ class Show extends Component implements HasForms, HasActions
     public function patternPartAction(): Action
     {
         return Action::make('patternPart')
-                ->url(fn () => route('search.suffix', ['basepart' => basename(($this->part->base_part?->filename ?? ''), '.dat')]))
+                ->url(fn () => route('parts.search.suffix', ['basepart' => basename(($this->part->base_part?->filename ?? $this->part->filename), '.dat')]))
                 ->visible($this->hasSuffixParts())
                 ->label('View patterns/composites/shortcuts')
                 ->color('gray')
@@ -153,7 +157,7 @@ class Show extends Component implements HasForms, HasActions
     public function stickerSearchAction(): Action
     {
         return Action::make('stickerSearch')
-                ->url(fn () => route('sticker-sheet.show', $this->part->sticker_sheet ?? ''))
+                ->url(fn () => route('parts.sticker-sheet.show', $this->part->sticker_sheet ?? ''))
                 ->visible(!is_null($this->part->sticker_sheet_id))
                 ->label('View sticker sheet parts')
                 ->color('gray')
@@ -437,12 +441,7 @@ class Show extends Component implements HasForms, HasActions
             ->button()
             ->color('gray')
             ->label("Base Part: {$this->part->base_part?->name()}")
-            ->url(function () {
-                if ($this->part->base_part?->isUnofficial()) {
-                    return route('official.show', $this->part->base_part?->id ?? 0);
-                }
-                return route('tracker.show', $this->part->base_part?->id ?? 0);
-            })
+            ->url(route('parts.show', $this->part->base_part?->id ?? 0))
             ->visible(!is_null($this->part->base_part));
     }
 
@@ -455,9 +454,9 @@ class Show extends Component implements HasForms, HasActions
             ->label('View ' . ($this->part->isUnofficial() ? 'official' : 'unofficial')  . ' version of part')
             ->url(function () {
                 if ($this->part->isUnofficial()) {
-                    return route('official.show', $this->part->official_part->id ?? 0);
+                    return route('parts.show', $this->part->official_part->id ?? 0);
                 }
-                return route('tracker.show', $this->part->unofficial_part->id ?? 0);
+                return route('parts.show', $this->part->unofficial_part->id ?? 0);
             })
             ->visible(!is_null($this->part->unofficial_part) || !is_null($this->part->official_part));
     }
@@ -471,9 +470,9 @@ class Show extends Component implements HasForms, HasActions
             ->label(true ? 'Edit/Clear Admin Error' : 'Add Admin Error')
             ->url(function () {
                 if ($this->part->isUnofficial()) {
-                    return route('official.show', $this->part->official_part->id ?? 0);
+                    return route('parts.show', $this->part->official_part->id ?? 0);
                 }
-                return route('tracker.show', $this->part->unofficial_part->id ?? 0);
+                return route('parts.show', $this->part->unofficial_part->id ?? 0);
             })
             ->visible(false);
     }

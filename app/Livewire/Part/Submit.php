@@ -155,7 +155,7 @@ class Submit extends Component implements HasForms
                 'image' => version("images/library/unofficial/" . substr($p->filename, 0, -4) . '_thumb.png'),
                 'description' => $p->description,
                 'filename' => $p->filename,
-                'route' => route('tracker.show', $p)
+                'route' => route('parts.show', $p)
             ];
         });
         $data = $this->form->fill();

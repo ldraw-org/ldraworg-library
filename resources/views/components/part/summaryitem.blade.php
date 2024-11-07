@@ -1,6 +1,6 @@
 @props(['part'])
 <div>
-    <a href="{{route(($part->isUnofficial() ? 'tracker.show' : 'official.show'), $part)}}">
+    <a href="{{route(('parts.show'), $part)}}">
         <div @class([
             'flex flex-col rounded border h-full',
             'bg-green-200' => !$part->isUnofficial(), 

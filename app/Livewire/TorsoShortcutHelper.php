@@ -172,7 +172,7 @@ class TorsoShortcutHelper extends Component implements HasForms
         $newpart = $p->first();
         UpdateZip::dispatch($newpart);
         PartSubmitted::dispatch($newpart, auth()->user());
-        $this->redirectRoute('tracker.show', $newpart);
+        $this->redirectRoute('parts.show', $newpart);
     }
     
     protected function partInput(int $index): Fieldset

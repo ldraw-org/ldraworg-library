@@ -35,7 +35,7 @@ class StickerShortcutsReadyForAdminTable extends BasicTable
                     ->visible(fn (Part $p) => auth()->user()?->can('create', [Vote::class, $p, 'T']))
 
             ])
-            ->recordUrl(fn (Part $p): string => route('tracker.show', ['part' => $p]))
+            ->recordUrl(fn (Part $p): string => route('parts.show', $p))
             ->queryStringIdentifier('stickerShortcutsReadyForAdmin');
     }
 

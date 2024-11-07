@@ -60,7 +60,7 @@ class UserVotesTable extends BasicTable
             ])
             ->recordUrl(
                 fn (Vote $v): string =>
-                    route('tracker.show', ['part' => $v->part])
+                    route('parts.show', $v->part)
             )
             ->queryStringIdentifier('userVotes');
     }

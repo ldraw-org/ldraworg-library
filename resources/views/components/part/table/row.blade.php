@@ -8,7 +8,7 @@
     @endif
   </td>
   <td class="text-wrap">
-    <a class="hover:underline" href="{{route($part->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $part])}}">
+    <a class="hover:underline" href="{{route('parts.show', $part)}}">
         <p class="font-bold break-all">{{ $part->filename }}</p>
         <p class="break-word">{{ $part->description }}</p>
     </a>
@@ -25,7 +25,7 @@
     <x-part.status :$part show-status />
     @else
       @isset ($part->unofficial_part)
-        <a href="{{ route('tracker.show', $part->unofficial_part->id) }}">Updated part on tracker</a>
+        <a href="{{ route('parts.show', $part->unofficial_part) }}">Updated part on tracker</a>
 	    <x-part.status :part="$part->unofficial_part" show-status />
       @endisset
     @endif    

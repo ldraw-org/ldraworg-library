@@ -17,7 +17,7 @@ class PartReadyForAdminTable extends BasicTable
             ->defaultSort('created_at', 'asc')
             ->heading('Parts Ready For Admin')
             ->columns(PartTable::columns())
-            ->recordUrl(fn (Part $p): string => route('tracker.show', ['part' => $p]))
+            ->recordUrl(fn (Part $p): string => route('parts.show', $p))
             ->queryStringIdentifier('readyForAdmin');
     }
 

@@ -39,20 +39,28 @@ class AppServiceProvider extends ServiceProvider
         // Model::preventLazyLoading(! $this->app->isProduction());
 
         // Route bindings
-        Route::pattern('officialpart', '[a-z0-9_/-]+\.(dat|png)');
+        $namePattern = '[a-z0-9_/-]+';
+        $filenamePattern = "{$namePattern}\.(dat|png)";
+        $zipPattern = "{$namePattern}\.(zip)";
+        Route::pattern('partfile', $filenamePattern);
+        Route::pattern('upartfile', $filenamePattern);
         Route::pattern('officialpartzip', '[a-z0-9_/-]+\.zip');
         Route::pattern('unofficialpart', '[a-z0-9_/-]+\.(dat|png)');
         Route::pattern('unofficialpartzip', '[a-z0-9_/-]+\.zip');
         Route::pattern('setnumber', '[a-z0-9]+(-\d+)?');
         Route::bind(
-            'officialpart',
-            fn (string $value): Part =>
-            Part::official()->where('filename', $value)->firstOrFail()
+            'partfile',
+            function (string $value): Part {
+                if(Part::where('filename', $value)->count() > 1) {
+                    return Part::official()->where('filename', $value)->firstOrFail();
+                }
+                return Part::where('filename', $value)->firstOrFail();
+            }
         );
         Route::bind(
-            'unofficialpart',
+            'upartfile',
             fn (string $value): Part =>
-            Part::unofficial()->where('filename', $value)->firstOrFail()
+                Part::unofficial()->where('filename', $value)->firstOrFail()
         );
         Route::bind(
             'officialpartzip',

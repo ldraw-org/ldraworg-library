@@ -44,7 +44,7 @@ class PartDependenciesTable extends BasicTable
             ->actions(PartTable::actions())
             ->recordUrl(
                 fn (Part $p): string =>
-                    route($p->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $p])
+                    route('parts.show', ['part' => $p])
             )
             ->queryStringIdentifier(($this->official ? "official" : "unofficial") . ($this->parents ? "Parents" : "Subparts"));
     }

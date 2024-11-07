@@ -16,7 +16,7 @@ class PartsFlaggedForDeletionTable extends BasicTable
             )
             ->heading('Parts Flagged For Deletion')
             ->columns(PartTable::columns())
-            ->recordUrl(fn (Part $p): string => route('tracker.show', ['part' => $p]))
+            ->recordUrl(fn (Part $p): string => route('parts.show', $p))
             ->queryStringIdentifier('deleteFlagged');
     }
 }

@@ -35,6 +35,8 @@ return [
         'history' => '#^\h*0\h+!HISTORY\h+(?P<date>\d\d\d\d-\d\d-\d\d)\h+[\[{](?P<user>[\w\s\/\\.-]+)[}\]]\h+(?P<comment>.*?)\h*$#um',
         'textures' => '#^\h*0\h+!TEXMAP\h+(START|NEXT)\h+(PLANAR|CYLINDRICAL|SPHERICAL)\h+([-\.\d]+\h+){9,11}(?P<texture1>.*?\.png)(\h+GLOSSMAP\h+(?P<texture2>.*?\.png))?\h*$#um',
         'subparts' => '#^\h*(0\h+!\:\h+)?1\h+((0x)?\d+\h+){1}([-\.\d]+\h+){12}(?P<subpart>.*?\.(dat|ldr))\h*$#um',
+        'colour' => '/^\h*0\h+!COLOUR\h+(?<name>[A-Za-z_]+)\h+CODE\h+(?<code>\d+)\h+VALUE\h+(?<value>(?:#|0x)[A-Fa-f\d]{6})\h+EDGE\h+(?<edge>\d+|(?:#|0x)[A-Fa-f\d]{6})(?:\h+ALPHA\h+(?<alpha>\d{1,3}))?(?:\h+LUMINANCE\h+(?<luminance>\d+))?(?:\h+(?<material>CHROME|METAL|PEARLESCENT|RUBBER|MATERIAL\h+.*))?\h*$/um',
+        'colour_material' => '/^\h*MATERIAL\h+(?<type>SPECKLE|GLITTER)\h+VALUE\h+(?<value>#[a-fA-F0-9]{6})(?:\h+ALPHA\h+(?<alpha>[0-9]{1,3}))?(?:\h+LUMINANCE\h+(?<luminance>[0-9]{1,3}))?(?:\h+FRACTION\h+(?<fraction>[0-9.]+))(?:\h+VFRACTION\h+(?<vfraction>[0-9.]+))?(?:\h+SIZE\h+(?<size>[0-9.]+))?(?:\h+MINSIZE\h+(?<minsize>[0-9.]+))?(?:\h+MAXSIZE\h+(?<maxsize>[0-9.]+))?\h*$/u',
         'line_type_0' => '#^\h*0(?:\h*)(.*)?\s*$#um',
         'line_type_1' => '#^\h*1\h+(?P<color>0x2[a-fA-F\d]{6}|\d+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+(?P<subpart>[\/a-z0-9_.\\\\-]+)\h*?$#um',
         'line_type_2' => '#^\h*2\h+(?P<color>0x2[a-fA-F\d]{6}|\d+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h*$#um',

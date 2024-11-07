@@ -25,7 +25,7 @@
             </div>
             <div class="flex flex-col">
                 <div class="text-lg font-bold">
-                    <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('tracker.index')}}">Parts List</a>
+                    <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('parts.list')}}">Parts List</a>
                 </div>
                 <p>
                     The complete list of library files.

@@ -73,7 +73,7 @@ class Create extends Component implements HasForms, HasTable
             ->recordClasses(fn (Part $p) => count($p->part_check_messages['errors']) > 0 ? '!bg-red-300' : null)
             ->actions([
                 Action::make('view')
-                    ->url(fn (Part $p) => route('tracker.show', $p))
+                    ->url(fn (Part $p) => route('parts.show', $p))
                     ->button()
             ])
             ->headerActions([

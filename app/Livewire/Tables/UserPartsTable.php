@@ -56,7 +56,7 @@ class UserPartsTable extends BasicTable
                         blank: fn (Builder $query): Builder => $query,
                     ),
             ])
-            ->recordUrl(fn (Part $p): string => route('tracker.show', ['part' => $p]))
+            ->recordUrl(fn (Part $p): string => route('parts.show', $p))
             ->queryStringIdentifier('userParts');
     }
 

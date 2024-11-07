@@ -17,7 +17,7 @@ class PartSearchResource extends JsonResource
         return [
             'title' => $this->name(),
             'description' => $this->description,
-            'url' => $this->isUnofficial() ? route('tracker.show', $this->id) : route('official.show', $this->id),
+            'url' => route('parts.show', $this->id),
         ];
     }
 }

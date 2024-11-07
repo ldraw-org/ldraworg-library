@@ -36,7 +36,7 @@ class PartTable
             ->actions(self::actions())
             ->recordUrl(
                 fn (Part $p): string =>
-                    route($p->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $p])
+                    route('parts.show', ['part' => $p])
             );
     }
 
@@ -82,7 +82,7 @@ class PartTable
                 ->color('info')
                 ->visible(fn (Part $part) => $part->isUnofficial() && $part->type->folder == 'parts/'),
             Action::make('updated')
-                ->url(fn (Part $part) => route('tracker.show', $part->unofficial_part->id))
+                ->url(fn (Part $part) => route('parts.show', $part->unofficial_part->id))
                 ->label(fn (Part $part) => ' Tracker Update: ' . $part->unofficial_part->statusCode())
                 ->button()
                 ->outlined()

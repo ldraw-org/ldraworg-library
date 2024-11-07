@@ -35,7 +35,7 @@ class Weekly extends Component implements HasForms, HasTable
             ->defaultGroup('week')
             ->recordUrl(
                 fn (Part $p): string =>
-                    route($p->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $p])
+                    route('parts.show', $p)
             );
     }
 

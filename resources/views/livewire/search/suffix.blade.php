@@ -16,11 +16,7 @@
         <div class="rounded border p-2">
             Part Not Found
         </div>
-    @elseif(!is_null($part) && $part->patterns->count() === 0 && $part->composites->count() === 0 && $part->shortcuts->count() === 0)
-        <div class="rounded border p-2">
-            No Patterns/Composites/Sticker Shortcuts Found
-        </div>
-    @elseif (!is_null($part) && ($part->patterns->count() !== 0 || $part->composites->count() !== 0 || $part->shortcuts->count() !== 0))
+    @else
         <div class="text-xl font-bold p-2">
             Pattern/Composite/Sticker Shortcut Reference for {{$part->name()}} - {{$part->description}}
         </div>

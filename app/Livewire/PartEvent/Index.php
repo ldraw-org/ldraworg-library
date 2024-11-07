@@ -129,7 +129,7 @@ class Index extends Component implements HasForms, HasTable
             ->extremePaginationLinks()
             ->recordUrl(
                 fn (PartEvent $e): string =>
-                    !is_null($e->part) ? route($e->part->isUnofficial() ? 'tracker.show' : 'official.show', ['part' => $e->part]) : ''
+                    !is_null($e->part) ? route('parts.show', ['part' => $e->part]) : ''
             )
             ->recordClasses(fn (PartEvent $e) => !is_null($e->part) && !$e->part->isUnofficial() ? '!bg-green-300' : '');
     }

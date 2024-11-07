@@ -20,7 +20,7 @@ class OfficialMinorEdits extends BasicTable
             ->emptyState(view('tables.empty', ['none' => 'None']))
             ->columns(PartTable::columns())
             ->actions(PartTable::actions())
-            ->recordUrl(fn (Part $p): string => route('tracker.show', ['part' => $p]));
+            ->recordUrl(fn (Part $p): string => route('parts.show', $p));
     }
 
 }
