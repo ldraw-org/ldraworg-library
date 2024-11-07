@@ -142,8 +142,8 @@ Route::redirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
 Route::redirect('/official/search', '/parts/list');
 Route::redirect('/official/suffixsearch', '/search/suffix');
 Route::redirect('/official/list', '/parts/list');
-//Route::redirect('/official/{officialpart}', 'parts/official/{officialpart}');
 Route::redirect('/official/{part:id}', 'parts/{part:id}');
+Route::redirect('/official/{partfile}', '/parts/{partfile}');
 
 Route::redirect('/search', '/parts/list');
 Route::redirect('/search/part', '/parts/list');
@@ -156,5 +156,5 @@ Route::redirect('/sticker-sheets/{sheet}', '/parts/sticker-sheets/{sheet}');
 Route::redirect('/tracker/list', '/parts/list');
 Route::redirect('/tracker/search', '/parts/list');
 Route::redirect('/tracker/suffixsearch', '/search/suffix');
-Route::redirect('/tracker/{part:id}', 'parts/{part:id}');
-//Route::redirect('/tracker/{unofficialpart}', 'parts/{unofficialpart}');
+Route::redirect('/tracker/{part:id}', '/parts/{part:id}');
+Route::redirect('/tracker/{partfile}', '/parts/{partfile}');
