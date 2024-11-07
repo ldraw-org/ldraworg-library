@@ -1,6 +1,6 @@
 <div class="flex grow md:justify-end relative">
-    <form class="border rounded" id="pt_search_comp" action="" method="get" name="pt_search_comp">
-        <input class="border-none w-full md:w-fit" name="s" type="text" wire:model.live="search" wire:input="doSearch" placeholder="Quick Search">
+    <form class="border rounded" id="pt_search_comp" action="{{route('parts.list', ['tableSearch' => $search])}}" method="get" name="pt_search_comp">
+        <input class="border-none w-full md:w-fit" name="tableSearch" type="text" wire:model.live="search" wire:input="doSearch" placeholder="Quick Search">
         <div 
             class="flex flex-col border rounded bg-white absolute mt-2 right-0 w-96 h-72 overflow-scroll z-50 divide-y divide-black"
             x-show="$wire.hasResults"

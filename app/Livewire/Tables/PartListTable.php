@@ -21,9 +21,13 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Url;
 
 class PartListTable extends BasicTable
 {
+    #[Url]
+    public $tableSearch = '';
+    
     public function table(Table $table): Table
     {
         return $table
