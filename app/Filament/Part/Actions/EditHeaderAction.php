@@ -8,14 +8,13 @@ use App\LDraw\Parse\Parser;
 use App\LDraw\PartManager;
 use App\Models\Part;
 use App\Models\PartCategory;
-use App\Models\PartKeyword;
 use App\Models\PartType;
 use App\Models\PartTypeQualifier;
 use App\Models\User;
+use App\Rules\PatternKeyword;
 use Closure;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
@@ -74,8 +73,7 @@ class EditHeaderAction
                 )
                 ->hidden($part->type->folder !== 'parts/')
                 ->disabled($part->type->folder !== 'parts/')
-                ->selectablePlaceholder(false)
-                ->native(false),
+                ->selectablePlaceholder(false),
             Select::make('part_type_qualifier_id')
                 ->relationship(
                     name: 'type_qualifier',
@@ -83,8 +81,7 @@ class EditHeaderAction
                 )
                 ->nullable()
                 ->hidden($part->type->folder !== 'parts/')
-                ->disabled($part->type->folder !== 'parts/')
-                ->native(false),
+                ->disabled($part->type->folder !== 'parts/'),
             Textarea::make('help')
                 ->helperText('Do not include 0 !HELP; each line will be a separate help line')
                 ->extraAttributes(['class' => 'font-mono'])
@@ -99,8 +96,9 @@ class EditHeaderAction
                 ->helperText('A !CATEGORY meta will be added only if this differs from the first word in the description')
                 ->hidden($part->type->folder !== 'parts/')
                 ->disabled($part->type->folder !== 'parts/')
+                ->searchable()
+                ->preload()
                 ->selectablePlaceholder(false)
-                ->native(false)
                 ->rules([
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
                         if ($part->type->folder == 'parts/') {
@@ -116,20 +114,9 @@ class EditHeaderAction
                 ->helperText('Note: keyword order will not be preserved')
                 ->extraAttributes(['class' => 'font-mono'])
                 ->rows(3)
-                ->rules([
-                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
-                        $keywords = array_map(fn(string $kw) => trim($kw), explode(',', str_replace("\n", ",", $value)));
-                        if (
-                            $part->type->folder == 'parts/' &&
-                            $part->category->category !== 'Moved' &&
-                            $part->category->category !== 'Sticker' &&
-                            $part->category->category !== 'Sticker Shortcut' &&
-                            ! app(\App\LDraw\Check\PartChecker::class)->checkPatternForSetKeyword($part->name(), $keywords)
-                        ) {
-                            $fail('partcheck.keywords')->translate();
-                        }
-                    }
-                ]),
+                ->hidden($part->type->folder !== 'parts/')
+                ->disabled($part->type->folder !== 'parts/')
+                ->rules([new PatternKeyword()]),
             TextInput::make('cmdline')
                 ->nullable()
                 ->string(),
