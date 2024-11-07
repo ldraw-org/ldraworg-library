@@ -16,7 +16,7 @@
         <div class="rounded border p-2">
             Part Not Found
         </div>
-    @else
+    @elseif(!is_null($part))
         <div class="text-xl font-bold p-2">
             Pattern/Composite/Sticker Shortcut Reference for {{$part->name()}} - {{$part->description}}
         </div>
