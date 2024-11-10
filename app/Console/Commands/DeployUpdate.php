@@ -53,7 +53,6 @@ class DeployUpdate extends Command
                     } else {
                         $material = mb_strtolower($material);
                         $color[$material] = true;
-                        if (!in_array($material, ['chrome', 'pearlescent', 'matte metallic', 'metal', 'rubber'])) dd($color);
                     }
                 }
                 LdrawColour::create($color);

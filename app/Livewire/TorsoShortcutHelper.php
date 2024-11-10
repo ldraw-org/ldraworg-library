@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Events\PartSubmitted;
+use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Jobs\UpdateZip;
 use App\Models\Part;
 use Closure;
@@ -180,12 +181,8 @@ class TorsoShortcutHelper extends Component implements HasForms
         return Fieldset::make()
             ->label("Part {$index}")
             ->schema([
-                Select::make("part_{$index}_color")
-                    ->label('Color')
-                    ->options($this->colors)
-                    ->preload()
-                    ->selectablePlaceholder(false)
-                    ->allowHtml(),
+                LDrawColourSelect::make("part_{$index}_color")
+                    ->label('Color'),  
                 Select::make("part_{$index}_id")
                     ->label('Name - Description')
                     ->options(fn () => array_key_exists($index-1, $this->templateParts()) ? $this->selectParts[$this->templateParts()[$index-1]]['subs'] : [])

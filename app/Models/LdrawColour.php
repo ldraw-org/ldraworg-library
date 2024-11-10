@@ -25,6 +25,7 @@ class LdrawColour extends Model
         ];
     }
 
+/*
     public function category(): BelongsTo
     {
         return $this->belongsTo(LdrawColourCategory::class, 'ldraw_colour_category_id', 'id');
@@ -33,6 +34,26 @@ class LdrawColour extends Model
     public function ldconfigs(): BelongsToMany
     {
         return $this->belongsToMany(Ldconfig::class, 'ldconfigs_ldraw_colours', 'ldraw_colour_id', 'ldconfig_id');
+    }
+*/
+    public function labelTextColor(): string
+    {
+        $int = hexdec($this->value);
+        $rgb = array("red" => ((0xFF & ($int >> 0x10)) / 255.0), "green" => ((0xFF & ($int >> 0x8)) / 255.0), "blue" => ((0xFF & $int) / 255.0));
+        foreach ($rgb as $tcolor => $value) {
+            if ($value <= 0.03928) {
+              $rgb[$tcolor] = $value / 12.92;
+            }
+            else {
+              $rgb[$tcolor] = (($value + 0.055) / 1.055) ** 2.4;
+            }
+        }
+        $L = 0.2126 * $rgb['red'] + 0.7152 * $rgb['green'] + 0.0722 * $rgb['blue'];
+        if ($L > 0.179) {
+            return 'text-gray-950';
+        }
+        
+        return 'text-gray-50';
     }
 
     public function toString(): string {
@@ -53,12 +74,12 @@ class LdrawColour extends Model
             $colour .= " RUBBER";
         }
         if ($this->matte_metallic === true) {
-            $colour .= " MATE_METALLIC";
+            $colour .= " MATTE_METALLIC";
         }
         if ($this->metal === true) {
             $colour .= " METAL";
         }
-        if (!$this->gitter || !$this->speckle) {
+        if (!$this->glitter || !$this->speckle) {
             $colour .= " MATERIAL";
             if ($this->glitter == true) {
                 $colour .= " GLITTER";
