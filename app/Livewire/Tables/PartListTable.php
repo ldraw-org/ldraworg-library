@@ -76,7 +76,7 @@ class PartListTable extends BasicTable
                 ->multiple(),
             SelectFilter::make('type')
                 ->label('!LDRAW_ORG Type')
-                ->relationship('type', 'type')
+                ->relationship(name: 'type', titleAttribute: 'name')
                 ->preload()
                 ->multiple(),
             QueryBuilder::make()
@@ -116,7 +116,7 @@ class PartListTable extends BasicTable
                         ->label('!LDRAW_ORG Type')
                         ->selectable(
                             IsRelatedToOperator::make()
-                                ->titleAttribute('type')
+                                ->titleAttribute('name')
                                 ->preload()
                                 ->multiple(),
                         ),
