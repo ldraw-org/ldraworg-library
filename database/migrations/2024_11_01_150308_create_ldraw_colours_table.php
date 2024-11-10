@@ -23,7 +23,7 @@ return new class extends Migration
             $table->boolean('chrome')->default(false);
             $table->boolean('pearlescent')->default(false);
             $table->boolean('rubber')->default(false);
-            $table->boolean('matte_mettalic')->default(false);
+            $table->boolean('matte_metallic')->default(false);
             $table->boolean('metal')->default(false);
             $table->boolean('glitter')->default(false);
             $table->boolean('speckle')->default(false);
