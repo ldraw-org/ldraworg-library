@@ -63,6 +63,7 @@ class PartListTable extends BasicTable
         return [
             SelectFilter::make('vote_sort')
                 ->label('Vote Status')
+                ->multiple()
                 ->options([
                     '1' => 'Certified/Official',
                     '2' => 'Needs Admin Review',
