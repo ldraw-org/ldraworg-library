@@ -8,6 +8,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table as Table;
 use Livewire\Attributes\Layout;
@@ -30,6 +31,17 @@ class Weekly extends Component implements HasForms, HasTable
             ->groups([
                 Group::make('week')
                     ->date(),
+            ])
+            ->filters([
+                SelectFilter::make('vote_sort')
+                ->label('Vote Status')
+                ->multiple()
+                ->options([
+                    '1' => 'Certified',
+                    '2' => 'Needs Admin Review',
+                    '3' => 'Needs More Votes',
+                    '5' => 'Errors Found'
+                ]),
             ])
             ->actions(PartTable::actions())
             ->defaultGroup('week')
