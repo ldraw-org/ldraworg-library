@@ -18,6 +18,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -55,7 +56,13 @@ class TorsoShortcutHelper extends Component implements HasForms
                         ->schema([
                             Select::make('torso')
                                 ->options(function() {
-                                    $parts = Part::doesntHave('parents')
+                                    $parts = Part::where(fn (Builder $query): Builder => 
+                                            $query
+                                                ->orDoesntHave('parents')
+                                                ->orWhereHas('parents', fn (Builder $query2): Builder => 
+                                                    $query2->whereRelation('category', 'category', 'Moved')
+                                                )
+                                        )
                                         ->doesntHave('unofficial_part')
                                         ->where('filename', 'LIKE', 'parts/973p%.dat')
                                         ->where('description', 'NOT LIKE', '~%')
