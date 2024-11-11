@@ -132,6 +132,12 @@
             @if ($this->viewBasePartAction->isVisible())
                 {{ $this->viewBasePartAction }}
             @endif
+            @if ($this->viewRebrickableAction->isVisible())
+                {{ $this->viewRebrickableAction }}
+            @endif
+            @if ($this->viewBricklinkAction->isVisible())
+                {{ $this->viewBrickLinkAction }}
+            @endif
         </div>
         <div class="w-full p-4 border rounded-md">
           <div class="flex flex-col md:flex-row-reverse w-full">

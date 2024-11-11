@@ -445,6 +445,35 @@ class Show extends Component implements HasForms, HasActions
             ->visible(!is_null($this->part->base_part));
     }
 
+    public function viewRebrickableAction(): Action
+    {
+        return Action::make('viewRebrickable')
+            ->button()
+            ->color('gray')
+            ->label("View on Rebrickable")
+            ->url('https://rebrickable.com/parts/'. $this->getSiteKeyword('Rebrickable'))
+            ->visible(!is_null($this->getSiteKeyword('Rebrickable')));
+    }
+
+    public function viewBricklinkAction(): Action
+    {
+        return Action::make('viewBricklink')
+            ->button()
+            ->color('gray')
+            ->label("View on Bricklink")
+            ->url('https://www.bricklink.com/v2/catalog/catalogitem.page?P=' . $this->getSiteKeyword('Bricklink'))
+            ->visible(!is_null($this->getSiteKeyword('Bricklink')));
+    }
+
+    protected function getSiteKeyword(string $site): ?string
+    {
+        $kw = $this->part->keywords()->where('keyword', 'LIKE', "$site %")->first()?->keyword;
+        if (!is_null($kw)) {
+            return str_replace("$site ", '', $kw);
+        }
+        
+        return null;
+    }
     public function viewFixAction(): Action
     {
         return Action::make('viewFix')
