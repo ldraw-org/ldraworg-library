@@ -472,4 +472,41 @@ class Parser
         }
         return $index + 1;
     }
+
+    public function getColours(string $text): ?array
+    {
+        $colors = $this->patternMatchAll('colour', $text, PREG_SET_ORDER);
+        if (!is_null($colors)) {
+            $colors = collect($colors);
+            $colors = $colors->map(function (array $color, int $key) {
+                $color = array_filter($color, fn ($k) => is_string($k), ARRAY_FILTER_USE_KEY);
+                $color = array_map(function($val) { return $val == '' ? null : $val; }, $color);
+                $color = array_merge(['alpha' => null, 'luminance' => null, 'material' => null], $color);
+                $material = $color['material'];
+                unset($color['material']);
+                if (!is_null($material)) {
+                    $mat = $this->patternMatch('colour_material', $material);
+                    if (!is_null($mat)) {
+                        $mat = array_filter($mat, fn ($k) => is_string($k), ARRAY_FILTER_USE_KEY);
+                        $mat = array_map(function($val) { return $val == '' ? null : $val; }, $mat);
+                        $mat = array_merge(['alpha' => null, 'luminance' => null, 'vfraction' => null, 'size' => null, 'maxsize' => null, 'minsize' => null], $mat);
+                        foreach($mat as $index => $value) {
+                            if ($index == 'type') {
+                                $color[mb_strtolower($value)] = true;
+                            } else {
+                                $color["material_{$index}"] = $value;
+                            }
+                        }
+                    } else {
+                        $material = mb_strtolower($material);
+                        $color[$material] = true;
+                    }
+                }
+                return $color;
+            });
+            return $colors->all();
+        }
+
+        return null;
+    }
 }

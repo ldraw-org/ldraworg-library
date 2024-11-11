@@ -26,6 +26,6 @@ class UpdateColours extends Command
      */
     public function handle()
     {
-        LDrawColourManager::importColours();
+        app(LDrawColourManager::class)->importColours();
     }
 }
