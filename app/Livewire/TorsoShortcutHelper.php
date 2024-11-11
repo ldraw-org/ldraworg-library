@@ -40,6 +40,17 @@ class TorsoShortcutHelper extends Component implements HasForms
         'parts/102195.dat',
         'parts/16360.dat',
         'parts/76382.dat',
+        'parts/10677.dat',
+        'parts/11398.dat',
+        'parts/12896.dat',
+        'parts/24319.dat',
+        'parts/34415.dat',
+        'parts/63208.dat',
+        'parts/66614.dat',
+        'parts/84638.dat',
+        'parts/97149.dat',
+        'parts/87858.dat',
+        'parts/98642.dat',
     ];
     
     public function mount(): void
@@ -56,12 +67,8 @@ class TorsoShortcutHelper extends Component implements HasForms
                         ->schema([
                             Select::make('torso')
                                 ->options(function() {
-                                    $parts = Part::where(fn (Builder $query): Builder => 
-                                            $query
-                                                ->orDoesntHave('parents')
-                                                ->orWhereHas('parents', fn (Builder $query2): Builder => 
-                                                    $query2->whereRelation('category', 'category', 'Moved')
-                                                )
+                                    $parts = Part::whereDoesntHave('parents', fn (Builder $query): Builder =>
+                                            $query->where('description', 'LIKE', 'Minifig Torso%')
                                         )
                                         ->doesntHave('unofficial_part')
                                         ->where('filename', 'LIKE', 'parts/973p%.dat')
