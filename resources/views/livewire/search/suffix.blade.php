@@ -55,13 +55,13 @@
         <div class="rounded border p-2">
             @switch($activeTab)
                 @case('patterns')
-                    <x-part.grid :parts="$part->patterns->load('votes', 'official_part')" />
+                    <x-part.grid :parts="$part->patterns->load('votes', 'official_part')->sortBy('filename')" />
                     @break
                 @case('composites')
-                    <x-part.grid :parts="$part->composites->load('votes', 'official_part')" />
+                    <x-part.grid :parts="$part->composites->load('votes', 'official_part')->sortBy('filename')" />
                     @break
                 @case('shortcuts')
-                    <x-part.grid :parts="$part->shortcuts->load('votes', 'official_part')" />
+                    <x-part.grid :parts="$part->shortcuts->load('votes', 'official_part')->sortBy('filename')" />
                     @break
             @endswitch
         </div>
