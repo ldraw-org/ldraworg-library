@@ -346,12 +346,14 @@
                         .then(response => response.json())
                         .then((response) => {
                             part_paths = response;
-                            LDR.Colors.load(() => {},() => {},part_paths['ldconfig.ldr']);
-                            scene = new LDrawOrg.Model(
-                                document.getElementById('ldbi-canvas'), 
-                                document.getElementById('filename').innerHTML.replace(/^(parts\/|p\/)/, ''),
-                                {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
-                            );
+                            LDR.Colors.load(() => {
+                                scene = new LDrawOrg.Model(
+                                    document.getElementById('ldbi-canvas'), 
+                                    document.getElementById('filename').innerHTML.replace(/^(parts\/|p\/)/, ''),
+                                    {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
+                                );
+                            },() => {},part_paths['ldconfig.ldr']);
+                            
                             window.addEventListener('resize', () => scene.onChange());
                         })
                 }
