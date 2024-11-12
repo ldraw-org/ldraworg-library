@@ -352,9 +352,9 @@
                                     document.getElementById('filename').innerHTML.replace(/^(parts\/|p\/)/, ''),
                                     {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
                                 );
+                                window.addEventListener('resize', () => scene.onChange());
                             },() => {},part_paths['ldconfig.ldr']);
                             
-                            window.addEventListener('resize', () => scene.onChange());
                         })
                 }
             });
