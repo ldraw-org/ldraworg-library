@@ -132,11 +132,16 @@
             @if ($this->viewBasePartAction->isVisible())
                 {{ $this->viewBasePartAction }}
             @endif
+        </div>
+        <div>
             @if ($this->viewRebrickableAction->isVisible())
                 {{ $this->viewRebrickableAction }}
             @endif
             @if ($this->viewBricklinkAction->isVisible())
                 {{ $this->viewBrickLinkAction }}
+            @endif
+            @if ($this->viewBrickowlAction->isVisible())
+                {{ $this->viewBrickowlAction }}
             @endif
         </div>
         <div class="w-full p-4 border rounded-md">

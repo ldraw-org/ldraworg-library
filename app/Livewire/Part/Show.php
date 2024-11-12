@@ -465,6 +465,16 @@ class Show extends Component implements HasForms, HasActions
             ->visible(!is_null($this->getSiteKeyword('Bricklink')));
     }
 
+    public function viewBrickowlAction(): Action
+    {
+        return Action::make('viewBrickowl')
+            ->button()
+            ->color('gray')
+            ->label("View on Brickowl")
+            ->url('https://www.brickowl.com//catalog/' . $this->getSiteKeyword('Brickowl'))
+            ->visible(!is_null($this->getSiteKeyword('Brickowl')));
+    }
+
     protected function getSiteKeyword(string $site): ?string
     {
         $kw = $this->part->keywords()->where('keyword', 'LIKE', "$site %")->first()?->keyword;
