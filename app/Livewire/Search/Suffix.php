@@ -48,8 +48,11 @@ class Suffix extends Component implements HasForms
     public function doSearch()
     {
         $this->form->getState();
-        $part = Part::with('patterns', 'composites', 'shortcuts')->where('filename', "parts/{$this->basepart}.dat");
-        $this->part = $part->official()->first() ?? $part->first();
+        $part = Part::with('patterns', 'composites', 'shortcuts')->where('filename', "parts/{$this->basepart}.dat")->official()->first();
+        if (is_null($part)) {   
+            $part = Part::with('patterns', 'composites', 'shortcuts')->where('filename', "parts/{$this->basepart}.dat")->first();
+        }
+        $this->part = $part;
     }
 
     #[Layout('components.layout.tracker')]
