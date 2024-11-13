@@ -11,7 +11,7 @@ use App\LDraw\Parse\Parser;
 use App\LDraw\PartManager;
 use App\LDraw\Rebrickable;
 use App\LDraw\Render\LDView;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -31,8 +31,8 @@ class LDrawServiceProvider extends ServiceProvider
         $this->app->bind(Parser::class, function (Application $app) {
             return new Parser(
                 config('ldraw.patterns'),
-                \App\Models\PartType::pluck('type')->all(),
-                \App\Models\PartTypeQualifier::pluck('type')->all(),
+                \App\Models\Part\PartType::pluck('type')->all(),
+                \App\Models\Part\PartTypeQualifier::pluck('type')->all(),
                 $app->make(LibrarySettings::class),
             );
         });

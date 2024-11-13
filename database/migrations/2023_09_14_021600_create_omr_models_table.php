@@ -15,7 +15,7 @@ return new class () extends Migration {
             $table->timestamps();
             $table->foreignIdFor(\App\Models\User::class)->constrained();
             $table->foreignIdFor(\App\Models\Omr\Set::class)->constrained();
-            $table->foreignIdFor(\App\Models\PartLicense::class)->constrained();
+            $table->foreignIdFor(\App\Models\Part\PartLicense::class)->constrained();
             $table->boolean('missing_parts');
             $table->boolean('missing_patterns');
             $table->boolean('missing_stickers');

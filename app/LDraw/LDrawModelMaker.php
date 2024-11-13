@@ -3,7 +3,7 @@
 namespace App\LDraw;
 
 use App\Models\Omr\OmrModel;
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 

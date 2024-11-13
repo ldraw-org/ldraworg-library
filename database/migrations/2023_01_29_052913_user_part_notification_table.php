@@ -14,7 +14,7 @@ return new class () extends Migration {
     {
         Schema::create('user_part_notifications', function (Blueprint $table) {
             $table->foreignIdFor(App\Models\User::class)->constrained();
-            $table->foreignIdFor(App\Models\Part::class)->constrained();
+            $table->foreignIdFor(App\Models\Part\Part::class)->constrained();
             $table->index('user_id');
             $table->index('part_id');
             $table->unique(['user_id', 'part_id']);

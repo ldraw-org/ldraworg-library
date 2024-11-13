@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
-use App\Models\PartType;
+use App\Models\Part\PartType;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;

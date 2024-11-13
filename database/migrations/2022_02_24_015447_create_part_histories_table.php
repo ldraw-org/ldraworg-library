@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User;
-use App\Models\Part;
+use App\Models\Part\Part;
 
 class CreatePartHistoriesTable extends Migration
 {

@@ -2,7 +2,7 @@
 
 namespace App\Models\Rebrickable;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

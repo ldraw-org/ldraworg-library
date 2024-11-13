@@ -2,7 +2,7 @@
 
 namespace App\LDraw\Parse;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 
 class ParsedPart
 {

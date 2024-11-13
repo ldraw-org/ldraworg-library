@@ -11,7 +11,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('part_events', function (Blueprint $table) {
-            $table->foreignIdFor(\App\Models\PartRelease::class)->nullable()->change();
+            $table->foreignIdFor(\App\Models\Part\PartRelease::class)->nullable()->change();
         });
     }
 
@@ -21,7 +21,7 @@ return new class () extends Migration {
     public function down(): void
     {
         Schema::table('part_events', function (Blueprint $table) {
-            $table->foreignIdFor(\App\Models\PartRelease::class)->change();
+            $table->foreignIdFor(\App\Models\Part\PartRelease::class)->change();
         });
     }
 };

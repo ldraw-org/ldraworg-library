@@ -4,8 +4,8 @@ namespace App\Observers;
 
 use App\Jobs\MassHeaderGenerate;
 use App\Models\MybbUser;
-use App\Models\Part;
-use App\Models\PartLicense;
+use App\Models\Part\Part;
+use App\Models\Part\PartLicense;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;

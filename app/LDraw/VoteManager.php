@@ -4,7 +4,7 @@ namespace App\LDraw;
 
 use App\Events\PartComment;
 use App\Events\PartReviewed;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\User;
 use App\Models\Vote;
 use Illuminate\Database\Eloquent\Builder;

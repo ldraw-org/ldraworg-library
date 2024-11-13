@@ -4,7 +4,7 @@ namespace App\LDraw;
 
 use Illuminate\Support\Facades\Storage;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
-use App\Models\Part;
+use App\Models\Part\Part;
 
 class ZipFiles
 {

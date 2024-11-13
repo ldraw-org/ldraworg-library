@@ -5,7 +5,7 @@ namespace App\Livewire\Part;
 use App\Events\PartSubmitted;
 use App\Jobs\UpdateZip;
 use App\LDraw\PartManager;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\User;
 use Closure;
 use Filament\Forms\Concerns\InteractsWithForms;

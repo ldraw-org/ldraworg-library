@@ -2,7 +2,7 @@
 
 namespace App\Livewire\PartEvent;
 
-use App\Models\PartEvent;
+use App\Models\Part\PartEvent;
 use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;

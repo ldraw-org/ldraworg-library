@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\PartEventSubscriber;
 use App\Models\Omr\Set;
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;

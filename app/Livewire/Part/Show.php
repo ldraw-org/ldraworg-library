@@ -6,7 +6,7 @@ use App\Filament\Actions\EditHeaderAction;
 use App\Filament\Actions\EditNumberAction;
 use App\LDraw\PartManager;
 use App\LDraw\VoteManager;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\Vote;
 use App\Models\VoteType;
 use Filament\Actions\Action;

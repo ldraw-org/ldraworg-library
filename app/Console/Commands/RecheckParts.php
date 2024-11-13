@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 

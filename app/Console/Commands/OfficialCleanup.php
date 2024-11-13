@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Console\Command;
 
 class OfficialCleanup extends Command

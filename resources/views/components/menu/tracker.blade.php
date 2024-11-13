@@ -1,6 +1,6 @@
 <x-menu>
     <x-menu.library-dropdown />
-    @can('create', \App\Models\Part::class)
+    @can('create', \App\Models\Part\Part::class)
         <x-menu.item label="Submit" link="{{route('tracker.submit')}}" />
     @endcan
     <x-menu.item label="Parts List" link="{{route('parts.list')}}" /> 

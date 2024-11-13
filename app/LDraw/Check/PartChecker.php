@@ -2,11 +2,11 @@
 
 namespace App\LDraw\Check;
 
-use App\Models\PartType;
+use App\Models\Part\PartType;
 use App\Models\User;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\LDraw\Parse\ParsedPart;
-use App\Models\PartCategory;
+use App\Models\Part\PartCategory;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -153,7 +153,7 @@ class PartChecker
 
         //Check qualifiers
         if (!empty($part->qual)) {
-            $pq = \App\Models\PartTypeQualifier::firstWhere('type', $part->qual);
+            $pq = \App\Models\Part\PartTypeQualifier::firstWhere('type', $part->qual);
             switch ($pq->type) {
                 case 'Physical_Colour':
                     $errors[] = __('partcheck.type.phycolor');
@@ -279,7 +279,7 @@ class PartChecker
 
     public function checkLibraryApprovedLicense(string $license): bool
     {
-        $liblic = \App\Models\PartLicense::firstWhere('text', $license);
+        $liblic = \App\Models\Part\PartLicense::firstWhere('text', $license);
         return !is_null($liblic) && $liblic->name !== 'NonCA';
     }
 

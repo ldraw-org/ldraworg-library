@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Part;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\LDraw\SupportFiles;
-use App\Models\PartRelease;
+use App\Models\Part\PartRelease;
 
 class PartUpdateController extends Controller
 {

@@ -3,8 +3,8 @@
 namespace App\Livewire\Release;
 
 use App\Jobs\MakePartRelease;
-use App\Models\Part;
-use App\Models\PartRelease;
+use App\Models\Part\Part;
+use App\Models\Part\PartRelease;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;

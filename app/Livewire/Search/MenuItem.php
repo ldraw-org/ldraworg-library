@@ -3,7 +3,7 @@
 namespace App\Livewire\Search;
 
 use App\Models\Omr\Set;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;

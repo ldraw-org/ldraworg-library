@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;

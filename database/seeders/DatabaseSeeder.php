@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use App\LDraw\LibraryConfig;
-use App\Models\PartCategory;
-use App\Models\PartEventType;
-use App\Models\PartLicense;
-use App\Models\PartType;
-use App\Models\PartTypeQualifier;
+use App\Models\Part\PartCategory;
+use App\Models\Part\PartEventType;
+use App\Models\Part\PartLicense;
+use App\Models\Part\PartType;
+use App\Models\Part\PartTypeQualifier;
 use App\Models\VoteType;
 use Illuminate\Database\Seeder;
 

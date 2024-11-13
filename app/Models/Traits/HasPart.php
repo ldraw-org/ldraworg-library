@@ -2,7 +2,7 @@
 
 namespace App\Models\Traits;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasPart

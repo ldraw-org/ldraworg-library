@@ -4,11 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User;
-use App\Models\PartCategory;
-use App\Models\PartRelease;
-use App\Models\PartType;
-use App\Models\PartTypeQualifier;
-use App\Models\PartLicense;
+use App\Models\Part\PartCategory;
+use App\Models\Part\PartRelease;
+use App\Models\Part\PartType;
+use App\Models\Part\PartTypeQualifier;
+use App\Models\Part\PartLicense;
 
 class CreatePartsTable extends Migration
 {

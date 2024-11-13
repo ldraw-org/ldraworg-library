@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\ReviewSummary\ReviewSummary;
 use App\Models\ReviewSummary\ReviewSummaryItem;
 use Filament\Forms\Components\Textarea;

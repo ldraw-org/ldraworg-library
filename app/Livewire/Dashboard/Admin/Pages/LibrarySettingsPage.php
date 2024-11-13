@@ -3,8 +3,8 @@
 namespace App\Livewire\Dashboard\Admin\Pages;
 
 use App\Jobs\UpdateImage;
-use App\Models\Part;
-use App\Models\PartLicense;
+use App\Models\Part\Part;
+use App\Models\Part\PartLicense;
 use App\Settings\LibrarySettings;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;

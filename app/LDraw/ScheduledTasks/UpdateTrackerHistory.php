@@ -3,7 +3,7 @@
 namespace App\LDraw\ScheduledTasks;
 
 use App\Models\TrackerHistory;
-use App\Models\Part;
+use App\Models\Part\Part;
 
 class UpdateTrackerHistory
 {

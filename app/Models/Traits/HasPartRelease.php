@@ -9,7 +9,7 @@ trait HasPartRelease
 {
     public function release(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\PartRelease::class, 'part_release_id', 'id');
+        return $this->belongsTo(\App\Models\Part\PartRelease::class, 'part_release_id', 'id');
     }
 
     public function scopeOfficial(Builder $query): void

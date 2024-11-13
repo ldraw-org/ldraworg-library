@@ -5,8 +5,8 @@ namespace App\Console\Commands;
 use App\Jobs\UpdateImage;
 use App\LDraw\PartManager;
 use App\Models\Omr\OmrModel;
-use App\Models\Part;
-use App\Models\PartKeyword;
+use App\Models\Part\Part;
+use App\Models\Part\PartKeyword;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 

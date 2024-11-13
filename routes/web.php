@@ -81,8 +81,8 @@ Route::prefix('parts')->name('parts.')->group(function () {
 Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::view('/', 'tracker.main')->name('main');
 
-    Route::middleware(['auth', 'can:create,App\Models\Part', 'currentlic'])->get('/submit', Submit::class)->name('submit');
-    Route::middleware(['auth', 'can:create,App\Models\Part', 'currentlic'])->get('/torso-helper', TorsoShortcutHelper::class)->name('torso-helper');
+    Route::middleware(['auth', 'can:create,App\Models\Part\Part', 'currentlic'])->get('/submit', Submit::class)->name('submit');
+    Route::middleware(['auth', 'can:create,App\Models\Part\Part', 'currentlic'])->get('/torso-helper', TorsoShortcutHelper::class)->name('torso-helper');
 
     Route::get('/weekly', Weekly::class)->name('weekly');
     Route::get('/history', TrackerHistoryController::class)->name('history');
@@ -115,12 +115,12 @@ Route::middleware(['auth', 'can:admin.view-dashboard'])->prefix('admin')->name('
     Route::middleware(['can:create,App\Models\Users'])->get('/users', UserManagePage::class)->name('users.index');
     Route::middleware(['can:viewAny,App\Models\ReviewSummary\ReviewSummary'])->get('/summaries', ReviewSummaryManagePage::class)->name('summaries.index');
     Route::middleware(['can:create,App\Models\Role'])->get('/roles', RoleManagePage::class)->name('roles.index');
-    Route::middleware(['can:create,App\Models\PartLicense'])->get('/part-licenses', PartLicenseManagePage::class)->name('part-licenses.index');
+    Route::middleware(['can:create,App\Models\Part\PartLicense'])->get('/part-licenses', PartLicenseManagePage::class)->name('part-licenses.index');
     Route::middleware(['can:documentation.edit'])->get('/documents', DocumentManagePage::class)->name('documents.index');
     Route::middleware(['can:documentation.edit'])->get('/document-categories', DocumentCategoryManagePage::class)->name('document-categories.index');
-    Route::middleware(['can:create,App\Models\PartCategory'])->get('/part-categories', PartCategoryManagePage::class)->name('part-categories.index');
-    Route::middleware(['can:manage,App\Models\PartKeyword'])->get('/part-keywords', PartKeywordManagePage::class)->name('part-keywords.index');
-    Route::middleware(['can:create,App\Models\PartType'])->get('/part-types', PartTypeManagePage::class)->name('part-types.index');
+    Route::middleware(['can:create,App\Models\Part\PartCategory'])->get('/part-categories', PartCategoryManagePage::class)->name('part-categories.index');
+    Route::middleware(['can:manage,App\Models\Part\PartKeyword'])->get('/part-keywords', PartKeywordManagePage::class)->name('part-keywords.index');
+    Route::middleware(['can:create,App\Models\Part\PartType'])->get('/part-types', PartTypeManagePage::class)->name('part-types.index');
     Route::middleware(['can:settings.edit'])->get('/settings', LibrarySettingsPage::class)->name('settings.index');
 });
 

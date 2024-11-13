@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Part;
 
 use App\Http\Controllers\Controller;
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 

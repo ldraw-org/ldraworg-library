@@ -2,7 +2,7 @@
 
 namespace App\LDraw;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Support\MessageBag;
 
 class SetPbg

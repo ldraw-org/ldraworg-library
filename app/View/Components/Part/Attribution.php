@@ -3,7 +3,7 @@
 namespace App\View\Components\Part;
 
 use Illuminate\View\Component;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 

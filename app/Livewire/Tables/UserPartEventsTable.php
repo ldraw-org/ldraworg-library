@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\PartEvent;
+use App\Models\Part\PartEvent;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;

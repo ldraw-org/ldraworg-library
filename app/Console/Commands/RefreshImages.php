@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\UpdateImage;
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Console\Command;
 
 class RefreshImages extends Command

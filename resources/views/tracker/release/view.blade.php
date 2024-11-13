@@ -9,7 +9,7 @@
                             <div>
                                 {{$filename}} - {{$description}}
                             </div>
-                            <a class="rounded p-2 my-1 border border-gray-950 bg-gray-100" href="{{route('parts.show', App\Models\Part::official()->where('filename', $filename)->first())}}">
+                            <a class="rounded p-2 my-1 border border-gray-950 bg-gray-100" href="{{route('parts.show', App\Models\Part\Part::official()->where('filename', $filename)->first())}}">
                                 View Part
                             </a>
                         </div>

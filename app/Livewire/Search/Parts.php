@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Search;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\User;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Section;

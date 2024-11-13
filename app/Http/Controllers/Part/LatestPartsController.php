@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Part;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\PartEvent;
+use App\Models\Part\PartEvent;
 
 class LatestPartsController extends Controller
 {

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Part;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 

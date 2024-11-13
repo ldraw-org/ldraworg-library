@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Tracker;
 
-use App\Models\PartLicense;
+use App\Models\Part\PartLicense;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;

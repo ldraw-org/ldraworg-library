@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;

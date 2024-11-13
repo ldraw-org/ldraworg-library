@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\StickerSheet;
 
 use App\Http\Controllers\Controller;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\StickerSheet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;

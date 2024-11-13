@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\Vote;
 use App\Livewire\Tables\PartTable;
 use App\LDraw\VoteManager;

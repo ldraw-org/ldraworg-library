@@ -1,26 +1,26 @@
 <x-menu>
     <x-menu.library-dropdown />
     @if(
-        Auth::user()->can('create', \App\Models\PartCategory::class) ||
-        Auth::user()->can('manage', \App\Models\PartKeyword::class) ||
-        Auth::user()->can('create', \App\Models\PartLicense::class) ||
-        Auth::user()->can('create', \App\Models\PartType::class) ||
+        Auth::user()->can('create', \App\Models\Part\PartCategory::class) ||
+        Auth::user()->can('manage', \App\Models\Part\PartKeyword::class) ||
+        Auth::user()->can('create', \App\Models\Part\PartLicense::class) ||
+        Auth::user()->can('create', \App\Models\Part\PartType::class) ||
         Auth::user()->can('settings.edit')
     )
         <x-menu.dropdown label="Library Management">
             @can('settings.edit')    
             <x-menu.item label="General Library Settings" link="{{route('admin.settings.index')}}" />
             @endcan 
-            @can('create', \App\Models\PartCategory::class)    
+            @can('create', \App\Models\Part\PartCategory::class)    
                 <x-menu.item label="View/Add Part Categories" link="{{route('admin.part-categories.index')}}" />
             @endcan 
-            @can('create', \App\Models\PartType::class)    
+            @can('create', \App\Models\Part\PartType::class)    
                 <x-menu.item label="View/Add Part Types" link="{{route('admin.part-types.index')}}" />
             @endcan
-            @can('manage', \App\Models\PartKeyword::class)    
+            @can('manage', \App\Models\Part\PartKeyword::class)    
                 <x-menu.item label="View/Edit Part Keywords" link="{{route('admin.part-keywords.index')}}" />
             @endcan 
-            @can('create', \App\Models\PartLicence::class)    
+            @can('create', \App\Models\Part\PartLicence::class)    
                 <x-menu.item label="View/Add Part Licenses" link="{{route('admin.part-licenses.index')}}" />
             @endcan
         </x-menu.dropdown>

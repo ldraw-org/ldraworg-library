@@ -2,7 +2,7 @@
 
 namespace App\Models\Traits;
 
-use App\Models\PartLicense;
+use App\Models\Part\PartLicense;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

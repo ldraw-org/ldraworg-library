@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;

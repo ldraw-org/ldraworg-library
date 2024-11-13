@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Part;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Livewire\Tables\PartTable;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;

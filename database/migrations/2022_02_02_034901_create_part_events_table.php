@@ -3,10 +3,10 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Part;
-use App\Models\PartEventType;
+use App\Models\Part\Part;
+use App\Models\Part\PartEventType;
 use App\Models\User;
-use App\Models\PartRelease;
+use App\Models\Part\PartRelease;
 
 class CreatePartEventsTable extends Migration
 {

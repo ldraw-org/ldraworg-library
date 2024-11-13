@@ -2,9 +2,9 @@
 
 namespace App\LDraw;
 
-use App\Models\Part;
-use App\Models\PartCategory;
-use App\Models\PartRelease;
+use App\Models\Part\Part;
+use App\Models\Part\PartCategory;
+use App\Models\Part\PartRelease;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 

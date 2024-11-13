@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Part;
 
 use App\Models\Traits\HasPart;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasUser;
+use App\Models\VoteType;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartEvent extends Model

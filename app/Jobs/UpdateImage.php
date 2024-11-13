@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\LDraw\OmrModelManager;
 use App\LDraw\PartManager;
 use App\Models\Omr\OmrModel;
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

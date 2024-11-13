@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Part;
 
+use App\Models\StickerSheet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasLicense;
 use App\Models\Traits\HasUser;
+use App\Models\User;
+use App\Models\Vote;
 use App\Observers\PartObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

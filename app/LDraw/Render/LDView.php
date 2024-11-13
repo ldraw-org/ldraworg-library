@@ -4,7 +4,7 @@ namespace App\LDraw\Render;
 
 use App\LDraw\LDrawModelMaker;
 use App\Models\Omr\OmrModel;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 use GdImage;
 use Illuminate\Support\Facades\Log;

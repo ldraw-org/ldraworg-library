@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Events\PartSubmitted;
 use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Jobs\UpdateZip;
-use App\Models\Part;
+use App\Models\Part\Part;
 use Closure;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Section;

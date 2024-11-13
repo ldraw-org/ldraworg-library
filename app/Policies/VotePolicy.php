@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Vote;
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 
 class VotePolicy

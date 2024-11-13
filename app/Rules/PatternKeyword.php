@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;

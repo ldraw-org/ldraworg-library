@@ -15,7 +15,7 @@ return new class () extends Migration {
             $table->timestamps();
             $table->integer('order');
             $table->foreignIdFor(\App\Models\ReviewSummary\ReviewSummary::class)->constrained();
-            $table->foreignIdFor(\App\Models\Part::class)->nullable()->constrained();
+            $table->foreignIdFor(\App\Models\Part\Part::class)->nullable()->constrained();
             $table->string('heading')->nullable();
         });
     }

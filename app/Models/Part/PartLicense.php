@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Part;
 
 use App\Models\Traits\HasParts;
 use Illuminate\Database\Eloquent\Model;

@@ -3,8 +3,8 @@
 namespace App\Livewire\Dashboard\Admin\Pages;
 
 use App\Jobs\MassHeaderGenerate;
-use App\Models\Part;
-use App\Models\PartKeyword;
+use App\Models\Part\Part;
+use App\Models\Part\PartKeyword;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;

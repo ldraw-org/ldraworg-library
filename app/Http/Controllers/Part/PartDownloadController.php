@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Part;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Carbon;
-use App\Models\Part;
+use App\Models\Part\Part;
 
 class PartDownloadController extends Controller
 {

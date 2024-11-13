@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
-use App\Models\PartLicense;
+use App\Models\Part\PartLicense;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;

@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Queue\Queueable;

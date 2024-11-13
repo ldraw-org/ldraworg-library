@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Part;
 
 use App\Models\Traits\HasOrder;
 use App\Models\Traits\HasPart;

@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 

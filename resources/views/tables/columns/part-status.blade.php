@@ -1,6 +1,6 @@
 @php
     $state = $getRecord();
-    if ($state instanceof \App\Models\Part) {
+    if ($state instanceof \App\Models\Part\Part) {
         $part = $getRecord();
     } else {
         $part = $state?->part;

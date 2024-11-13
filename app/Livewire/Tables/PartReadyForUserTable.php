@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\Part;
+use App\Models\Part\Part;
 use App\Models\User;
 use App\Livewire\Tables\PartTable;
 use Filament\Forms\Components\Select;
