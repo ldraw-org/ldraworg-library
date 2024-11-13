@@ -4,7 +4,7 @@ namespace App\Livewire\Tables;
 
 use App\Models\Part;
 use App\Models\User;
-use App\Filament\Part\Tables\PartTable;
+use App\Livewire\Tables\PartTable;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Enums\FiltersLayout;

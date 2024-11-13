@@ -4,7 +4,7 @@ namespace App\Livewire\Tables;
 
 use App\Models\Part;
 use App\Models\Vote;
-use App\Filament\Part\Tables\PartTable;
+use App\Livewire\Tables\PartTable;
 use App\LDraw\VoteManager;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;

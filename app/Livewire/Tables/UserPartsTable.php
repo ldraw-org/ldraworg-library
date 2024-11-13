@@ -3,7 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Models\Part;
-use App\Filament\Part\Tables\PartTable;
+use App\Livewire\Tables\PartTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
