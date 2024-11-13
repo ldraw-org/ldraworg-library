@@ -82,6 +82,11 @@ class DailyMaintenance extends Command
             }
         });
 
+        $this->info('Reloading colors for LDConfig');
+        $this->call('lib:update-colours');
+
+        $this->info('Regenerate unofficial zip');
+        $this->call('lib:refresh-zip');
 
     }
 }
