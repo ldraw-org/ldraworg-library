@@ -3,7 +3,7 @@
 namespace App\Filament\Part\Tables;
 
 use App\Models\Part;
-use App\Filament\Part\Tables\Filters\AuthorFilter;
+use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Actions\Action;

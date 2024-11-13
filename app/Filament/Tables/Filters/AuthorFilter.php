@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Part\Tables\Filters;
+namespace App\Filament\Tables\Filters;
 
 use App\Models\User;
 use Filament\Tables\Filters\SelectFilter;

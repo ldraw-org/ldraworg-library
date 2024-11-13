@@ -3,7 +3,7 @@
 namespace App\Livewire\PartEvent;
 
 use App\Models\PartEvent;
-use App\Filament\Part\Tables\Filters\AuthorFilter;
+use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\DatePicker;
