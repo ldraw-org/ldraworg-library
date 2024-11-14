@@ -55,7 +55,7 @@ class UserManagePage extends BasicResourceManagePage
                 TextColumn::make('parts_count')
                     ->counts('parts')
                     ->sortable()
-                    ->url(fn (User $u) => route('search.part', ['s' => $u->name, 'user_id' => $u->id]))
+                    ->url(fn (User $u) => route('parts.list', ['tableSearch' => "\"Author: $u->realname\""]))
             ])
             ->filters([
                 SelectFilter::make('license')
