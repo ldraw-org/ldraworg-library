@@ -14,7 +14,7 @@ class RefreshZip extends Command
      *
      * @var string
      */
-    protected $signature = 'pt:refresh-zip';
+    protected $signature = 'lib:refresh-zip';
 
     /**
      * The console command description.

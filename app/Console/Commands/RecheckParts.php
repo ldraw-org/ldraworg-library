@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class RecheckParts extends Command
 {
-    protected $signature = 'pt:recheck';
+    protected $signature = 'lib:recheck-parts';
 
     protected $description = 'Recheck all parts';
 
