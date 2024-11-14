@@ -92,15 +92,16 @@
                     }
                 };
                 if (WEBGL.isWebGLAvailable()) {
-                    LDR.Colors.load(() => {},() => {},$wire.parts['ldconfig.ldr']);
-                    if (scene) {
-                        scene = null;
-                    }
-                    scene = new LDrawOrg.Model(
-                        document.getElementById('ldbi-canvas'), 
-                        $wire.modeltext,
-                        {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
-                    );
+                    LDR.Colors.load(() => {
+                        if (scene) {
+                            scene = null;
+                        }
+                        scene = new LDrawOrg.Model(
+                            document.getElementById('ldbi-canvas'), 
+                            $wire.modeltext,
+                            {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
+                        );
+                    },() => {},$wire.parts['ldconfig.ldr']);
                     window.addEventListener('resize', () => scene.onChange());
                 }
             });
