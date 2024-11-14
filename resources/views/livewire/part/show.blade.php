@@ -26,23 +26,14 @@
 
     <div class="flex flex-col space-y-4">
         <div class="flex flex-wrap gap-2">
-            {{ $this->downloadAction }}
-            @if ($this->downloadZipAction->isVisible())
-                {{ $this->downloadZipAction }}
-            @endif
-            @if ($this->patternPartAction->isVisible())
-                {{ $this->patternPartAction }}
-            @endif
-            @if ($this->stickerSearchAction->isVisible())
-                {{ $this->stickerSearchAction }}
-            @endif
-            @if ($this->adminCertifyAllAction->isVisible())
-                {{ $this->adminCertifyAllAction }}
-            @endif
-            @if ($this->certifyAllAction->isVisible())
-                {{ $this->certifyAllAction }}
-            @endif
-            {{ $this->webglViewAction }}
+            <x-filament-action action="downloadAction" />
+            <x-filament-action action="downloadZipAction" />
+            <x-filament-action action="patternPartAction" />
+            <x-filament-action action="stickerSearchAction" />
+            <x-filament-action action="adminCertifyAllAction" />
+            <x-filament-action action="certifyAllAction" />
+            <x-filament-action action="webglViewAction" />
+
             @if ($this->editHeaderAction->isVisible() ||
                 $this->editNumberAction->isVisible() ||
                 $this->editBasePartAction->isVisible() ||
@@ -52,6 +43,7 @@
                 $this->retieFixAction->isVisible() ||
                 $this->deleteAction->isVisible()
             )
+
                 <x-filament-actions::group
                     :actions="[
                         $this->editHeaderAction,
@@ -79,16 +71,11 @@
                 {{ucfirst($part->libFolder())}} File <span id="filename">{{ $part->filename }}</span>
         </div>
         <div>
-            @if ($this->viewFixAction->isVisible())
-                {{ $this->viewFixAction }}
-            @endif
+            <x-filament-action action="viewFixAction" />
             @if ($part->isUnofficial())
-                @if ($this->toggleTrackedAction->isVisible())
-                    {{ $this->toggleTrackedAction }}
-                @endif
-                @if ($this->toggleDeleteFlagAction->isVisible())
-                    {{ $this->toggleDeleteFlagAction }}
-                @elseif($part->delete_flag)
+                <x-filament-action action="toggleTrackedAction" />
+                <x-filament-action action="toggleDeleteFlagAction" />
+                @if($part->delete_flag && !$this->toggleDeleteFlagAction->isVisible())
                     <x-filament::button
                         icon="fas-flag"
                         color="danger"
@@ -96,53 +83,46 @@
                         Flagged for Deletion
                     </x-filament::button>
                 @endif
-                @if ($this->toggleManualHoldAction->isVisible())
-                    {{ $this->toggleManualHold }}
-                @endif
+                <x-filament-action action="toggleManualHoldAction" />
             @endif
         </div>
         <div>
-            @if ($this->toggleIsPatternAction->isVisible())
-                {{ $this->toggleIsPatternAction }}
-            @else
+            <span class="font-bold text-lg">
+                Part Attributes:
+            </span>
+            <x-filament-action action="viewBasePartAction" />
+            <x-filament-action action="toggleIsPatternAction" />
+            @if (!$this->toggleIsPatternAction->isVisible())
                 <x-filament::button
                     color="gray"
                 >
                   {{$this->part->is_pattern ? 'Printed' : 'Not Printed'}}
                 </x-filament::button>
             @endif
-            @if ($this->toggleIsCompositeAction->isVisible())
-                {{ $this->toggleIsCompositeAction }}
-            @else
+            <x-filament-action action="toggleIsCompositeAction" />
+            @if (!$this->toggleIsCompositeAction->isVisible())
                 <x-filament::button
                     color="gray"
                 >
                     {{$this->part->is_composite ? 'Assembly' : 'Single Part'}}
                 </x-filament::button>
             @endif
-            @if ($this->toggleIsDualMouldAction->isVisible())
-                {{ $this->toggleIsDualMouldAction }}
-            @else
+            <x-filament-action action="toggleIsDualMouldAction" />
+            @if (!$this->toggleIsDualMouldAction->isVisible())
                 <x-filament::button
                     color="gray"
                 >
                     {{$this->part->is_dual_mould ? 'Dual Moulded' : 'Single Mould'}}
                 </x-filament::button>
             @endif
-            @if ($this->viewBasePartAction->isVisible())
-                {{ $this->viewBasePartAction }}
-            @endif
         </div>
         <div>
-            @if ($this->viewRebrickableAction->isVisible())
-                {{ $this->viewRebrickableAction }}
-            @endif
-            @if ($this->viewBricklinkAction->isVisible())
-                {{ $this->viewBrickLinkAction }}
-            @endif
-            @if ($this->viewBrickowlAction->isVisible())
-                {{ $this->viewBrickowlAction }}
-            @endif
+            <span class="font-bold text-lg">
+                External Sites:
+            </span>
+             <x-filament-action action="viewRebrickableAction" />
+            <x-filament-action action="viewBricklinkAction" />
+            <x-filament-action action="viewBrickowlAction" />
         </div>
         <div class="w-full p-4 border rounded-md">
           <div class="flex flex-col md:flex-row-reverse w-full">
@@ -243,9 +223,10 @@
                 <div id="voteForm"></div>
                 <form wire:submit="postVote">
                     {{ $this->form }}
-                    <button class="border rounded mt-2 py-2 px-4 bg-yellow-500" type="submit">
-                        Send
-                    </button>
+                    <x-filament::button type="submit">
+                        <x-filament::loading-indicator wire:loading wire:target="postVote" class="h-5 w-5" />
+                        Vote
+                    </x-filament::button>
                 </form>
             @endcan
         @endif

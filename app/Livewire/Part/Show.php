@@ -10,6 +10,7 @@ use App\Models\Part\Part;
 use App\Models\Vote;
 use App\Models\VoteType;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\DeleteAction;
@@ -23,6 +24,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\IconPosition;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -447,42 +449,34 @@ class Show extends Component implements HasForms, HasActions
 
     public function viewRebrickableAction(): Action
     {
-        return Action::make('viewRebrickable')
-            ->button()
-            ->color('gray')
-            ->label("View on Rebrickable")
-            ->url('https://rebrickable.com/parts/'. $this->getSiteKeyword('Rebrickable'))
-            ->visible(!is_null($this->getSiteKeyword('Rebrickable')));
+        return $this->externalSiteAction('Rebrickable');
     }
 
     public function viewBricklinkAction(): Action
     {
-        return Action::make('viewBricklink')
-            ->button()
-            ->color('gray')
-            ->label("View on Bricklink")
-            ->url('https://www.bricklink.com/v2/catalog/catalogitem.page?P=' . $this->getSiteKeyword('Bricklink'))
-            ->visible(!is_null($this->getSiteKeyword('Bricklink')));
+        return $this->externalSiteAction('Bricklink');
     }
 
     public function viewBrickowlAction(): Action
     {
-        return Action::make('viewBrickowl')
-            ->button()
-            ->color('gray')
-            ->label("View on Brickowl")
-            ->url('https://www.brickowl.com//catalog/' . $this->getSiteKeyword('Brickowl'))
-            ->visible(!is_null($this->getSiteKeyword('Brickowl')));
+        return $this->externalSiteAction('BrickOwl');
     }
 
-    protected function getSiteKeyword(string $site): ?string
+    protected function externalSiteAction(string $site): Action
     {
         $kw = $this->part->keywords()->where('keyword', 'LIKE', "$site %")->first()?->keyword;
-        if (!is_null($kw)) {
-            return str_replace("$site ", '', $kw);
+        if (array_key_exists(strtolower($site), config('ldraw.external_sites')) && !is_null($kw)) {
+            $number = str_replace("$site ", '', $kw);
+            return Action::make("view{$site}")
+                ->button()
+                ->color('gray')
+                ->label("View on $site")
+                ->icon('fas-external-link-alt')
+                ->iconPosition(IconPosition::After)
+                ->url(config('ldraw.external_sites')[strtolower($site)] . $number);
         }
         
-        return null;
+        return Action::make("view{$site}Action")->visible(false);
     }
     public function viewFixAction(): Action
     {

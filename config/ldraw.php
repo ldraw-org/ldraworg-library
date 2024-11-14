@@ -17,6 +17,13 @@ return [
         'Library Admin' => 10,
     ],
 
+    // External Site URL Stubs
+    'external_sites' => [
+        'bricklink' => 'https://www.bricklink.com/v2/catalog/catalogitem.page?P=',
+        'rebrickable' => 'https://rebrickable.com/parts/',
+        'brickowl' => 'https://www.brickowl.com//catalog/',
+    ],
+
     // Match patterns
     'patterns' => [
         'description' => '#^\h*0\h+(?P<description>.*)\h*#u',
