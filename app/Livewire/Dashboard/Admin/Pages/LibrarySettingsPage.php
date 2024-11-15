@@ -27,6 +27,7 @@ class LibrarySettingsPage extends Component implements HasForms
     use InteractsWithForms;
 
     public ?array $data = [];
+    public string $title = "Manage Library Settings";
 
     public function form(Form $form): Form
     {

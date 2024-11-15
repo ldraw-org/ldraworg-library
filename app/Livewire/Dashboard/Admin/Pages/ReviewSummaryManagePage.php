@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Part\Part;
 use App\Models\ReviewSummary\ReviewSummary;
 use App\Models\ReviewSummary\ReviewSummaryItem;
@@ -24,6 +25,7 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
     use InteractsWithTable;
 
     public string $title = "Manage Review Summaries";
+    protected string $menu = 'admin';
 
     public function table(Table $table): Table
     {

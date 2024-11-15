@@ -24,7 +24,7 @@ use App\Livewire\Dashboard\Admin\Pages\PartCategoryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
 use App\Livewire\Dashboard\Admin\Pages\PartLicenseManagePage;
 use App\Livewire\Dashboard\Admin\Pages\PartTypeManagePage;
-use App\Livewire\Dashboard\User;
+use App\Livewire\Dashboard\User\Index as UserIndex;
 use App\Livewire\LDrawModelViewer;
 use App\Livewire\Omr\Set\Index;
 use App\Livewire\Part\Show;
@@ -33,7 +33,6 @@ use App\Livewire\Part\Weekly;
 use App\Livewire\PartEvent\Index as PartEventIndex;
 use App\Livewire\PbgGenerator;
 use App\Livewire\Release\Create;
-use App\Livewire\Search\Parts;
 use App\Livewire\Search\Suffix;
 use App\Livewire\TorsoShortcutHelper;
 use App\Livewire\Tracker\ConfirmCA;
@@ -126,7 +125,7 @@ Route::middleware(['auth', 'can:admin.view-dashboard'])->prefix('admin')->name('
 
 
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
-    Route::get('/', User::class)->name('index');
+    Route::get('/', UserIndex::class)->name('index');
 });
 
 Route::middleware(['auth'])->get('/logout', function () {

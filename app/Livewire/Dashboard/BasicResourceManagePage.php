@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Dashboard\Admin\Pages;
+namespace App\Livewire\Dashboard;
 
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -16,12 +16,13 @@ abstract class BasicResourceManagePage extends Component implements HasForms, Ha
     use InteractsWithTable;
 
     public string $title = '';
+    protected string $menu = 'user';
 
     abstract public function table(Table $table): Table;
 
     #[Layout('components.layout.base')]
     public function render()
     {
-        return view('livewire.dashboard.admin.pages.basic-resource-manage-page');
+        return view('livewire.dashboard.basic-resource-manage-page', ['menu' => $this->menu]);
     }
 }

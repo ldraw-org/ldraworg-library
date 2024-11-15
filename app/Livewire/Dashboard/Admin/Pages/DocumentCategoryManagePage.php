@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Document\DocumentCategory;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -18,6 +19,7 @@ class DocumentCategoryManagePage extends BasicResourceManagePage
     use InteractsWithTable;
 
     public string $title = "Manage Document Categories";
+    protected string $menu = 'admin';
 
     public function table(Table $table): Table
     {

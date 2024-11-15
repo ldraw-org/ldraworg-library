@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\MybbUser;
 use App\Models\User;
 use App\Settings\LibrarySettings;
@@ -29,6 +30,7 @@ class UserManagePage extends BasicResourceManagePage
     use InteractsWithTable;
 
     public string $title = "Manage Users";
+    protected string $menu = 'admin';
 
     public function table(Table $table): Table
     {

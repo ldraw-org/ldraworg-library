@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Part\PartLicense;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -19,6 +20,7 @@ class PartLicenseManagePage extends BasicResourceManagePage
     use InteractsWithTable;
 
     public string $title = "Manage Part Licenses";
+    protected string $menu = 'admin';
 
     public function table(Table $table): Table
     {

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Document\Document;
 use App\Models\Document\DocumentCategory;
 use Filament\Forms\Components\Section;
@@ -26,6 +27,7 @@ class DocumentManagePage extends BasicResourceManagePage
     use InteractsWithTable;
 
     public string $title = "Manage Documents";
+    protected string $menu = 'admin';
 
     public function table(Table $table): Table
     {

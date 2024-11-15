@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Livewire\Dashboard\BasicResourceManagePage;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -19,6 +20,7 @@ class RoleManagePage extends BasicResourceManagePage
     use InteractsWithTable;
 
     public string $title = "Manage Roles";
+    protected string $menu = 'admin';
 
     public function table(Table $table): Table
     {
