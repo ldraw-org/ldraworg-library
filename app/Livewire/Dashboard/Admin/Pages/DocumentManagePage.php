@@ -94,7 +94,7 @@ class DocumentManagePage extends BasicResourceManagePage
             AceEditor::make('content')
                 ->mode('php_laravel_blade')
                 ->height('30rem')
-                ->theme('github')
+                ->theme('monokai')
                 ->required()
         ];
     }

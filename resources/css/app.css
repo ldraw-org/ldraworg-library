@@ -5,3 +5,13 @@
 .event-comment a {
     @apply underline decoration-dotted hover:decoration-solid
 }
+
+#editor *{
+    font-family: "Courier New", monospace !important;
+    font-size: 10pt !important;
+  }
+
+.ace-editor *{
+    font-family: "Courier New", monospace !important;
+    font-size: 10pt !important;
+}

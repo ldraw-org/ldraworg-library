@@ -1,13 +1,5 @@
 <x-slot:title>File Editor</x-slot>
 <x-slot:menu><x-menu.library /></x-slot>
-@push('css')
-<style>
-  #editor *{
-    font-family: "Courier New", monospace !important;
-    font-size: 10pt !important;
-  }
-</style>
-@endpush
 <div>
     <form wire:submit="getFile">
         {{ $this->form }}
