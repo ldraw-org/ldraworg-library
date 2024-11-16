@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
+use App\Models\Part\UnknownPartNumber;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -71,6 +72,11 @@ class User extends Authenticatable
     public function part_history(): HasMany
     {
         return $this->hasMany(PartHistory::class);
+    }
+
+    public function unknown_part_numbers(): HasMany
+    {
+        return $this->hasMany(UnknownPartNumber::class);
     }
 
     public function notification_parts(): BelongsToMany

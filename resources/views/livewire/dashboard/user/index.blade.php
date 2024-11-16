@@ -31,6 +31,12 @@
         >
             Parts for My Review
         </x-filament::tabs.item>
+        <x-filament::tabs.item
+            :active="$activeTab === 'unumbers'"
+            wire:click="$set('activeTab', 'unumbers')"
+        >
+            My uXXXX Number Reservations
+        </x-filament::tabs.item>
     </x-filament::tabs>
     <x-filament::loading-indicator wire:loading class="h-5 w-5" />
     <div wire:loading class="p-2">Loading Table...</div>
@@ -40,12 +46,15 @@
             @break
         @case('user-part-events')
             <livewire:tables.user-part-events-table />
-        @break 
+            @break 
         @case('user-votes')
             <livewire:tables.user-votes-table />
-        @break 
+            @break 
         @case('review-list')
             <livewire:tables.part-ready-for-user-table />
+            @break
+        @case('unumbers')
+            <livewire:tables.user-unknown-numbers-table />
             @break
     @endswitch
 </div>
