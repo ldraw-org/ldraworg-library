@@ -1,33 +1,18 @@
 <?php
 
-use App\Models\PartRelease;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 
-uses(RefreshDatabase::class);
+use function Spatie\RouteTesting\routeTesting;
 
-// Public Routes
-test('library main', function () {
-    PartRelease::factory()->create();
-    $response = $this->get('/');
-    $response->assertOK();
-});
+routeTesting('all parts routes')
+    ->setUp(function ()
+    {
+        $user = User::factory()->create();
+        
+        $this->actingAs($user);
+    })
+    ->include('parts*', 'tracker*')
+    ->ignoreRoutesWithMissingBindings()
+    ->assertSuccessful();
 
-test('part updates', function () {
-    $response = $this->get('/updates');
-    $response->assertOK();
-});
 
-test('latest updates', function () {
-    $response = $this->get('/updates', ['latest']);
-    $response->assertOK();
-});
-
-test('categories.txt', function () {
-    $response = $this->get('/categories.txt');
-    $response->assertOK();
-});
-
-test('library.csv', function () {
-    $response = $this->get('/library.csv');
-    $response->assertOK();
-});

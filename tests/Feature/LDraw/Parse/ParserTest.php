@@ -152,6 +152,7 @@ test('get bfc', function (string $input, ?array $expected) {
 })->with([
     'cert' => ["0 BFC CERTIFY CCW", ['bfc' => 'CERTIFY', 'winding' => 'CCW']],
     'nocert' => ["0 BFC NOCERTIFY", ['bfc' => 'NOCERTIFY', 'winding' => '']],
+    'noclip' => ["0 BFC NOCLIP", ['bfc' => 'NOCLIP', 'winding' => '']],
     'blank statement' => ["0 BFC", null],
     'empty file' => ["", null],
 ]);

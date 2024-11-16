@@ -128,6 +128,6 @@ test('check line allowed body meta', function (string $input, bool $expected) {
     expect(app(\App\LDraw\Check\PartChecker::class)->checkLineAllowedBodyMeta($input))->toBe($expected);
 })->with([
     'not approved' => ['0 WRITE blah blah', false],
-    'approved' => ['0 // blah blah blah', true],
-    'approved' => ['0 BFC NOCLIP', true],
+    'approved Comment' => ['0 // blah blah blah', true],
+    'approved BFC' => ['0 BFC NOCLIP', true],
 ]);

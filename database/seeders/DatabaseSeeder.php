@@ -9,6 +9,7 @@ use App\Models\Part\PartLicense;
 use App\Models\Part\PartType;
 use App\Models\Part\PartTypeQualifier;
 use App\Models\VoteType;
+use App\Settings\LibrarySettings;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -26,5 +27,29 @@ class DatabaseSeeder extends Seeder
         PartCategory::insert(LibraryConfig::partCategories());
         PartEventType::insert(LibraryConfig::partEventTypes());
         VoteType::insert(LibraryConfig::voteTypes());
+        $ls = app(LibrarySettings::class);
+        if (empty($ls->allowed_header_metas)) {
+            $ls->allowed_header_metas = [
+                'Name:',
+                'Author:',
+                '!LDRAW_ORG',
+                '!LICENSE',
+                '!HELP',
+                'BFC',
+                '!CATEGORY',
+                '!KEYWORDS',
+                '!CMDLINE',
+                '!HISTORY'
+            ];
+        }   
+        if (empty($ls->allowed_body_metas)) {
+            $ls->allowed_body_metas = [
+                '!TEXMAP',
+                '!:',
+                'BFC',
+                '//',
+            ];
+        }
+        $ls->save();
     }
 }
