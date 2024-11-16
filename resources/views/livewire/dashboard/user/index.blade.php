@@ -26,12 +26,6 @@
             My Votes
         </x-filament::tabs.item>    
         <x-filament::tabs.item
-            :active="$activeTab === 'review-list'"
-            wire:click="$set('activeTab', 'review-list')"
-        >
-            Parts for My Review
-        </x-filament::tabs.item>
-        <x-filament::tabs.item
             :active="$activeTab === 'unumbers'"
             wire:click="$set('activeTab', 'unumbers')"
         >
@@ -50,9 +44,6 @@
         @case('user-votes')
             <livewire:tables.user-votes-table />
             @break 
-        @case('review-list')
-            <livewire:tables.part-ready-for-user-table />
-            @break
         @case('unumbers')
             <livewire:tables.user-unknown-numbers-table />
             @break
