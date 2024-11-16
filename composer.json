@@ -14,6 +14,7 @@
         "filament/filament": "^3.2.122",
         "http-interop/http-factory-guzzle": ">=1.2",
         "icehouse-ventures/laravel-chartjs": "^4.0",
+        "lara-zeus/quantity": "^1.0",
         "laravel/framework": "^11.22",
         "laravel/pail": "^1.1.3",
         "laravel/tinker": "^2.9",
