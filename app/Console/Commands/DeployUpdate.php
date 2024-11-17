@@ -31,18 +31,21 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        $csv = Reader::createFromPath(Storage::path('db/3dp.csv'));
-        $csv->setHeaderOffset(0);
-        $parts = Part::where('filename', 'LIKE', 'parts/u9___%.dat')->get();
-        foreach ($csv->getRecords() as $unumber) {
-            $user = User::firstWhere('name', $unumber['Author']);
-            $part = $parts->first(fn (Part $p) => strpos($p->filename, "parts/{$unumber['Number']}") !== false);
-            if (!is_null($user) && (is_null($part) || ($part->isUnofficial() && is_null($part->official_part)))) {
-                $u = new UnknownPartNumber();
-                $u->user()->associate($user);
-                $u->number = substr($unumber['Number'], 1);
-                $u->save();
-                $this->info($user->name . " " . ($part?->filename ?? $unumber['Number']));
+        $parts = Part::where('filename', 'LIKE', "parts/u____%.dat")->get();
+        foreach ($parts as $part) {
+            $result = preg_match('/parts\/u([0-9]{4}).*\.dat/', $part->filename, $matches);
+            if ($result) {
+                $number = $matches[1];
+                $unk = UnknownPartNumber::firstOrCreate(
+                    ['number' => $number],
+                    ['user_id' => $part->user->id]
+                );
+                if ($part->user_id !== $unk->user_id) {
+                    $unk->user_id = $part->user_id;
+                    $unk->save();
+                }
+                $part->unknown_part_number()->associate($unk);
+                $part->save();
             }
         }
     }

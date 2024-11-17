@@ -9,6 +9,7 @@ use App\Models\Part\Part;
 use App\Models\Part\PartCategory;
 use App\Models\Part\PartType;
 use App\Models\Part\PartTypeQualifier;
+use App\Models\Part\UnknownPartNumber;
 use App\Models\Rebrickable\RebrickablePart;
 use App\Models\StickerSheet;
 use App\Models\User;
@@ -183,6 +184,7 @@ class PartManager
         $this->checkPart($part);
         $this->addStickerSheet($part);
         $part->updateReadyForAdmin();
+        $this->addUnknownNumber($part);
         UpdateParentParts::dispatch($part);
     }
 
@@ -333,6 +335,7 @@ class PartManager
         $this->updateMissing($part->name());
         $this->checkPart($part);
         $part->updateReadyForAdmin();
+        $this->addUnknownNumber($part);
         UpdateParentParts::dispatch($part);
         return true;
     }
@@ -373,6 +376,23 @@ class PartManager
         $part->save();
     }
 
+    protected function addUnknownNumber(Part $p)
+    {
+        $result = preg_match('/parts\/u([0-9]{4}).*\.dat/', $p->filename, $matches);
+        if ($result) {
+            $number = $matches[1];
+            $unk = UnknownPartNumber::firstOrCreate(
+                ['number' => $number],
+                ['user_id' => $p->user->id]
+            );
+            $p->unknown_part_number()->associate($unk);
+        }
+        else {
+            $p->unknown_part_number_id = null;
+        }
+        $p->save();
+    }
+    
     public function addStickerSheet(Part $p)
     {
         $p->refresh();

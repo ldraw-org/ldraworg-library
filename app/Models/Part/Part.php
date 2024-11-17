@@ -189,6 +189,12 @@ class Part extends Model
 
     }
 
+    public function unknown_part_number(): BelongsTo
+    {
+        return $this->BelongsTo(UnknownPartNumber::class, 'unknown_part_number_id', 'id');
+
+    }
+
     protected function errors(): Attribute
     {
         return Attribute::make(

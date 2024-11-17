@@ -10,6 +10,7 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use LaraZeus\Quantity\Components\Quantity;
 use Livewire\Attributes\Computed;
 
@@ -19,7 +20,13 @@ class UserUnknownNumbersTable extends BasicTable
     {
         return $table
             ->query(
-                auth()->user()->unknown_part_numbers()->getQuery()
+                UnknownPartNumber::with('parts')
+                    ->where('user_id', auth()->user()->id)
+                    ->where(fn (Builder $query) => 
+                        $query->orDoesntHave('parts')->orWhereHas('parts', fn (Builder $query2) =>
+                            $query2->unofficial()->doesntHave('official_part')
+                        )
+                    )
             )
             ->heading('uXXXX Numbers Assigned to Me')
             ->columns([
@@ -27,15 +34,9 @@ class UserUnknownNumbersTable extends BasicTable
                     ->state(fn (UnknownPartNumber $unk) => "u{$unk->number}")
                     ->sortable(),
                 TextColumn::make('in_use')
-                    ->state(fn(UnknownPartNumber $unk) => is_null($this->findUPart($unk)) ? 'No' : 'Yes'),
+                    ->state(fn(UnknownPartNumber $unk) => $unk->parts->count() > 0 ? 'Yes' : 'No'),
                 TextColumn::make('in_use_desciption')
-                    ->state(function (UnknownPartNumber $unk) {
-                        $p = $this->findUPart($unk);
-                        if (!is_null($p)) {
-                            return $p->description;
-                        }
-                        return '';
-                    }),
+                    ->state(fn(UnknownPartNumber $unk) => $unk->parts->count() > 0 ? $unk->parts->first()->description : ''),
                 TextInputColumn::make('notes')
                     ->rules(['required', 'max:255'])
             ])
@@ -43,11 +44,11 @@ class UserUnknownNumbersTable extends BasicTable
             ->actions([
                 Action::make('view')
                     ->url(fn(UnknownPartNumber $unk) => route('parts.list', ['tableSearch' => "u{$unk->number}"]))
-                    ->visible(fn(UnknownPartNumber $unk) => !is_null($this->findUPart($unk))),
+                    ->visible(fn(UnknownPartNumber $unk) => $unk->parts->count() > 0),
                 DeleteAction::make('delete')
                     ->modalHeading(fn(UnknownPartNumber $unk) => "Remove your reservation of u{$unk->number}?")
                     ->modalDescription('Are you sure you\'d like to remove this number from your reservation list? This cannot be undone.')
-                    ->visible(fn(UnknownPartNumber $unk) => is_null($this->findUPart($unk)))
+                    ->visible(fn(UnknownPartNumber $unk) => $unk->parts->count() == 0)
             ])
             ->headerActions([
                 Action::make('request')
@@ -61,12 +62,9 @@ class UserUnknownNumbersTable extends BasicTable
                             ->required()
                     ])
                     ->action(function (array $data) {
-                        $parts = Part::where('filename', 'LIKE', 'parts/u9___%.dat')->get();
-                        $unk_assigned = UnknownPartNumber::pluck('number')->all();
                         $request_list = [];
                         for ($i = 9000; $i < 10000; $i++) {
-                            $part = $parts->first(fn (Part $p) => strpos($p->filename, "parts/u{$i}") !== false);
-                            if (!is_null($part) || in_array($i, $unk_assigned)) {
+                            if (!is_null(UnknownPartNumber::firstWhere('number', $i))) {
                                 continue;
                             }
                             $request_list[] = $i;
@@ -84,17 +82,5 @@ class UserUnknownNumbersTable extends BasicTable
                     })
             ])
             ->paginated(false);
-    }
-
-    #[Computed]
-    protected function uParts()
-    {
-        return Part::doesntHave('official_part')->where('filename', 'LIKE', 'parts/u____%.dat')->get();
-    }
-
-    protected function findUPart(UnknownPartNumber $unk): ?Part 
-    {
-        $p = $this->uParts->first(fn (Part $part) => strpos($part->filename, "parts/u{$unk->number}") !== false);
-        return $p;
     }
 }
