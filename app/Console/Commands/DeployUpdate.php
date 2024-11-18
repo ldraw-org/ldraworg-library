@@ -31,22 +31,5 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        $parts = Part::where('filename', 'LIKE', "parts/u____%.dat")->get();
-        foreach ($parts as $part) {
-            $result = preg_match('/parts\/u([0-9]{4}).*\.dat/', $part->filename, $matches);
-            if ($result) {
-                $number = $matches[1];
-                $unk = UnknownPartNumber::firstOrCreate(
-                    ['number' => $number],
-                    ['user_id' => $part->user->id]
-                );
-                if ($part->user_id !== $unk->user_id) {
-                    $unk->user_id = $part->user_id;
-                    $unk->save();
-                }
-                $part->unknown_part_number()->associate($unk);
-                $part->save();
-            }
-        }
     }
 }
