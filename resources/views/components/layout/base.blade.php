@@ -100,5 +100,6 @@
     @filamentScripts
     @vite('resources/js/app.js')
     @stack('scripts')
+    <div wire:poll.30s>
   </body>
 </html>
