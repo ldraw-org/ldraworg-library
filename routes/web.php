@@ -10,6 +10,7 @@ use App\Http\Controllers\Part\PartUpdateController;
 use App\Http\Controllers\Part\PartDownloadController;
 use App\Http\Controllers\Part\PartDownloadZipController;
 use App\Http\Controllers\Part\PartWebGLController;
+use App\Http\Controllers\Part\WeeklyPartsController;
 use App\Http\Controllers\ReviewSummaryController;
 use App\Http\Controllers\StickerSheet\StickerSheetShowController;
 use App\Http\Controllers\TrackerHistoryController;
@@ -47,6 +48,7 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/ptreleases/{output}', [SupportFilesController::class, 'ptreleases'])->name('ptreleases');
     Route::get('/ldbi/part/{part}', PartWebGLController::class)->name('part.ldbi');
     Route::get('/tracker/latest-parts', LatestPartsController::class)->name('part.latest');
+    Route::get('/tracker/weekly-parts', WeeklyPartsController::class)->name('part.weekly-api');
     Route::get('/tracker/ldrawunf-last-day.zip', LastDayDownloadZipController::class)->name('tracker.last-day');
     Route::get('/library/official/{opartfile}', PartDownloadController::class)->name('official.download');
     Route::get('/library/official/{officialpartzip}', PartDownloadZipController::class)->name('official.download.zip');
