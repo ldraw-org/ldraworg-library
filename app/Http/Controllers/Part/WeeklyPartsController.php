@@ -20,7 +20,7 @@ class WeeklyPartsController extends Controller
         $date->setTime(0,0,0);
         $date->setDaysFromStartOfWeek(0, \Carbon\CarbonInterface::SUNDAY);
         $parts = Part::whereRelation('type', 'folder', 'parts/')->doesntHave('official_part')->where('week', $date->format('Y-m-d'))->get();
-        return \App\Http\Resources\WeeklyPartsResource::collection($parts);
+        return \App\Http\Resources\PartsResource::collection($parts);
     }
 
 }

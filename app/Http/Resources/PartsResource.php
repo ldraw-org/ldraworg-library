@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @mixin \App\Models\Part\PartEvent
  */
-class WeeklyPartsResource extends JsonResource
+class PartsResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,6 +18,7 @@ class WeeklyPartsResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'image' => $this->isTexmap() ? route("{$this->libFolder()}.download", $this->filename) : version("images/library/{$this->libFolder()}/" . substr($this->filename, 0, -4) . '.png'),
             'url' => route('parts.show', $this),
             'description' => $this->description,
             'filename' => $this->filename,
