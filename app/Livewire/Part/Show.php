@@ -473,9 +473,9 @@ class Show extends Component implements HasForms, HasActions
                 ->label("View on $site")
                 ->icon('fas-external-link-alt')
                 ->iconPosition(IconPosition::After)
-                ->url(config('ldraw.external_sites')[strtolower($site)] . $number);
+                ->url(config('ldraw.external_sites')[strtolower($site)] . $number, shouldOpenInNewTab: true);
         }
-        
+
         return Action::make("view{$site}Action")->visible(false);
     }
     public function viewFixAction(): Action
