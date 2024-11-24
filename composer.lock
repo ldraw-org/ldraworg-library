@@ -4,8 +4,70 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "424e50fda186d55e61f80ccea1ef0f86",
+    "content-hash": "9687efca1129db6b05d81130c1009921",
     "packages": [
+        {
+            "name": "abraham/twitteroauth",
+            "version": "6.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/abraham/twitteroauth.git",
+                "reference": "e6fc2e0c30371ce68427d547bdeb19725868db30"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/abraham/twitteroauth/zipball/e6fc2e0c30371ce68427d547bdeb19725868db30",
+                "reference": "e6fc2e0c30371ce68427d547bdeb19725868db30",
+                "shasum": ""
+            },
+            "require": {
+                "composer/ca-bundle": "^1.2",
+                "ext-curl": "*",
+                "php": "8.*"
+            },
+            "require-dev": {
+                "php-vcr/php-vcr": "^1",
+                "php-vcr/phpunit-testlistener-vcr": "dev-php8",
+                "phpmd/phpmd": "^2",
+                "phpunit/phpunit": "^9",
+                "rector/rector": "^0.15.7",
+                "squizlabs/php_codesniffer": "^3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Abraham\\TwitterOAuth\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Abraham Williams",
+                    "email": "abraham@abrah.am",
+                    "homepage": "https://abrah.am",
+                    "role": "Developer"
+                }
+            ],
+            "description": "The most popular PHP library for use with the Twitter OAuth REST API.",
+            "homepage": "https://twitteroauth.com",
+            "keywords": [
+                "Twitter API",
+                "Twitter oAuth",
+                "api",
+                "oauth",
+                "rest",
+                "social",
+                "twitter"
+            ],
+            "support": {
+                "issues": "https://github.com/abraham/twitteroauth/issues",
+                "source": "https://github.com/abraham/twitteroauth"
+            },
+            "time": "2023-10-28T20:17:00+00:00"
+        },
         {
             "name": "anourvalar/eloquent-serialize",
             "version": "1.2.26",
@@ -483,6 +545,82 @@
                 }
             ],
             "time": "2023-12-20T15:40:13+00:00"
+        },
+        {
+            "name": "composer/ca-bundle",
+            "version": "1.5.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/ca-bundle.git",
+                "reference": "3b1fc3f0be055baa7c6258b1467849c3e8204eb2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/3b1fc3f0be055baa7c6258b1467849c3e8204eb2",
+                "reference": "3b1fc3f0be055baa7c6258b1467849c3e8204eb2",
+                "shasum": ""
+            },
+            "require": {
+                "ext-openssl": "*",
+                "ext-pcre": "*",
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^8 || ^9",
+                "psr/log": "^1.0 || ^2.0 || ^3.0",
+                "symfony/process": "^4.0 || ^5.0 || ^6.0 || ^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Composer\\CaBundle\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "http://seld.be"
+                }
+            ],
+            "description": "Lets you find a path to the system CA bundle, and includes a fallback to the Mozilla CA bundle.",
+            "keywords": [
+                "cabundle",
+                "cacert",
+                "certificate",
+                "ssl",
+                "tls"
+            ],
+            "support": {
+                "irc": "irc://irc.freenode.org/composer",
+                "issues": "https://github.com/composer/ca-bundle/issues",
+                "source": "https://github.com/composer/ca-bundle/tree/1.5.3"
+            },
+            "funding": [
+                {
+                    "url": "https://packagist.com",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/composer",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-11-04T10:15:26+00:00"
         },
         {
             "name": "danharrin/date-format-converter",
@@ -2282,6 +2420,46 @@
             "time": "2024-10-06T12:28:14+00:00"
         },
         {
+            "name": "kylewm/brevity",
+            "version": "0.2.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kylewm/brevity-php.git",
+                "reference": "9700a3ca666ff9486bd8bed322d7096ef78b6580"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kylewm/brevity-php/zipball/9700a3ca666ff9486bd8bed322d7096ef78b6580",
+                "reference": "9700a3ca666ff9486bd8bed322d7096ef78b6580",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Kylewm\\Brevity": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CC0"
+            ],
+            "authors": [
+                {
+                    "name": "Kyle Mahan",
+                    "email": "kyle+brevityphp@kylewm.com"
+                }
+            ],
+            "description": "A small utility to count characters and shorten posts to tweet-length.",
+            "support": {
+                "issues": "https://github.com/kylewm/brevity-php/issues",
+                "source": "https://github.com/kylewm/brevity-php/tree/master"
+            },
+            "time": "2017-11-25T19:51:26+00:00"
+        },
+        {
             "name": "lara-zeus/quantity",
             "version": "1.0.8",
             "source": {
@@ -2429,6 +2607,67 @@
                 "source": "https://github.com/laravel-notification-channels/discord/tree/v1.6.0"
             },
             "time": "2024-04-01T01:31:08+00:00"
+        },
+        {
+            "name": "laravel-notification-channels/twitter",
+            "version": "v8.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel-notification-channels/twitter.git",
+                "reference": "dd268693e233d097b9a6ab401c08e13f47109fcb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel-notification-channels/twitter/zipball/dd268693e233d097b9a6ab401c08e13f47109fcb",
+                "reference": "dd268693e233d097b9a6ab401c08e13f47109fcb",
+                "shasum": ""
+            },
+            "require": {
+                "abraham/twitteroauth": "^5.0|^6.0",
+                "ext-fileinfo": "*",
+                "illuminate/notifications": "^10.0|^11.0",
+                "illuminate/support": "^10.0|^11.0",
+                "kylewm/brevity": "^0.2.9",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.10",
+                "mockery/mockery": "^1.3.1",
+                "orchestra/testbench": "^8.0|^9.0",
+                "phpunit/phpunit": "^9.3|^10.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "NotificationChannels\\Twitter\\TwitterServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "NotificationChannels\\Twitter\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Christoph Rumpel",
+                    "email": "c.rumpel@kabsi.at",
+                    "homepage": "https://christoph-rumpel.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "This package makes it easy to send notifications via Twitter with Laravel",
+            "homepage": "https://github.com/laravel-notification-channels/twitter",
+            "support": {
+                "issues": "https://github.com/laravel-notification-channels/twitter/issues",
+                "source": "https://github.com/laravel-notification-channels/twitter/tree/v8.1.2"
+            },
+            "time": "2024-10-02T18:06:08+00:00"
         },
         {
             "name": "laravel/framework",
