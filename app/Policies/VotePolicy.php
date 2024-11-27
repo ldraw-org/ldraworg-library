@@ -7,6 +7,8 @@ use App\Models\Vote;
 use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 
+use function GuzzleHttp\default_ca_bundle;
+
 class VotePolicy
 {
     public function __construct(
@@ -14,7 +16,7 @@ class VotePolicy
     ) {
     }
 
-    public function vote(User $user, Part $part): bool
+    public function voteAny(User $user, Part $part): bool
     {
         if (!$part->isUnofficial() || $this->settings->tracker_locked) {
             return false;
@@ -38,79 +40,36 @@ class VotePolicy
             ]);
     }
 
-    public function create(User $user, Part $part, string $vote_type): bool
+    public function vote(?User $user, Part $part, string $vote_type): bool
     {
-        if (!$part->isUnofficial() || $this->settings->tracker_locked) {
+        if (is_null($user) || !$part->isUnofficial() || $this->settings->tracker_locked) {
             return false;
         }
-        switch ($vote_type) {
-            case 'M':
-                return $user->can('part.comment');
-                break;
-            case 'A':
-                return $user->can('part.vote.admincertify');
-                break;
-            case 'T':
-                return $user->can('part.vote.fasttrack');
-                break;
-            case 'C':
-                if ($part->user_id === $user->id) {
-                    return $user->can('part.own.vote.certify');
-                } else {
-                    return $user->can('part.vote.certify');
-                }
-                break;
-            case 'H':
-                if ($part->user_id !== $user->id) {
-                    return $user->can('part.vote.hold');
-                } else {
-                    return $user->canAny(['part.vote.hold', 'part.own.vote.hold']);
-                }
-                break;
-        }
-        return false;
-    }
 
-    public function update(User $user, Vote $vote, string $vote_type): bool
-    {
-        if (!$vote->part->isUnofficial() || $vote->user_id !== $user->id || $this->settings->tracker_locked) {
+        $vote = $user->votes->firstWhere('part_id', $part->id);
+
+        if (!is_null($vote) && ($vote->user_id !== $user->id || $vote->vote_type_code === $vote_type)) {
             return false;
         }
-        switch ($vote_type) {
-            case 'M':
-                return $user->can('part.comment');
-                break;
-            case 'N':
-                return true;
-                break;
-            case 'A':
-                return $user->can('part.vote.admincertify');
-                break;
-            case 'T':
-                return $user->can('part.vote.fasttrack');
-                break;
-            case 'C':
-                if ($vote->part->user_id === $user->id) {
-                    return $user->can('part.own.vote.certify');
-                } else {
-                    return $user->can('part.vote.certify');
-                }
-                break;
-            case 'H':
-                if ($vote->part->user_id !== $user->id) {
-                    return $user->can('part.vote.hold');
-                } else {
-                    return $user->canAny(['part.vote.hold', 'part.own.vote.hold']);
-                }
-                break;
-        }
-        return false;
+
+        return $this->canCastVoteType($user, $part, $vote_type, $vote);
+
     }
 
-    public function delete(User $user, Vote $vote): bool
+    protected function canCastVoteType(User $user, Part $part, string $vote_type, ?Vote $vote): bool
     {
-        return !$this->settings->tracker_locked && $vote->user_id === $user->id ;
-    }
+        $userIsPartAuthor = (is_null($part->official_part) && $part->user_id === $user->id) ||
+            (!is_null($part->official_part) && $part->events->firstWhere('initial_submit', true)?->user_id === $user->id);
+        return match($vote_type) {
+            'M' => $user->can('part.comment'),
+            'N' => !is_null($vote) && $vote->user_id === $user->id,
+            'A' => $user->can('part.vote.admincertify'),
+            'T' => $user->can('part.vote.fasttrack'),
+            'C' => $userIsPartAuthor ? $user->can('part.own.vote.certify') : $user->can('part.vote.certify'),
+            'H' =>  $userIsPartAuthor ? $user->canAny(['part.vote.hold', 'part.own.vote.hold']) : $user->can('part.vote.hold'),
+            default => false
+        };
+     }
 
     public function all(User $user): bool
     {

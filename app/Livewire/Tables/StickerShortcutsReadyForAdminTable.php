@@ -28,11 +28,11 @@ class StickerShortcutsReadyForAdminTable extends BasicTable
                 Action::make('Fast Track')
                     ->action(function (Part $p) {
                         $vm = new VoteManager();
-                        $vm->postVote($p, auth()->user(), 'T');
+                        $vm->castVote($p, auth()->user(), 'T');
                     })
                     ->button()
                     ->outlined()
-                    ->visible(fn (Part $p) => auth()->user()?->can('create', [Vote::class, $p, 'T']))
+                    ->visible(fn (Part $p) => auth()->user()?->can('vote', [Vote::class, $p, 'T']))
 
             ])
             ->recordUrl(fn (Part $p): string => route('parts.show', $p))

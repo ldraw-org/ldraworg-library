@@ -1,10 +1,10 @@
-<div x-data="{ webgl: true }"> 
+<div x-data="{ webgl: true }">
     <x-slot:title>
         File Detail {{ $part->filename }}
     </x-slot>
     <x-slot:breadcrumbs>
         <x-breadcrumb-item class="active" item="Part Detail" />
-    </x-slot>    
+    </x-slot>
     @push('meta')
         <meta name="description" content="{{$part->description}}">
 
@@ -126,19 +126,19 @@
         </div>
         <div class="w-full p-4 border rounded-md">
           <div class="flex flex-col md:flex-row-reverse w-full">
-            <div class="flex w-full justify-center items-center md:w-1/3">            
+            <div class="flex w-full justify-center items-center md:w-1/3">
               <img class = 'w-80 h-80 object-contain'
                 @if(!$part->isTexmap()) wire:click="$dispatch('open-modal', { id: 'ldbi' })" @endif
                 src="{{$image}}" alt="{{ $part->description }}" title="{{ $part->description }}">
             </div>
-            <div class="w-full md:w-2/3">            
+            <div class="w-full md:w-2/3">
               <div class="justify-self-start w-full">
                 <div class="text-lg font-bold">File Header:</div>
                 <code class="whitespace-pre-wrap break-words font-mono">{{ trim($part->header) }}</code>
-              </div>  
+              </div>
             </div>
           </div>
-          <div class="w-full">              
+          <div class="w-full">
             <x-accordion id="showContents">
               <x-slot name="header" class="text-md font-bold pt-4">
                 Show contents
@@ -173,10 +173,10 @@
                             @endif
                         @endforeach
                     </ul>
-                </x-message>        
+                </x-message>
             @endif
             <div class="text-md font-bold">Current Votes:</div>
-            <x-vote.table :votes="$part->votes" /> 
+            <x-vote.table :votes="$part->votes" />
             @if (count($part->missing_parts) > 0)
                 <div class="text-md font-bold">Missing Part References:</div>
                 @foreach($part->missing_parts as $missing)
@@ -207,7 +207,7 @@
                         <x-event.list.item :$event wire:key="part-event-{{$event->id}}" />
                     @empty
                         <div>None</div>
-                    @endforelse 
+                    @endforelse
                 </x-accordion>
             @endif
             @if ($part->isUnofficial())
@@ -216,10 +216,10 @@
                 @empty
                     <div>No Events</div>
                 @endforelse
-            @endif 
+            @endif
         </div>
         @if($part->isUnofficial())
-            @can('vote', [\App\Models\Vote::class, $this->part])
+            @can('voteAny', [\App\Models\Vote::class, $this->part])
                 <div id="voteForm"></div>
                 <form wire:submit="postVote">
                     {{ $this->form }}
@@ -281,7 +281,7 @@
                     wire:click="$dispatch('ldbi-physical-mode')"
                 />
             </div>
-            <div id="ldbi-container" class="border w-full h-[80vh]"> 
+            <div id="ldbi-container" class="border w-full h-[80vh]">
                 <canvas id="ldbi-canvas" class="size-full"></canvas>
             </div>
         </div>
@@ -291,7 +291,7 @@
         <x-layout.ldbi-scripts />
         <script type="text/javascript">
             var scene;
-        </script>    
+        </script>
         @script
         <script>
             let part_id = {{$part->id}};
@@ -300,7 +300,7 @@
 
             LDR.Options.bgColor = 0xFFFFFF;
 
-            LDR.Colors.envMapPrefix = '/assets/ldbi/textures/cube/';    
+            LDR.Colors.envMapPrefix = '/assets/ldbi/textures/cube/';
             LDR.Colors.textureMaterialPrefix = '/assets/ldbi/textures/materials/';
 
             $wire.on('open-modal', (modal) => {
@@ -329,13 +329,13 @@
                             part_paths = response;
                             LDR.Colors.load(() => {
                                 scene = new LDrawOrg.Model(
-                                    document.getElementById('ldbi-canvas'), 
+                                    document.getElementById('ldbi-canvas'),
                                     document.getElementById('filename').innerHTML.replace(/^(parts\/|p\/)/, ''),
                                     {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
                                 );
                                 window.addEventListener('resize', () => scene.onChange());
                             },() => {},part_paths['ldconfig.ldr']);
-                            
+
                         })
                 }
             });

@@ -11,17 +11,14 @@ use Illuminate\Database\Eloquent\Builder;
 
 class VoteManager
 {
-    public function postVote(Part $part, User $user, string $vote_type_code, ?string $comment = null): void
+    public function castVote(Part $part, User $user, string $vote_type_code, ?string $comment = null): void
     {
-        $vote = $user->votes()->where('part_id', $part->id)->first();
+        $canVote = $user->can('vote', [Vote::class, $part, $vote_type_code]);
 
-        if (is_null($vote)) {
-            $canVote = $user->can('create', [Vote::class, $part, $vote_type_code]);
-        } else {
-            $canVote = $user->can('update', [$vote, $vote_type_code]);
-        }
+        $vote = $user->votes->firstWhere('part_id', $part->id);
 
-        if (!$canVote || !$part->isUnofficial() || $vote?->vote_type_code == $vote_type_code) {
+        // Can't vote or same vote type
+        if (!$canVote || $vote?->vote_type_code == $vote_type_code) {
             return;
         }
 
@@ -29,17 +26,21 @@ class VoteManager
         $newVoteIsAdminCert = in_array($vote_type_code, ['A', 'T']);
 
         switch ($vote_type_code) {
+            // Cancel vote
             case 'N':
                 $vote->delete();
                 PartReviewed::dispatch($part, $user, null, $comment);
                 break;
+            // Comment, doesn't create a vote object
             case 'M':
                 PartComment::dispatch($part, $user, $comment);
                 break;
             default:
+                // Vote changed
                 if (!is_null($vote)) {
                     $vote->vote_type_code = $vote_type_code;
                     $vote->save();
+                // New vote
                 } else {
                     Vote::create([
                         'part_id' => $part->id,
@@ -52,6 +53,8 @@ class VoteManager
 
         $part->refresh();
         $part->updateVoteSort();
+
+        // Admin vote status changed
         if (($oldVoteIsAdminCert && $vote_type_code === 'N') || $newVoteIsAdminCert) {
             $part
                 ->parentsAndSelf
@@ -59,6 +62,8 @@ class VoteManager
                 ->unofficial()
                 ->each(fn (Part $p) => app(PartManager::class)->checkPart($p));
         }
+
+        // Add user to notifications list
         $user->notification_parts()->syncWithoutDetaching([$part->id]);
     }
 
@@ -72,8 +77,9 @@ class VoteManager
             return;
         }
         $parts = $part->descendantsAndSelf->unofficial()->where('vote_sort', 2);
-        $parts->each(fn (Part $p) => $this->postVote($p, $user, 'A'));
-        // Have to recheck parts since sometime, based on processing order, subfiles status is missed
+        $parts->each(fn (Part $p) => $this->castVote($p, $user, 'A'));
+
+        // Have to recheck parts since sometimes, based on processing order, subfiles status is missed
         $parts->each(fn (Part $p) => app(PartManager::class)->checkPart($p));
 
     }
@@ -92,7 +98,7 @@ class VoteManager
             ->where('vote_sort', 3)
             ->whereDoesntHave('votes', fn (Builder $q) => $q->where('user_id', $user->id)->whereIn('vote_type_code', ['A', 'T']))
             ->unofficial()
-            ->each(fn (Part $p) => $this->postVote($p, $user, 'C'));
+            ->each(fn (Part $p) => $this->castVote($p, $user, 'C'));
 
     }
 }

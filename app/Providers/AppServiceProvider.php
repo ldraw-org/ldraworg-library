@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Pan\PanConfiguration;
 
 class AppServiceProvider extends ServiceProvider
@@ -101,9 +102,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
 
-        // Allow Super Users full access
+        // Allow Super Users full access excluding voting
         Gate::before(function ($user, $ability) {
-            return $user->hasRole('Super Admin') ? true : null;
+            return $ability !== 'vote' && $user->hasRole('Super Admin') ? true : null;
         });
 
         //Subscriber

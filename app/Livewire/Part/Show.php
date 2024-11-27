@@ -57,7 +57,7 @@ class Show extends Component implements HasForms, HasActions
                             ->default('M')
                             ->required()
                             ->markAsRequired(false)
-                            ->in(fn () => $this->voteTypes()->pluck('code')->all())
+                            ->exists(table: VoteType::class, column: 'code')
                             ->inline()
                             ->inlineLabel(false)
                             ->validationAttribute('vote type'),
@@ -74,40 +74,17 @@ class Show extends Component implements HasForms, HasActions
     }
 
     #[Computed]
-    public function voteTypes()
-    {
-        return VoteType::ordered()->get();
-    }
-
-    #[Computed]
     public function voteOptions(): array
     {
-        if (!Auth::check()) {
-            return [];
-        }
         $options = [];
-        $u = Auth::user();
-        $v = $this->part->votes->firstWhere('user_id', $u->id);
-        foreach ($this->voteTypes() as $vt) {
-            switch ($vt->code) {
-                case 'N':
-                    if (!is_null($v) && $u->can('update', [$v, $vt->code])) {
-                        $options[$vt->code] = $vt->name;
-                    }
-                    break;
-                default:
-                    if (
-                        (is_null($v) && $u->can('create', [Vote::class, $this->part, $vt->code])) ||
-                        $u->can('update', [$v, $vt->code])
-                    ) {
-                        if (is_null($v) || $v->vote_type_code != $vt->code) {
-                            $options[$vt->code] = $vt->name;
-                        }
-                    }
+        foreach (VoteType::ordered()->get() as $vt) {
+            if (Auth::user()->can('vote', [Vote::class, $this->part, $vt->code])) {
+                $options[$vt->code] = $vt->name;
             }
         }
         return $options;
     }
+
     public function mount(?Part $part, ?Part $partfile, ?Part $upartfile)
     {
         if (!is_null($part) && $part->exists) {
@@ -295,7 +272,7 @@ class Show extends Component implements HasForms, HasActions
                     $this->part->type->folder == 'parts/' &&
                     $this->part->ready_for_admin === true &&
                     $this->part->descendantsAndSelf->where('vote_sort', 2)->count() > 0 &&
-                    (Auth::user()?->can('create', [Vote::class, $this->part, 'A']) ?? false) &&
+                    (Auth::user()?->can('vote', [Vote::class, $this->part, 'A']) ?? false) &&
                     (Auth::user()?->can('allAdmin', Vote::class) ?? false)
                 )
                 ->color('gray')
@@ -320,7 +297,7 @@ class Show extends Component implements HasForms, HasActions
                     $this->part->type->folder == 'parts/' &&
                     $this->part->descendantsAndSelf->where('vote_sort', '>', 3)->count() == 0 &&
                     $this->part->descendantsAndSelf->where('vote_sort', 3)->count() > 0 &&
-                    (Auth::user()?->can('create', [Vote::class, $this->part, 'C']) ?? false) &&
+                    (Auth::user()?->can('vote', [Vote::class, $this->part, 'C']) ?? false) &&
                     (Auth::user()?->can('all', Vote::class) ?? false)
                 )
                 ->color('gray')
@@ -331,7 +308,7 @@ class Show extends Component implements HasForms, HasActions
     {
         $this->form->getState();
         $vm = new VoteManager();
-        $vm->postVote($this->part, Auth::user(), $this->vote_type_code, $this->comment);
+        $vm->castVote($this->part, Auth::user(), $this->vote_type_code, $this->comment);
         $this->dispatch('mass-vote');
         $this->form->fill();
     }
