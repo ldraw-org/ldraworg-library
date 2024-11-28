@@ -76,7 +76,7 @@ class VoteManager
             $user->cannot('allAdmin', Vote::class)) {
             return;
         }
-        $parts = $part->descendantsAndSelf->unofficial()->where('vote_sort', 2);
+        $parts = $part->descendantsAndSelf->unique()->unofficial()->where('vote_sort', 2);
         $parts->each(fn (Part $p) => $this->castVote($p, $user, 'A'));
 
         // Have to recheck parts since sometimes, based on processing order, subfiles status is missed
@@ -98,6 +98,8 @@ class VoteManager
             ->where('vote_sort', 3)
             ->whereDoesntHave('votes', fn (Builder $q) => $q->where('user_id', $user->id)->whereIn('vote_type_code', ['A', 'T']))
             ->unofficial()
+            ->get()
+            ->unique()
             ->each(fn (Part $p) => $this->castVote($p, $user, 'C'));
 
     }
