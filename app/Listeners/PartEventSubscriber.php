@@ -23,7 +23,6 @@ class PartEventSubscriber
         $init_submit = is_null(PartEvent::unofficial()->firstWhere('part_id', $event->part->id));
         PartEvent::create([
             'event_type' => EventType::Submit,
-            'part_event_type_id' => 1,
             'initial_submit' => $init_submit,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
@@ -35,7 +34,6 @@ class PartEventSubscriber
     {
         PartEvent::create([
             'event_type' => EventType::Rename,
-            'part_event_type_id' => 1,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
             'moved_to_filename' => $event->moved_to,
@@ -47,7 +45,6 @@ class PartEventSubscriber
     {
         PartEvent::create([
             'event_type' => EventType::HeaderEdit,
-            'part_event_type_id' => 1,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
             'header_changes' => $event->changes,
@@ -59,7 +56,6 @@ class PartEventSubscriber
     {
         PartEvent::create([
             'event_type' => EventType::Release,
-            'part_event_type_id' => 1,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
             'part_release_id' => $event->release->id,
@@ -71,7 +67,7 @@ class PartEventSubscriber
     {
         PartEvent::create([
             'event_type' => EventType::Review,
-            'part_event_type_id' => 1,
+            'part_evnt_type_id' => 1,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
             'vote_type' => $event->vote_type,
@@ -83,7 +79,6 @@ class PartEventSubscriber
     {
         PartEvent::create([
             'event_type' => EventType::Comment,
-            'part_event_type_id' => 1,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
             'comment' => $event->comment,
@@ -97,7 +92,6 @@ class PartEventSubscriber
         });
         PartEvent::create([
             'event_type' => EventType::Delete,
-            'part_event_type_id' => 1,
             'user_id' => $event->user->id,
             'deleted_filename' => $event->deleted_filename,
             'deleted_description' => $event->deleted_description,

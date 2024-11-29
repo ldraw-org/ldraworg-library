@@ -8,17 +8,12 @@ use App\Models\Traits\HasPart;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasUser;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartEvent extends Model
 {
     use HasPartRelease;
     use HasUser;
     use HasPart;
-
-    protected $with = [
-        'part_event_type',
-    ];
 
     protected $fillable = [
         'created_at',
@@ -27,7 +22,6 @@ class PartEvent extends Model
         'user_id',
         'vote_type',
         'event_type',
-        'part_event_type_id',
         'part_release_id',
         'comment',
         'deleted_filename',
@@ -54,11 +48,6 @@ class PartEvent extends Model
             'vote_type' => VoteType::class,
             'event_type' => EventType::class,
         ];
-    }
-
-    public function part_event_type(): BelongsTo
-    {
-        return $this->belongsTo(PartEventType::class);
     }
 
     public function processedComment(): ?string
