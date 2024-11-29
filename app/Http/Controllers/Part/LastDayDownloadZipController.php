@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Part;
 
+use App\Enums\EventType;
 use App\Http\Controllers\Controller;
 use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,11 +19,11 @@ class LastDayDownloadZipController extends Controller
         Part::whereHas(
             'events',
             fn (Builder $q) =>
-                $q->where('created_at', '>=', now()->subDay())->whereHas(
-                    'part_event_type',
-                    fn (Builder $qu) =>
-                    $qu->whereIn('slug', ['submit', 'rename', 'edit'])
-                )
+                $q->where('created_at', '>=', now()->subDay())
+                    ->whereIn(
+                        'event_type',
+                        [EventType::Submit, EventType::Rename, EventType::HeaderEdit]
+                    )
         )
             ->each(
                 fn (Part $part) =>

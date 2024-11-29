@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Enums\VoteType;
 use App\Models\Part\Part;
 use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -20,7 +21,7 @@ class PartReviewed
     public function __construct(
         public Part $part,
         public User $user,
-        public ?string $vote_type_code,
+        public ?VoteType $vote_type,
         public ?string $comment = null,
     ) {
     }

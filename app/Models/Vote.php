@@ -2,22 +2,32 @@
 
 namespace App\Models;
 
+use App\Enums\VoteType;
 use App\Models\Traits\HasPart;
 use App\Models\Traits\HasUser;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Vote extends Model
 {
     use HasUser;
     use HasPart;
 
-    protected $with = ['type'];
+    protected $fillable = [
+        'user_id',
+        'part_id',
+        'vote_type',
+        'comment'
+    ];
 
-    protected $fillable = ['user_id', 'part_id', 'vote_type_code', 'comment'];
-
-    public function type(): BelongsTo
+    /**
+    * @return array{
+    *     vote_type: 'App\Enums\VoteType',
+    * }
+    */
+    protected function casts(): array
     {
-        return $this->belongsTo(VoteType::class, 'vote_type_code', 'code');
+        return  [
+            'vote_type' => VoteType::class,
+        ];
     }
 }

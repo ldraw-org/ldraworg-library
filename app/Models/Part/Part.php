@@ -2,6 +2,8 @@
 
 namespace App\Models\Part;
 
+use App\Enums\EventType;
+use App\Enums\VoteType;
 use App\Models\StickerSheet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -54,12 +56,12 @@ class Part extends Model
 
     /**
     * @return array{
-    *     delete_flag: 'boolean', 
-    *     manual_hold_flag: 'boolean', 
+    *     delete_flag: 'boolean',
+    *     manual_hold_flag: 'boolean',
     *     has_minor_edit: 'boolean',
-    *     missing_parts: 'array', 
-    *     can_release: 'boolean', 
-    *     marked_for_release: 'boolean', 
+    *     missing_parts: 'array',
+    *     can_release: 'boolean',
+    *     marked_for_release: 'boolean',
     *     part_check_messages: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
     *     ready_for_admin: 'boolean'
     * }
@@ -202,7 +204,7 @@ class Part extends Model
             set: fn (array $value, array $attributes) => $attributes['part_check_messages']['errors'] = $value,
         );
     }
-    
+
     public function scopeName(Builder $query, string $name): void
     {
         $name = str_replace('\\', '/', $name);
@@ -294,7 +296,13 @@ class Part extends Model
 
     public function lastChange(): Carbon
     {
-        $recent_change = $this->events()->whereHas('part_event_type', fn ($q) => $q->whereIn('slug', ['submit', 'rename', 'edit', 'release']))->latest()->first();
+        $recent_change = $this->events()
+            ->whereIn(
+                'event_type',
+                [EventType::Submit, EventType::Rename, EventType::HeaderEdit, EventType::Release]
+            )
+            ->latest()
+            ->first();
         if (is_null($recent_change)) {
             return $this->isUnofficial() ? $this->created_at : $this->release->created_at;
         }
@@ -338,26 +346,35 @@ class Part extends Model
         return $file;
     }
 
+    protected function voteTypeCount(): array
+    {
+        return array_merge(
+            [VoteType::AdminCertify->value => 0, VoteType::Certify->value => 0, VoteType::Hold->value => 0, VoteType::AdminFastTrack->value => 0],
+            $this->votes->pluck('vote_type')->countBy(fn(VoteType $vt) => $vt->value)->all()
+        );
+    }
+
     public function updateVoteSort(): void
     {
         if (!$this->isUnofficial()) {
             return;
         }
         $old_sort = $this->vote_sort;
-        $data = array_merge(['A' => 0, 'C' => 0, 'H' => 0, 'T' => 0], $this->votes->pluck('vote_type_code')->countBy()->all());
-        if ($data['H'] != 0) {
+        $data = $this->voteTypeCount();
+
+        if ($data[VoteType::Hold->value] != 0) {
             $this->vote_sort = 5;
         }
         // Needs votes
-        elseif (($data['C'] + $data['A'] < 2) && $data['T'] == 0) {
+        elseif (($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value] < 2) && $data[VoteType::AdminFastTrack->value] == 0) {
             $this->vote_sort = 3;
         }
         // Awaiting Admin
-        elseif ($data['T'] == 0 && $data['A'] == 0 && $data['C'] >= 2) {
+        elseif ($data[VoteType::AdminFastTrack->value] == 0 && $data[VoteType::AdminCertify->value] == 0 && $data[VoteType::Certify->value] >= 2) {
             $this->vote_sort = 2;
         }
         // Certified
-        elseif (($data['A'] > 0 && ($data['C'] + $data['A']) > 2) || $data['T'] > 0) {
+        elseif (($data[VoteType::AdminCertify->value] > 0 && ($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value]) > 2) || $data[VoteType::AdminFastTrack->value] > 0) {
             $this->vote_sort = 1;
         }
         $this->saveQuietly();
@@ -603,12 +620,13 @@ class Part extends Model
     public function statusText(): string
     {
         if ($this->isUnofficial()) {
-            $codes = array_merge(['A' => 0, 'C' => 0, 'H' => 0, 'T' => 0], $this->votes->pluck('vote_type_code')->countBy()->all());
+            $codes = $this->voteTypeCount();
             return match ($this->vote_sort) {
                 1 => 'Certified!',
                 2 => 'Needs Admin Review',
-                3 => $codes['A'] + $codes['C'] == 1 ? 'Needs 1 More Vote' : 'Needs 2 More Votes',
-                5 => 'Errors Found'
+                3 => $codes[VoteType::AdminCertify->value] + $codes[VoteType::Certify->value] == 1 ? 'Needs 1 More Vote' : 'Needs 2 More Votes',
+                5 => 'Errors Found',
+                default => 'Needs More Votes'
             };
         } else {
             return "Update {$this->release->name}";
@@ -619,8 +637,8 @@ class Part extends Model
     {
         if ($this->isUnofficial()) {
             $code = '(';
-            $codes = array_merge(['A' => 0, 'C' => 0, 'H' => 0, 'T' => 0], $this->votes->pluck('vote_type_code')->countBy()->all());
-            foreach (['T', 'A', 'C', 'H'] as $letter) {
+            $codes = $this->voteTypeCount();
+            foreach ([VoteType::AdminFastTrack->value, VoteType::AdminCertify->value, VoteType::Certify->value, VoteType::Hold->value] as $letter) {
                 $code .= str_repeat($letter, $codes[$letter]);
             }
             return $code .= is_null($this->official_part) ? 'N)' : 'F)';

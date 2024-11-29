@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\VoteType;
 use App\Models\User;
 use App\Models\Vote;
 use App\Models\Part\Part;
@@ -40,7 +41,7 @@ class VotePolicy
             ]);
     }
 
-    public function vote(?User $user, Part $part, string $vote_type): bool
+    public function vote(?User $user, Part $part, VoteType $vote_type): bool
     {
         if (is_null($user) || !$part->isUnofficial() || $this->settings->tracker_locked) {
             return false;
@@ -48,7 +49,7 @@ class VotePolicy
 
         $vote = $user->votes->firstWhere('part_id', $part->id);
 
-        if (!is_null($vote) && ($vote->user_id !== $user->id || $vote->vote_type_code === $vote_type)) {
+        if (!is_null($vote) && ($vote->user_id !== $user->id || $vote->vote_type === $vote_type)) {
             return false;
         }
 
@@ -56,18 +57,17 @@ class VotePolicy
 
     }
 
-    protected function canCastVoteType(User $user, Part $part, string $vote_type, ?Vote $vote): bool
+    protected function canCastVoteType(User $user, Part $part, VoteType $vote_type, ?Vote $vote): bool
     {
         $userIsPartAuthor = (is_null($part->official_part) && $part->user_id === $user->id) ||
             (!is_null($part->official_part) && $part->events->firstWhere('initial_submit', true)?->user_id === $user->id);
         return match($vote_type) {
-            'M' => $user->can('part.comment'),
-            'N' => !is_null($vote) && $vote->user_id === $user->id,
-            'A' => $user->can('part.vote.admincertify'),
-            'T' => $user->can('part.vote.fasttrack'),
-            'C' => $userIsPartAuthor ? $user->can('part.own.vote.certify') : $user->can('part.vote.certify'),
-            'H' =>  $userIsPartAuthor ? $user->canAny(['part.vote.hold', 'part.own.vote.hold']) : $user->can('part.vote.hold'),
-            default => false
+            VoteType::Comment => $user->can('part.comment'),
+            VoteType::CancelVote => !is_null($vote) && $vote->user_id === $user->id,
+            VoteType::AdminCertify => $user->can('part.vote.admincertify'),
+            VoteType::AdminFastTrack => $user->can('part.vote.fasttrack'),
+            VoteType::Certify => $userIsPartAuthor ? $user->can('part.own.vote.certify') : $user->can('part.vote.certify'),
+            VoteType::Hold =>  $userIsPartAuthor ? $user->canAny(['part.vote.hold', 'part.own.vote.hold']) : $user->can('part.vote.hold'),
         };
      }
 

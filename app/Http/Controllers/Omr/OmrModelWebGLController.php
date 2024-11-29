@@ -27,6 +27,7 @@ class OmrModelWebGLController extends Controller
         }
         $oparts = new Collection();
         foreach (Part::official()->whereIn('filename', $subs)->get() as $part) {
+            /** var Part $p */
             $oparts = $oparts->merge($part->descendantsAndSelf()->official()->get());
         }
         $oparts = $oparts->unique();

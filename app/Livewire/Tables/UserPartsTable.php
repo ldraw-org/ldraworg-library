@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\EventType;
 use App\Models\Part\Part;
 use App\Livewire\Tables\PartTable;
 use Filament\Tables\Filters\SelectFilter;
@@ -21,7 +22,7 @@ class UserPartsTable extends BasicTable
                     ->where(
                         fn (Builder $query) =>
                         $query->orWhere(fn (Builder $query2): Builder => $query2->doesntHave('official_part')->where('user_id', Auth::user()->id))
-                            ->orWhereHas('events', fn (Builder $query2): Builder => $query2->whereNull('part_release_id')->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit'))
+                            ->orWhereHas('events', fn (Builder $query2): Builder => $query2->whereNull('part_release_id')->where('user_id', Auth::user()->id)->where('event_type', EventType::Submit))
                     )
             )
             ->defaultSort('created_at', 'desc')

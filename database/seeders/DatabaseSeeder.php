@@ -4,11 +4,9 @@ namespace Database\Seeders;
 
 use App\LDraw\LibraryConfig;
 use App\Models\Part\PartCategory;
-use App\Models\Part\PartEventType;
 use App\Models\Part\PartLicense;
 use App\Models\Part\PartType;
 use App\Models\Part\PartTypeQualifier;
-use App\Models\VoteType;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Seeder;
 
@@ -25,8 +23,6 @@ class DatabaseSeeder extends Seeder
         PartTypeQualifier::insert(LibraryConfig::partTypeQualifiers());
         PartLicense::insert(LibraryConfig::partLicenses());
         PartCategory::insert(LibraryConfig::partCategories());
-        PartEventType::insert(LibraryConfig::partEventTypes());
-        VoteType::insert(LibraryConfig::voteTypes());
         $ls = app(LibrarySettings::class);
         if (empty($ls->allowed_header_metas)) {
             $ls->allowed_header_metas = [
@@ -41,7 +37,7 @@ class DatabaseSeeder extends Seeder
                 '!CMDLINE',
                 '!HISTORY'
             ];
-        }   
+        }
         if (empty($ls->allowed_body_metas)) {
             $ls->allowed_body_metas = [
                 '!TEXMAP',

@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\VoteType;
 use App\Models\Vote;
-use App\Models\VoteType;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
@@ -25,7 +25,7 @@ class UserVotesTable extends BasicTable
             ->heading('My Votes')
             ->columns([
                 Split::make([
-                    ViewColumn::make('vote_type_code')
+                    ViewColumn::make('vote_type')
                     ->view('tables.columns.vote-status')
                     ->sortable()
                     ->grow(false)
@@ -52,8 +52,8 @@ class UserVotesTable extends BasicTable
                 ])
             ])
             ->filters([
-                SelectFilter::make('vote_type_code')
-                    ->options(VoteType::whereIn('code', ['A', 'C', 'T', 'H'])->ordered()->pluck('name', 'code'))
+                SelectFilter::make('vote_type')
+                    ->options(VoteType::options([VoteType::Certify, VoteType::AdminCertify, VoteType::Hold, VoteType::AdminFastTrack]))
                     ->preload()
                     ->multiple()
                     ->label('My Vote'),

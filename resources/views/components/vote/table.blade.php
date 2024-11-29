@@ -10,14 +10,14 @@
       </thead>
       <tbody class="divide-y divide-gray-200 bg-white">
       @foreach ($votes as $vote)
-          <tr wire:key="{{$vote->user_id}}-{{$vote->vote_type_code}}">
+          <tr wire:key="{{$vote->user_id}}-{{$vote->vote_type->value}}">
             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ $vote->user->name }}</td>
             <td @class([
                   'whitespace-nowrap px-3 py-4 text-sm',
-                  'bg-green-200' => $vote->vote_type_code == 'C',
-                  'bg-red-200' => $vote->vote_type_code == 'H',
-                  'bg-lime-200' => $vote->vote_type_code == 'A' || $vote->vote_type_code == 'T',
-                  ])>{{ $vote->type->name }}</td>
+                  'bg-green-200' => $vote->vote_type == \App\Enums\VoteType::Certify,
+                  'bg-red-200' => $vote->vote_type == \App\Enums\VoteType::Hold,
+                  'bg-lime-200' => $vote->vote_type == \App\Enums\VoteType::AdminCertify || $vote->vote_type == \App\Enums\VoteType::AdminFastTrack,
+                  ])>{{ $vote->vote_type->label() }}</td>
           </tr>
       @endforeach
       </tbody>

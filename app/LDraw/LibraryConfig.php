@@ -137,29 +137,4 @@ class LibraryConfig
             ['category' => 'Znap'],
         ];
     }
-
-    public static function partEventTypes(): array
-    {
-        return [
-            ['slug' => 'review', 'name' => 'Review'],
-            ['slug' => 'submit', 'name' => 'Submit'],
-            ['slug' => 'edit', 'name' => 'Header Edit'],
-            ['slug' => 'rename', 'name' => 'Rename'],
-            ['slug' => 'release', 'name' => 'Release'],
-            ['slug' => 'delete', 'name' => 'Delete'],
-            ['slug' => 'comment', 'name' => 'Comment'],
-        ];
-    }
-
-    public static function voteTypes(): array
-    {
-        return [
-            ['code' => 'C', 'short' => 'certify', 'name' => 'Certify', 'phrase' => 'Certify (Yes).  This file is ready for general release.', 'order' => 4],
-            ['code' => 'A', 'short' => 'admincertify', 'name' => 'Admin Certify', 'phrase' => 'Admin Certify (Approve).  This file is approved for release.', 'order' => 3],
-            ['code' => 'T', 'short' => 'fasttrack', 'name' => 'Admin Fast Track', 'phrase' => 'Fast-track (Yes).  This file is eligible for fast-track review and is approved release.', 'order' => 6],
-            ['code' => 'H', 'short' => 'hold', 'name' => 'Hold', 'phrase' => 'Hold (No).  It\'s getting there, but not yet.', 'order' => 5],
-            ['code' => 'N', 'short' => 'cancel', 'name' => 'Cancel Vote', 'phrase' => 'Cancel Vote.  This will clear your vote on this part.', 'order' => 2],
-            ['code' => 'M', 'short' => 'comment', 'name' => 'Comment', 'phrase' => 'Comment.  Comment on this part without voting or changing your vote.', 'order' => 1],
-        ];
-    }
 }

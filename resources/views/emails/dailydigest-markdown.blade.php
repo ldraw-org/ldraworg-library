@@ -4,25 +4,25 @@
 ![{{$part->description}}]({{$message->embed(storage_path("app/images/library/{$part->libFolder()}/" . substr($part->filename, 0, -4) . '_thumb.png'))}})
 ## [{{$part->filename}} - {{$part->description}}]({{route('parts.show', $part)}})
 @foreach ($part->events->whereBetween('created_at', [$date, $next]) as $event)
-### On {{$event->created_at}}: 
-@switch($event->part_event_type->slug)
-@case('submit')
+### On {{$event->created_at}}:
+@switch($event->event_type)
+@case(\App\Enums\EventType::Submit)
 A new version of file was submitted by {{$event->user->name}}
 @break
-@case('edit') 
+@case(\App\Enums\EventType::HeaderEdit)
 The header was edited by {{$event->user->name}}
 @break
-@case('rename') 
+@case(\App\Enums\EventType::Rename)
 The part was moved/renamed
 @break
-@case('comment') 
+@case(\App\Enums\EventType::Comment)
 {{$event->user->name}} made a comment
 @break
-@case('review')
-@empty($event->vote_type_code) 
+@case(\App\Enums\EventType::Review)
+@empty($event->vote_type)
 {{$event->user->name}} cancelled thier vote.
 @else
-{{$event->user->name}} left a **{{strtolower($event->vote_type->name)}}** vote.
+{{$event->user->name}} left a **{{strtolower($event->vote_type->label())}}** vote.
 @endempty
 @break
 @endswitch

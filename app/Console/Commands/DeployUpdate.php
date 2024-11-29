@@ -2,13 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\LdrawColour;
-use App\Models\Part\Part;
-use App\Models\Part\UnknownPartNumber;
-use App\Models\User;
+use App\Enums\EventType;
+use App\Enums\VoteType;
+use App\Models\Part\PartEvent;
+use App\Models\Vote;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
-use League\Csv\Reader;
 
 class DeployUpdate extends Command
 {
@@ -31,5 +29,14 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
+        Vote::each(function (Vote $v) {
+            $v->vote_type = VoteType::from($v->vote_type_code);
+            $v->save();
+        });
+        PartEvent::each(function (PartEvent $e) {
+            $e->vote_type = VoteType::tryFrom($e->vote_type_code);
+            $e->event_type = EventType::from($e->part_event_type->slug);
+            $e->save();
+        });
     }
 }

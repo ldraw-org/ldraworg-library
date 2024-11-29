@@ -2,15 +2,14 @@
 
 namespace App\Livewire\Part;
 
+use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
 use App\Filament\Actions\EditNumberAction;
 use App\LDraw\PartManager;
 use App\LDraw\VoteManager;
 use App\Models\Part\Part;
 use App\Models\Vote;
-use App\Models\VoteType;
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\DeleteAction;
@@ -26,7 +25,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
 use Illuminate\Database\Eloquent\Collection;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -57,7 +55,7 @@ class Show extends Component implements HasForms, HasActions
                             ->default('M')
                             ->required()
                             ->markAsRequired(false)
-                            ->exists(table: VoteType::class, column: 'code')
+                            ->enum(VoteType::class)
                             ->inline()
                             ->inlineLabel(false)
                             ->validationAttribute('vote type'),
@@ -73,13 +71,12 @@ class Show extends Component implements HasForms, HasActions
             ]);
     }
 
-    #[Computed]
     public function voteOptions(): array
     {
         $options = [];
-        foreach (VoteType::ordered()->get() as $vt) {
-            if (Auth::user()->can('vote', [Vote::class, $this->part, $vt->code])) {
-                $options[$vt->code] = $vt->name;
+        foreach (VoteType::cases() as $vt) {
+            if (Auth::user()->can('vote', [Vote::class, $this->part, $vt])) {
+                $options[$vt->value] = $vt->label();
             }
         }
         return $options;
@@ -272,7 +269,7 @@ class Show extends Component implements HasForms, HasActions
                     $this->part->type->folder == 'parts/' &&
                     $this->part->ready_for_admin === true &&
                     $this->part->descendantsAndSelf->where('vote_sort', 2)->count() > 0 &&
-                    (Auth::user()?->can('vote', [Vote::class, $this->part, 'A']) ?? false) &&
+                    (Auth::user()?->can('vote', [Vote::class, $this->part, VoteType::AdminCertify]) ?? false) &&
                     (Auth::user()?->can('allAdmin', Vote::class) ?? false)
                 )
                 ->color('gray')
@@ -297,7 +294,7 @@ class Show extends Component implements HasForms, HasActions
                     $this->part->type->folder == 'parts/' &&
                     $this->part->descendantsAndSelf->where('vote_sort', '>', 3)->count() == 0 &&
                     $this->part->descendantsAndSelf->where('vote_sort', 3)->count() > 0 &&
-                    (Auth::user()?->can('vote', [Vote::class, $this->part, 'C']) ?? false) &&
+                    (Auth::user()?->can('vote', [Vote::class, $this->part, VoteType::Certify]) ?? false) &&
                     (Auth::user()?->can('all', Vote::class) ?? false)
                 )
                 ->color('gray')
@@ -308,7 +305,7 @@ class Show extends Component implements HasForms, HasActions
     {
         $this->form->getState();
         $vm = new VoteManager();
-        $vm->castVote($this->part, Auth::user(), $this->vote_type_code, $this->comment);
+        $vm->castVote($this->part, Auth::user(), VoteType::tryFrom($this->vote_type_code), $this->comment);
         $this->dispatch('mass-vote');
         $this->form->fill();
     }

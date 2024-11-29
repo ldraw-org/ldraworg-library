@@ -2,11 +2,12 @@
 
 namespace App\Models\Part;
 
+use App\Enums\EventType;
+use App\Enums\VoteType;
 use App\Models\Traits\HasPart;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasUser;
-use App\Models\VoteType;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartEvent extends Model
@@ -17,7 +18,6 @@ class PartEvent extends Model
 
     protected $with = [
         'part_event_type',
-        'vote_type'
     ];
 
     protected $fillable = [
@@ -25,9 +25,10 @@ class PartEvent extends Model
         'initial_submit',
         'part_id',
         'user_id',
-        'vote_type_code',
-        'part_release_id',
+        'vote_type',
+        'event_type',
         'part_event_type_id',
+        'part_release_id',
         'comment',
         'deleted_filename',
         'deleted_description',
@@ -37,22 +38,27 @@ class PartEvent extends Model
         'header_changes',
     ];
 
+    /**
+    * @return array{
+    *     initial_submit: 'boolean',
+    *     header_changes: 'array',
+    *     vote_type: 'App\Enums\VoteType',
+    *     event_type: 'App\Enums\EventType',
+    * }
+    */
     protected function casts(): array
     {
         return  [
             'initial_submit' => 'boolean',
             'header_changes' => 'array',
+            'vote_type' => VoteType::class,
+            'event_type' => EventType::class,
         ];
     }
 
     public function part_event_type(): BelongsTo
     {
         return $this->belongsTo(PartEventType::class);
-    }
-
-    public function vote_type(): BelongsTo
-    {
-        return $this->belongsTo(VoteType::class);
     }
 
     public function processedComment(): ?string

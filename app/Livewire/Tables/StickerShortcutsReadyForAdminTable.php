@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\VoteType;
 use App\Models\Part\Part;
 use App\Models\Vote;
 use App\Livewire\Tables\PartTable;
@@ -28,11 +29,11 @@ class StickerShortcutsReadyForAdminTable extends BasicTable
                 Action::make('Fast Track')
                     ->action(function (Part $p) {
                         $vm = new VoteManager();
-                        $vm->castVote($p, auth()->user(), 'T');
+                        $vm->castVote($p, auth()->user(), VoteType::AdminFastTrack);
                     })
                     ->button()
                     ->outlined()
-                    ->visible(fn (Part $p) => auth()->user()?->can('vote', [Vote::class, $p, 'T']))
+                    ->visible(fn (Part $p) => auth()->user()?->can('vote', [Vote::class, $p, VoteType::AdminFastTrack]))
 
             ])
             ->recordUrl(fn (Part $p): string => route('parts.show', $p))

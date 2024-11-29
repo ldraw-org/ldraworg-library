@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\EventType;
 use App\Models\Part\Part;
 use App\Models\User;
 use App\Livewire\Tables\PartTable;
@@ -35,7 +36,7 @@ class PartReadyForUserTable extends BasicTable
                     ->whereDoesntHave(
                         'events',
                         fn (Builder $qu) =>
-                        $qu->where('user_id', Auth::user()->id)->whereRelation('part_event_type', 'slug', 'submit')->whereNull('part_release_id')
+                        $qu->where('user_id', Auth::user()->id)->where('event_type', EventType::Submit)->whereNull('part_release_id')
                     )
                     // Not authored by user unless a fix
                     ->where(function (Builder $q) {

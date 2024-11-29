@@ -2,6 +2,7 @@
 
 namespace App\Livewire\PartEvent;
 
+use App\Enums\EventType;
 use App\Models\Part\PartEvent;
 use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -39,7 +40,7 @@ class Index extends Component implements HasForms, HasTable
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Split::make([
-                    ViewColumn::make('part_event_type')
+                    ViewColumn::make('event_type')
                         ->view('components.event.icon.filament-table-icon')
                         ->grow(false),
                     TextColumn::make('created_at')
@@ -91,8 +92,8 @@ class Index extends Component implements HasForms, HasTable
                 ])
             ])
             ->filters([
-                SelectFilter::make('part_event_type_id')
-                    ->relationship('part_event_type', 'name')
+                SelectFilter::make('event_type')
+                    ->options(EventType::options())
                     ->native(false)
                     ->multiple()
                     ->preload()
