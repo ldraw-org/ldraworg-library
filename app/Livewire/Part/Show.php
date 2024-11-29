@@ -440,7 +440,7 @@ class Show extends Component implements HasForms, HasActions
     {
         $kw = $this->part->keywords()->where('keyword', 'LIKE', "$site %")->first()?->keyword;
         if (array_key_exists(strtolower($site), config('ldraw.external_sites')) && !is_null($kw)) {
-            $number = str_replace("$site ", '', $kw);
+            $number = trim(str_replace([$site, ucfirst(strtolower($site)), strtolower($site)], '', $kw));
             return Action::make("view{$site}")
                 ->button()
                 ->color('gray')
