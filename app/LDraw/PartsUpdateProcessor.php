@@ -12,6 +12,7 @@ use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -88,7 +89,7 @@ class PartsUpdateProcessor
             if ($type->inPartsFolder()) {
                 $count = $this->parts
                     ->whereNull('official_part')
-                    ->whereIn('type', PartType::partsFolderTypes())
+                    ->partsFolderOnly()
                     ->count();
             } else {
                 $count = $this->parts
@@ -134,28 +135,37 @@ class PartsUpdateProcessor
             "Release statistics:\n" .
             "   Total files: {$data['total_files']}\n" .
             "   New files: {$data['new_files']}\n";
-        foreach ($data['new_types'] as $t) {
-            $notes .= "   New {$t['name']}s: {$t['count']}\n";
-        }
-        $notes .= "\n" .
-            "Moved Parts\n";
-        foreach ($data['moved_parts'] as $m) {
-            $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['movedto']}\n";
-        }
-        $notes .= "\n" .
-            "Renamed Parts\n";
-        foreach ($data['rename'] as $m) {
-            $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['old_description']}\n" .
-            "   changed to    {$m['decription']}\n";
-        }
-        $notes .= "\n" .
-            "Other Fixed Parts\n";
-        foreach ($data['fixed'] as $m) {
-            $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['decription']}\n";
-        }
-        if ($data['minor_edits'] > 0) {
-            $notes .= "\nMinor Edits\n";
-            $notes .=  "   {$data['minor_edits']} Parts with minor adminstrative edits and/or license changes\n";
+        foreach ($data as $cat => $value) {
+            switch ($cat) {
+                case 'new_types':
+                    foreach ($data['new_types'] as $t) {
+                        $notes .= "   New {$t['name']}s: {$t['count']}\n";
+                    }
+                    break;
+                case 'moved_parts':
+                    $notes .= "\nMoved Parts\n";
+                    foreach ($data['moved_parts'] as $m) {
+                        $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['movedto']}\n";
+                    }
+                    break;
+                case 'rename':
+                    $notes .= "\nRenamed Parts\n";
+                    foreach ($data['rename'] as $m) {
+                        $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['old_description']}\n" .
+                        "   changed to    {$m['decription']}\n";
+                    }
+                    break;
+                case 'fixed':
+                    $notes .= "\nOther Fixed Parts\n";
+                    foreach ($data['fixed'] as $m) {
+                        $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['decription']}\n";
+                    }
+                    break;
+                case 'minor_edits':
+                    $notes .= "\nMinor Edits\n";
+                    $notes .=  "   {$data['minor_edits']} Parts with minor administrative edits and/or license changes\n";
+                    break;
+            }
         }
         return $notes;
     }
@@ -270,23 +280,26 @@ class PartsUpdateProcessor
     {
         $uzipname = $this->tempDir->path("lcad{$this->release->short}.zip");
         $zipname = $this->tempDir->path("complete.zip");
+
+        copy(Storage::disk('library')->path('updates/complete.zip'), $zipname);
         $uzip = new \ZipArchive();
         $uzip->open($uzipname, \ZipArchive::CREATE);
 
         $zip = new \ZipArchive();
-        $zip->open($zipname, \ZipArchive::CREATE);
+        $zip->open($zipname);
 
+/*
         // Add non-part files to complete zip
-        // Copy the new non-Part files to the library
         foreach (Storage::disk('library')->allFiles('official') as $filename) {
             $zipfilename = str_replace('official/', '', $filename);
             $content = Storage::disk('library')->get($filename);
             $zip->addFromString('ldraw/' . $zipfilename, $content);
         }
         $zip->close();
+*/
 
         // Add new/updated non-part files to complete and update zip
-        $zip->open($zipname);
+//        $zip->open($zipname);
         foreach ($this->extraFiles as $filename => $contents) {
             $filename = "ldraw/{$filename}";
             $uzip->addFromString($filename, $contents);
@@ -301,13 +314,35 @@ class PartsUpdateProcessor
         $uzip->addFromString("ldraw/models/Note{$this->release->short}CA.txt", $notes);
 
         if ($this->includeLdconfig === true) {
+            $zip->deleteName('ldraw/LDConfig.ldr');
+            $zip->deleteName('ldraw/LDCfgalt.ldr');
+            $zip->addFromString('ldraw/LDConfig.ldr', Storage::disk('library')->get('official/LDConfig.ldr'));
+            $zip->addFromString('ldraw/LDCfgalt.ldr', Storage::disk('library')->get('official/LDCfgalt.ldr'));
             $uzip->addFromString('ldraw/LDConfig.ldr', Storage::disk('library')->get('official/LDConfig.ldr'));
+            $uzip->addFromString('ldraw/LDCfgalt.ldr', Storage::disk('library')->get('official/LDCfgalt.ldr'));
         }
+
         $zip->close();
         $uzip->close();
 
-        // These have to be chunked because php doesn't write the file to disk immediately
-        // Trying to hold the entire library in memory will cause an OOM error
+        $zip->open($zipname);
+        $uzip->open($uzipname);
+
+        Part::where(
+                fn (Builder $query) => $query->orWhere('part_release_id', $this->release->id)
+                    ->orWhere('has_minor_edit', true)
+            )
+            ->each(function (Part $part) use ($zip, $uzip) {
+                $content = $part->get();
+                if ($zip->getFromName('ldraw/' . $part->filename) !== false) {
+                    $zip->deleteName('ldraw/' . $part->filename);
+                }
+                $zip->addFromString('ldraw/' . $part->filename, $content);
+                $uzip->addFromString('ldraw/' . $part->filename, $content);
+            });
+        $zip->close();
+        $uzip->close();
+/*
         Part::official()->chunk(500, function (Collection $parts) use ($zip, $zipname, $uzip, $uzipname) {
             $zip->open($zipname);
             $uzip->open($uzipname);
@@ -321,6 +356,7 @@ class PartsUpdateProcessor
             $zip->close();
             $uzip->close();
         });
+*/
     }
 
     protected function copyReleaseFiles(): void
