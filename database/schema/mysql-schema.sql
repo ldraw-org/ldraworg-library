@@ -165,7 +165,6 @@ CREATE TABLE `omr_models` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `user_id` bigint unsigned NOT NULL,
   `set_id` bigint unsigned NOT NULL,
-  `part_license_id` bigint unsigned NOT NULL,
   `missing_parts` tinyint(1) NOT NULL,
   `missing_patterns` tinyint(1) NOT NULL,
   `missing_stickers` tinyint(1) NOT NULL,
@@ -173,11 +172,10 @@ CREATE TABLE `omr_models` (
   `alt_model` tinyint(1) NOT NULL,
   `alt_model_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `notes` json DEFAULT NULL,
+  `license` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `omr_models_user_id_foreign` (`user_id`),
   KEY `omr_models_set_id_foreign` (`set_id`),
-  KEY `omr_models_part_license_id_foreign` (`part_license_id`),
-  CONSTRAINT `omr_models_part_license_id_foreign` FOREIGN KEY (`part_license_id`) REFERENCES `part_licenses` (`id`),
   CONSTRAINT `omr_models_set_id_foreign` FOREIGN KEY (`set_id`) REFERENCES `sets` (`id`),
   CONSTRAINT `omr_models_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -215,19 +213,6 @@ CREATE TABLE `part_categories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `part_event_types`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `part_event_types` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `slug` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `part_event_types_slug_unique` (`slug`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `part_events`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -245,8 +230,8 @@ CREATE TABLE `part_events` (
   `moved_from_filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `moved_to_filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `header_changes` json DEFAULT NULL,
-  `vote_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `event_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `vote_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `event_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `part_events_part_release_id_foreign` (`part_release_id`),
   KEY `part_events_user_id_index` (`user_id`),
@@ -296,17 +281,6 @@ CREATE TABLE `part_keywords` (
   UNIQUE KEY `part_keywords_keyword_unique` (`keyword`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `part_licenses`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `part_licenses` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `in_use` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `part_releases`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -321,28 +295,6 @@ CREATE TABLE `part_releases` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `part_type_qualifiers`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `part_type_qualifiers` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `part_types`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `part_types` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `folder` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `format` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `parts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -353,12 +305,9 @@ CREATE TABLE `parts` (
   `user_id` bigint unsigned NOT NULL,
   `part_category_id` bigint unsigned DEFAULT NULL,
   `part_release_id` bigint unsigned DEFAULT NULL,
-  `part_license_id` bigint unsigned NOT NULL,
   `filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `header` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `part_type_id` bigint unsigned NOT NULL,
-  `part_type_qualifier_id` bigint unsigned DEFAULT NULL,
   `official_part_id` bigint unsigned DEFAULT NULL,
   `unofficial_part_id` bigint unsigned DEFAULT NULL,
   `uncertified_subpart_count` int NOT NULL DEFAULT '0',
@@ -381,12 +330,12 @@ CREATE TABLE `parts` (
   `is_dual_mould` tinyint(1) NOT NULL DEFAULT '0',
   `base_part_id` bigint unsigned DEFAULT NULL,
   `unknown_part_number_id` bigint unsigned DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type_qualifier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `license` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `parts_filename_part_release_id_unique` (`filename`,`part_release_id`),
   KEY `parts_part_release_id_foreign` (`part_release_id`),
-  KEY `parts_part_license_id_foreign` (`part_license_id`),
-  KEY `parts_part_type_id_foreign` (`part_type_id`),
-  KEY `parts_part_type_qualifier_id_foreign` (`part_type_qualifier_id`),
   KEY `parts_user_id_index` (`user_id`),
   KEY `parts_part_category_id_index` (`part_category_id`),
   KEY `parts_filename_index` (`filename`),
@@ -399,10 +348,7 @@ CREATE TABLE `parts` (
   CONSTRAINT `parts_base_part_id_foreign` FOREIGN KEY (`base_part_id`) REFERENCES `parts` (`id`),
   CONSTRAINT `parts_official_part_id_foreign` FOREIGN KEY (`official_part_id`) REFERENCES `parts` (`id`),
   CONSTRAINT `parts_part_category_id_foreign` FOREIGN KEY (`part_category_id`) REFERENCES `part_categories` (`id`),
-  CONSTRAINT `parts_part_license_id_foreign` FOREIGN KEY (`part_license_id`) REFERENCES `part_licenses` (`id`),
   CONSTRAINT `parts_part_release_id_foreign` FOREIGN KEY (`part_release_id`) REFERENCES `part_releases` (`id`),
-  CONSTRAINT `parts_part_type_id_foreign` FOREIGN KEY (`part_type_id`) REFERENCES `part_types` (`id`),
-  CONSTRAINT `parts_part_type_qualifier_id_foreign` FOREIGN KEY (`part_type_qualifier_id`) REFERENCES `part_type_qualifiers` (`id`),
   CONSTRAINT `parts_sticker_sheet_id_foreign` FOREIGN KEY (`sticker_sheet_id`) REFERENCES `sticker_sheets` (`id`),
   CONSTRAINT `parts_unknown_part_number_id_foreign` FOREIGN KEY (`unknown_part_number_id`) REFERENCES `unknown_part_numbers` (`id`),
   CONSTRAINT `parts_unofficial_part_id_foreign` FOREIGN KEY (`unofficial_part_id`) REFERENCES `parts` (`id`),
@@ -660,7 +606,6 @@ CREATE TABLE `users` (
   `realname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `forum_user_id` bigint DEFAULT NULL,
-  `part_license_id` bigint unsigned NOT NULL,
   `settings` json DEFAULT NULL,
   `loginkey` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `profile_settings` json DEFAULT NULL,
@@ -668,25 +613,11 @@ CREATE TABLE `users` (
   `is_legacy` tinyint(1) NOT NULL DEFAULT '0',
   `is_ptadmin` tinyint(1) NOT NULL DEFAULT '0',
   `ca_confirm` tinyint(1) NOT NULL DEFAULT '0',
+  `license` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_name_unique` (`name`),
   UNIQUE KEY `users_email_unique` (`email`),
-  UNIQUE KEY `users_realname_unique` (`realname`),
-  KEY `users_part_license_id_foreign` (`part_license_id`),
-  CONSTRAINT `users_part_license_id_foreign` FOREIGN KEY (`part_license_id`) REFERENCES `part_licenses` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `vote_types`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `vote_types` (
-  `code` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `short` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `phrase` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `order` int NOT NULL,
-  PRIMARY KEY (`code`),
-  UNIQUE KEY `vote_types_short_unique` (`short`)
+  UNIQUE KEY `users_realname_unique` (`realname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `votes`;
@@ -698,7 +629,7 @@ CREATE TABLE `votes` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `part_id` bigint unsigned NOT NULL,
   `user_id` bigint unsigned NOT NULL,
-  `vote_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `vote_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `votes_part_id_user_id_unique` (`part_id`,`user_id`),
   KEY `votes_user_id_index` (`user_id`),
@@ -797,6 +728,16 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (85,'2024_11_01_150
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (86,'2024_11_15_005620_create_unknown_part_number_table',19);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (87,'2024_11_17_011340_create_parts_unknown_part_numbers_table',20);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (88,'2024_11_28_191428_add_vote_type_to_votes_table',21);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (90,'2024_11_28_193101_add_enum_types_to_part_events_table',22);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (91,'2024_11_29_061157_remove_vote_and_event_type_from_part_events_table',23);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (92,'2024_11_29_061221_remove_vote_type_code_from_votes_table',23);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (89,'2024_11_28_193101_add_enum_types_to_part_events_table',21);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (90,'2024_11_29_061157_remove_vote_and_event_type_from_part_events_table',22);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (91,'2024_11_29_061221_remove_vote_type_code_from_votes_table',22);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (92,'2024_11_29_065104_drop_vote_and_part_event_types_tables',23);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (93,'2024_11_29_180749_add_part_type_enums_to_part_table',24);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (94,'2024_11_29_184550_add_license_enum_to_users_table',24);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (95,'2024_11_30_170048_update_default_license_type',24);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (96,'2024_12_01_180608_drop_enumed_columns_from_parts_table',25);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (97,'2024_12_01_180615_drop_enumed_columns_from_users_table',25);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (98,'2024_12_01_183024_drop_enumed_tables',26);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (99,'2024_12_01_183322_add_license_to_omr_models_table',26);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (100,'2024_12_01_184725_drop_part_license_from_omr_models_table',27);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (101,'2024_12_01_184726_drop_part_licenses_table',27);
