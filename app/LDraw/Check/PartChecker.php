@@ -146,7 +146,7 @@ class PartChecker
 
         // !LDRAW_ORG Part type checks
         if (! $this->checkNameAndPartType($part->name, $part->type)) {
-            $errors[] = __('partcheck.type.path', ['name' => $name, 'type' => $pt->type->value]);
+            $errors[] = __('partcheck.type.path', ['name' => $name, 'type' => $pt->value]);
         }
         if ($pt == PartType::Subpart && $part->description[0] != '~') {
             $errors[] = __('partcheck.type.subpartdesc');

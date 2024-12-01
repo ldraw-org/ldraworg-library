@@ -56,7 +56,7 @@ class EditHeaderAction
                             $fail('partcheck.description.invalidchars')->translate();
                         }
                         if (
-                            $part->type->folder == 'parts/' &&
+                            $part->type->inPartsFolder() &&
                             $part->category->category !== 'Moved' &&
                             $part->category->category !== 'Sticker' &&
                             $part->category->category !== 'Sticker Shortcut' &&
@@ -95,7 +95,7 @@ class EditHeaderAction
                 ->selectablePlaceholder(false)
                 ->rules([
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
-                        if ($part->type->folder == 'parts/') {
+                        if ($part->type->inPartsFolder()) {
                             $c = app(\App\LDraw\Parse\Parser::class)->getDescriptionCategory($get('description'));
                             $cat = PartCategory::firstWhere('category', $c);
                             if (is_null($cat) && is_null($value)) {

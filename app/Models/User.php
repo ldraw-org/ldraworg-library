@@ -28,7 +28,6 @@ class User extends Authenticatable
 {
     use HasFactory;
     use HasParts;
-    use HasLicense;
     use HasRoles;
     use Notifiable;
 
@@ -38,7 +37,6 @@ class User extends Authenticatable
         'realname',
         'password',
         'license',
-        'part_license_id',
         'forum_user_id',
         'is_legacy',
         'is_synthetic',

@@ -30,19 +30,5 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::lazy()->each(function (Part $p) {
-            $p->type = PartType::from($p->part_type->type);
-            if (!is_null($p->part_type_qualifier)) {
-                $p->type_qualifier = PartTypeQualifier::from($p->part_type_qualifier->type);
-            }
-            $p->license = License::from($p->part_license->name);
-            $p->save();
-        });
-
-        User::each(function (User $u) {
-            $u->license = License::from($u->part_license->name);
-            $u->save();
-        });
-
     }
 }

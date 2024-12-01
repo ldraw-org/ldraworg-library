@@ -37,19 +37,15 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 class Part extends Model
 {
     use HasGraphRelationships;
-    use HasLicense;
     use HasPartRelease;
     use HasUser;
 
     protected $fillable = [
         'user_id',
         'part_category_id',
-        'part_license_id',
         'license',
-        'part_type_id',
         'type',
         'part_release_id',
-        'part_type_qualifier_id',
         'type_qualifier',
         'description',
         'filename',
@@ -115,16 +111,6 @@ class Part extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(PartCategory::class, 'part_category_id', 'id');
-    }
-
-    public function part_type(): BelongsTo
-    {
-        return $this->belongsTo(PartPartType::class, 'part_type_id', 'id');
-    }
-
-    public function part_type_qualifier(): BelongsTo
-    {
-        return $this->belongsTo(PartPartTypeQualifier::class, 'part_type_qualifier_id', 'id');
     }
 
     public function subparts(): BelongsToMany
