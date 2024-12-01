@@ -17,10 +17,14 @@ class UserObserver
             if ($user->wasChanged('license')) {
                 $user->parts()->update(['license' => $user->license]);
             }
+            
             $user->parts()->official()->update(['has_minor_edit' => true]);
-            Part::official()->whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))->update(['has_minor_edit' => true]);
             MassHeaderGenerate::dispatch($user->parts);
-            MassHeaderGenerate::dispatch(Part::whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))->get());
+
+            if ($user->wasChanged('name')) {
+                Part::official()->whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))->update(['has_minor_edit' => true]);
+                MassHeaderGenerate::dispatch(Part::whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))->get());
+            }
         }
         if (app()->environment() == 'production') {
             $mybb = MybbUser::find($user->forum_user_id);

@@ -14,7 +14,7 @@ class ConfirmCA extends Component
     {
         $user = Auth::user();
         if ($user->license != License::CC_BY_4) {
-            $user->license = License::from($settings->default_part_license);
+            $user->license = License::CC_BY_4;
         }
         $user->ca_confirm = true;
         $user->save();
