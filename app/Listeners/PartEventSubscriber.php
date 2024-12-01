@@ -67,7 +67,6 @@ class PartEventSubscriber
     {
         PartEvent::create([
             'event_type' => EventType::Review,
-            'part_evnt_type_id' => 1,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
             'vote_type' => $event->vote_type,
