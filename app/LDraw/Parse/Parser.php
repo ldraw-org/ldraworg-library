@@ -2,14 +2,14 @@
 
 namespace App\LDraw\Parse;
 
+use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
 use App\Settings\LibrarySettings;
 
 class Parser
 {
     public function __construct(
         protected readonly array $patterns,
-        protected readonly array $types,
-        protected readonly array $type_qualifiers,
         protected LibrarySettings $settings,
     ) {
     }
@@ -309,10 +309,10 @@ class Parser
     {
         $text = $this->formatText($text);
         if (array_key_exists('type', $this->patterns)) {
-            $pattern = str_replace(['###PartTypes###', '###PartTypesQualifiers###'], [implode('|', $this->types), implode('|', $this->type_qualifiers)], $this->patterns['type']);
+            $pattern = str_replace(['###PartTypes###', '###PartTypesQualifiers###'], [implode('|', array_column(PartType::cases(), 'value')), implode('|', array_column(PartTypeQualifier::cases(), 'value'))], $this->patterns['type']);
 
             if (preg_match($pattern, $text, $matches)) {
-                $t = ['unofficial' => false, 'type' => $matches['type'], 'qual' => '', 'releasetype' => '', 'release' => ''];
+                $t = ['unofficial' => false, 'type' => $matches['type'], 'qual' => null, 'releasetype' => null, 'release' => null];
                 if (array_key_exists('unofficial', $matches) && $matches['unofficial'] !== '') {
                     $t['unofficial'] = true;
                 }

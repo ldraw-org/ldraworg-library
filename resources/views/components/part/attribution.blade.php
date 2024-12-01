@@ -4,7 +4,7 @@
     </x-slot>
     <p>
         This part is copyright &copy; {{empty(trim($copyuser->realname)) ? 'LDraw.org' : $copyuser->realname}}<br/>
-        Licensed under <x-part.license :license="$copyuser->license->name" /><br>
+        Licensed under <x-part.license :license="$copyuser->license->value" /><br>
         <br>
         Edits:<br>
         LDraw.org Parts Tracker,

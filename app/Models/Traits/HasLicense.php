@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasLicense
 {
-    public function license(): BelongsTo
+    public function part_license(): BelongsTo
     {
         return $this->belongsTo(PartLicense::class, 'part_license_id', 'id');
     }

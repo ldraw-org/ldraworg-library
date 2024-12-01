@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\License;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
@@ -33,14 +34,13 @@ class User extends Authenticatable
         'email',
         'realname',
         'password',
+        'license',
         'part_license_id',
         'forum_user_id',
         'is_legacy',
         'is_synthetic',
         'is_ptadmin'
     ];
-
-    protected $with = ['license'];
 
     protected $hidden = [
         'password',
@@ -50,6 +50,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'license' => License::class,
             'email_verified_at' => 'datetime',
             'profile_settings' => 'array',
             'is_legacy' => 'boolean',

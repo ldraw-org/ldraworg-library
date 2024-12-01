@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Part;
 
+use App\Enums\PartType;
 use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
 use App\Filament\Actions\EditNumberAction;
@@ -237,7 +238,7 @@ class Show extends Component implements HasForms, HasActions
         return Action::make('zipdownload')
                 ->label('Download zip file')
                 ->url(fn () => route($this->part->isUnofficial() ? 'unofficial.download.zip' : 'official.download.zip', str_replace('.dat', '.zip', $this->part->filename)))
-                ->visible($this->part->type->folder == 'parts/')
+                ->visible($this->part->type->inPartsFolder())
                 ->color('gray')
                 ->outlined();
     }
@@ -266,7 +267,7 @@ class Show extends Component implements HasForms, HasActions
                 })
                 ->visible(
                     $this->part->isUnofficial() &&
-                    $this->part->type->folder == 'parts/' &&
+                    $this->part->type->inPartsFolder() &&
                     $this->part->ready_for_admin === true &&
                     $this->part->descendantsAndSelf->where('vote_sort', 2)->count() > 0 &&
                     (Auth::user()?->can('vote', [Vote::class, $this->part, VoteType::AdminCertify]) ?? false) &&
@@ -291,7 +292,7 @@ class Show extends Component implements HasForms, HasActions
                 })
                 ->visible(
                     $this->part->isUnofficial() &&
-                    $this->part->type->folder == 'parts/' &&
+                    $this->part->type->inPartsFolder() &&
                     $this->part->descendantsAndSelf->where('vote_sort', '>', 3)->count() == 0 &&
                     $this->part->descendantsAndSelf->where('vote_sort', 3)->count() > 0 &&
                     (Auth::user()?->can('vote', [Vote::class, $this->part, VoteType::Certify]) ?? false) &&
@@ -399,7 +400,7 @@ class Show extends Component implements HasForms, HasActions
                 Select::make('base_part_id')
                     ->searchable()
                     ->options(
-                        Part::whereRelation('type', 'folder', 'parts/')
+                        Part::partsFolderOnly()
                             ->doesntHave('official_part')
                             ->where('is_pattern', false)
                             ->whereRelation('category', 'category', '!=', 'Moved')

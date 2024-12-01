@@ -2,13 +2,14 @@
 
 namespace App\LDraw\Check;
 
-use App\Models\Part\PartType;
+use App\Enums\License;
+use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
 use App\Models\User;
 use App\Models\Part\Part;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\PartCategory;
 use App\Settings\LibrarySettings;
-use Illuminate\Database\Eloquent\Builder;
 
 class PartChecker
 {
@@ -33,7 +34,7 @@ class PartChecker
         }
         if ($part->isUnofficial()) {
             $hascertparents = !is_null($part->official_part) ||
-                $part->type->folder == 'parts/' || $part->type->folder == 'parts/helpers/' ||
+                $part->type->inPartsFolder() || $part->type == PartType::Helper ||
                 $this->hasCertifiedParentInParts($part);
             if (!$hascertparents) {
                 $errors[] = 'No certified parents in the parts directory';
@@ -47,8 +48,8 @@ class PartChecker
             if ($part->manual_hold_flag) {
                 $errors[] = 'Manual hold back by admin';
             }
-            if ($part->license->in_use === false) {
-                $errors[] = "Part License {$part->license->name} not authorized for library";
+            if ($part->license !== License::CC_BY_4) {
+                $errors[] = "Part License {$part->license->value} not authorized for library";
             }
         }
         $can_release = count($errors) == 0;
@@ -57,7 +58,7 @@ class PartChecker
 
     public function hasCertifiedParentInParts(Part $part): bool
     {
-        return $part->ancestors->where('type.folder', 'parts/')->where('vote_sort', 1)->count() > 0;
+        return $part->ancestors->whereIn('type', PartType::partsFolderTypes())->where('vote_sort', 1)->count() > 0;
     }
 
     public function hasAllSubpartsCertified(Part $part): bool
@@ -119,7 +120,7 @@ class PartChecker
             return $errors;
         }
 
-        $pt = PartType::firstWhere('type', $part->type);
+        $pt = PartType::from($part->type);
         $name = str_replace('\\', '/', $part->name);
 
         // Description Checks
@@ -131,7 +132,7 @@ class PartChecker
             $part->descriptionCategory !== 'Moved' &&
             $part->descriptionCategory !== 'Sticker' &&
             $part->metaCategory !== 'Sticker Shortcut' &&
-            $pt->folder == 'parts/' &&
+            $pt->inPartsFolder() &&
             !$this->checkDescriptionForPatternText($name, $part->description)
         ) {
             $errors[] = __('partcheck.description.patternword');
@@ -145,29 +146,29 @@ class PartChecker
 
         // !LDRAW_ORG Part type checks
         if (! $this->checkNameAndPartType($part->name, $part->type)) {
-            $errors[] = __('partcheck.type.path', ['name' => $name, 'type' => $pt->type]);
+            $errors[] = __('partcheck.type.path', ['name' => $name, 'type' => $pt->type->value]);
         }
-        if ($pt->type == 'Subpart' && $part->description[0] != '~') {
+        if ($pt == PartType::Subpart && $part->description[0] != '~') {
             $errors[] = __('partcheck.type.subpartdesc');
         }
 
         //Check qualifiers
         if (!empty($part->qual)) {
-            $pq = \App\Models\Part\PartTypeQualifier::firstWhere('type', $part->qual);
+            $pq = PartTypeQualifier::from($part->qual);
             switch ($pq->type) {
-                case 'Physical_Colour':
+                case PartTypeQualifier::PhysicalColour:
                     $errors[] = __('partcheck.type.phycolor');
                     break;
-                case 'Alias':
-                    if ($pt->type != 'Shortcut' && $pt->type != 'Part') {
+                case PartTypeQualifier::Alias:
+                    if (!$pt->inPartsFolder()) {
                         $errors[] = __('partcheck.type.alias');
                     }
                     if ($part->description[0] != '=') {
                         $errors[] = __('partcheck.type.aliasdesc');
                     }
                     break;
-                case 'Flexible_Section':
-                    if ($pt->type != 'Part') {
+                case PartTypeQualifier::FlexibleSection:
+                    if ($pt->type != PartType::Part) {
                         $errors[] = __('partcheck.type.flex');
                     }
                     if (! preg_match('#^[a-z0-9_-]+?k[a-z0-9]{2}(p[a-z0-9]{2,3})?\.dat#', $name, $matches)) {
@@ -186,7 +187,7 @@ class PartChecker
         }
         // Category Check
         $validCategory = false;
-        if ($pt->folder === 'parts/') {
+        if ($pt->inPartsFolder()) {
             if (!empty($part->metaCategory)) {
                 $validCategory = $this->checkCategory($part->metaCategory);
                 $cat = $part->metaCategory;
@@ -203,7 +204,7 @@ class PartChecker
         // Keyword Check
         if (
             $part->descriptionCategory !== 'Moved' &&
-            $pt->folder == 'parts/' &&
+            $pt->inPartsFolder() &&
             $part->descriptionCategory !== 'Moved' &&
             $part->descriptionCategory !== 'Sticker' &&
             $part->metaCategory !== 'Sticker Shortcut' &&
@@ -260,14 +261,14 @@ class PartChecker
     public function checkNameAndPartType(string $name, string $type): bool
     {
         $name = str_replace('\\', '/', $name);
-        $pt = PartType::firstWhere('type', $type);
+        $pt = PartType::tryFrom($type);
         // Automatic fail if no Name:, LDRAW_ORG line, or DAT file has TEXTURE type
-        if (is_null($pt) || $pt->format == 'png') {
+        if (is_null($pt) || $pt->isImageFormat()) {
             return false;
         }
 
         // Construct the name implied by the part type
-        $aname = str_replace(['p/', 'parts/'], '', $pt->folder . basename($name));
+        $aname = str_replace(['p/', 'parts/'], '', $pt->folder() . '/' . basename($name));
 
         return $name === $aname;
     }
@@ -279,8 +280,8 @@ class PartChecker
 
     public function checkLibraryApprovedLicense(string $license): bool
     {
-        $liblic = \App\Models\Part\PartLicense::firstWhere('text', $license);
-        return !is_null($liblic) && $liblic->name !== 'NonCA';
+        $liblic = License::tryFromText($license);
+        return !is_null($liblic);
     }
 
     public function checkLibraryBFCCertify(?string $bfc): bool

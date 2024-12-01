@@ -15,7 +15,7 @@ class NextReleasePartsTable extends BasicTable
                 Part::unofficial()
                     ->where('vote_sort', 1)
                     ->where('can_release', true)
-                    ->orderBy('part_type_id')
+                    ->orderBy('type')
                     ->orderBy('filename')
             )
             ->emptyState(view('tables.empty', ['none' => 'None']))

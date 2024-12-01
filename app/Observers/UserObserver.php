@@ -5,7 +5,6 @@ namespace App\Observers;
 use App\Jobs\MassHeaderGenerate;
 use App\Models\MybbUser;
 use App\Models\Part\Part;
-use App\Models\Part\PartLicense;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
@@ -14,9 +13,9 @@ class UserObserver
 {
     public function saved(User $user): void
     {
-        if ($user->wasChanged(['name', 'realname', 'part_license_id'])) {
-            if ($user->wasChanged('part_license_id')) {
-                $user->parts()->update(['part_license_id' => $user->part_license_id]);
+        if ($user->wasChanged(['name', 'realname', 'license'])) {
+            if ($user->wasChanged('license')) {
+                $user->parts()->update(['license' => $user->license]);
             }
             $user->parts()->official()->update(['has_minor_edit' => true]);
             Part::official()->whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))->update(['has_minor_edit' => true]);

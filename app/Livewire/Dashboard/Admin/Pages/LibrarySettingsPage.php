@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Enums\License;
 use App\Jobs\UpdateImage;
 use App\Models\Part\Part;
-use App\Models\Part\PartLicense;
 use App\Settings\LibrarySettings;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -38,8 +38,8 @@ class LibrarySettingsPage extends Component implements HasForms
                         Tabs\Tab::make('General Settings')
                             ->schema([
                                 Toggle::make('tracker_locked'),
-                                Select::make('default_part_license_id')
-                                    ->options(PartLicense::pluck('name', 'id'))
+                                Select::make('default_part_license')
+                                    ->options(License::options())
                                     ->required()
                                     ->label('Default Part License'),
                                 TextInput::make('quick_search_limit')
@@ -120,7 +120,7 @@ class LibrarySettingsPage extends Component implements HasForms
             'max_thumb_width' => $settings->max_thumb_width,
             'allowed_header_metas' => $settings->allowed_header_metas,
             'allowed_body_metas' => $settings->allowed_body_metas,
-            'default_part_license_id' => $settings->default_part_license_id,
+            'default_part_license' => $settings->default_part_license,
             'pattern_codes' => $settings->pattern_codes,
             'quick_search_limit' => $settings->quick_search_limit,
         ];
@@ -150,10 +150,10 @@ class LibrarySettingsPage extends Component implements HasForms
         $settings->allowed_body_metas = $form_data['allowed_body_metas'];
         $settings->pattern_codes = $form_data['pattern_codes'];
         $settings->quick_search_limit = $form_data['quick_search_limit'];
-        $settings->default_part_license_id = $form_data['default_part_license_id'];
+        $settings->default_part_license = $form_data['default_part_license'];
         $settings->save();
         foreach ($view_changes as $part) {
-            Part::whereRelation('type', 'folder', 'parts/')
+            Part::partsFolderOnly()
                 ->where('filename', 'LIKE', "%{$part}%")
                 ->each(fn (Part $p) => UpdateImage::dispatch($p));
         }

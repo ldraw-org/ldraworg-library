@@ -2,6 +2,7 @@
 
 namespace App\LDraw;
 
+use App\Enums\PartType;
 use App\Events\PartReleased;
 use App\Jobs\UpdateImage;
 use Illuminate\Support\Facades\Storage;
@@ -10,7 +11,6 @@ use App\Models\Part\PartRelease;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
-use App\Models\Part\PartType;
 use App\Models\User;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -81,20 +81,23 @@ class PartsUpdateProcessor
         $data['total_files'] = $this->parts->count();
         $data['new_files'] = $this->parts->whereNull('official_part')->count();
         $data['new_types'] = [];
-        foreach (PartType::where('type', '!=', 'Shortcut')->get() as $type) {
-            if ($type->folder == 'parts/') {
+        foreach (PartType::cases() as $type) {
+            if ($type == PartType::Shortcut) {
+                continue;
+            }
+            if ($type->inPartsFolder()) {
                 $count = $this->parts
                     ->whereNull('official_part')
-                    ->where('type.folder', 'parts/')
+                    ->whereIn('type', PartType::partsFolderTypes())
                     ->count();
             } else {
                 $count = $this->parts
                     ->whereNull('official_part')
-                    ->where('part_type_id', $type->id)
+                    ->where('type', $type)
                     ->count();
             }
             if ($count > 0) {
-                $data['new_types'][] = ['name' => $type->name, 'count' => $count];
+                $data['new_types'][] = ['name' => $type->description(), 'count' => $count];
             }
         }
         $data['moved_parts'] = [];
@@ -177,7 +180,7 @@ class PartsUpdateProcessor
 
     protected function updatePartsList(Part $part): void
     {
-        if (is_null($part->official_part) && $part->type->folder == 'parts/') {
+        if (is_null($part->official_part) && $part->type->inPartsFolder()) {
             $pl = $this->release->part_list ?? [];
             $pl[] = [$part->description, $part->filename];
             $f = substr($part->filename, 0, -4);
@@ -241,10 +244,10 @@ class PartsUpdateProcessor
             'description' => $upart->description,
             'filename' => $upart->filename,
             'user_id' => $upart->user_id,
-            'part_type_id' => $upart->part_type_id,
-            'part_type_qualifier_id' => $upart->part_type_qualifier_id,
+            'type' => $upart->type,
+            'type_qualifier' => $upart->type_qualifier,
             'part_release_id' => $this->release->id,
-            'part_license_id' => $upart->part_license_id,
+            'license' => $upart->license,
             'bfc' => $upart->bfc,
             'part_category_id' => $upart->part_category_id,
             'cmdline' => $upart->cmdline,

@@ -22,9 +22,9 @@ class PatternKeyword implements DataAwareRule, ValidationRule
      * @var array<string, mixed>
      */
     protected $data = [];
- 
+
     // ...
- 
+
     /**
      * Set the data under validation.
      *
@@ -33,7 +33,7 @@ class PatternKeyword implements DataAwareRule, ValidationRule
     public function setData(array $data): static
     {
         $this->data = $data;
- 
+
         return $this;
     }
 
@@ -47,7 +47,7 @@ class PatternKeyword implements DataAwareRule, ValidationRule
         $keywords = array_map(fn(string $kw) => trim($kw), explode(',', str_replace("\n", ",", $value)));
         $part = Part::find($this->data['part']['id']);
         if (
-            $part->type->folder == 'parts/' &&
+            $part->type->inPartsFolder() &&
             $part->category->category !== 'Moved' &&
             $part->category->category !== 'Sticker' &&
             $part->category->category !== 'Sticker Shortcut' &&

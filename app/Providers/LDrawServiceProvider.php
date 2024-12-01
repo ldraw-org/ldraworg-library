@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\PartType;
 use App\LDraw\LDrawModelMaker;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Foundation\Application;
@@ -23,8 +24,6 @@ class LDrawServiceProvider extends ServiceProvider
         $this->app->bind(Parser::class, function (Application $app) {
             return new Parser(
                 config('ldraw.patterns'),
-                \App\Models\Part\PartType::pluck('type')->all(),
-                \App\Models\Part\PartTypeQualifier::pluck('type')->all(),
                 $app->make(LibrarySettings::class),
             );
         });
@@ -52,5 +51,6 @@ class LDrawServiceProvider extends ServiceProvider
     {
         Collection::macro('unofficial', fn (): Collection => $this->whereNull('part_release_id'));
         Collection::macro('official', fn (): Collection => $this->whereNotNull('part_release_id'));
+        Collection::macro('partsFolderOnly', fn (): Collection => $this->whereIn('type', PartType::partsFolderTypes()));
     }
 }

@@ -14,7 +14,7 @@ class OfficialMinorEdits extends BasicTable
             ->query(
                 Part::official()
                     ->where('has_minor_edit', true)
-                    ->orderBy('part_type_id')
+                    ->orderBy('type')
                     ->orderBy('filename')
             )
             ->emptyState(view('tables.empty', ['none' => 'None']))

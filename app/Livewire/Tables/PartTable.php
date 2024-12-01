@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\License;
+use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
 use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Support\Enums\Alignment;
@@ -80,7 +83,7 @@ class PartTable
                 ->button()
                 ->outlined()
                 ->color('info')
-                ->visible(fn (Part $part) => $part->isUnofficial() && $part->type->folder == 'parts/'),
+                ->visible(fn (Part $part) => $part->isUnofficial() && $part->type->inPartsFolder()),
             Action::make('updated')
                 ->url(fn (Part $part) => route('parts.show', $part->unofficial_part->id))
                 ->label(fn (Part $part) => ' Tracker Update: ' . $part->unofficial_part->statusCode())
@@ -106,8 +109,8 @@ class PartTable
                 ->label('Unofficial Status')
                 ->visible(!$official),
             AuthorFilter::make('user_id'),
-            SelectFilter::make('part_type_id')
-                ->relationship('type', 'name')
+            SelectFilter::make('type')
+                ->options(PartType::options())
                 ->native(false)
                 ->multiple()
                 ->preload()
@@ -123,8 +126,8 @@ class PartTable
                 ->native(false)
                 ->multiple()
                 ->label('Keywords'),
-            SelectFilter::make('part_license_id')
-                ->relationship('license', 'name')
+            SelectFilter::make('license')
+                ->options(License::options())
                 ->native(false)
                 ->searchable()
                 ->preload()
@@ -136,7 +139,7 @@ class PartTable
                 ->falseLabel('Alias Parts')
                 ->queries(
                     true: fn (Builder $q) => $q->where('description', 'LIKE', '|%'),
-                    false: fn (Builder $q) => $q->whereRelation('type_qualifier', 'type', 'Alias'),
+                    false: fn (Builder $q) => $q->whereRelation('type_qualifier', PartTypeQualifier::Alias),
                     blank: fn (Builder $q) => $q,
                 ),
             TernaryFilter::make('exclude_fixes')

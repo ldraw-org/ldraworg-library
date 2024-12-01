@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\License;
+use App\Enums\PartType;
 use App\Models\Part\Part;
 use App\Models\User;
 use App\Livewire\Tables\PartTable;
@@ -18,7 +20,6 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Oper
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
@@ -27,7 +28,7 @@ class PartListTable extends BasicTable
 {
     #[Url]
     public $tableSearch = '';
-    
+
     public function table(Table $table): Table
     {
         return $table
@@ -54,7 +55,7 @@ class PartListTable extends BasicTable
         if (filled($search = $this->getTableSearch())) {
             $query->searchPart($search, 'header');
         }
-     
+
         return $query;
     }
 
@@ -77,13 +78,13 @@ class PartListTable extends BasicTable
                 ->multiple(),
             SelectFilter::make('type')
                 ->label('!LDRAW_ORG Type')
-                ->relationship(name: 'type', titleAttribute: 'name')
+                ->options(PartType::options())
                 ->preload()
                 ->multiple(),
             QueryBuilder::make()
                 ->constraintPickerColumns(['md' => 2, 'xl' => 4])
                 ->constraints([
-                    // TODO: History Author, Part Fixes, Alias, Third Party 
+                    // TODO: History Author, Part Fixes, Alias, Third Party
                     Constraint::make('part_release')
                         ->label('Library Status')
                         ->operators([
@@ -113,15 +114,11 @@ class PartListTable extends BasicTable
                                 ->searchable()
                                 ->multiple(),
                         ),
-                    RelationshipConstraint::make('type')
+                    SelectConstraint::make('type')
                         ->label('!LDRAW_ORG Type')
-                        ->selectable(
-                            IsRelatedToOperator::make()
-                                ->titleAttribute('name')
-                                ->preload()
-                                ->multiple(),
-                        ),
-                    RelationshipConstraint::make('category')
+                        ->options(PartType::options())
+                        ->multiple(),
+                     RelationshipConstraint::make('category')
                         ->selectable(
                             IsRelatedToOperator::make()
                                 ->titleAttribute('category')
@@ -141,13 +138,9 @@ class PartListTable extends BasicTable
                             'CCW' => 'CCW',
                         ])
                         ->multiple(),
-                    RelationshipConstraint::make('license')
-                        ->selectable(
-                            IsRelatedToOperator::make()
-                                ->titleAttribute('name')
-                                ->preload()
-                                ->multiple(),
-                        ),
+                    SelectConstraint::make('license')
+                        ->options(License::options())
+                        ->multiple(),
                     TextConstraint::make('help')
                         ->relationship(name: 'help', titleAttribute: 'help'),
                     DateConstraint::make('history_date')

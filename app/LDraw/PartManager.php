@@ -2,13 +2,13 @@
 
 namespace App\LDraw;
 
+use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
 use App\Jobs\UpdateParentParts;
 use App\LDraw\Parse\Parser;
 use App\LDraw\Render\LDView;
 use App\Models\Part\Part;
 use App\Models\Part\PartCategory;
-use App\Models\Part\PartType;
-use App\Models\Part\PartTypeQualifier;
 use App\Models\Part\UnknownPartNumber;
 use App\Models\Rebrickable\RebrickablePart;
 use App\Models\StickerSheet;
@@ -61,24 +61,24 @@ class PartManager
         foreach ($partfiles as $file) {
             if ($file['type'] == 'text' && $filename !== $file['filename'] && stripos($filename, $file['contents']) !== false) {
                 $type = $this->parser->parse($file['contents'])->type;
-                $pt = PartType::firstWhere('type', $type);
-                $textype = PartType::firstWhere('type', "{$pt->type}_Texmap");
+                $pt = PartType::from($type);
+                $textype = PartType::tryFrom("{$pt->value}_Texmap");
                 if (!is_null($textype)) {
                     return $textype;
                 }
             }
         }
-        return PartType::firstWhere('type', 'Part_Texmap');
+        return PartType::PartTexmap;
     }
 
     protected function makePartFromImage(string $filename, string $contents, User $user, PartType $type): Part
     {
         $attributes = [
             'user_id' => $user->id,
-            'part_license_id' => $user->license->id,
-            'filename' => $type->folder . $filename,
-            'description' => "{$type->name} {$filename}",
-            'part_type_id' => $type->id,
+            'license' => $user->license,
+            'filename' => "{$type->folder()}/{$filename}",
+            'description' => "{$type->description()} {$filename}",
+            'type' => $type,
             'header' => '',
         ];
         $upart = $this->makePart($attributes);
@@ -92,17 +92,17 @@ class PartManager
         $part = $this->parser->parse($text);
 
         $user = User::fromAuthor($part->username, $part->realname)->first();
-        $type = PartType::firstWhere('type', $part->type);
-        $qual = PartTypeQualifier::firstWhere('type', $part->qual);
+        $type = PartType::from($part->type);
+        $qual = !is_null($part->qual) ? PartTypeQualifier::from($part->qual) : null;
         $cat = PartCategory::firstWhere('category', $part->metaCategory ?? $part->descriptionCategory);
-        $filename = $type->folder . basename(str_replace('\\', '/', $part->name));
+        $filename = $type->folder() . '/' . basename(str_replace('\\', '/', $part->name));
         $values = [
             'description' => $part->description,
             'filename' => $filename,
             'user_id' => $user->id,
-            'part_type_id' => $type->id,
-            'part_type_qualifier_id' => $qual->id ?? null,
-            'part_license_id' => $user->license->id,
+            'type' => $type,
+            'type_qualifier' => $qual,
+            'license' => $user->license,
             'bfc' => $part->bfcwinding ?? null,
             'part_category_id' => $cat->id ?? null,
             'cmdline' => $part->cmdline,
@@ -141,9 +141,9 @@ class PartManager
             'description' => $part->description,
             'filename' => $part->filename,
             'user_id' => $part->user_id,
-            'part_type_id' => $part->part_type_id,
-            'part_type_qualifier_id' => $part->part_type_qualifier_id,
-            'part_license_id' => $part->part_license_id,
+            'type' => $part->type,
+            'type_qualifier' => $part->type_qualifier,
+            'license' => $part->license,
             'bfc' => $part->bfc,
             'part_category_id' => $part->part_category_id,
             'cmdline' => $part->cmdline,
@@ -230,7 +230,7 @@ class PartManager
         if (!$result) {
             return;
         }
-        
+
         $bp = null;
         for ($i = 7, $j = 2; $i >= 5; $i--, $j++) {
             if ($matches[$i] != '') {
@@ -249,10 +249,10 @@ class PartManager
             $part->base_part()->associate($bp);
         }
         if($matches[5] != '') {
-            $part->is_pattern = mb_substr($matches[5], 0, 1) == 'p' || 
+            $part->is_pattern = mb_substr($matches[5], 0, 1) == 'p' ||
                 mb_substr($matches[6], 0, 1) == 'p' ||
                 mb_substr($matches[7], 0, 1) == 'p';
-            $part->is_composite = mb_substr($matches[5], 0, 1) == 'c' || 
+            $part->is_composite = mb_substr($matches[5], 0, 1) == 'c' ||
                 mb_substr($matches[6], 0, 1) == 'c' ||
                 mb_substr($matches[7], 0, 1) == 'c';
         }
@@ -267,7 +267,7 @@ class PartManager
             $oldPart->isUnofficial() ||
             !$newPart->isUnofficial() ||
             !is_null($oldPart->unofficial_part) ||
-            $oldPart->type->folder != 'parts/'
+            !$oldPart->type->inPartsFolder()
         ) {
             return null;
         }
@@ -276,9 +276,9 @@ class PartManager
             'description' => "~Moved To " . str_replace(['.dat', '.png'], '', $newPart->name()),
             'filename' => $oldPart->filename,
             'user_id' => Auth::user()->id,
-            'part_type_id' => $oldPart->type->id,
-            'part_type_qualifier_id' => $oldPart->qualifier->id ?? null,
-            'part_license_id' => Auth::user()->license->id,
+            'type' => $oldPart->type,
+            'type_qualifier' => $oldPart->type_qualifier,
+            'license' => Auth::user()->license,
             'bfc' => $newPart->bfc,
             'part_category_id' => PartCategory::firstWhere('category', 'Moved')->id,
             'header' => '',
@@ -299,19 +299,19 @@ class PartManager
             $newName = basename($part->filename);
         }
         if ($part->isTexmap()) {
-            $part->description = "{$newType->name} {$newName}";
+            $part->description = "{$newType->description()} {$newName}";
         }
-        $newName = "{$newType->folder}{$newName}";
+        $newName = "{$newType->folder}/{$newName}";
         $upart = Part::unofficial()->where('filename', $newName)->first();
         if (!$part->isUnofficial() || !is_null($upart)) {
             return false;
         }
-        if ($part->type->folder !== 'parts/' && $newType->folder == 'parts/') {
+        if (!$part->type->inPartsFolder() && $newType->inPartsFolder()) {
             $dcat = PartCategory::firstWhere('category', $this->parser->getDescriptionCategory($part->header));
             $part->category()->associate($dcat);
         }
-        if ($part->type->folder !== $newType->folder) {
-            $part->type()->associate($newType);
+        if ($part->type->folder() !== $newType->folder()) {
+            $part->type = $newType;
         }
         $part->filename = $newName;
         $part->save();
@@ -319,7 +319,7 @@ class PartManager
         $this->updateBasePart($part, true);
         $this->updateImage($part);
         foreach ($part->parents()->unofficial()->get() as $p) {
-            if ($p->type->folder === 'parts/' && $p->category->category === "Moved") {
+            if ($part->type->inPartsFolder() && $p->category->category === "Moved") {
                 $p->description = str_replace($oldname, $part->name(), $p->description);
                 $p->save();
             }
@@ -392,11 +392,11 @@ class PartManager
         }
         $p->save();
     }
-    
+
     public function addStickerSheet(Part $p)
     {
         $p->refresh();
-        $sticker = $p->descendantsAndSelf->where('category.category', 'Sticker')->where('type.folder', 'parts/')->first();
+        $sticker = $p->descendantsAndSelf->where('category.category', 'Sticker')->partsFolderOnly()->first();
         if (is_null($sticker)) {
             return;
         }

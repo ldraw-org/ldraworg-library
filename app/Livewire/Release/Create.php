@@ -36,7 +36,7 @@ class Create extends Component implements HasForms, HasTable
             ->query(
                 Part::unofficial()
                 ->where('vote_sort', 1)
-                ->orderBy('part_type_id')
+                ->orderBy('type')
                 ->orderBy('filename')
             )
             ->emptyState(view('tables.empty', ['none' => 'None']))

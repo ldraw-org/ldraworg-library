@@ -3,6 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Enums\EventType;
+use App\Enums\PartType;
 use App\Models\Part\Part;
 use App\Livewire\Tables\PartTable;
 use Filament\Tables\Filters\SelectFilter;
@@ -40,8 +41,8 @@ class UserPartsTable extends BasicTable
                 ->multiple()
                 ->preload()
                 ->label('Unofficial Status'),
-                SelectFilter::make('part_type_id')
-                    ->relationship('type', 'name')
+                SelectFilter::make('type')
+                    ->options('type', PartType::options())
                     ->native(false)
                     ->multiple()
                     ->preload()

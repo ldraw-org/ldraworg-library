@@ -71,7 +71,7 @@ class VoteManager
     public function adminCertifyAll(Part $part, User $user): void
     {
         if (!$part->isUnofficial() ||
-            !$part->type->folder == 'parts/' ||
+            !$part->type->inPartsFolder() ||
             $part->descendantsAndSelf->where('vote_sort', '>', 2)->count() > 0 ||
             $user->cannot('create', [Vote::class, $part, VoteType::AdminCertify]) ||
             $user->cannot('allAdmin', Vote::class)) {
@@ -88,7 +88,7 @@ class VoteManager
     public function certifyAll(Part $part, User $user): void
     {
         if (!$part->isUnofficial() ||
-            !$part->type->folder == 'parts/' ||
+            !$part->type->inPartsFolder() ||
             $part->descendantsAndSelf->where('vote_sort', '>', 3)->count() > 0 ||
             $user->cannot('create', [Vote::class, $part, VoteType::Certify]) ||
             $user->cannot('all', Vote::class)) {

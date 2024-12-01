@@ -2,14 +2,14 @@
 
 namespace App\Filament\Actions;
 
+use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
 use App\Events\PartHeaderEdited;
 use App\Jobs\UpdateZip;
 use App\LDraw\Parse\Parser;
 use App\LDraw\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartCategory;
-use App\Models\Part\PartType;
-use App\Models\Part\PartTypeQualifier;
 use App\Models\User;
 use App\Rules\PatternKeyword;
 use Closure;
@@ -47,6 +47,7 @@ class EditHeaderAction
     {
         return [
             TextInput::make('description')
+                ->extraAttributes(['class' => 'font-mono'])
                 ->required()
                 ->string()
                 ->rules([
@@ -65,23 +66,16 @@ class EditHeaderAction
                         }
                     }
                 ]),
-            Select::make('part_type_id')
-                ->relationship(
-                    name: 'type',
-                    titleAttribute: 'name',
-                    modifyQueryUsing: fn (Builder $query) => $query->where('folder', 'parts/'),
-                )
-                ->hidden($part->type->folder !== 'parts/')
-                ->disabled($part->type->folder !== 'parts/')
+            Select::make('type')
+                ->options(PartType::options(PartType::partsFolderTypes()))
+                ->hidden(!$part->type->inPartsFolder())
+                ->disabled(!$part->type->inPartsFolder())
                 ->selectablePlaceholder(false),
-            Select::make('part_type_qualifier_id')
-                ->relationship(
-                    name: 'type_qualifier',
-                    titleAttribute: 'name',
-                )
+            Select::make('type_qualifier')
+                ->options(PartTypeQualifier::options())
                 ->nullable()
-                ->hidden($part->type->folder !== 'parts/')
-                ->disabled($part->type->folder !== 'parts/'),
+                ->hidden(!$part->type->inPartsFolder())
+                ->disabled(!$part->type->inPartsFolder()),
             Textarea::make('help')
                 ->helperText('Do not include 0 !HELP; each line will be a separate help line')
                 ->extraAttributes(['class' => 'font-mono'])
@@ -94,8 +88,8 @@ class EditHeaderAction
                     titleAttribute: 'category',
                 )
                 ->helperText('A !CATEGORY meta will be added only if this differs from the first word in the description')
-                ->hidden($part->type->folder !== 'parts/')
-                ->disabled($part->type->folder !== 'parts/')
+                ->hidden(!$part->type->inPartsFolder())
+                ->disabled(!$part->type->inPartsFolder())
                 ->searchable()
                 ->preload()
                 ->selectablePlaceholder(false)
@@ -114,11 +108,14 @@ class EditHeaderAction
                 ->helperText('Note: keyword order will not be preserved')
                 ->extraAttributes(['class' => 'font-mono'])
                 ->rows(3)
-                ->hidden($part->type->folder !== 'parts/')
-                ->disabled($part->type->folder !== 'parts/')
+                ->hidden(!$part->type->inPartsFolder())
+                ->disabled(!$part->type->inPartsFolder())
                 ->rules([new PatternKeyword()]),
             TextInput::make('cmdline')
                 ->nullable()
+                ->extraAttributes(['class' => 'font-mono'])
+                ->hidden(!$part->type->inPartsFolder())
+                ->disabled(!$part->type->inPartsFolder())
                 ->string(),
             TextArea::make('history')
                 ->helperText('Must include 0 !HISTORY; ALL changes to existing history must be documented with a comment')
@@ -171,7 +168,7 @@ class EditHeaderAction
             $changes['old']['description'] = $part->description;
             $changes['new']['description'] = $data['description'];
             $part->description = $data['description'];
-            if ($part->type->folder === 'parts/') {
+            if ($part->type->inPartsFolder()) {
                 $cat = $manager->parser->getDescriptionCategory($part->description);
                 $cat = PartCategory::firstWhere('category', $cat);
                 if (!is_null($cat) && $part->part_category_id !== $cat->id) {
@@ -180,7 +177,7 @@ class EditHeaderAction
             }
         }
 
-        if ($part->type->folder === 'parts/' &&
+        if ($part->type->inPartsFolder() &&
             !is_null($data['part_category_id']) &&
             $part->part_category_id !== (int)$data['part_category_id']
         ) {
@@ -190,22 +187,22 @@ class EditHeaderAction
             $part->part_category_id = $cat->id;
         }
 
-        if ($part->type->folder === 'parts/' && (int)$data['part_type_id'] !== $part->part_type_id) {
-            $pt = PartType::find($data['part_type_id']);
-            $changes['old']['type'] = $part->type->type;
-            $changes['new']['type'] = $pt->type;
-            $part->part_type_id = $pt->id;
+        if ($part->type->inPartsFolder() && PartType::tryFrom($data['type']) !== $part->type) {
+            $pt = PartType::tryFrom($data['type']);
+            $changes['old']['type'] = $part->type->value;
+            $changes['new']['type'] = $pt->value;
+            $part->type = $pt;
         }
 
-        if (!is_null($data['part_type_qualifier_id'] ?? null)) {
-            $pq = PartTypeQualifier::find($data['part_type_qualifier_id']);
+        if (!is_null($data['type_qualifier'] ?? null)) {
+            $pq = PartTypeQualifier::tryFrom($data['type_qulaifier']);
         } else {
             $pq = null;
         }
-        if ($part->part_type_qualifier_id !== ($pq->id ?? null)) {
-            $changes['old']['qual'] = $part->type_qualifier->type ?? '';
-            $changes['new']['qual'] = $pq->type ?? '';
-            $part->part_type_qualifier_id = $pq->id ?? null;
+        if ($part->type_qualifier !== $pq) {
+            $changes['old']['qual'] = $part->type_qualifier->value ?? '';
+            $changes['new']['qual'] = $pq->value ?? '';
+            $part->type_qualifier = $pq;
         }
 
         if (!is_null($data['help'] ?? null) && trim($data['help']) !== '') {

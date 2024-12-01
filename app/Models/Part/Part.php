@@ -3,7 +3,12 @@
 namespace App\Models\Part;
 
 use App\Enums\EventType;
+use App\Enums\License;
+use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
+use App\Models\Part\PartType as PartPartType;
+use App\Models\Part\PartTypeQualifier as PartPartTypeQualifier;
 use App\Models\StickerSheet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,9 +42,12 @@ class Part extends Model
         'user_id',
         'part_category_id',
         'part_license_id',
+        'license',
         'part_type_id',
+        'type',
         'part_release_id',
         'part_type_qualifier_id',
+        'type_qualifier',
         'description',
         'filename',
         'header',
@@ -52,10 +60,13 @@ class Part extends Model
         'base_part_id',
     ];
 
-    protected $with = ['release', 'type'];
+    protected $with = ['release'];
 
     /**
     * @return array{
+    *     type: 'App\Enums\PartType',
+    *     type_qualifier: 'App\Enums\PartTypeQualifier',
+    *     license: 'App\Enums\License',
     *     delete_flag: 'boolean',
     *     manual_hold_flag: 'boolean',
     *     has_minor_edit: 'boolean',
@@ -69,6 +80,9 @@ class Part extends Model
     protected function casts(): array
     {
         return [
+            'type' => PartType::class,
+            'type_qualifier' => PartTypeQualifier::class,
+            'license' => License::class,
             'delete_flag' => 'boolean',
             'manual_hold_flag' => 'boolean',
             'has_minor_edit' => 'boolean',
@@ -100,14 +114,14 @@ class Part extends Model
         return $this->belongsTo(PartCategory::class, 'part_category_id', 'id');
     }
 
-    public function type(): BelongsTo
+    public function part_type(): BelongsTo
     {
-        return $this->belongsTo(PartType::class, 'part_type_id', 'id');
+        return $this->belongsTo(PartPartType::class, 'part_type_id', 'id');
     }
 
-    public function type_qualifier(): BelongsTo
+    public function part_type_qualifier(): BelongsTo
     {
-        return $this->belongsTo(PartTypeQualifier::class, 'part_type_qualifier_id', 'id');
+        return $this->belongsTo(PartPartTypeQualifier::class, 'part_type_qualifier_id', 'id');
     }
 
     public function subparts(): BelongsToMany
@@ -277,16 +291,21 @@ class Part extends Model
     public function scopeAdminReady(Builder $query): void
     {
         $query->whereNull('part_release_id')
-            ->whereRelation('type', 'folder', 'parts/')
+            ->whereIn('type', PartType::partsFolderTypes())
             ->where('ready_for_admin', true)
             ->whereHas('descendantsAndSelf', function ($q) {
                 $q->where('vote_sort', '=', 2);
             });
     }
 
+    public function scopePartsFolderOnly(Builder $query): void
+    {
+        $query->whereIn('type', PartType::partsFolderTypes());
+    }
+
     public function isTexmap(): bool
     {
-        return $this->type->format == 'png';
+        return $this->type->isImageFormat();
     }
 
     public function isUnofficial(): bool
@@ -515,15 +534,15 @@ class Part extends Model
         $header[] = "0 Name: {$this->name()}" ?? '';
         $header[] = $this->user->toString();
 
-        $typestr = $this->type->toString(is_null($this->release));
+        $typestr = $this->type->ldrawString($this->isUnofficial());
         if (!is_null($this->type_qualifier)) {
-            $typestr .= " {$this->type_qualifier->type}";
+            $typestr .= " {$this->type_qualifier->value}";
         }
         if (!is_null($this->release)) {
             $typestr .= $this->release->toString();
         }
         $header[] = $typestr;
-        $header[] = $this->license->toString();
+        $header[] = $this->license->ldrawString();
         $header[] = '';
 
         if ($this->help->count() > 0) {
@@ -542,7 +561,7 @@ class Part extends Model
         }
 
         $addBlank = false;
-        if (!is_null($this->category) && ($this->type->type === 'Part' || $this->type->type === 'Shortcut')) {
+        if (!is_null($this->category) && ($this->type === PartType::Part || $this->type === PartType::Shortcut)) {
             $d = trim($this->description);
             if ($d !== '' && in_array($d[0], ['~', '|', '=', '_'])) {
                 $d = trim(substr($d, 1));

@@ -2,6 +2,7 @@
 
 namespace App\Settings;
 
+use App\Enums\License;
 use Spatie\LaravelSettings\Settings;
 
 class LibrarySettings extends Settings
@@ -21,7 +22,7 @@ class LibrarySettings extends Settings
     public array $allowed_header_metas;
     public array $allowed_body_metas;
 
-    public int $default_part_license_id;
+    public string $default_part_license;
     public int $quick_search_limit;
 
     public array $pattern_codes;

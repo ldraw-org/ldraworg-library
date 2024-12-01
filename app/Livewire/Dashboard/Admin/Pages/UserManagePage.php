@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Enums\License;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\MybbUser;
 use App\Models\User;
@@ -61,7 +62,7 @@ class UserManagePage extends BasicResourceManagePage
             ])
             ->filters([
                 SelectFilter::make('license')
-                    ->relationship('license', titleAttribute: 'name')
+                    ->options(License::options())
                     ->preload()
                     ->multiple()
                     ->native(false),
@@ -120,9 +121,9 @@ class UserManagePage extends BasicResourceManagePage
                 ->email()
                 ->required()
                 ->maxLength(255),
-            Select::make('part_license_id')
-                ->relationship('license', titleAttribute: 'name')
-                ->default(app(LibrarySettings::class)->default_part_license_id)
+            Select::make('license')
+                ->options(License::options())
+                ->default(app(LibrarySettings::class)->default_part_license)
                 ->native(false)
                 ->required(),
             Select::make('roles')

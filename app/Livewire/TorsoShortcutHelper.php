@@ -52,7 +52,7 @@ class TorsoShortcutHelper extends Component implements HasForms
         'parts/87858.dat',
         'parts/98642.dat',
     ];
-    
+
     public function mount(): void
     {
         $this->form->fill();
@@ -75,7 +75,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                                         ->where('description', 'NOT LIKE', '~%')
                                         ->orderBy('filename')
                                         ->get();
-                                    $options = [];    
+                                    $options = [];
                                     foreach($parts as $part) {
                                         $name = basename($part->filename, '.dat');
                                         $options[$part->id] = "{$name} - {$part->description}";
@@ -90,7 +90,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                                     $parts = Part::whereIn('filename', $this->templates)
                                         ->orderBy('description')
                                         ->get();
-                                    $options = [];    
+                                    $options = [];
                                     foreach($parts as $part) {
                                         $name = basename($part->filename, '.dat');
                                         $options[$part->id] = "{$name} - {$part->description}";
@@ -122,7 +122,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                                 ->required()
                                 ->rules([
                                     fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                                        $p = Part::where('description', $value)->whereRelation('type', 'folder', 'parts/')->first();
+                                        $p = Part::where('description', $value)->partFolderOnly()->first();
                                         if (!is_null($p)) {
                                             $fail('A part with that description already exists');
                                         }
@@ -169,7 +169,7 @@ class TorsoShortcutHelper extends Component implements HasForms
             ])
             ->statePath('data');
     }
-    
+
     public function submitFile()
     {
         if (auth()->user()->cannot('part.submit')) {
@@ -189,14 +189,14 @@ class TorsoShortcutHelper extends Component implements HasForms
         PartSubmitted::dispatch($newpart, auth()->user());
         $this->redirectRoute('parts.show', $newpart);
     }
-    
+
     protected function partInput(int $index): Fieldset
     {
         return Fieldset::make()
             ->label("Part {$index}")
             ->schema([
                 LDrawColourSelect::make("part_{$index}_color")
-                    ->label('Color'),  
+                    ->label('Color'),
                 Select::make("part_{$index}_id")
                     ->label('Name - Description')
                     ->options(fn () => array_key_exists($index-1, $this->templateParts()) ? $this->selectParts[$this->templateParts()[$index-1]]['subs'] : [])
@@ -205,7 +205,7 @@ class TorsoShortcutHelper extends Component implements HasForms
             ])
             ->hidden(!array_key_exists($index-1, $this->templateParts()));
     }
-    
+
     #[Computed(persist: true)]
     protected function template(): ?Part
     {
@@ -224,7 +224,7 @@ class TorsoShortcutHelper extends Component implements HasForms
             preg_match_all($pattern, $this->template->body->body, $subs);
             array_shift($subs['subpart']);
             return $subs['subpart'];
-        }       
+        }
         return $tparts;
     }
 
@@ -250,7 +250,7 @@ class TorsoShortcutHelper extends Component implements HasForms
     }
 
     #[Computed]
-    protected function colors(): array 
+    protected function colors(): array
     {
         if (Storage::disk('library')->exists('official/LDConfig.ldr')) {
             $ldconfig = Storage::disk('library')->get('official/LDConfig.ldr');
@@ -282,7 +282,7 @@ class TorsoShortcutHelper extends Component implements HasForms
         }
         return [];
     }
-    
+
     protected function makeShortcut(): string
     {
         $text = "0 {$this->data['description']}\n";
@@ -290,7 +290,7 @@ class TorsoShortcutHelper extends Component implements HasForms
         $u = auth()->user();
         $text .= "0 Author: {$u->authorString}\n";
         $text .= "0 !LDRAW_ORG Unofficial_Shortcut\n";
-        $text .= $u->license->toString() . "\n\n";
+        $text .= $u->license->ldrawString() . "\n\n";
         $kws = explode(', ', $this->data['keywords']);
         $kwline = '';
         foreach ($kws as $index => $kw) {
@@ -324,7 +324,7 @@ class TorsoShortcutHelper extends Component implements HasForms
         }
         return $text;
     }
-    
+
     #[Layout('components.layout.tracker')]
     public function render()
     {
