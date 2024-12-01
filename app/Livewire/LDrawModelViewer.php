@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+/**
+ * @property Form $form
+ */
 class LDrawModelViewer extends Component implements HasForms
 {
     use InteractsWithForms;

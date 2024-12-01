@@ -58,9 +58,9 @@ class EditNumberAction
                 ->rules([
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
                         if (!empty($get('type'))) {
-                            $newType = PartType::from($get('type'));
+                            $newType = PartType::tryFrom($get('type'));
                             $p = Part::find($part->id);
-                            if (!empty($newType) && !empty($p)) {
+                            if (!is_null($newType) && !is_null($p)) {
                                 $newName = basename($value, ".{$p->type->format()}");
                                 $newName = "{$newType->folder()}/{$newName}.{$newType->format()}";
                                 $oldp = Part::firstWhere('filename', $newName);

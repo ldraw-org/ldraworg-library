@@ -155,7 +155,7 @@ class PartChecker
         //Check qualifiers
         if (!empty($part->qual)) {
             $pq = PartTypeQualifier::from($part->qual);
-            switch ($pq->type) {
+            switch ($pq) {
                 case PartTypeQualifier::PhysicalColour:
                     $errors[] = __('partcheck.type.phycolor');
                     break;
@@ -168,7 +168,7 @@ class PartChecker
                     }
                     break;
                 case PartTypeQualifier::FlexibleSection:
-                    if ($pt->type != PartType::Part) {
+                    if ($pt != PartType::Part) {
                         $errors[] = __('partcheck.type.flex');
                     }
                     if (! preg_match('#^[a-z0-9_-]+?k[a-z0-9]{2}(p[a-z0-9]{2,3})?\.dat#', $name, $matches)) {

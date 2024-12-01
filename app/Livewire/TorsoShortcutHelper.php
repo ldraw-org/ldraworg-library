@@ -122,7 +122,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                                 ->required()
                                 ->rules([
                                     fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                                        $p = Part::where('description', $value)->partFolderOnly()->first();
+                                        $p = Part::where('description', $value)->partsFolderOnly()->first();
                                         if (!is_null($p)) {
                                             $fail('A part with that description already exists');
                                         }

@@ -301,7 +301,7 @@ class PartManager
         if ($part->isTexmap()) {
             $part->description = "{$newType->description()} {$newName}";
         }
-        $newName = "{$newType->folder}/{$newName}";
+        $newName = "{$newType->folder()}/{$newName}";
         $upart = Part::unofficial()->where('filename', $newName)->first();
         if (!$part->isUnofficial() || !is_null($upart)) {
             return false;
@@ -357,7 +357,7 @@ class PartManager
     {
         $messages = $part->part_check_messages ?? [];
         if (!$part->isUnofficial()) {
-            $part->can_release == true;
+            $part->can_release = true;
             $check = app(\App\LDraw\Check\PartChecker::class)->checkCanRelease($part);
             $messages['errors'] = $check['errors'];
             $messages['warnings'] = [];

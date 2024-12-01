@@ -22,9 +22,6 @@ use Filament\Tables\Table as Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-/**
- * @property Form $form
- */
 class UserManagePage extends BasicResourceManagePage
 {
     use InteractsWithForms;
