@@ -46,9 +46,8 @@ class AppServiceProvider extends ServiceProvider
         Route::pattern('partfile', $filenamePattern);
         Route::pattern('upartfile', $filenamePattern);
         Route::pattern('opartfile', $filenamePattern);
-        Route::pattern('officialpartzip', '[a-z0-9_/-]+\.zip');
-        Route::pattern('unofficialpart', '[a-z0-9_/-]+\.(dat|png)');
-        Route::pattern('unofficialpartzip', '[a-z0-9_/-]+\.zip');
+        Route::pattern('officialpartzip', $zipPattern);
+        Route::pattern('unofficialpartzip', $zipPattern);
         Route::pattern('setnumber', '[a-z0-9]+(-\d+)?');
         Route::bind(
             'partfile',

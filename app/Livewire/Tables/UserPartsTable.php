@@ -42,7 +42,7 @@ class UserPartsTable extends BasicTable
                 ->preload()
                 ->label('Unofficial Status'),
                 SelectFilter::make('type')
-                    ->options('type', PartType::options())
+                    ->options(PartType::options())
                     ->native(false)
                     ->multiple()
                     ->preload()
