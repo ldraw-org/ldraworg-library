@@ -2,6 +2,7 @@
 
 namespace App\Models\Omr;
 
+use App\Enums\License;
 use App\Models\Traits\HasLicense;
 use App\Models\Traits\HasUser;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,7 @@ class OmrModel extends Model
     {
         return [
             'notes' => 'array',
+            'license' => License::class,
             'missing_parts' => 'boolean',
             'missing_patterns' => 'boolean',
             'missing_stickers' => 'boolean',

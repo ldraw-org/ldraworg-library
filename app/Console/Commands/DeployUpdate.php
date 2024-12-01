@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\License;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
+use App\Models\Omr\OmrModel;
 use App\Models\Part\Part;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -30,5 +31,10 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
+        OmrModel::each(function (OmrModel $m) {
+            $m->license = License::from($m->part_license->name);
+            $m->save();
+        });
+
     }
 }
