@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OmrModel extends Model
 {
     use HasUser;
-    use HasLicense;
 
     protected $guarded = [];
 

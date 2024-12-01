@@ -2,13 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\PartType;
 use App\LDraw\LibraryConfig;
 use App\Models\Part\PartCategory;
-use App\Models\Part\PartEventType;
-use App\Models\Part\PartLicense;
-use App\Models\Part\PartType;
-use App\Models\Part\PartTypeQualifier;
-use App\Models\VoteType;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -40,13 +36,12 @@ class UpdateConfig extends Command
             );
         }
 
-        foreach (PartType::getDirectories() as $dir) {
-            $dir = substr($dir, 0, -1);
-            if (!Storage::disk('images')->exists("library/official/{$dir}")) {
-                Storage::disk('images')->makeDirectory("library/official/{$dir}");
+        foreach (PartType::cases() as $dir) {
+            if (!Storage::disk('images')->exists("library/official/{$dir->value}")) {
+                Storage::disk('images')->makeDirectory("library/official/{$dir->value}");
             }
-            if (!Storage::disk('images')->exists("library/unofficial/{$dir}")) {
-                Storage::disk('images')->makeDirectory("library/unofficial/{$dir}");
+            if (!Storage::disk('images')->exists("library/unofficial/{$dir->value}")) {
+                Storage::disk('images')->makeDirectory("library/unofficial/{$dir->value}");
             }
         }
 

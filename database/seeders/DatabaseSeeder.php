@@ -4,9 +4,6 @@ namespace Database\Seeders;
 
 use App\LDraw\LibraryConfig;
 use App\Models\Part\PartCategory;
-use App\Models\Part\PartLicense;
-use App\Models\Part\PartType;
-use App\Models\Part\PartTypeQualifier;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Seeder;
 
@@ -19,9 +16,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        PartType::insert(LibraryConfig::partTypes());
-        PartTypeQualifier::insert(LibraryConfig::partTypeQualifiers());
-        PartLicense::insert(LibraryConfig::partLicenses());
         PartCategory::insert(LibraryConfig::partCategories());
         $ls = app(LibrarySettings::class);
         if (empty($ls->allowed_header_metas)) {

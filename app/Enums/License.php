@@ -29,7 +29,7 @@ enum License: string
     public static function tryFromText(string $text): ?self
     {
         foreach (self::cases() as $lic) {
-            /** var PartLicense $lic */
+            /** var License $lic */
             if ($lic->text() == $text) {
                 return $lic;
             }
