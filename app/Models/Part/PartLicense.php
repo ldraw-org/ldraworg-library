@@ -5,6 +5,9 @@ namespace App\Models\Part;
 use App\Models\Traits\HasParts;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperPartLicense
+ */
 class PartLicense extends Model
 {
     use HasParts;

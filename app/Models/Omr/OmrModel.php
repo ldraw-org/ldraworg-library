@@ -7,6 +7,9 @@ use App\Models\Traits\HasUser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperOmrModel
+ */
 class OmrModel extends Model
 {
     use HasUser;

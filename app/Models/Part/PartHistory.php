@@ -6,6 +6,9 @@ use App\Models\Traits\HasPart;
 use App\Models\Traits\HasUser;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperPartHistory
+ */
 class PartHistory extends Model
 {
     use HasPart;

@@ -7,6 +7,9 @@ use App\Models\Traits\HasPart;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperReviewSummaryItem
+ */
 class ReviewSummaryItem extends Model
 {
     use HasPart;

@@ -6,6 +6,9 @@ use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperRebrickablePart
+ */
 class RebrickablePart extends Model
 {
     protected $fillable = [

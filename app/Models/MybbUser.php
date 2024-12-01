@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $email
  * @property string $loginname
  * @property string $additionalgroups
+ * @mixin IdeHelperMybbUser
  */
 class MybbUser extends Model
 {

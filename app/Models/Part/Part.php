@@ -30,6 +30,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 
+/**
+ * @mixin IdeHelperPart
+ */
 #[ObservedBy([PartObserver::class])]
 class Part extends Model
 {

@@ -6,6 +6,9 @@ use App\Models\Traits\HasOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @mixin IdeHelperReviewSummary
+ */
 class ReviewSummary extends Model
 {
     use HasOrder;

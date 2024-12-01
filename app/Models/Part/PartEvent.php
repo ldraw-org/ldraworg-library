@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasUser;
 
+/**
+ * @mixin IdeHelperPartEvent
+ */
 class PartEvent extends Model
 {
     use HasPartRelease;

@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * @mixin IdeHelperPartRelease
+ */
 class PartRelease extends Model
 {
     use HasParts;

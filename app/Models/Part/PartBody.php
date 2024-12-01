@@ -5,6 +5,9 @@ namespace App\Models\Part;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperPartBody
+ */
 class PartBody extends Model
 {
     protected $fillable = [

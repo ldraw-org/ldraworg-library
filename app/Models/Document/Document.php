@@ -6,6 +6,9 @@ use App\Models\Traits\HasOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperDocument
+ */
 class Document extends Model
 {
     use HasOrder;

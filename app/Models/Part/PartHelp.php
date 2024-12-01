@@ -6,6 +6,9 @@ use App\Models\Traits\HasOrder;
 use App\Models\Traits\HasPart;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperPartHelp
+ */
 class PartHelp extends Model
 {
     use HasPart;
