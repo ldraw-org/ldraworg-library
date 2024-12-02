@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\StickerSheet;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Part\Part;

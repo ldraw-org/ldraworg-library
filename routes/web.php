@@ -3,7 +3,7 @@
 use App\Http\Controllers\DocumentShowController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SupportFilesController;
-use App\Http\Controllers\Omr\SetController;
+use App\Http\Controllers\Omr\SetShowController;
 use App\Http\Controllers\Part\LastDayDownloadZipController;
 use App\Http\Controllers\Part\LatestPartsController;
 use App\Http\Controllers\Part\PartUpdateController;
@@ -12,7 +12,7 @@ use App\Http\Controllers\Part\PartDownloadZipController;
 use App\Http\Controllers\Part\PartWebGLController;
 use App\Http\Controllers\Part\WeeklyPartsController;
 use App\Http\Controllers\ReviewSummaryController;
-use App\Http\Controllers\StickerSheet\StickerSheetShowController;
+use App\Http\Controllers\StickerSheetShowController;
 use App\Http\Controllers\TrackerHistoryController;
 use App\Livewire\Dashboard\Admin\Index as AdminIndex;
 use App\Livewire\Dashboard\Admin\Pages\DocumentCategoryManagePage;
@@ -98,8 +98,8 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
 Route::prefix('omr')->name('omr.')->group(function () {
     Route::view('/', 'omr.main')->name('main');
     Route::get('/sets', Index::class)->name('sets.index');
-    Route::resource('sets', SetController::class)->only(['show']);
-    Route::get('/set/{setnumber}', [SetController::class, 'show'])->name('show.setnumber');
+    Route::get('sets/{set}', SetShowController::class)->name('sets.show');
+    Route::get('/set/{setnumber}', [SetShowController::class, 'show'])->name('show.setnumber');
 });
 
 
