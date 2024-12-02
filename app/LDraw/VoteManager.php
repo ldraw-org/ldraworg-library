@@ -90,7 +90,7 @@ class VoteManager
         if (!$part->isUnofficial() ||
             !$part->type->inPartsFolder() ||
             $part->descendantsAndSelf->where('vote_sort', '>', 3)->count() > 0 ||
-            $user->cannot('create', [Vote::class, $part, VoteType::Certify]) ||
+            $user->cannot('vote', [Vote::class, $part, VoteType::Certify]) ||
             $user->cannot('all', Vote::class)) {
             return;
         }
