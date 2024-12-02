@@ -37,6 +37,9 @@ class DailyMaintenance extends Command
         $this->info('Recounting all votes');
         Part::unofficial()->lazy()->each(fn (Part $p) => $p->updateVoteSort());
 
+        $this->info('Rechecking all unofficial parts');
+        Part::unofficial()->lazy()->each(fn (Part $p) => app(PartManager::class)->checkPart($p));
+
         $this->info('Removing orphan keywords');
         PartKeyword::doesntHave('parts')->delete();
 

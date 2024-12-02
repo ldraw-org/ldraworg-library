@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\UpdateImage;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 
 class RefreshImages extends Command
 {
@@ -27,20 +28,16 @@ class RefreshImages extends Command
      */
     public function handle()
     {
-        switch ($this->option('lib')) {
-            case 'official':
-                $this->info('Queueing official part images');
-                $parts = Part::official()->lazy();
-                break;
-            case 'unofficial':
-                $this->info('Queueing unofficial part images');
-                $parts = Part::unofficial()->lazy();
-                break;
-            default:
-                $this->info('Queueing all part images');
-                $parts = Part::lazy();
-        }
-
-        $parts->each(fn (Part $p) => UpdateImage::dispatch($p));
+        $this->info("Queueing {$this->option('lib')} part images");
+        Part::when(
+                $this->option('lib') == 'unofficial',
+                fn (Builder $query) => $query->unofficial()
+            )
+            ->when(
+                $this->option('lib') == 'official',
+                fn (Builder $query) => $query->official()
+            )
+            ->lazy()
+            ->each(fn (Part $p) => UpdateImage::dispatch($p));
     }
 }
