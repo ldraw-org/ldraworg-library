@@ -93,7 +93,7 @@ class PartManager
 
         $user = User::fromAuthor($part->username, $part->realname)->first();
         $type = PartType::from($part->type);
-        $qual = !is_null($part->qual) ? PartTypeQualifier::from($part->qual) : null;
+        $qual = !is_null($part->qual) ? PartTypeQualifier::tryFrom($part->qual) : null;
         $cat = PartCategory::firstWhere('category', $part->metaCategory ?? $part->descriptionCategory);
         $filename = $type->folder() . '/' . basename(str_replace('\\', '/', $part->name));
         $values = [
