@@ -195,7 +195,7 @@ class EditHeaderAction
         }
 
         if (!is_null($data['type_qualifier'] ?? null)) {
-            $pq = PartTypeQualifier::tryFrom($data['type_qulaifier']);
+            $pq = PartTypeQualifier::tryFrom($data['type_qualifier']);
         } else {
             $pq = null;
         }
