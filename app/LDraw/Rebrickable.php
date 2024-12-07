@@ -10,10 +10,10 @@ class Rebrickable
 {
     protected int $limit = 1;
     protected string $api_url = 'https://rebrickable.com/api/v3/lego';
+    protected string $api_key;
 
-    public function __construct(
-        public readonly string $api_key,
-    ) {
+    public function __construct() {
+        $this->api_key = config('ldraw.rebrickable_api_key', '');
     }
 
     protected function makeApiCall(string $url): ?array

@@ -14,11 +14,13 @@ use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class LDView
 {
+    protected readonly bool $debug;
+
     public function __construct(
-        protected readonly bool $debug,
         protected LibrarySettings $settings,
         protected LDrawModelMaker $modelmaker,
     ) {
+        $this->debug = config('ldraw.ldview_debug', false);
     }
 
     public function render(Part|OmrModel $part): GDImage

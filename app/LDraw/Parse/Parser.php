@@ -8,10 +8,12 @@ use App\Settings\LibrarySettings;
 
 class Parser
 {
+    protected readonly array $patterns;
+
     public function __construct(
-        protected readonly array $patterns,
         protected LibrarySettings $settings,
     ) {
+        $this->patterns = config('ldraw.patterns');
     }
 
     public function parse(string $part): ParsedPart
