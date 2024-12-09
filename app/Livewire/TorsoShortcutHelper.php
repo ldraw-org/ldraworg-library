@@ -69,10 +69,12 @@ class TorsoShortcutHelper extends Component implements HasForms
                                 ->options(function() {
                                     $parts = Part::whereDoesntHave('parents', fn (Builder $query): Builder =>
                                             $query->where('description', 'LIKE', 'Minifig Torso%')
+                                                ->whereRelation('category', 'category', '<>', 'Sticker Shortcut')
                                         )
                                         ->doesntHave('unofficial_part')
                                         ->where('filename', 'LIKE', 'parts/973p%.dat')
                                         ->where('description', 'NOT LIKE', '~%')
+                                        ->whereRelation('category', 'category', '<>', 'Sticker Shortcut')
                                         ->orderBy('filename')
                                         ->get();
                                     $options = [];
@@ -172,7 +174,7 @@ class TorsoShortcutHelper extends Component implements HasForms
 
     public function submitFile()
     {
-        if (auth()->user()->cannot('part.submit')) {
+        if (auth()->user()->cannot('part.submit.regular')) {
             return;
         }
         $pm = app(\App\LDraw\PartManager::class);
