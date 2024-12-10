@@ -3,6 +3,7 @@
 namespace App\LDraw;
 
 use App\Models\Part\Part;
+use App\Models\StickerSheet;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
 
@@ -71,21 +72,29 @@ class SetPbg
 
         foreach ($rb_parts->whereNull('part.external_ids.LDraw') as $part) {
             $p = Part::firstWhere('filename', 'parts/' . $part['part']['part_num'] . '.dat');
-            if (is_null($p)) {
-                $this->messages->add('missing', "<a class=\"underline decoration-dotted hover:decoration-solid\" href=\"{$part['part']['part_url']}\">{$part['part']['part_num']} ({$part['part']['name']})</a>");
-            } else {
+            $sticker_sheet = StickerSheet::whereRelation('rebrickable_part', 'part_num', $part['part']['part_num'])->first();
+            if (!is_null($p)) {
                 $this->addPart($part, basename($p->name(), '.dat'));
+            } elseif (!is_null($sticker_sheet)) {
+                foreach ($sticker_sheet->complete_set() as $s) {
+                    $part['part']['part_num'] = basename($s->name(), '.dat');
+                    $this->addPart($part, $part['part']['part_num'], 16);
+                }
+            } else {
+                $this->messages->add('missing', "<a class=\"underline decoration-dotted hover:decoration-solid\" href=\"{$part['part']['part_url']}\">{$part['part']['part_num']} ({$part['part']['name']})</a>");
             }
         }
 
         return $this->makePbg();
     }
 
-    protected function addPart(array $part, ?string $ldraw_number = null): void
+    protected function addPart(array $part, ?string $ldraw_number = null, ?int $color = null): void
     {
-        $color = array_key_exists('LDraw', $part['color']['external_ids']) ? $part['color']['external_ids']['LDraw']['ext_ids'][0] : 16;
-        if ($color == 16) {
+        if (!array_key_exists('LDraw', $part['color']['external_ids']) && is_null($color)) {
             $this->messages->add('errors', 'LDraw color not found for ' . $part['color']['name']);
+            $color = 16;
+        } elseif (array_key_exists('LDraw', $part['color']['external_ids'])) {
+            $color = $part['color']['external_ids']['LDraw']['ext_ids'][0];
         }
 
         $rb_part_num = $part['part']['part_num'];
