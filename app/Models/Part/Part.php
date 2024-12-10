@@ -7,8 +7,7 @@ use App\Enums\License;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
-use App\Models\Part\PartType as PartPartType;
-use App\Models\Part\PartTypeQualifier as PartPartTypeQualifier;
+use App\Models\Rebrickable\RebrickablePart;
 use App\Models\StickerSheet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,7 +17,6 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\Traits\HasPartRelease;
-use App\Models\Traits\HasLicense;
 use App\Models\Traits\HasUser;
 use App\Models\User;
 use App\Models\Vote;
@@ -40,24 +38,7 @@ class Part extends Model
     use HasPartRelease;
     use HasUser;
 
-    protected $fillable = [
-        'user_id',
-        'part_category_id',
-        'license',
-        'type',
-        'part_release_id',
-        'type_qualifier',
-        'description',
-        'filename',
-        'header',
-        'cmdline',
-        'bfc',
-        'unofficial_part_id',
-        'can_release',
-        'part_check_messages',
-        'ready_for_admin',
-        'base_part_id',
-    ];
+    protected $guarded = [];
 
     protected $with = ['release'];
 
@@ -74,6 +55,7 @@ class Part extends Model
     *     marked_for_release: 'boolean',
     *     part_check_messages: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
     *     ready_for_admin: 'boolean'
+    *     extarnal_ids: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
     * }
     */
     protected function casts(): array
@@ -90,6 +72,7 @@ class Part extends Model
             'marked_for_release' => 'boolean',
             'part_check_messages' => AsArrayObject::class,
             'ready_for_admin' => 'boolean',
+            'external_ids' => AsArrayObject::class,
         ];
     }
 
@@ -151,6 +134,11 @@ class Part extends Model
     public function body(): HasOne
     {
         return $this->hasOne(PartBody::class, 'part_id', 'id');
+    }
+
+    public function rebrickable_part(): HasOne
+    {
+        return $this->hasOne(RebrickablePart::class, 'part_id', 'id');
     }
 
     public function unofficial_part(): BelongsTo

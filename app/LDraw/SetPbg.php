@@ -3,6 +3,7 @@
 namespace App\LDraw;
 
 use App\Models\Part\Part;
+use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
 
 class SetPbg
@@ -14,10 +15,10 @@ class SetPbg
 
     public function __construct(?string $set_number = null)
     {
-        $this->rb = app(Rebrickable::class);
+        $this->rb = new Rebrickable();
         $this->messages = new MessageBag();
         if (!is_null($set_number)) {
-            $this->set = $this->rb->getSet($set_number);
+            $this->set = $this->rb->getSet($set_number)->all();
         }
     }
 
@@ -37,7 +38,7 @@ class SetPbg
         $this->parts = [];
 
 
-        $this->set = $this->rb->getSet($set_number);
+        $this->set = $this->rb->getSet($set_number)->all();
 
         if (is_null($this->set)) {
             $this->messages->add('errors', 'Set Not Found');
@@ -45,30 +46,33 @@ class SetPbg
         }
 
         $rb_parts = $this->rb->getSetParts($set_number);
-        if ($rb_parts->whereNull('ldraw_part_number')->whereNotNull('print_of')->pluck('print_of')->count() > 0) {
-            $unpatterned = $this->rb->getParts($rb_parts->whereNull('ldraw_part_number')->whereNotNull('print_of')->pluck('print_of')->all());
+        $no_ldraw = $rb_parts->whereNull('part.external_ids.LDraw');
+        if ($no_ldraw->whereNotNull('part.print_of')->count() > 0) {
+            $unpatterned = $this->rb->getParts(['part_nums' => $no_ldraw->whereNotNull('part.print_of')->pluck('part.print_of')->all()]);
         } else {
-            $unpatterned = collect([]);
+            $unpatterned = new Collection();
         }
+        $rb_parts->whereNull('part.external_ids.LDraw')
+            ->whereNotNull('part.print_of')
+            ->transform(function (array $part, int $key) use ($unpatterned) {
+                $upart = $unpatterned->where('part_num', $part['part']['print_of'])
+                    ->whereNotNull('external_ids.LDraw')
+                    ->first();
+                if (!is_null($upart)) {
+                    $this->messages->add('unpatterned', "{$part['part']['part_num']} ({$upart['external_ids']['LDraw'][0]})");
+                    $part['part'] = $upart;
+                }
+                return $part;
+            });
 
-        $rb_parts = $rb_parts->map(function (array $part) use ($unpatterned) {
-            if (is_null($part['ldraw_part_number']) && !is_null($part['print_of']) && !is_null($unpatterned->where('rb_part_number', $part['print_of'])->whereNotNull('ldraw_part_number')->first())) {
-                $unprinted_part = $unpatterned->where('rb_part_number', $part['print_of'])->whereNotNull('ldraw_part_number')->first();
-                $this->messages->add('unpatterned', $part['rb_part_number'] . " ({$unprinted_part['ldraw_part_number']})");
-                $part['ldraw_part_number'] = $unprinted_part['ldraw_part_number'];
-                $part['rb_part_number'] = $unprinted_part['rb_part_number'];
-            }
-            return $part;
-        });
-
-        foreach ($rb_parts->whereNotNull('ldraw_part_number') as $part) {
+        foreach ($rb_parts->whereNotNull('part.external_ids.LDraw') as $part) {
             $this->addPart($part);
         }
 
-        foreach ($rb_parts->whereNull('ldraw_part_number') as $part) {
-            $p = Part::firstWhere('filename', 'parts/' . $part['rb_part_number'] . '.dat');
+        foreach ($rb_parts->whereNull('part.external_ids.LDraw') as $part) {
+            $p = Part::firstWhere('filename', 'parts/' . $part['part']['part_num'] . '.dat');
             if (is_null($p)) {
-                $this->messages->add('missing', "<a class=\"underline decoration-dotted hover:decoration-solid\" href=\"{$part['rb_part_url']}\">{$part['rb_part_number']} ({$part['rb_part_name']})</a>");
+                $this->messages->add('missing', "<a class=\"underline decoration-dotted hover:decoration-solid\" href=\"{$part['part']['part_url']}\">{$part['part']['part_num']} ({$part['part']['name']})</a>");
             } else {
                 $this->addPart($part, basename($p->name(), '.dat'));
             }
@@ -77,16 +81,16 @@ class SetPbg
         return $this->makePbg();
     }
 
-    protected function addPart(array $rb_part, ?string $ldraw_number = null): void
+    protected function addPart(array $part, ?string $ldraw_number = null): void
     {
-        if (is_null($rb_part['ldraw_color_number'])) {
-            $this->messages->add('errors', 'LDraw color not found for ' . $rb_part['color_name']);
+        $color = array_key_exists('LDraw', $part['color']['external_ids']) ? $part['color']['external_ids']['LDraw']['ext_ids'][0] : 16;
+        if ($color == 16) {
+            $this->messages->add('errors', 'LDraw color not found for ' . $part['color']['name']);
         }
 
-        $rb_part_num = $rb_part['rb_part_number'];
-        $ldraw_part = $ldraw_number ?? $rb_part['ldraw_part_number'];
-        $color = $rb_part['ldraw_color_number'] ?? 16;
-        $quantity = $rb_part['quantity'];
+        $rb_part_num = $part['part']['part_num'];
+        $ldraw_part = $ldraw_number ?? $part['part']['external_ids']['LDraw'][0];
+        $quantity = $part['quantity'];
 
         if (array_key_exists($rb_part_num, $this->parts) && array_key_exists($color, $this->parts[$rb_part_num]['colors'])) {
             $this->parts[$rb_part_num]['colors'][$color] += $quantity;

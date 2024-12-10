@@ -396,6 +396,7 @@ class PartManager
     public function addStickerSheet(Part $p)
     {
         $p->refresh();
+        $rb = new Rebrickable();
         $sticker = $p->descendantsAndSelf->where('category.category', 'Sticker')->partsFolderOnly()->first();
         if (is_null($sticker)) {
             return;
@@ -407,9 +408,9 @@ class PartManager
             if ($m === 1) {
                 $sheet = StickerSheet::firstWhere('number', $s[1]);
                 if (is_null($sheet)) {
-                    $part = app(Rebrickable::class)->getPartBySearch($s[1]);
-                    if (is_null($part)) {
-                        $part = app(Rebrickable::class)->getPart($s[1]);
+                    $part = $rb->getParts(['search' => $s[1]])->first();
+                    if ($part->count() == 0) {
+                        $part = $rb->getPart($s[1])->first();
                     }
                     $sheet = StickerSheet::create([
                         'number' => $s[1],
@@ -417,10 +418,10 @@ class PartManager
                     ]);
                     if (!is_null($part)) {
                         $rb_part = RebrickablePart::create([
-                            'part_num' => $part['rb_part_number'],
-                            'name' => $part['rb_part_name'],
-                            'part_url' => $part['rb_part_url'],
-                            'part_img_url' => $part['rb_part_img_url'],
+                            'part_num' => $part['part_num'],
+                            'name' => $part['name'],
+                            'part_url' => $part['part_url'],
+                            'part_img_url' => $part['part_img_url'],
                             'part_id' => null
                         ]);
                         $sheet->rebrickable_part()->associate($rb_part);
