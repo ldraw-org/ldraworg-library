@@ -39,7 +39,7 @@ class SetPbg
         $this->parts = [];
 
 
-        $this->set = $this->rb->getSet($set_number)->all();
+        $this->set = $this->rb->getSet($set_number)?->all();
 
         if (is_null($this->set)) {
             $this->messages->add('errors', 'Set Not Found');
