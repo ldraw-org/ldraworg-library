@@ -38,7 +38,7 @@ class DailyMaintenance extends Command
         Part::unofficial()->lazy()->each(fn (Part $p) => $p->updateVoteSort());
 
         $this->info('Rechecking all unofficial parts');
-        Part::unofficial()->lazy()->each(fn (Part $p) => app(PartManager::class)->checkPart($p));
+        Part::unofficial()->lazy()->each(fn (Part $p) => dispatch(fn () => app(PartManager::class)->checkPart($p)));
 
         $this->info('Removing orphan keywords');
         PartKeyword::doesntHave('parts')->delete();
@@ -77,6 +77,7 @@ class DailyMaintenance extends Command
                 UpdateImage::dispatch($p);
             }
         });
+
         OmrModel::lazy()->each(function (OmrModel $m) {
             $image = str_replace(['.dat','.mpd','.ldr'], '.png', "omr/models/{$m->filename()}");
             $thumb = str_replace('.png', '_thumb.png', $image);
@@ -90,6 +91,5 @@ class DailyMaintenance extends Command
 
         $this->info('Regenerate unofficial zip');
         $this->call('lib:refresh-zip');
-
     }
 }
