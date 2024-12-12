@@ -6,7 +6,7 @@
 </x-slot>
 <x-slot:breadcrumbs>
     <x-breadcrumb-item class="active" item="Torso Shortcut Helper" />
-</x-slot>    
+</x-slot>
 
 <div class="flex flex-col space-y-2">
     <div class="text-2xl font-bold">

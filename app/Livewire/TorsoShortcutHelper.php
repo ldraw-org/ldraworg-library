@@ -8,10 +8,11 @@ use App\Jobs\UpdateZip;
 use App\Models\Part\Part;
 use Closure;
 use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\View;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -22,7 +23,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
-use Illuminate\Validation\Rules\Unique;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -35,6 +35,7 @@ class TorsoShortcutHelper extends Component implements HasForms
     use InteractsWithForms;
 
     public ?array $data = [];
+    public array $parts = [];
 
     protected array $templates = [
         'parts/102195.dat',
@@ -160,10 +161,18 @@ class TorsoShortcutHelper extends Component implements HasForms
                         }),
                     Wizard\Step::make('Review and Submit')
                         ->schema([
-                            Textarea::make('new_part')
-                                ->autosize()
-                                ->readOnly()
-                                ->extraAttributes(['class' => 'font-mono']),
+                            Grid::make(2)
+                                ->schema([
+                                    Textarea::make('new_part')
+                                        ->autosize()
+                                        ->readOnly()
+                                        ->extraAttributes(['class' => 'font-mono']),
+                                    View::make('forms.3d-view')
+                                        ->viewData([
+                                            'parts' => $this->parts,
+                                            'partname' => 'model.ldr',
+                                        ])
+                                ])
                         ]),
                 ])
                     ->submitAction(new HtmlString(Blade::render("<x-filament::button type=\"submit\">\n<x-filament::loading-indicator wire:loading wire:target=\"submitFile\" class=\"h-5 w-5\" />\nSubmit\n</x-filament::button>")))
@@ -324,6 +333,8 @@ class TorsoShortcutHelper extends Component implements HasForms
             $p = Part::find($this->data["part_{$index}_id"]);
             $text .= '1 ' . $this->data["part_{$index}_color"] . ' ' . $matrix[$index-1] . $p->name() . "\n";
         }
+        $this->parts = app(\App\LDraw\LDrawModelMaker::class)->webGl($text);
+        $this->dispatch('render-model');
         return $text;
     }
 

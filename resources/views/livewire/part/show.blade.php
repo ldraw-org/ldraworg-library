@@ -281,98 +281,15 @@
                     wire:click="$dispatch('ldbi-physical-mode')"
                 />
             </div>
-            <div id="ldbi-container" class="border w-full h-[80vh]">
-                <canvas id="ldbi-canvas" class="size-full"></canvas>
-            </div>
+            <x-3d-viewer class="border w-full h-[80vh]" partname="{{$part->name()}}" :parts="app(\App\LDraw\LDrawModelMaker::class)->webGl($this->part)"/>
         </div>
     </x-filament::modal>
     <x-filament-actions::modals />
     @push('scripts')
-        <x-layout.ldbi-scripts />
-        <script type="text/javascript">
-            var scene;
-        </script>
         @script
         <script>
-            let part_id = {{$part->id}};
-            var part_paths;
-
-
-            LDR.Options.bgColor = 0xFFFFFF;
-
-            LDR.Colors.envMapPrefix = '/assets/ldbi/textures/cube/';
-            LDR.Colors.textureMaterialPrefix = '/assets/ldbi/textures/materials/';
-
             $wire.on('open-modal', (modal) => {
-                let idToUrl = function(id) {
-                    if (part_paths[id]) {
-                        return [part_paths[id]];
-                    }
-                    else {
-                        return [id];
-                    }
-                };
-
-                let idToTextureUrl = function(id) {
-                    if (part_paths[id]) {
-                        return part_paths[id];
-                    }
-                    else {
-                        return id;
-                    }
-                };
-                if (modal.id == 'ldbi' && WEBGL.isWebGLAvailable() && !scene) {
-                    // pre-fetch the paths to the subfiles used to speed up loading
-                    fetch('/ldbi/part/' + part_id)
-                        .then(response => response.json())
-                        .then((response) => {
-                            part_paths = response;
-                            LDR.Colors.load(() => {
-                                scene = new LDrawOrg.Model(
-                                    document.getElementById('ldbi-canvas'),
-                                    document.getElementById('filename').innerHTML.replace(/^(parts\/|p\/)/, ''),
-                                    {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
-                                );
-                                window.addEventListener('resize', () => scene.onChange());
-                            },() => {},part_paths['ldconfig.ldr']);
-
-                        })
-                }
-            });
-
-            $wire.on('ldbi-default-mode', () => {
-                scene.default_mode();
-            });
-
-            $wire.on('ldbi-harlequin-mode', () => {
-                scene.harlequin_mode();
-            });
-
-            $wire.on('ldbi-bfc-mode', () => {
-                scene.bfc_mode();
-            });
-
-            $wire.on('ldbi-stud-logos', () => {
-                if (LDR.Options.studLogo == 1) {
-                    LDR.Options.studLogo = 0;
-                } else {
-                    LDR.Options.studLogo = 1;
-                }
-                scene.reload();
-            });
-
-            $wire.on('ldbi-show-origin', () => {
-                scene.axesHelper.visible = !scene.axesHelper.visible;
-                scene.reload();
-            });
-
-            $wire.on('ldbi-physical-mode', () => {
-                if (scene.loader.physicalRenderingAge > 0) {
-                    scene.setPhysicalRenderingAge(0);
-                }
-                else {
-                    scene.setPhysicalRenderingAge(20);
-                }
+                $wire.dispatch('ldbi-render-model');
             });
         </script>
         @endscript

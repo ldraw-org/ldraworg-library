@@ -100,7 +100,7 @@ class LDrawModelMaker
         } elseif ($model instanceof OmrModel) {
             $webgl[$model->filename()] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
         } else {
-            $webgl['model.ldr'] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
+            $webgl['model.ldr'] = 'data:text/plain;base64,' . base64_encode("0 FILE model.ldr\r\n" . $this->modelMpd($model));
         }
         $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::disk('library')->get('official/LDConfig.ldr'));
         return $webgl;

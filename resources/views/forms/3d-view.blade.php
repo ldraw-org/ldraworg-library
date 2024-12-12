@@ -1,0 +1,14 @@
+<x-3d-viewer class="border rounded-lg w-full h-full overflow-hidden" partname="{{$partname}}" :parts="$parts" />
+
+@push('scripts')
+    @script
+    <script>
+        $wire.on('render-model', (event) => {
+            parts = $wire.parts;
+            partname = 'model.ldr';
+            $wire.dispatch('ldbi-render-model');
+        });
+    </script>
+    @endscript
+@endpush
+

@@ -60,14 +60,14 @@
     </div>
 
     @push('scripts')
-    @script
-    <script>
-        $wire.on('render-model', (event) => {
-            parts = $wire.parts;
-            $wire.dispatch('ldbi-render-model');
-        });
-    </script>
-    @endscript
-@endpush
+        @script
+        <script>
+            $wire.on('render-model', (event) => {
+                parts = $wire.parts;
+                $wire.dispatch('ldbi-render-model');
+            });
+        </script>
+        @endscript
+    @endpush
 
 </div>
