@@ -9,7 +9,6 @@ use App\Http\Controllers\Part\LatestPartsController;
 use App\Http\Controllers\Part\PartUpdateController;
 use App\Http\Controllers\Part\PartDownloadController;
 use App\Http\Controllers\Part\PartDownloadZipController;
-use App\Http\Controllers\Part\PartWebGLController;
 use App\Http\Controllers\Part\WeeklyPartsController;
 use App\Http\Controllers\ReviewSummaryController;
 use App\Http\Controllers\StickerSheetShowController;
@@ -43,7 +42,6 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/categories.txt', [SupportFilesController::class, 'categories'])->name('categories-txt');
     Route::get('/library.csv', [SupportFilesController::class, 'librarycsv'])->name('library-csv');
     Route::get('/ptreleases/{output}', [SupportFilesController::class, 'ptreleases'])->name('ptreleases');
-    Route::get('/ldbi/part/{part}', PartWebGLController::class)->name('part.ldbi');
     Route::get('/tracker/latest-parts', LatestPartsController::class)->name('part.latest');
     Route::get('/tracker/weekly-parts', WeeklyPartsController::class)->name('part.weekly-api');
     Route::get('/tracker/ldrawunf-last-day.zip', LastDayDownloadZipController::class)->name('tracker.last-day');

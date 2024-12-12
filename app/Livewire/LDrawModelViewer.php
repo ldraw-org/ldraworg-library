@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\LDraw\LDrawModelMaker;
 use App\Models\Part\Part;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -41,10 +42,12 @@ class LDrawModelViewer extends Component implements HasForms
 
     public function makeModel()
     {
+
         if (count($this->data['ldraw-model']) != 1) {
             return;
         }
         $model = array_pop($this->data['ldraw-model'])->get();
+/*
         $this->modeltext = 'data:text/plain;base64,' . base64_encode($model);
         $parts = app(\App\LDraw\Parse\Parser::class)->getSubparts($model);
         $subs = [];
@@ -69,7 +72,6 @@ class LDrawModelViewer extends Component implements HasForms
         }
         $mparts = $mparts->unique();
         foreach($mparts as $p) {
-            /** var Part $p */
             if ($p->isTexmap()) {
                 $pn = str_replace(["parts/textures/","p/textures/"], '', $p->filename);
                 $this->parts[$pn] = 'data:image/png;base64,' .  base64_encode($p->get());
@@ -79,6 +81,8 @@ class LDrawModelViewer extends Component implements HasForms
             }
         }
         $this->parts['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::disk('library')->get('official/LDConfig.ldr'));
+*/
+        $this->parts = app(LDrawModelMaker::class)->webGl($model);
         $this->dispatch('render-model');
     }
 

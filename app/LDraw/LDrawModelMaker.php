@@ -33,9 +33,14 @@ class LDrawModelMaker
         return $file;
     }
 
-    public function modelMpd(OmrModel $model): string
+    public function modelMpd(string|OmrModel $model): string
     {
-        $file = app(\App\LDraw\Parse\Parser::class)->unix2dos(Storage::disk('library')->get("omr/{$model->filename()}") . "\r\n");
+        if ($model instanceof OmrModel) {
+            $file = app(\App\LDraw\Parse\Parser::class)->unix2dos(Storage::disk('library')->get("omr/{$model->filename()}") . "\r\n");
+        } else {
+            $file = $model;
+        }
+
         $parts = app(\App\LDraw\Parse\Parser::class)->getSubparts($file);
         $subs = [];
         foreach ($parts['subparts'] ?? [] as $s) {
@@ -48,12 +53,12 @@ class LDrawModelMaker
             $subs[] = "parts/textures/{$s}";
             $subs[] = "p/textures/{$s}";
         }
-        $oparts = new Collection();
-        foreach (Part::official()->whereIn('filename', $subs)->get() as $part) {
-            $oparts = $oparts->merge($part->descendantsAndSelf()->official()->get());
+        $parts = new Collection();
+        foreach (Part::doesntHave('unofficial_part')->whereIn('filename', $subs)->get() as $part) {
+            $parts = $parts->merge($part->descendantsAndSelf()->official()->get());
         }
-        $oparts = $oparts->unique();
-        foreach ($oparts as $s) {
+        $parts = $parts->unique();
+        foreach ($parts as $s) {
             /** @var Part $s */
             if ($s->isTexmap()) {
                 $file .= $s->get(true, true);
@@ -86,6 +91,24 @@ class LDrawModelMaker
             return preg_replace($pattern, '$1 '. $delcolor[$item[0]], $item);
         });
         return implode("\n", array_merge($same->toArray(), $added->toArray(), $removed->toArray()));
+    }
+
+    public function webGl(string|OmrModel|Part $model): array
+    {
+        if ($model instanceof Part) {
+            $webgl[$model->name()] = 'data:text/plain;base64,' . base64_encode($this->partMpd($model));
+        } elseif ($model instanceof OmrModel) {
+            $webgl[$model->filename()] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
+        } else {
+            $webgl['model.ldr'] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
+        }
+        $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::disk('library')->get('official/LDConfig.ldr'));
+        return $webgl;
+    }
+
+    public function webGlModel()
+    {
+
     }
 
 }

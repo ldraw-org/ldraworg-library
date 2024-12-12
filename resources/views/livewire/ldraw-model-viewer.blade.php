@@ -6,7 +6,7 @@
 </x-slot>
 <x-slot:breadcrumbs>
     <x-breadcrumb-item class="active" item="LDraw Model Viewer" />
-</x-slot>    
+</x-slot>
 
 <div class="flex flex-col space-y-2">
     <div class="text-2xl font-bold">
@@ -44,87 +44,30 @@
                 wire:click="$dispatch('ldbi-physical-mode')"
             />
         </div>
-        <div id="ldbi-container" class="border w-full h-[80vh]"> 
-            <canvas id="ldbi-canvas" class="size-full"></canvas>
-        </div>
+        <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" :parts="$parts" />
     </div>
 
     <div class="border rounded p-2">
         <p>
-            All parts used in the file submitted to the model viewer must be embedded in the MPD, 
+            All parts used in the file submitted to the model viewer must be embedded in the MPD,
             be present in the Official Library, or listed on the Parts Tracker. Official parts
             will be given priority over unoffical parts.
         </p>
         <p>
-            The model submitted here is uploaded to LDraw.org for processing but is 
+            The model submitted here is uploaded to LDraw.org for processing but is
             <strong>not</strong> permanently stored.
         </p>
     </div>
 
     @push('scripts')
-        <x-layout.ldbi-scripts />
-        <script type="text/javascript">
-            var scene;
-        </script>    
-        @script
-        <script>
-            LDR.Options.bgColor = 0xFFFFFF;
+    @script
+    <script>
+        $wire.on('render-model', (event) => {
+            parts = $wire.parts;
+            $wire.dispatch('ldbi-render-model');
+        });
+    </script>
+    @endscript
+@endpush
 
-            LDR.Colors.envMapPrefix = '/assets/ldbi/textures/cube/';    
-            LDR.Colors.textureMaterialPrefix = '/assets/ldbi/textures/materials/';
-
-            $wire.on('render-model', (modal) => {
-                let idToUrl = function(id) {
-                    if ($wire.parts[id]) {
-                        return [$wire.parts[id]];
-                    }
-                    else {
-                        return [id];
-                    }
-                };
-
-                let idToTextureUrl = function(id) {
-                    if ($wire.parts[id]) {
-                        return $wire.parts[id];
-                    }
-                    else {
-                        return id;
-                    }
-                };
-                if (WEBGL.isWebGLAvailable()) {
-                    LDR.Colors.load(() => {
-                        if (scene) {
-                            scene = null;
-                        }
-                        scene = new LDrawOrg.Model(
-                            document.getElementById('ldbi-canvas'), 
-                            $wire.modeltext,
-                            {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
-                        );
-                    },() => {},$wire.parts['ldconfig.ldr']);
-                    window.addEventListener('resize', () => scene.onChange());
-                }
-            });
-            $wire.on('ldbi-default-mode', () => {
-                scene.default_mode();
-            });
-            $wire.on('ldbi-stud-logos', () => {
-                if (LDR.Options.studLogo == 1) {
-                    LDR.Options.studLogo = 0;
-                } else {
-                    LDR.Options.studLogo = 1;
-                }
-                scene.reload();
-            });
-            $wire.on('ldbi-physical-mode', () => {
-                if (scene.loader.physicalRenderingAge > 0) {
-                    scene.setPhysicalRenderingAge(0);
-                }
-                else {
-                    scene.setPhysicalRenderingAge(20);
-                }
-            });
-        </script>
-        @endscript
-    @endpush
 </div>
