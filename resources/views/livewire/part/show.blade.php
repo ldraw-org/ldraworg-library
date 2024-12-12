@@ -281,7 +281,7 @@
                     wire:click="$dispatch('ldbi-physical-mode')"
                 />
             </div>
-            <x-3d-viewer class="border w-full h-[80vh]" partname="{{$part->name()}}" :parts="app(\App\LDraw\LDrawModelMaker::class)->webGl($this->part)"/>
+            <x-3d-viewer class="border w-full h-[80vh]" partname="{{basename($part->filename, '.dat') . '.ldr'}}" :parts="app(\App\LDraw\LDrawModelMaker::class)->webGl($part)"/>
         </div>
     </x-filament::modal>
     <x-filament-actions::modals />

@@ -15,7 +15,7 @@ class LDrawModelMaker
             return $part->get(true, true);
         }
 
-        $topModelName = pathinfo($part->filename, PATHINFO_FILENAME) . '.ldr';
+        $topModelName = basename($part->filename, '.dat') . '.ldr';
         $file = "0 FILE {$topModelName}\r\n1 16 0 0 0 {$matrix} {$part->name()}\r\n0 FILE {$part->name()}\r\n{$part->get()}\r\n";
         if ($part->isUnofficial()) {
             $sparts = $part->descendants->whereNull('unofficial_part');
@@ -96,7 +96,7 @@ class LDrawModelMaker
     public function webGl(string|OmrModel|Part $model): array
     {
         if ($model instanceof Part) {
-            $webgl[$model->name()] = 'data:text/plain;base64,' . base64_encode($this->partMpd($model));
+            $webgl[basename($model->filename, '.dat') . '.ldr'] = 'data:text/plain;base64,' . base64_encode($this->partMpd($model));
         } elseif ($model instanceof OmrModel) {
             $webgl[$model->filename()] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
         } else {
@@ -104,11 +104,6 @@ class LDrawModelMaker
         }
         $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::disk('library')->get('official/LDConfig.ldr'));
         return $webgl;
-    }
-
-    public function webGlModel()
-    {
-
     }
 
 }
