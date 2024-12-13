@@ -5,7 +5,6 @@
     <script>
         $wire.on('render-model', (event) => {
             parts = $wire.parts;
-            partname = 'model.ldr';
             $wire.dispatch('ldbi-render-model');
         });
     </script>
