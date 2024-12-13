@@ -14,22 +14,33 @@
         LDR.Colors.envMapPrefix = '/assets/ldbi/textures/cube/';
         LDR.Colors.textureMaterialPrefix = '/assets/ldbi/textures/materials/';
 
+        const OFFICIAL_DIR = '/library/official', UNOFFICIAL_DIR = '/library/unofficial';
         var idToUrl = function(id) {
-            if (window.parts[id]) {
-                return [window.parts[id]];
+            if (parts[id]) {
+                return [parts[id]];
+            } else if(id.startsWith('48/') || id.startsWith('8/')) {
+                return [OFFICIAL_DIR + '/p/' + id,
+                        UNOFFICIAL_DIR + '/p/' + id];
+            } else if(id.startsWith('s/')) {
+                return [OFFICIAL_DIR + '/parts/' + id,
+                        UNOFFICIAL_DIR + '/parts/' + id];
+            } else if(id.match(/[a-z][a-z].*\.dat/)) {
+                return [OFFICIAL_DIR + '/p/' + id,
+                        OFFICIAL_DIR + '/parts/' + id,
+                        UNOFFICIAL_DIR + '/p/' + id,
+                        UNOFFICIAL_DIR + '/parts/' + id];
             }
-            else {
-                return [id];
-            }
+            return [OFFICIAL_DIR + '/parts/' + id,
+                        OFFICIAL_DIR + '/p/' + id,
+                        UNOFFICIAL_DIR + '/parts/' + id,
+                        UNOFFICIAL_DIR + '/p/' + id];
         };
 
         var idToTextureUrl = function(id) {
-            if (window.parts[id]) {
-                return window.parts[id];
+            if (parts[id]) {
+                return parts[id];
             }
-            else {
-                return id;
-            }
+            return id;
         };
 
         var renderModel = function() {

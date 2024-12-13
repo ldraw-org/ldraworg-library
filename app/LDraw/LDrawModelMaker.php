@@ -95,8 +95,22 @@ class LDrawModelMaker
 
     public function webGl(string|OmrModel|Part $model): array
     {
+        $webgl = [];
         if ($model instanceof Part) {
-            $webgl[basename($model->filename, '.dat') . '.ldr'] = 'data:text/plain;base64,' . base64_encode($this->partMpd($model));
+            if ($model->isUnofficial()) {
+                $sparts = $model->descendantsAndSelf->whereNull('unofficial_part');
+            } else {
+                $sparts = $model->descendantsAndSelf->whereNotNull('part_release_id');
+            }
+            foreach ($sparts as $s) {
+                /** @var Part $s */
+                if ($s->isTexmap()) {
+                    $text = $s->get(true, true);
+                } else {
+                    $text = $s->get();
+                }
+                $webgl[str_replace('\\', '/',$s->name())] = 'data:text/plain;base64,' . base64_encode($text);
+            }
         } elseif ($model instanceof OmrModel) {
             $webgl[$model->filename()] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
         } else {
