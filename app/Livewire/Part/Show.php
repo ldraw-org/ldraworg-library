@@ -243,15 +243,6 @@ class Show extends Component implements HasForms, HasActions
                 ->outlined();
     }
 
-    public function webglViewAction(): Action
-    {
-        return Action::make('webglView')
-                ->label('3D View')
-                ->action(fn () => $this->dispatch('open-modal', id: 'ldbi'))
-                ->color('gray')
-                ->outlined();
-    }
-
     public function adminCertifyAllAction(): Action
     {
         return Action::make('adminCertifyAll')

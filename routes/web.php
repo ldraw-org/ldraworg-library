@@ -3,7 +3,6 @@
 use App\Http\Controllers\DocumentShowController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SupportFilesController;
-use App\Http\Controllers\Omr\SetShowController;
 use App\Http\Controllers\Part\LastDayDownloadZipController;
 use App\Http\Controllers\Part\LatestPartsController;
 use App\Http\Controllers\Part\PartUpdateController;
@@ -25,6 +24,7 @@ use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
 use App\Livewire\Dashboard\User\Index as UserIndex;
 use App\Livewire\LDrawModelViewer;
 use App\Livewire\Omr\Set\Index;
+use App\Livewire\Omr\Set\Show as SetShow;
 use App\Livewire\Part\Show;
 use App\Livewire\Part\Submit;
 use App\Livewire\Part\Weekly;
@@ -96,8 +96,8 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
 Route::prefix('omr')->name('omr.')->group(function () {
     Route::view('/', 'omr.main')->name('main');
     Route::get('/sets', Index::class)->name('sets.index');
-    Route::get('sets/{set}', SetShowController::class)->name('sets.show');
-    Route::get('/set/{setnumber}', [SetShowController::class, 'show'])->name('show.setnumber');
+    Route::get('sets/{set}', SetShow::class)->name('sets.show');
+    Route::get('/set/{setnumber}', [SetShow::class, 'show'])->name('show.setnumber');
 });
 
 

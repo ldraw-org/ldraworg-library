@@ -32,7 +32,15 @@
             <x-filament-action action="stickerSearchAction" />
             <x-filament-action action="adminCertifyAllAction" />
             <x-filament-action action="certifyAllAction" />
-            <x-filament-action action="webglViewAction" />
+            @if (!$part->isTexmap())
+                <x-filament::button
+                    color="gray"
+                    outlined
+                    wire:click="$dispatch('open-modal', { id: 'ldbi' })"
+                >
+                    3D View
+                </x-filament::button>
+            @endif
 
             @if ($this->editHeaderAction->isVisible() ||
                 $this->editNumberAction->isVisible() ||

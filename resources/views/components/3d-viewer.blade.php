@@ -45,17 +45,18 @@
 
         var renderModel = function() {
             if (WEBGL.isWebGLAvailable()) {
-                LDR.Colors.load(() => {
-                    if (scene) {
-                        scene = null;
-                    }
-                    scene = new LDrawOrg.Model(
-                        document.getElementById('ldbi-canvas'),
-                        partname,
-                        {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
-                    );
-                },() => {},parts['ldconfig.ldr']);
-                addEventListener('resize', () => scene.onChange());
+                if (scene != null) {
+                    scene.setModel(partname, true);
+                } else {
+                    LDR.Colors.load(() => {
+                        scene = new LDrawOrg.Model(
+                            document.getElementById('ldbi-canvas'),
+                            partname,
+                            {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
+                        );
+                    },() => {},parts['ldconfig.ldr']);
+                    addEventListener('resize', () => scene.onChange());
+                }
             }
         };
 

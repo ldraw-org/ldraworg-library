@@ -44,7 +44,7 @@
                 wire:click="$dispatch('ldbi-physical-mode')"
             />
         </div>
-        <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" :parts="$parts" />
+        <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" :$parts />
     </div>
 
     <div class="border rounded p-2">
@@ -64,8 +64,9 @@
         <script>
             $wire.on('render-model', (event) => {
                 parts = $wire.parts;
+                partname = 'model.ldr';
                 $wire.dispatch('ldbi-render-model');
-            });
+           });
         </script>
         @endscript
     @endpush
