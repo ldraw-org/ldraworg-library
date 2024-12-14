@@ -6,7 +6,7 @@
 @push('scripts')
     <x-layout.ldbi-scripts />
     <script type="text/javascript">
-        var scene = {};
+        var scene = null;
         var parts = {{ Js::from($parts) }};
         var partname = "{{$partname}}";
         LDR.Options.bgColor = 0xFFFFFF;

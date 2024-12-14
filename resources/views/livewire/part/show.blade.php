@@ -289,7 +289,9 @@
         @script
         <script>
             $wire.on('open-modal', (modal) => {
-                $wire.dispatch('ldbi-render-model');
+                if (scene == null) {
+                    $wire.dispatch('ldbi-render-model');
+                }
             });
         </script>
         @endscript
