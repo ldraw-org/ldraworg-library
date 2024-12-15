@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\CheckPart;
 use App\Jobs\UpdateImage;
 use App\LDraw\PartManager;
 use App\Models\Omr\OmrModel;
@@ -38,7 +39,7 @@ class DailyMaintenance extends Command
         Part::unofficial()->lazy()->each(fn (Part $p) => $p->updateVoteSort());
 
         $this->info('Rechecking all unofficial parts');
-        Part::unofficial()->lazy()->each(fn (Part $p) => dispatch(fn () => app(PartManager::class)->checkPart($p)));
+        Part::unofficial()->lazy()->each(fn (Part $p) => CheckPart::dispatch($p));
 
         $this->info('Removing orphan keywords');
         PartKeyword::doesntHave('parts')->delete();
@@ -91,5 +92,8 @@ class DailyMaintenance extends Command
 
         $this->info('Regenerate unofficial zip');
         $this->call('lib:refresh-zip');
+
+        $this->info('Pruning failed jobs');
+        $this->call('queue:prune-failed');
     }
 }
