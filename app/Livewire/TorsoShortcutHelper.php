@@ -118,7 +118,20 @@ class TorsoShortcutHelper extends Component implements HasForms
                             $p = Part::with('keywords')->find($this->data['torso']);
                             $set('description', $this->template->description . str_replace('Minifig Torso', '', $p->description));
                             $set('name', basename($this->template->filename, '.dat') . str_replace('973', '', basename($p->filename)));
-                            $set('keywords', implode(', ', $p->keywords->pluck('keyword')->all()));
+                            $kws = [];
+                            foreach($p->keywords as $keyword) {
+                                $kw = strtolower($keyword->keyword);
+                                if (strpos($kw, 'bricklink') !== false) {
+                                    $set('bricklink', str_replace('bricklink ', '', $kw));
+                                } elseif (strpos($kw, 'brickowl') !== false) {
+                                    $set('brickowl', str_replace('brickowl ', '', $kw));
+                                } elseif (strpos($kw, 'rebrickable') !== false) {
+                                    $set('rebrickable', str_replace('rebrickable ', '', $kw));
+                                } else {
+                                    $kws[] = $keyword->keyword;
+                                }
+                            }
+                            $set('keywords', implode(', ', $kws));
                             foreach($this->templateParts() as $index => $tpart) {
                                 $index++;
                                 $set("part_{$index}_color", '16');
@@ -129,6 +142,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                         ->schema([
                             TextInput::make('description')
                                 ->required()
+                                ->extraAttributes(['class' => 'font-mono'])
                                 ->rules([
                                     fn (): Closure => function (string $attribute, $value, Closure $fail) {
                                         $p = Part::where('description', $value)->partsFolderOnly()->first();
@@ -147,8 +161,26 @@ class TorsoShortcutHelper extends Component implements HasForms
                                         }
                                     },
                                 ]),
+                            Grid::make([
+                                    'md' => 3
+                                ])
+                                ->schema([
+                                    TextInput::make('rebrickable')
+                                    ->string()
+                                    ->required()
+                                    ->extraAttributes(['class' => 'font-mono']),
+                                    TextInput::make('bricklink')
+                                        ->string()
+                                        ->required()
+                                        ->extraAttributes(['class' => 'font-mono']),
+                                    TextInput::make('brickowl')
+                                        ->string()
+                                        ->required()
+                                        ->extraAttributes(['class' => 'font-mono']),
+                                ]),
                             TextInput::make('keywords')
                                 ->required()
+                                ->extraAttributes(['class' => 'font-mono'])
                                 ->rules([
                                     fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
                                         $kws = explode(', ', $value);
@@ -309,6 +341,9 @@ class TorsoShortcutHelper extends Component implements HasForms
         $text .= "0 !LDRAW_ORG Unofficial_Shortcut\n";
         $text .= $u->license->ldrawString() . "\n\n";
         $kws = explode(', ', $this->data['keywords']);
+        $kws[] = 'Bricklink ' . $this->data['bricklink'];
+        $kws[] = 'Rebrickable ' . $this->data['rebrickable'];
+        $kws[] = 'BrickOwl ' . $this->data['brickowl'];
         $kwline = '';
         foreach ($kws as $index => $kw) {
             if (array_key_first($kws) == $index) {
