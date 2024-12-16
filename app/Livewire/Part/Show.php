@@ -65,6 +65,7 @@ class Show extends Component implements HasForms, HasActions
                             ->string()
                             ->nullable()
                             ->requiredIf('vote_type_code', ['M', 'H'])
+                            ->extraAttributes(['class' => 'font-mono'])
                             ->validationMessages([
                                 'required_if' => 'A comment is required',
                             ]),

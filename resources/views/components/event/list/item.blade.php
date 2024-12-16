@@ -55,7 +55,7 @@
           {{ $event->created_at }}
         </div>
     </div>
-    <p class="mt-4 event-comment">
+    <p class="mt-4 event-comment font-mono">
         @if($event->event_type == \App\Enums\EventType::Rename)
             "{{$event->moved_from_filename}}" to "{{$event->moved_to_filename}}"
         @endif
