@@ -183,7 +183,7 @@ class TorsoShortcutHelper extends Component implements HasForms
 
     public function submitFile()
     {
-        if (auth()->user()->cannot('part.submit.regular')) {
+        if (auth()->user()->cannot('create', Part::class)) {
             return;
         }
         $pm = app(\App\LDraw\PartManager::class);

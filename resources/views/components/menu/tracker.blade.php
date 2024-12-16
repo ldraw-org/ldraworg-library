@@ -3,18 +3,21 @@
     @can('create', \App\Models\Part\Part::class)
         <x-menu.item label="Submit" link="{{route('tracker.submit')}}" />
     @endcan
-    <x-menu.item label="Parts List" link="{{route('parts.list')}}" /> 
-    <x-menu.item label="Activity" link="{{route('tracker.activity')}}" /> 
+    <x-menu.item label="Parts List" link="{{route('parts.list')}}" />
+    <x-menu.item label="Activity" link="{{route('tracker.activity')}}" />
     <x-menu.item label="Weekly New Parts" link="{{route('tracker.weekly')}}" />
     <x-menu.item label="Documentation" link="https://www.ldraw.org/docs-main.html" />
     <x-menu.dropdown label="Tools">
         <x-menu.item label="Part Search" link="{{route('parts.list')}}" />
-        <x-menu.item label="Pattern/Shortcut Part Summary" link="{{route('parts.search.suffix')}}" /> 
-        <x-menu.item label="Sticker Sheet Lookup" link="{{route('parts.sticker-sheet.index')}}" /> 
+        <x-menu.item label="Pattern/Shortcut Part Summary" link="{{route('parts.search.suffix')}}" />
+        <x-menu.item label="Sticker Sheet Lookup" link="{{route('parts.sticker-sheet.index')}}" />
+        @can('create', \App\Models\Part\Part::class)
+            <x-menu.item label="Torso Shortcut Helper" link="{{route('tracker.torso-helper')}}" />
+        @endcan
         @if(!empty($summaries))
             <x-menu.dropdown label="Review Summaries" level="1">
                 @foreach($summaries as $summary)
-                    <x-menu.item label="{{$summary->header}}" link="{{route('tracker.summary.view', $summary)}}" /> 
+                    <x-menu.item label="{{$summary->header}}" link="{{route('tracker.summary.view', $summary)}}" />
                 @endforeach
             </x-menu.dropdown>
         @endif
