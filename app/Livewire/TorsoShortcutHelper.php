@@ -12,6 +12,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\View;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -66,11 +67,16 @@ class TorsoShortcutHelper extends Component implements HasForms
                 Wizard::make([
                     Wizard\Step::make('Torso and Template')
                         ->schema([
+                            Toggle::make('all-torsos')
+                                ->label('Show all torsos'),
                             Select::make('torso')
-                                ->options(function() {
-                                    $parts = Part::whereDoesntHave('parents', fn (Builder $query): Builder =>
-                                            $query->where('description', 'LIKE', 'Minifig Torso%')
-                                                ->whereRelation('category', 'category', '<>', 'Sticker Shortcut')
+                                ->options(function(Get $get) {
+                                    $parts = Part::when(
+                                            !$get('all-torsos'),
+                                            fn (Builder $query2) => $query2->whereDoesntHave('parents', fn (Builder $query): Builder =>
+                                                $query->where('description', 'LIKE', 'Minifig Torso%')
+                                                    ->whereRelation('category', 'category', '<>', 'Sticker Shortcut')
+                                            )
                                         )
                                         ->doesntHave('unofficial_part')
                                         ->where('filename', 'LIKE', 'parts/973p%.dat')
