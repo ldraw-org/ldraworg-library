@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Events\PartSubmitted;
 use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Jobs\UpdateZip;
+use App\LDraw\Rebrickable;
 use App\Models\Part\Part;
 use Closure;
 use Filament\Forms\Components\Fieldset;
@@ -21,9 +22,11 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -114,24 +117,28 @@ class TorsoShortcutHelper extends Component implements HasForms
                                     unset($this->selectParts);
                                 }),
                         ])
-                        ->afterValidation(function (Set $set) {
-                            $p = Part::with('keywords')->find($this->data['torso']);
+                        ->afterValidation(function (Set $set, Get $get) {
+                            $set('bricklink', null);
+                            $set('brickowl', null);
+                            $set('rebrickable', null);
+                            $p = Part::with('keywords')->find($get('torso'));
                             $set('description', $this->template->description . str_replace('Minifig Torso', '', $p->description));
                             $set('name', basename($this->template->filename, '.dat') . str_replace('973', '', basename($p->filename)));
                             $kws = [];
                             foreach($p->keywords as $keyword) {
                                 $kw = strtolower($keyword->keyword);
-                                if (strpos($kw, 'bricklink') !== false) {
-                                    $set('bricklink', str_replace('bricklink ', '', $kw));
-                                } elseif (strpos($kw, 'brickowl') !== false) {
-                                    $set('brickowl', str_replace('brickowl ', '', $kw));
-                                } elseif (strpos($kw, 'rebrickable') !== false) {
-                                    $set('rebrickable', str_replace('rebrickable ', '', $kw));
+                                if (Str::startsWith($kw, ['bricklink ', 'brickowl ', 'rebrickable '])) {
+                                    $number = Str::chopStart($kw, ['bricklink ', 'brickowl ', 'rebrickable ']);
+                                    $site = Str::words($kw, 1, '');
+                                    $set($site, $number);
                                 } else {
                                     $kws[] = $keyword->keyword;
                                 }
                             }
                             $set('keywords', implode(', ', $kws));
+                            if (is_null($get('brickowl')) || is_null($get('bricklink')) || is_null($get('rebrickable'))) {
+                                $this->setExternal($get, $set);
+                            }
                             foreach($this->templateParts() as $index => $tpart) {
                                 $index++;
                                 $set("part_{$index}_color", '16');
@@ -219,7 +226,37 @@ class TorsoShortcutHelper extends Component implements HasForms
             ->statePath('data');
     }
 
-    public function submitFile()
+    protected function setExternal(Get $get, Set $set): void
+    {
+        $rb_num = $get('rebrickable');
+        $bl_num = $get('bricklink');
+        $bo_num = $get('brickowl');
+
+        $rb = new Rebrickable();
+        if (!is_null($rb_num)) {
+            $rb_part = $rb->getPart($rb_num);
+        } elseif (!is_null($bl_num)) {
+            $rb_part = $rb->getParts(['search' => $bl_num]);
+        } elseif (!is_null($bl_num)) {
+            $rb_part = $rb->getParts(['search' => $bo_num]);
+        } else {
+            $rb_part = $rb->getParts(['search' => basename(Part::find($this->data['torso'])->name(), '.dat')]);
+        }
+
+        $rb_part = $rb_part->first();
+
+        if (!is_null($rb_part)) {
+            $set('rebrickable', $rb_part['part_num']);
+            if (Arr::has($rb_part, 'external_ids.BrickLink')) {
+                $set('bricklink', Arr::get($rb_part, 'external_ids.BrickLink.0'));
+            }
+            if (Arr::has($rb_part, 'external_ids.BrickOwl')) {
+                $set('brickowl', Arr::get($rb_part, 'external_ids.BrickOwl.0'));
+            }
+        }
+    }
+
+    public function submitFile(): void
     {
         if (auth()->user()->cannot('create', Part::class)) {
             return;
