@@ -236,16 +236,14 @@ class TorsoShortcutHelper extends Component implements HasForms
         if (!is_null($rb_num)) {
             $rb_part = $rb->getPart($rb_num);
         } elseif (!is_null($bl_num)) {
-            $rb_part = $rb->getParts(['search' => $bl_num]);
+            $rb_part = $rb->getParts(['search' => $bl_num])?->first();
         } elseif (!is_null($bl_num)) {
-            $rb_part = $rb->getParts(['search' => $bo_num]);
+            $rb_part = $rb->getParts(['search' => $bo_num])?->first();
         } else {
-            $rb_part = $rb->getParts(['search' => basename(Part::find($this->data['torso'])->name(), '.dat')]);
+            $rb_part = $rb->getParts(['search' => basename(Part::find($this->data['torso'])->name(), '.dat')])?->first();
         }
 
-        $rb_part = $rb_part->first();
-
-        if (!is_null($rb_part)) {
+        if (!is_null($rb_part) && $rb_part['part_num'] != '973') {
             $set('rebrickable', $rb_part['part_num']);
             if (Arr::has($rb_part, 'external_ids.BrickLink')) {
                 $set('bricklink', Arr::get($rb_part, 'external_ids.BrickLink.0'));
