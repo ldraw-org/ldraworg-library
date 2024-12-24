@@ -84,7 +84,7 @@ class PartListTable extends BasicTable
             QueryBuilder::make()
                 ->constraintPickerColumns(['md' => 2, 'xl' => 4])
                 ->constraints([
-                    // TODO: History Author, Part Fixes, Alias, Third Party
+                    // TODO: Part Fixes, Alias, Third Party
                     Constraint::make('part_release')
                         ->label('Library Status')
                         ->operators([
@@ -114,11 +114,17 @@ class PartListTable extends BasicTable
                                 ->searchable()
                                 ->multiple(),
                         ),
+                    SelectConstraint::make('hist_user')
+                        ->label('History Author')
+                        ->relationship(name: 'history', titleAttribute: 'user_id')
+                        ->options(User::whereHas('part_history')->pluck('name', 'id'))
+                        ->multiple()
+                        ->searchable(),
                     SelectConstraint::make('type')
                         ->label('!LDRAW_ORG Type')
                         ->options(PartType::options())
                         ->multiple(),
-                     RelationshipConstraint::make('category')
+                    RelationshipConstraint::make('category')
                         ->selectable(
                             IsRelatedToOperator::make()
                                 ->titleAttribute('category')
