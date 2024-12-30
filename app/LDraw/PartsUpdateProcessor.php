@@ -120,7 +120,7 @@ class PartsUpdateProcessor
                 $data['fixed'][] = ['name' => $part->name(), 'decription' => $part->description];
             }
         }
-        $data['minor_edits'] = Part::official()->where('has_minor_edit', true)->count();
+        //$data['minor_edits'] = Part::official()->where('has_minor_edit', true)->count();
         return $data;
     }
 
@@ -328,10 +328,7 @@ class PartsUpdateProcessor
         $zip->open($zipname);
         $uzip->open($uzipname);
 
-        Part::where(
-                fn (Builder $query) => $query->orWhere('part_release_id', $this->release->id)
-                    ->orWhere('has_minor_edit', true)
-            )
+        Part::where('part_release_id', $this->release->id)
             ->each(function (Part $part) use ($zip, $uzip) {
                 $content = $part->get();
                 if ($zip->getFromName('ldraw/' . $part->filename) !== false) {
