@@ -86,7 +86,7 @@ class EditNumberAction
             $part->refresh();
             PartRenamed::dispatch($part, Auth::user(), $oldname, $part->filename);
         } else {
-            $upart = Part::unofficial()->where('filename', "{$newType->folder}$newName")->first();
+            $upart = Part::unofficial()->where('filename', "{$newType->folder()}$newName")->first();
             if (is_null($upart)) {
                 $upart = $manager->copyOfficialToUnofficialPart($part);
                 PartHistory::create([
