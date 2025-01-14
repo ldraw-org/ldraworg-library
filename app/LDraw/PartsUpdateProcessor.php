@@ -288,18 +288,6 @@ class PartsUpdateProcessor
         $zip = new \ZipArchive();
         $zip->open($zipname);
 
-/*
-        // Add non-part files to complete zip
-        foreach (Storage::disk('library')->allFiles('official') as $filename) {
-            $zipfilename = str_replace('official/', '', $filename);
-            $content = Storage::disk('library')->get($filename);
-            $zip->addFromString('ldraw/' . $zipfilename, $content);
-        }
-        $zip->close();
-*/
-
-        // Add new/updated non-part files to complete and update zip
-//        $zip->open($zipname);
         foreach ($this->extraFiles as $filename => $contents) {
             $filename = "ldraw/{$filename}";
             $uzip->addFromString($filename, $contents);
@@ -339,21 +327,6 @@ class PartsUpdateProcessor
             });
         $zip->close();
         $uzip->close();
-/*
-        Part::official()->chunk(500, function (Collection $parts) use ($zip, $zipname, $uzip, $uzipname) {
-            $zip->open($zipname);
-            $uzip->open($uzipname);
-            foreach ($parts as $part) {
-                $content = $part->get();
-                $zip->addFromString('ldraw/' . $part->filename, $content);
-                if ($part->part_release_id == $this->release->id || ($part->part_release_id != $this->release->id && $part->has_minor_edit === true)) {
-                    $uzip->addFromString('ldraw/' . $part->filename, $content);
-                }
-            }
-            $zip->close();
-            $uzip->close();
-        });
-*/
     }
 
     protected function copyReleaseFiles(): void
