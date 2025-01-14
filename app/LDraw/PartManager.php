@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Image\Image;
@@ -273,7 +274,7 @@ class PartManager
         }
 
         $values = [
-            'description' => "~Moved To " . str_replace(['.dat', '.png'], '', $newPart->name()),
+            'description' => "~Moved to " . str_replace(['.dat', '.png'], '', $newPart->name()),
             'filename' => $oldPart->filename,
             'user_id' => Auth::user()->id,
             'type' => $oldPart->type,
@@ -396,7 +397,6 @@ class PartManager
     public function addStickerSheet(Part $p)
     {
         $p->refresh();
-        $rb = new Rebrickable();
         $sticker = $p->descendantsAndSelf->where('category.category', 'Sticker')->partsFolderOnly()->first();
         if (is_null($sticker)) {
             return;
@@ -408,24 +408,12 @@ class PartManager
             if ($m === 1) {
                 $sheet = StickerSheet::firstWhere('number', $s[1]);
                 if (is_null($sheet)) {
-                    $part = $rb->getParts(['search' => $s[1]])->first();
-                    if ($part->count() == 0) {
-                        $part = $rb->getPart($s[1])->first();
-                    }
                     $sheet = StickerSheet::create([
                         'number' => $s[1],
-                        'rebrickable_part_id' => null
+                        'part_colors' => [],
+                        'rebrickable' => null,
                     ]);
-                    if (!is_null($part)) {
-                        $rb_part = RebrickablePart::create([
-                            'part_num' => $part['part_num'],
-                            'name' => $part['name'],
-                            'part_url' => $part['part_url'],
-                            'part_img_url' => $part['part_img_url'],
-                            'part_id' => null
-                        ]);
-                        $sheet->rebrickable_part()->associate($rb_part);
-                    }
+                    $sheet->rebrickable = app(\App\LDraw\StickerSheetManager::class)->getRebrickableData($sheet);
                     $sheet->save();
                 }
                 $p->ancestorsAndSelf()->update(['sticker_sheet_id' => $sheet->id]);

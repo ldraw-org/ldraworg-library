@@ -23,7 +23,8 @@ class StickerSheetIndex extends BasicTable
                 TextColumn::make('number')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('rebrickable_part.name')
+                TextColumn::make('rebrickable')
+                    ->state(fn (StickerSheet $s) => $s->rebrickable['name'] ?? '')
                     ->label('Description')
                     ->grow()
                     ->sortable()
@@ -33,8 +34,8 @@ class StickerSheetIndex extends BasicTable
                     ->alignment(Alignment::Center)
                     ->sortable()
                     ->counts([
-                        'parts as sticker_count' => 
-                            function (Builder $q) { 
+                        'parts as sticker_count' =>
+                            function (Builder $q) {
                                 $q->whereRelation('category', 'category', 'Sticker');
                             }
                     ]),
@@ -43,8 +44,8 @@ class StickerSheetIndex extends BasicTable
                     ->sortable()
                     ->alignment(Alignment::Center)
                     ->counts([
-                        'parts as shortcut_count' => 
-                            function (Builder $q) { 
+                        'parts as shortcut_count' =>
+                            function (Builder $q) {
                                 $q->whereRelation('category', 'category', 'Sticker Shortcut');
                             }
                     ]),
@@ -54,8 +55,8 @@ class StickerSheetIndex extends BasicTable
                     ->wrapHeader()
                     ->alignment(Alignment::Center)
                     ->counts([
-                        'parts as stickers_need_votes_count' => 
-                            function (Builder $q) { 
+                        'parts as stickers_need_votes_count' =>
+                            function (Builder $q) {
                                 $q->whereRelation('category', 'category', 'Sticker')
                                     ->where('vote_sort', '3');
                             }
@@ -67,14 +68,14 @@ class StickerSheetIndex extends BasicTable
                     ->wrapHeader()
                     ->alignment(Alignment::Center)
                     ->counts([
-                        'parts as shortcut_fast_track_ready_count' => 
-                            function (Builder $q) { 
+                        'parts as shortcut_fast_track_ready_count' =>
+                            function (Builder $q) {
                                 $q->whereRelation('category', 'category', 'Sticker Shortcut')
                                 ->whereNull('part_release_id')
                                 ->whereBetween('vote_sort', [2, 4])
                                 ->whereDoesntHave('subparts', function (Builder $q) {
                                     $q->where('vote_sort', '>', '1');
-                                }); 
+                                });
                             }
                     ])
                     ->visible(auth()->user()?->can('part.vote.fasttrack') ?? false),

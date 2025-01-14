@@ -4,11 +4,11 @@
     </x-slot>
     <x-slot:breadcrumbs>
     <x-breadcrumb-item class="active" item="Sticker Sheet" />
-    </x-slot> 
-    <div> 
+    </x-slot>
+    <div>
         <div class="text-3xl font-bold">
-            <span>Sticker Sheet {{$sheet->number}}</span>
-        </div>  
+            <span>Sticker Sheet {{$sheet->number}} - @if (!is_null($sheet->rebrickable)) {{$sheet->rebrickable['name']}} ({{$sheet->rebrickable['part_num']}}) @endif </span>
+        </div>
         <div class="space-y-2">
             @if (!is_null($sheet->parts))
                 <div class="rounded text-xl font-bold bg-gray-200 p-2">Flat Stickers</div>
