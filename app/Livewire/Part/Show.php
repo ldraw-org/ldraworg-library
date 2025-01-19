@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Part;
 
-use App\Enums\PartType;
 use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
 use App\Filament\Actions\EditNumberAction;
@@ -16,6 +15,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -432,8 +432,9 @@ class Show extends Component implements HasForms, HasActions
     protected function externalSiteAction(string $site): Action
     {
         $kw = $this->part->keywords()->where('keyword', 'LIKE', "$site %")->first()?->keyword;
-        if (array_key_exists(strtolower($site), config('ldraw.external_sites')) && !is_null($kw)) {
-            $number = trim(str_replace([$site, ucfirst(strtolower($site)), strtolower($site)], '', $kw));
+        $kw = Str::lower($kw);
+        if (array_key_exists(strtolower($site), config('ldraw.external_sites')) && Str::startsWith($kw, Str::lower($site))) {
+            $number = Str::chopStart($kw, Str::lower($site) . ' ');
             return Action::make("view{$site}")
                 ->button()
                 ->color('gray')
