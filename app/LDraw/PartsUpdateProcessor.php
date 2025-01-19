@@ -272,6 +272,10 @@ class PartsUpdateProcessor
         $opart->save();
         $opart->refresh();
         $opart->generateHeader();
+        $this->manager->updateBasePart($opart);
+        $this->manager->updateImage($opart);
+        $this->manager->checkPart($opart);
+        $this->manager->addStickerSheet($opart);
         $opart->save();
         return $opart;
     }
