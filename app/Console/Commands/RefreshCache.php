@@ -25,10 +25,8 @@ class RefreshCache extends Command
      */
     public function handle(): void
     {
+        $this->call('optimize:clear');
         $this->call('icons:clear');
-        $this->call('config:clear');
-        $this->call('route:clear');
-        $this->call('cache:clear');
         $this->call('filament:clear-cached-components');
         $this->call('optimize');
         $this->call('filament:cache-components');
