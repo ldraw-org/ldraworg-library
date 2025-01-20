@@ -337,6 +337,7 @@ class PartManager
         $this->checkPart($part);
         $part->updateReadyForAdmin();
         $this->addUnknownNumber($part);
+        $this->updateBasePart($part);
         UpdateParentParts::dispatch($part);
         return true;
     }
