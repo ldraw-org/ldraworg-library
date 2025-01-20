@@ -23,7 +23,7 @@ class RecheckParts extends Command
             )
             ->when(
                 $this->option('lib') == 'official',
-                fn (Builder $query) => $query->official()
+                fn (Builder $query) => $query->where(fn (Builder $query2) => $query2->official()->whereJsonLength('part_check_messages->errors', '>', 0))
             )
             ->count();
         $div = 50;
@@ -35,7 +35,7 @@ class RecheckParts extends Command
             )
             ->when(
                 $this->option('lib') == 'official',
-                fn (Builder $query) => $query->official()
+                fn (Builder $query) => $query->where(fn (Builder $query2) => $query2->official()->whereJsonLength('part_check_messages->errors', '>', 0))
             )
             ->chunkById($div, function (Collection $parts) use ($manager, $num, &$iter) {
             $this->info("Processing chunk {$iter} of {$num}");
