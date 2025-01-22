@@ -6,6 +6,7 @@ use App\Models\Omr\OmrModel;
 use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class LDrawModelMaker
 {
@@ -104,12 +105,13 @@ class LDrawModelMaker
             }
             foreach ($sparts as $s) {
                 /** @var Part $s */
-                $text = $s->get();
+                $text = base64_encode($s->get());
+                $name = Str::chopStart($s->filename, ['parts/', 'p/']);
                 if ($s->isTexmap()) {
-                    $name = str_replace('textures\\', '',$s->name());
-                    $webgl[str_replace('\\', '/',$name)] = 'data:img/png;base64,' . base64_encode($text);
+                    $name = Str::chopStart($name, 'textures/');
+                    $webgl[$name] = "data:img/png;base64,{$text}";
                 } else {
-                    $webgl[str_replace('\\', '/',$s->name())] = 'data:text/plain;base64,' . base64_encode($text);
+                    $webgl[$name] = "data:text/plain;base64,{$text}";
                 }
 
             }
