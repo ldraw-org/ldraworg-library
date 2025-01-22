@@ -104,12 +104,14 @@ class LDrawModelMaker
             }
             foreach ($sparts as $s) {
                 /** @var Part $s */
+                $text = $s->get();
                 if ($s->isTexmap()) {
-                    $text = $s->get(true, true);
+                    $name = str_replace('textures\\', '',$s->name());
+                    $webgl[str_replace('\\', '/',$name)] = 'data:img/png;base64,' . base64_encode($text);
                 } else {
-                    $text = $s->get();
+                    $webgl[str_replace('\\', '/',$s->name())] = 'data:text/plain;base64,' . base64_encode($text);
                 }
-                $webgl[str_replace('\\', '/',$s->name())] = 'data:text/plain;base64,' . base64_encode($text);
+
             }
         } elseif ($model instanceof OmrModel) {
             $webgl[$model->filename()] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
