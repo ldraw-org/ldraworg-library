@@ -4,6 +4,7 @@ namespace App\LDraw;
 
 use App\Models\Part\Part;
 use App\Models\StickerSheet;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
 
@@ -11,7 +12,7 @@ class SetPbg
 {
     public MessageBag $messages;
     public array $parts = [];
-    protected ?array $set = null;
+    protected array $set = [];
     protected Rebrickable $rb;
 
     public function __construct(?string $set_number = null)
@@ -26,11 +27,11 @@ class SetPbg
     public function pbg(?string $set_number = null): string|false
     {
 
-        if ((is_null($set_number) && !is_null($this->set)) ||
-            (!is_null($this->set) && $this->set['set_num'] == $set_number)
+        if ((is_null($set_number) && Arr::exists($this->set, 'set_num')) ||
+            (Arr::get($this->set, 'set_num') == $set_number)
             && count($this->parts) > 0) {
             return $this->makePbg();
-        } elseif (is_null($set_number) && is_null($this->set)) {
+        } elseif (is_null($set_number) && !Arr::exists($this->set, 'set_num')) {
             $this->messages = new MessageBag();
             $this->messages->add('errors', 'Set number empty');
             return false;
@@ -39,9 +40,9 @@ class SetPbg
         $this->parts = [];
 
 
-        $this->set = $this->rb->getSet($set_number)?->all();
+        $this->set = $this->rb->getSet($set_number)->all();
 
-        if (is_null($this->set)) {
+        if (!Arr::exists($this->set, 'set_num')) {
             $this->messages->add('errors', 'Set Not Found');
             return false;
         }
