@@ -21,13 +21,15 @@ class PartRelease extends Model
         'short',
         'created_at',
         'part_list',
-        'part_data'
+        'part_data',
+        'enabled'
     ];
 
     /**
     * @return array{
-    *     part_list: 'array', 
+    *     part_list: 'array',
     *     part_data: 'Illuminate\Database\Eloquent\Casts\AsArrayObject'
+    *     enabled: 'boolean'
     * }
     */
     protected function casts(): array
@@ -35,6 +37,7 @@ class PartRelease extends Model
         return  [
             'part_list' => 'array',
             'part_data' => AsArrayObject::class,
+            'enabled' => 'boolean',
         ];
     }
 
@@ -63,7 +66,7 @@ class PartRelease extends Model
 
     public static function current(): ?self
     {
-        return self::latest()?->first();
+        return self::where('enabled', true)->latest()?->first();
     }
 
     public function isLatest(): bool
