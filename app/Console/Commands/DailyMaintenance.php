@@ -39,7 +39,7 @@ class DailyMaintenance extends Command
         Part::unofficial()->lazy()->each(fn (Part $p) => $p->updateVoteSort());
 
         $this->info('Rechecking all unofficial parts');
-        $this->call('lib:check --lib=unofficial');
+        $this->call('lib:check', ['--lib' => 'unofficial']);
 
         $this->info('Removing orphan keywords');
         PartKeyword::doesntHave('parts')->delete();
