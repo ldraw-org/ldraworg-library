@@ -4,6 +4,7 @@ namespace App\Livewire\Tables;
 
 use App\Enums\License;
 use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
 use App\Models\User;
 use App\Livewire\Tables\PartTable;
@@ -123,6 +124,10 @@ class PartListTable extends BasicTable
                     SelectConstraint::make('type')
                         ->label('!LDRAW_ORG Type')
                         ->options(PartType::options())
+                        ->multiple(),
+                    SelectConstraint::make('type_qualifier')
+                        ->label('Alias/Physical Colour/Flex Section')
+                        ->options(PartTypeQualifier::options())
                         ->multiple(),
                     RelationshipConstraint::make('category')
                         ->selectable(
