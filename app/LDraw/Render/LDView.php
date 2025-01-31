@@ -74,7 +74,13 @@ class LDView
             Log::debug($ldviewcmd);
         }
 
-        Process::run($ldviewcmd);
+        $result = Process::run($ldviewcmd);
+        if ($this->debug) {
+            Log::debug($result->output());
+            Log::debug($result->errorOutput());
+            Storage::put("/db/part.mpd", file_get_contents($filename));
+            Storage::put("/db/ldview.ini", file_get_contents($inipath));
+        }
         $png = imagecreatefrompng($imagepath);
         imagesavealpha($png, true);
 
