@@ -81,6 +81,9 @@ class LDView
             Storage::put("/db/part.mpd", file_get_contents($filename));
             Storage::put("/db/ldview.ini", file_get_contents($inipath));
         }
+        if (!file_exists($imagepath)) {
+            file_put_contents($imagepath, base64_decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII="));
+        }
         $png = imagecreatefrompng($imagepath);
         imagesavealpha($png, true);
 
