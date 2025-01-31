@@ -22,8 +22,8 @@ class MenuItem extends Component
             return;
         }
         $limit = $settings->quick_search_limit;
-        $uparts = Part::unofficial()->searchPart($this->search, 'header')->orderBy('filename')->take($limit)->get();
-        $oparts = Part::official()->searchPart($this->search, 'header')->orderBy('filename')->take($limit)->get();
+        $uparts = Part::select(['id', 'filename', 'description'])->unofficial()->searchPart($this->search, 'header')->orderBy('filename')->take($limit)->get();
+        $oparts = Part::select(['id', 'filename', 'description'])->official()->searchPart($this->search, 'header')->orderBy('filename')->take($limit)->get();
         if ($uparts->count() > 0) {
             $this->hasResults = true;
             foreach ($uparts as $part) {
@@ -36,7 +36,7 @@ class MenuItem extends Component
                 $this->results['Official Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
             }
         }
-        $sets = Set::where(function (Builder $q) {
+        $sets = Set::select(['id', 'name', 'number'])->where(function (Builder $q) {
             $q->orWhere('number', 'LIKE', "%{$this->search}%")
                 ->orWhere('name', 'LIKE', "%{$this->search}%")
                 ->orWhereHas('models', fn (Builder $qu) => $qu->where('alt_model_name', 'LIKE', "%{$this->search}%"))
