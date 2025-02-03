@@ -12,9 +12,12 @@ return [
 
     // These are groups for Part Author/Reviewer tags
     'mybb-groups' => [
+        'Administrators' => 4,
         'Part Author' => 8,
         'Part Reviewer' => 9,
         'Library Admin' => 10,
+        'LDraw Member' => 21,
+        'Registered' => 11,
     ],
 
     // External Site URL Stubs

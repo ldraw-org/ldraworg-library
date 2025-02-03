@@ -18,7 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'currentlic' => App\Http\Middleware\CurrentLicense::class
+            'currentlic' => App\Http\Middleware\CurrentLicense::class,
+            'ldrawmember' => App\Http\Middleware\LdrawMember::class
         ]);
         $middleware->web(append: [
             App\Http\Middleware\LoginMybbUser::class,
