@@ -55,7 +55,7 @@
           {{ $event->created_at }}
         </div>
     </div>
-    <p class="mt-4 event-comment font-mono">
+    <div class="mt-4 event-comment font-mono center max-w-screen-xl w-full break-words overflow-auto">
         @if($event->event_type == \App\Enums\EventType::Rename)
             "{{$event->moved_from_filename}}" to "{{$event->moved_to_filename}}"
         @endif
@@ -68,5 +68,5 @@
         @if(!is_null($event->comment) && $event->event_type !== \App\Enums\EventType::Rename)
             {!! $event->processedComment() !!}
         @endif
-    </p>
+    </div>
 </div>
