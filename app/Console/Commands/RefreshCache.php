@@ -28,6 +28,7 @@ class RefreshCache extends Command
         $this->call('optimize:clear');
         $this->call('icons:clear');
         $this->call('filament:clear-cached-components');
+        $this->call('view:cache');
         $this->call('optimize');
         $this->call('filament:cache-components');
         $this->call('icons:cache');
