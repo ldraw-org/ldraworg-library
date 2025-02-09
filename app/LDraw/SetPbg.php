@@ -74,7 +74,7 @@ class SetPbg
 
         foreach ($rb_parts->whereNull('part.external_ids.LDraw') as $part) {
             $p = Part::firstWhere('filename', 'parts/' . $part['part']['part_num'] . '.dat');
-            $sticker_sheet = StickerSheet::whereRelation('rebrickable_part', 'part_num', $part['part']['part_num'])->first();
+            $sticker_sheet = StickerSheet::where('rebrickable->part_num', $part['part']['part_num'])->first();
             if (!is_null($p)) {
                 $this->addPart($part, basename($p->name(), '.dat'));
             } elseif (!is_null($sticker_sheet)) {
@@ -93,7 +93,7 @@ class SetPbg
     protected function addPart(array $part, ?string $ldraw_number = null, ?int $color = null): void
     {
         if (!array_key_exists('LDraw', $part['color']['external_ids']) && is_null($color)) {
-            $this->messages->add('errors', 'LDraw color not found for ' . $part['color']['name']);
+            $this->messages->add('errors', 'LDraw color not found for ' . $part['color']['name'] . ', color 16 used instead');
             $color = 16;
         } elseif (array_key_exists('LDraw', $part['color']['external_ids'])) {
             $color = $part['color']['external_ids']['LDraw']['ext_ids'][0];
