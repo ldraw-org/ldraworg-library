@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Poll\PollVote;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property string $username
@@ -52,6 +54,20 @@ class MybbUser extends Model
             return true;
         }
         return false;
+    }
+
+    public function addGroup(int $gid): void
+    {
+        if ($this->additional_groups === '') {
+            $groups = [];
+        } else {
+            $groups = explode(',', $this->additionalgroups);
+        }
+
+        if ($this->usergroup != $gid && !in_array($gid, $groups)) {
+            $groups[] = $gid;
+            $this->additionalgroups = implode(',', $groups);
+        }
     }
 }
 

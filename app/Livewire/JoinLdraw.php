@@ -2,7 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Enums\License;
 use App\Models\MybbUser;
+use App\Models\User;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\View;
 use Filament\Forms\Components\Wizard;
@@ -11,8 +13,10 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -25,16 +29,23 @@ class JoinLdraw extends Component implements HasForms
 
     public function mount()
     {
-        $u = MybbUser::findFromCookie();
-        if (is_null($u)) {
+        if (Auth::check() && Auth::user()->can('member.access')) {
+            $this->redirectIntended();
+        }
+
+        if (!Auth::check() || is_null(Auth::user()->forum_user)) {
+            $user = MybbUser::findFromCookie();
+        } else {
+            $user = Auth::user()->forum_user;
+        }
+
+        if (is_null($user)) {
             $this->redirect('/login');
             return;
         }
-        if ($u->inGroup(config('ldraw.mybb-groups')['LDraw Member'])) {
-            $this->redirectIntended();
-        }
-        $this->meetsId = $u->inGroup(config('ldraw.mybb-groups')['Registered'])
-            || $u->inGroup(config('ldraw.mybb-groups')['Administrators']);
+
+        $this->meetsId = !is_null(Auth::user()?->forum_user) || $user->inGroup(config('ldraw.mybb-groups')['Registered'])
+            || $user->inGroup(config('ldraw.mybb-groups')['Administrators']);
     }
 
     public function form(Form $form): Form
@@ -69,13 +80,23 @@ class JoinLdraw extends Component implements HasForms
         if (Arr::has($this->data, 'age-check')
             && Arr::has($this->data, 'person-check')
             && Arr::has($this->data, 'bylaw-accept')) {
-            $u = MybbUser::findFromCookie();
-            if ($u->additionalgroups == '') {
-                $u->additionalgroups = config('ldraw.mybb-groups')['LDraw Member'];
+            if (!Auth::check()) {
+                $u = MybbUser::findFromCookie();
+                $user = User::create([
+                    'name' => $u->username,
+                    'realname' => $u->loginname,
+                    'license' => License::CC_BY_4,
+                    'forum_user_id' => $u->uid,
+                    'password' => bcrypt(Str::random(40)),
+                    'email' => $u->email,
+                ]);
             } else {
-                $u->additionalgroups .= ',' . config('ldraw.mybb-groups')['LDraw Member'];
+                $user = Auth::user();
             }
-            $u->save();
+            $user->forum_user->addGroup(config('ldraw.mybb-groups')['LDraw Member']);
+            $user->forum_user->save();
+            $user->assignRole('LDraw Member');
+
             Notification::make()
                 ->title('Membership Successful')
                 ->success()

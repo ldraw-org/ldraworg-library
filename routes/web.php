@@ -22,6 +22,7 @@ use App\Livewire\Dashboard\Admin\Pages\LibrarySettingsPage;
 use App\Livewire\Dashboard\Admin\Pages\PartCategoryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
 use App\Livewire\Dashboard\User\Index as UserIndex;
+use App\Livewire\JoinLdraw;
 use App\Livewire\LDrawModelViewer;
 use App\Livewire\Omr\Set\Index;
 use App\Livewire\Omr\Set\Show as SetShow;
@@ -30,6 +31,7 @@ use App\Livewire\Part\Submit;
 use App\Livewire\Part\Weekly;
 use App\Livewire\PartEvent\Index as PartEventIndex;
 use App\Livewire\PbgGenerator;
+use App\Livewire\Poll\Show as PollShow;
 use App\Livewire\Release\Create;
 use App\Livewire\Search\Suffix;
 use App\Livewire\TorsoShortcutHelper;
@@ -55,6 +57,10 @@ Route::middleware(['throttle:file'])->group(function () {
 Route::get('/model-viewer', LDrawModelViewer::class)->name('model-viewer');
 Route::get('/pbg', PbgGenerator::class)->name('pbg');
 
+Route::get('/joinldraw', JoinLdraw::class)->name('joinldraw');
+
+Route::view('/polls', 'poll.index')->middleware(['ldrawmember'])->name('poll.index');
+Route::get('/polls/{poll}', PollShow::class)->middleware(['ldrawmember'])->name('poll.show');
 
 // Updates
 Route::get('/updates', [PartUpdateController::class, 'index'])->name('part-update.index');

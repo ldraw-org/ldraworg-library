@@ -21,18 +21,18 @@
                     You are on the BETA LDraw.org Library Site.
                 </x-slot:header>
                 For the live version go here: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="https://library.ldraw.org">https://library.ldraw.org</a>
-            </x-message>        
+            </x-message>
         @endenv
-        @if (Auth::check() && Auth::user()->ca_confirm !== true)
+        @if (Auth::check() && Auth::user()->can('submit', App\Models\Part\Part::class) && Auth::user()->ca_confirm !== true)
             <x-message centered icon type="warning">
                 <x-slot:header>
                     You have not confirmed the current Contributor's Agreement. You will not be able to
-                    submit or edit parts. 
+                    submit or edit parts.
                 </x-slot:header>
                 Please visits the CA confirm page to agree to the new CA: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('tracker.confirmCA.show')}}">Confirm the new CA</a>
-            </x-message>        
+            </x-message>
         @endif
-      
+
         <div class="grid grid-cols-2 justify-stretch items-center">
             <div class="justify-self-start">
                 <a href="https://www.ldraw.org">
@@ -45,7 +45,7 @@
                 </div>
             @endisset
         </div>
-        <nav class="bg-white rounded-lg border flex flex-col md:flex-row">   
+        <nav class="bg-white rounded-lg border flex flex-col md:flex-row">
             {{$menu ?? ''}}
             <livewire:search.menu-item />
         </nav>
@@ -56,14 +56,14 @@
                     @isset($breadcrumbs)
                         <x-breadcrumb-item item="Library" />
                         {{$breadcrumbs}}
-                    @else   
+                    @else
                         <x-breadcrumb-item active item="Library" />
                     @endisset
                 </div>
             </div>
             <div class="justify-self-end">
                 @auth
-                    Welcome {{Auth::user()->name}}                   
+                    Welcome {{Auth::user()->realname}}
                     <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('dashboard.index')}}">User Dashboard</a>
                     @can('admin.view-dashboard')
                         :: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('admin.index')}}">Admin Dashboard</a>
@@ -72,25 +72,25 @@
             </div>
         </div>
 
-  
+
       <div class="bg-white rounded p-2">
          {{ $slot ?? '' }}
       </div>
-    
-  
+
+
       <div class="flex flex-col p-2">
         <p>
-          Website copyright &copy;2003-{{date_format(now(),"Y")}} LDraw.org, see 
+          Website copyright &copy;2003-{{date_format(now(),"Y")}} LDraw.org, see
           <a href="/legal-info">Legal Info</a> for details.
         </p>
         <p>
-          LDraw is a completely unofficial, community run free CAD system which 
+          LDraw is a completely unofficial, community run free CAD system which
           represents official parts produced by the LEGO company.
         </p>
         <p>
           LDraw&trade; is a trademark owned and licensed by the Estate of James Jessiman<br>
-          LEGO&reg; is a registered trademark of the LEGO Group, which does not sponsor, 
-          endorse, or authorize this site. Visit the official Lego website at 
+          LEGO&reg; is a registered trademark of the LEGO Group, which does not sponsor,
+          endorse, or authorize this site. Visit the official Lego website at
           <a href="https://www.lego.com" target="_blank">http://www.lego.com</a>
         </p>
       </div>

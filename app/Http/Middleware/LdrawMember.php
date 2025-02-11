@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\MybbUser;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class LdrawMember
@@ -16,9 +17,7 @@ class LdrawMember
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $u = MybbUser::findFromCookie();
-        if (is_null($u) || !$u->inGroup(config('ldraw.mybb-groups')['LDraw Member'])) {
-            session(['mem_route_redirect' => $request->route()->getName()]);
+        if (!Auth::check() || Auth::user()->cannot('member.access')) {
             return redirect('joinldraw');
         }
         return $next($request);
