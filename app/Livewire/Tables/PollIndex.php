@@ -3,9 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Livewire\Tables\BasicTable;
-use App\Models\MybbUser;
 use App\Models\Poll\Poll;
-use App\Models\StickerSheet;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;

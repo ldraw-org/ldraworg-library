@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Jobs\MassHeaderGenerate;
-use App\Models\MybbUser;
 use App\Models\Part\Part;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,7 +16,7 @@ class UserObserver
             if ($user->wasChanged('license')) {
                 $user->parts()->update(['license' => $user->license]);
             }
-            
+
             $user->parts()->official()->update(['has_minor_edit' => true]);
             MassHeaderGenerate::dispatch($user->parts);
 
@@ -27,20 +26,15 @@ class UserObserver
             }
         }
         if (app()->environment() == 'production') {
-            $mybb = MybbUser::find($user->forum_user_id);
-            $mybb->username = $user->realname;
-            $mybb->email = $user->email;
-            $mybb->loginname = $user->name;
-            $mybb_groups = empty($mybb->additionalgroups) ? [] : explode(',', $mybb->additionalgroups);
+            $user->forum_user->username = $user->realname;
+            $user->forum_user->email = $user->email;
+            $user->forum_user->loginname = $user->name;
             foreach (config('ldraw.mybb-groups') as $role => $group) {
-                if ($user->hasRole($role) && !in_array($group, $mybb_groups)) {
-                    $mybb_groups[] = $group;
-                } elseif (!$user->hasRole($role) && in_array($group, $mybb_groups)) {
-                    $mybb_groups = array_values(array_filter($mybb_groups, fn ($m) => $m != $group));
+                if ($user->hasRole($role)) {
+                    $user->forum_user->addGroup($group);
                 }
             }
-            $mybb->additionalgroups = implode(',', $mybb_groups);
-            $mybb->save();
+            $user->forum_user->save();
         } else {
             Log::debug("User update job run for {$user->name}");
         }

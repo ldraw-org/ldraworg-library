@@ -4,15 +4,12 @@ namespace App\Livewire\Poll;
 
 use App\Models\Poll\Poll;
 use App\Models\Poll\PollVote;
-use App\Models\MybbUser;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
