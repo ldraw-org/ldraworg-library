@@ -172,7 +172,7 @@ CREATE TABLE `omr_models` (
   `alt_model` tinyint(1) NOT NULL,
   `alt_model_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `notes` json DEFAULT NULL,
-  `license` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `license` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `omr_models_user_id_foreign` (`user_id`),
   KEY `omr_models_set_id_foreign` (`set_id`),
@@ -236,6 +236,10 @@ CREATE TABLE `part_events` (
   KEY `part_events_part_release_id_foreign` (`part_release_id`),
   KEY `part_events_user_id_index` (`user_id`),
   KEY `part_events_part_id_index` (`part_id`),
+  KEY `part_events_event_type_index` (`event_type`),
+  KEY `part_events_vote_type_index` (`vote_type`),
+  KEY `part_events_part_release_id_index` (`part_release_id`),
+  KEY `part_events_created_at_index` (`created_at`),
   CONSTRAINT `part_events_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
   CONSTRAINT `part_events_part_release_id_foreign` FOREIGN KEY (`part_release_id`) REFERENCES `part_releases` (`id`),
   CONSTRAINT `part_events_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
@@ -292,6 +296,7 @@ CREATE TABLE `part_releases` (
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `part_list` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `part_data` json DEFAULT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -333,6 +338,7 @@ CREATE TABLE `parts` (
   `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `type_qualifier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `license` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `external_ids` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `parts_filename_part_release_id_unique` (`filename`,`part_release_id`),
   KEY `parts_part_release_id_foreign` (`part_release_id`),
@@ -345,6 +351,12 @@ CREATE TABLE `parts` (
   KEY `parts_sticker_sheet_id_foreign` (`sticker_sheet_id`),
   KEY `parts_base_part_id_foreign` (`base_part_id`),
   KEY `parts_unknown_part_number_id_foreign` (`unknown_part_number_id`),
+  KEY `parts_type_index` (`type`),
+  KEY `parts_type_qualifier_index` (`type_qualifier`),
+  KEY `parts_license_index` (`license`),
+  KEY `parts_part_release_id_index` (`part_release_id`),
+  KEY `parts_unofficial_part_id_index` (`unofficial_part_id`),
+  KEY `parts_vote_sort_index` (`vote_sort`),
   CONSTRAINT `parts_base_part_id_foreign` FOREIGN KEY (`base_part_id`) REFERENCES `parts` (`id`),
   CONSTRAINT `parts_official_part_id_foreign` FOREIGN KEY (`official_part_id`) REFERENCES `parts` (`id`),
   CONSTRAINT `parts_part_category_id_foreign` FOREIGN KEY (`part_category_id`) REFERENCES `part_categories` (`id`),
@@ -408,6 +420,45 @@ CREATE TABLE `personal_access_tokens` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
   KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `poll_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `poll_items` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `poll_id` bigint unsigned NOT NULL,
+  `item` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `poll_votes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `poll_votes` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `poll_item_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `polls`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `polls` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ends_on` datetime NOT NULL,
+  `choices_limit` int NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `has_been_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `rebrickable_parts`;
@@ -536,8 +587,52 @@ CREATE TABLE `sticker_sheets` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `rebrickable_part_id` bigint unsigned DEFAULT NULL,
+  `rebrickable` json NOT NULL,
+  `ldraw_colour_id` bigint unsigned DEFAULT NULL,
+  `part_colors` json NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `sticker_sheets_number_unique` (`number`)
+  UNIQUE KEY `sticker_sheets_number_unique` (`number`),
+  KEY `sticker_sheets_ldraw_colour_id_foreign` (`ldraw_colour_id`),
+  CONSTRAINT `sticker_sheets_ldraw_colour_id_foreign` FOREIGN KEY (`ldraw_colour_id`) REFERENCES `ldraw_colours` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `telescope_entries`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `telescope_entries` (
+  `sequence` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `family_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `should_display_on_index` tinyint(1) NOT NULL DEFAULT '1',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`sequence`),
+  UNIQUE KEY `telescope_entries_uuid_unique` (`uuid`),
+  KEY `telescope_entries_batch_id_index` (`batch_id`),
+  KEY `telescope_entries_family_hash_index` (`family_hash`),
+  KEY `telescope_entries_created_at_index` (`created_at`),
+  KEY `telescope_entries_type_should_display_on_index_index` (`type`,`should_display_on_index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `telescope_entries_tags`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `telescope_entries_tags` (
+  `entry_uuid` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tag` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`entry_uuid`,`tag`),
+  KEY `telescope_entries_tags_tag_index` (`tag`),
+  CONSTRAINT `telescope_entries_tags_entry_uuid_foreign` FOREIGN KEY (`entry_uuid`) REFERENCES `telescope_entries` (`uuid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `telescope_monitoring`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `telescope_monitoring` (
+  `tag` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`tag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `themes`;
@@ -634,6 +729,7 @@ CREATE TABLE `votes` (
   UNIQUE KEY `votes_part_id_user_id_unique` (`part_id`,`user_id`),
   KEY `votes_user_id_index` (`user_id`),
   KEY `votes_part_id_index` (`part_id`),
+  KEY `votes_vote_type_index` (`vote_type`),
   CONSTRAINT `votes_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
   CONSTRAINT `votes_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -741,3 +837,15 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (98,'2024_12_01_183
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (99,'2024_12_01_183322_add_license_to_omr_models_table',26);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (100,'2024_12_01_184725_drop_part_license_from_omr_models_table',27);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (101,'2024_12_01_184726_drop_part_licenses_table',27);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (102,'2024_12_02_034722_add_indexes_to_parts_table',28);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (103,'2024_12_03_181115_add_indexes_to_part_events_table',29);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (104,'2024_12_03_181124_add_indexes_to_votes_table',29);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (105,'2024_12_03_181125_add_external_site_ids_to_parts_table',30);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (106,'2024_12_15_065746_add_indexes_to_parts_table',31);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (107,'2024_12_15_065752_add_indexes_to_part_events_table',31);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (108,'2024_12_18_073755_add_external_info_to_sticker_sheets_table',32);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (109,'2025_01_20_045104_add_enabled_to_part_releases_table',33);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (110,'2025_02_02_000000_create_telescope_entries_table',34);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (111,'2025_02_03_034228_create_polls_table',35);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (112,'2025_02_03_034235_create_poll_items_table',35);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (113,'2025_02_04_164900_create_poll_votes_table',35);
