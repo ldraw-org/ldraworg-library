@@ -6,6 +6,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use RecursiveDirectoryIterator;
@@ -87,7 +88,7 @@ class FileEditor extends Component implements HasForms
         }
         if (file_exists(base_path($file)) &&
             $this->fileInWhitelist() === true &&
-            auth()->user()->can('edit-files')
+            Auth::user()->can('edit-files')
         ) {
             $contents = file_get_contents(base_path($file));
             $this->dispatch('file-loaded', contents: $contents, mode: $mode);
@@ -114,7 +115,7 @@ class FileEditor extends Component implements HasForms
         $file = $files[$this->file];
         if (file_exists(base_path($file)) &&
             $this->fileInWhitelist() === true &&
-            auth()->user()->can('edit-files')
+            Auth::user()->can('edit-files')
         ) {
             file_put_contents(base_path($file), $contents);
         }

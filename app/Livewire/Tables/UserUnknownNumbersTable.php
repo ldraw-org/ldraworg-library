@@ -18,7 +18,7 @@ class UserUnknownNumbersTable extends BasicTable
         return $table
             ->query(
                 UnknownPartNumber::with('parts')
-                    ->where('user_id', auth()->user()->id)
+                    ->where('user_id', Auth::user()->id)
                     ->where(
                         fn (Builder $query) =>
                         $query->orDoesntHave('parts')->orWhereHas(
@@ -75,7 +75,7 @@ class UserUnknownNumbersTable extends BasicTable
                         foreach ($request_list as $num) {
                             $unk = UnknownPartNumber::create([
                                 'number' => $num,
-                                'user_id' => auth()->user()->id
+                                'user_id' => Auth::user()->id
                             ]);
                             $unk->save();
                         }

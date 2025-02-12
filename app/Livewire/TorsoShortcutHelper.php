@@ -23,6 +23,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -260,7 +261,8 @@ class TorsoShortcutHelper extends Component implements HasForms
 
     public function submitFile(): void
     {
-        if (auth()->user()->cannot('create', Part::class)) {
+        $u = Auth::user();
+        if ($u->cannot('create', Part::class)) {
             return;
         }
         $pm = app(\App\LDraw\PartManager::class);
@@ -271,10 +273,10 @@ class TorsoShortcutHelper extends Component implements HasForms
                 'contents' => $this->makeShortcut()
             ]
         ];
-        $p = $pm->submit($file, auth()->user());
+        $p = $pm->submit($file, $u);
         $newpart = $p->first();
         UpdateZip::dispatch($newpart);
-        PartSubmitted::dispatch($newpart, auth()->user());
+        PartSubmitted::dispatch($newpart, $u);
         $this->redirectRoute('parts.show', $newpart);
     }
 
@@ -373,7 +375,7 @@ class TorsoShortcutHelper extends Component implements HasForms
     {
         $text = "0 {$this->data['description']}\n";
         $text .= "0 Name: {$this->data['name']}\n";
-        $u = auth()->user();
+        $u = Auth::user();
         $text .= "0 Author: {$u->authorString}\n";
         $text .= "0 !LDRAW_ORG Unofficial_Shortcut\n";
         $text .= $u->license->ldrawString() . "\n\n";

@@ -60,7 +60,7 @@ class StickerSheetIndex extends BasicTable
                                     ->where('vote_sort', '3');
                             }
                     ])
-                    ->visible(auth()->user()?->can('part.vote.certify') ?? false),
+                    ->visible(Auth::user()?->can('part.vote.certify') ?? false),
                 TextColumn::make('shortcut_fast_track_ready_count')
                     ->sortable()
                     ->label('Shortcuts Can Be Fast Tracked')
@@ -77,7 +77,7 @@ class StickerSheetIndex extends BasicTable
                                 });
                             }
                     ])
-                    ->visible(auth()->user()?->can('part.vote.fasttrack') ?? false),
+                    ->visible(Auth::user()?->can('part.vote.fasttrack') ?? false),
             ])
             ->persistSortInSession()
             ->persistSearchInSession()
