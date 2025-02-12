@@ -8,9 +8,6 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Discord\DiscordChannel;
 use NotificationChannels\Discord\DiscordMessage;
-use NotificationChannels\Twitter\TwitterChannel;
-use NotificationChannels\Twitter\TwitterMessage;
-use NotificationChannels\Twitter\TwitterStatusUpdate;
 
 class PartsUpdateNotification extends Notification
 {
@@ -25,18 +22,12 @@ class PartsUpdateNotification extends Notification
     {
         return [
             DiscordChannel::class,
-            TwitterChannel::class,
         ];
     }
 
     public function toDiscord($notifiable)
     {
         return DiscordMessage::create($this->socialMessage());
-    }
-
-    public function toTwitter(mixed $notifiable): TwitterMessage
-    {
-        return new TwitterStatusUpdate($this->socialMessage());
     }
 
     public function toMail(object $notifiable): MailMessage
