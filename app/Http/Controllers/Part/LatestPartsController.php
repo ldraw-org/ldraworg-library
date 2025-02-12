@@ -12,7 +12,9 @@ class LatestPartsController extends Controller
     {
         $parts = PartEvent::with(['part'])
             ->where('initial_submit', true)
-            ->whereHas('part', fn ($query) =>
+            ->whereHas(
+                'part',
+                fn ($query) =>
                 $query->unofficial()->partsFolderOnly()
             )
             ->latest()

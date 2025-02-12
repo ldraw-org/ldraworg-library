@@ -3,7 +3,6 @@
 namespace App\Models\Omr;
 
 use App\Enums\License;
-use App\Models\Traits\HasLicense;
 use App\Models\Traits\HasUser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

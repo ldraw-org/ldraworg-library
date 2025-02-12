@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Tables;
 
-use App\Livewire\Tables\BasicTable;
 use App\Models\Poll\Poll;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
@@ -29,13 +28,16 @@ class PollIndex extends BasicTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Poll::query()
-                ->when(!Auth::user()->can('manage.polls'),
+            ->query(
+                Poll::query()
+                ->when(
+                    !Auth::user()->can('manage.polls'),
                     fn (Builder $query) => $query
                         ->has('items')
                         ->where('enabled', true)
                         ->where('ends_on', '>=', now())
-                        ->whereDoesntHave('items.votes',
+                        ->whereDoesntHave(
+                            'items.votes',
                             fn (Builder $query2) => $query2->where('user_id', Auth::user()->id)
                         )
                 )

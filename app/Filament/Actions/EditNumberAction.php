@@ -45,7 +45,7 @@ class EditNumberAction
                 ->options(function () use ($part) {
                     $types = $part->type->isDatFormat() ? PartType::datFormat() : PartType::imageFormat();
                     $options = [];
-                    foreach($types as $type) {
+                    foreach ($types as $type) {
                         $options[$type->value] = $type->folder();
                     }
                     return $options;

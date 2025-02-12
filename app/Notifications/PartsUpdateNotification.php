@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\Part\PartRelease;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Discord\DiscordChannel;
@@ -19,7 +18,8 @@ class PartsUpdateNotification extends Notification
 
     public function __construct(
         public PartRelease $release
-    ) {}
+    ) {
+    }
 
     public function via(object $notifiable): array
     {
@@ -41,7 +41,7 @@ class PartsUpdateNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return (new MailMessage())
                     ->greeting('')
                     ->line('')
                     ->lineIf($this->amount > 0, "")

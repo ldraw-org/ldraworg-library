@@ -346,7 +346,7 @@ class Part extends Model
     {
         return array_merge(
             [VoteType::AdminCertify->value => 0, VoteType::Certify->value => 0, VoteType::Hold->value => 0, VoteType::AdminFastTrack->value => 0],
-            $this->votes->pluck('vote_type')->countBy(fn(VoteType $vt) => $vt->value)->all()
+            $this->votes->pluck('vote_type')->countBy(fn (VoteType $vt) => $vt->value)->all()
         );
     }
 
@@ -400,7 +400,7 @@ class Part extends Model
         if ($keywords instanceof Collection) {
             $this->keywords()->sync($keywords->pluck('id')->all());
         } else {
-            $keywords = array_filter($keywords, fn(string $value) => strlen(trim($value)) > 0);
+            $keywords = array_filter($keywords, fn (string $value) => strlen(trim($value)) > 0);
             $kws = PartKeyword::whereIn('keyword', $keywords)->get();
             $ids = $kws->pluck('id')->all();
             $new_keywords = array_udiff($keywords, $kws->pluck('keyword')->all(), 'strcasecmp');

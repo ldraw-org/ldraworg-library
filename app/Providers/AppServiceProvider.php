@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Log;
 use Pan\PanConfiguration;
 
 class AppServiceProvider extends ServiceProvider
@@ -52,7 +51,7 @@ class AppServiceProvider extends ServiceProvider
         Route::bind(
             'partfile',
             function (string $value): Part {
-                if(Part::where('filename', $value)->count() > 1) {
+                if (Part::where('filename', $value)->count() > 1) {
                     return Part::official()->where('filename', $value)->firstOrFail();
                 }
                 return Part::where('filename', $value)->firstOrFail();

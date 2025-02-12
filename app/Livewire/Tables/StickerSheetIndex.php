@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Tables;
 
-use App\Livewire\Tables\BasicTable;
 use App\Models\StickerSheet;
 use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;

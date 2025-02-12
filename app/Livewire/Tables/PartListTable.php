@@ -7,7 +7,6 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
 use App\Models\User;
-use App\Livewire\Tables\PartTable;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Enums\FiltersLayout;
@@ -48,7 +47,7 @@ class PartListTable extends BasicTable
                     ->slideOver()
             )
             ->filtersFormWidth(MaxWidth::FourExtraLarge)
-            ->recordUrl(fn(Part $p) => route('parts.show', ['part' => $p]));
+            ->recordUrl(fn (Part $p) => route('parts.show', ['part' => $p]));
     }
 
     protected function applySearchToTableQuery(Builder $query): Builder

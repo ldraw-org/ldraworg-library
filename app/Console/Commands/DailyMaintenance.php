@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\CheckPart;
 use App\Jobs\UpdateImage;
 use App\LDraw\PartManager;
 use App\Models\Omr\OmrModel;

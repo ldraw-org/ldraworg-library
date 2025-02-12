@@ -8,8 +8,6 @@ use App\Models\Vote;
 use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 
-use function GuzzleHttp\default_ca_bundle;
-
 class VotePolicy
 {
     public function __construct(
@@ -69,7 +67,7 @@ class VotePolicy
             VoteType::Certify => $userIsPartAuthor ? $user->can('part.own.vote.certify') : $user->can('part.vote.certify'),
             VoteType::Hold =>  $userIsPartAuthor ? $user->canAny(['part.vote.hold', 'part.own.vote.hold']) : $user->can('part.vote.hold'),
         };
-     }
+    }
 
     public function all(User $user): bool
     {

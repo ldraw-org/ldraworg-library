@@ -3,7 +3,6 @@
 namespace App\Livewire\Tables;
 
 use App\Models\Part\Part;
-use App\Livewire\Tables\PartTable;
 use Filament\Tables\Table;
 
 class PartsFlaggedForDeletionTable extends BasicTable

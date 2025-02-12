@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\MybbUser;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

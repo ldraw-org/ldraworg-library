@@ -22,7 +22,7 @@ class Suffix extends Component implements HasForms
 
     public string $activeTab = 'patterns';
     public ?Part $part;
-    
+
     #[Url]
     public ?string $basepart = null;
 
@@ -49,7 +49,7 @@ class Suffix extends Component implements HasForms
     {
         $this->form->getState();
         $part = Part::with('patterns', 'composites', 'shortcuts')->where('filename', "parts/{$this->basepart}.dat")->official()->first();
-        if (is_null($part)) {   
+        if (is_null($part)) {
             $part = Part::with('patterns', 'composites', 'shortcuts')->where('filename', "parts/{$this->basepart}.dat")->first();
         }
         $this->part = $part;

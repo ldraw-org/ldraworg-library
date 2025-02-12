@@ -348,7 +348,7 @@ class Show extends Component implements HasForms, HasActions
     {
         return Action::make('toggleIsPattern')
             ->button()
-            ->color(fn() => $this->part->is_pattern ? 'green' : 'gray')
+            ->color(fn () => $this->part->is_pattern ? 'green' : 'gray')
             ->label($this->part->is_pattern ? 'Printed' : 'Not Printed')
             ->action(function () {
                 $this->part->is_pattern = !$this->part->is_pattern;

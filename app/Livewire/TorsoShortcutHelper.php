@@ -73,14 +73,16 @@ class TorsoShortcutHelper extends Component implements HasForms
                             Toggle::make('all-torsos')
                                 ->label('Show all torsos'),
                             Select::make('torso')
-                                ->options(function(Get $get) {
+                                ->options(function (Get $get) {
                                     $parts = Part::when(
-                                            !$get('all-torsos'),
-                                            fn (Builder $query2) => $query2->whereDoesntHave('parents', fn (Builder $query): Builder =>
-                                                $query->where('description', 'LIKE', 'Minifig Torso%')
-                                                    ->whereRelation('category', 'category', '<>', 'Sticker Shortcut')
-                                            )
+                                        !$get('all-torsos'),
+                                        fn (Builder $query2) => $query2->whereDoesntHave(
+                                            'parents',
+                                            fn (Builder $query): Builder =>
+                                            $query->where('description', 'LIKE', 'Minifig Torso%')
+                                                ->whereRelation('category', 'category', '<>', 'Sticker Shortcut')
                                         )
+                                    )
                                         ->doesntHave('unofficial_part')
                                         ->where('filename', 'LIKE', 'parts/973p%.dat')
                                         ->where('description', 'NOT LIKE', '~%')
@@ -88,7 +90,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                                         ->orderBy('filename')
                                         ->get();
                                     $options = [];
-                                    foreach($parts as $part) {
+                                    foreach ($parts as $part) {
                                         $name = basename($part->filename, '.dat');
                                         $options[$part->id] = "{$name} - {$part->description}";
                                     }
@@ -98,12 +100,12 @@ class TorsoShortcutHelper extends Component implements HasForms
                                 ->searchable()
                                 ->required(),
                             Select::make('template')
-                                ->options(function() {
+                                ->options(function () {
                                     $parts = Part::whereIn('filename', $this->templates)
                                         ->orderBy('description')
                                         ->get();
                                     $options = [];
-                                    foreach($parts as $part) {
+                                    foreach ($parts as $part) {
                                         $name = basename($part->filename, '.dat');
                                         $options[$part->id] = "{$name} - {$part->description}";
                                     }
@@ -112,7 +114,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                                 ->preload()
                                 ->live()
                                 ->required()
-                                ->afterStateUpdated(function(Select $c) {
+                                ->afterStateUpdated(function (Select $c) {
                                     unset($this->template);
                                     unset($this->selectParts);
                                 }),
@@ -125,7 +127,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                             $set('description', $this->template->description . str_replace('Minifig Torso', '', $p->description));
                             $set('name', basename($this->template->filename, '.dat') . str_replace('973', '', basename($p->filename)));
                             $kws = [];
-                            foreach($p->keywords as $keyword) {
+                            foreach ($p->keywords as $keyword) {
                                 $kw = strtolower($keyword->keyword);
                                 if (Str::startsWith($kw, ['bricklink ', 'brickowl ', 'rebrickable '])) {
                                     $number = Str::chopStart($kw, ['bricklink ', 'brickowl ', 'rebrickable ']);
@@ -139,7 +141,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                             if (is_null($get('brickowl')) || is_null($get('bricklink')) || is_null($get('rebrickable'))) {
                                 $this->setExternal($get, $set);
                             }
-                            foreach($this->templateParts() as $index => $tpart) {
+                            foreach ($this->templateParts() as $index => $tpart) {
                                 $index++;
                                 $set("part_{$index}_color", '16');
                                 $set("part_{$index}_id", $this->selectParts[$tpart]['default']);
@@ -285,11 +287,11 @@ class TorsoShortcutHelper extends Component implements HasForms
                     ->label('Color'),
                 Select::make("part_{$index}_id")
                     ->label('Name - Description')
-                    ->options(fn () => array_key_exists($index-1, $this->templateParts()) ? $this->selectParts[$this->templateParts()[$index-1]]['subs'] : [])
+                    ->options(fn () => array_key_exists($index - 1, $this->templateParts()) ? $this->selectParts[$this->templateParts()[$index - 1]]['subs'] : [])
                     ->selectablePlaceholder(false)
                     ->preload(),
             ])
-            ->hidden(!array_key_exists($index-1, $this->templateParts()));
+            ->hidden(!array_key_exists($index - 1, $this->templateParts()));
     }
 
     #[Computed(persist: true)]
@@ -319,13 +321,12 @@ class TorsoShortcutHelper extends Component implements HasForms
     {
         $parts = [];
         if (!is_null($this->template)) {
-            foreach($this->template->subparts as $subpart)
-            {
+            foreach ($this->template->subparts as $subpart) {
                 if ($subpart->filename != 'parts/973.dat') {
                     $name = basename($subpart->filename);
                     $parts[$name] = ['default' => $subpart->id, 'subs' => [$subpart->id => "{$name} - {$subpart->description}"]];
                     $pats = $subpart->suffix_parts->where('is_pattern', true)->where('category.category', '!=', 'Moved');
-                    foreach($pats as $pat) {
+                    foreach ($pats as $pat) {
                         $patname = basename($pat->filename);
                         $parts[$name]['subs'][$pat->id] = "{$patname} - {$pat->description}";
                     }
@@ -344,15 +345,14 @@ class TorsoShortcutHelper extends Component implements HasForms
             $colour_pattern = "/^\h*0\h+!COLOUR\h+(?<name>[A-Za-z_]+)\h+CODE\h+(?<code>\d+)\h+VALUE\h+(?<value>(?:#|0x)[A-Fa-f\d]{6})\h+EDGE\h+(?<edge>\d+|(?:#|0x)[A-Fa-f\d]{6})(?:\h+ALPHA\h+(?<alpha>\d{1,3}))?(?:\h+LUMINANCE\h+(?<luminance>\d+))?(?:\h+(?<material>CHROME|METAL|PEARLESCENT|RUBBER|MATERIAL\h+.*))?\h*$/im";
             if (preg_match_all($colour_pattern, $ldconfig, $colours, PREG_SET_ORDER)) {
                 $options = [];
-                foreach($colours as $color) {
+                foreach ($colours as $color) {
                     $int = hexdec($color['value']);
                     $rgb = array("red" => ((0xFF & ($int >> 0x10)) / 255.0), "green" => ((0xFF & ($int >> 0x8)) / 255.0), "blue" => ((0xFF & $int) / 255.0));
                     foreach ($rgb as $tcolor => $value) {
                         if ($value <= 0.03928) {
-                          $rgb[$tcolor] = $value / 12.92;
-                        }
-                        else {
-                          $rgb[$tcolor] = (($value + 0.055) / 1.055) ** 2.4;
+                            $rgb[$tcolor] = $value / 12.92;
+                        } else {
+                            $rgb[$tcolor] = (($value + 0.055) / 1.055) ** 2.4;
                         }
                     }
                     $L = 0.2126 * $rgb['red'] + 0.7152 * $rgb['green'] + 0.0722 * $rgb['blue'];
@@ -406,10 +406,10 @@ class TorsoShortcutHelper extends Component implements HasForms
         array_shift($matrix);
         $p = Part::find($this->data['torso']);
         $text .= "1 16 0 0 0 1 0 0 0 1 0 0 0 1 {$p->name()}\n";
-        foreach($this->templateParts() as $index => $tpart) {
+        foreach ($this->templateParts() as $index => $tpart) {
             $index++;
             $p = Part::find($this->data["part_{$index}_id"]);
-            $text .= '1 ' . $this->data["part_{$index}_color"] . ' ' . $matrix[$index-1] . $p->name() . "\n";
+            $text .= '1 ' . $this->data["part_{$index}_color"] . ' ' . $matrix[$index - 1] . $p->name() . "\n";
         }
         $this->parts = app(\App\LDraw\LDrawModelMaker::class)->webGl($text);
         $this->dispatch('render-model');

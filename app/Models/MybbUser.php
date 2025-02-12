@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Poll\PollVote;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property string $username
@@ -70,4 +68,3 @@ class MybbUser extends Model
         }
     }
 }
-

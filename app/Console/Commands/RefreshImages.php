@@ -30,9 +30,9 @@ class RefreshImages extends Command
     {
         $this->info("Queueing {$this->option('lib')} part images");
         Part::when(
-                $this->option('lib') == 'unofficial',
-                fn (Builder $query) => $query->unofficial()
-            )
+            $this->option('lib') == 'unofficial',
+            fn (Builder $query) => $query->unofficial()
+        )
             ->when(
                 $this->option('lib') == 'official',
                 fn (Builder $query) => $query->official()

@@ -27,7 +27,7 @@ class Set extends Model
         return $this->hasMany(OmrModel::class, 'set_id', 'id');
     }
 
-    public function mainModel(): OmrModel 
+    public function mainModel(): OmrModel
     {
         return $this->models->where('alt_model', false)->first() ?? $this->models->first();
     }

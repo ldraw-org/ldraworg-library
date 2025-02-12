@@ -18,9 +18,9 @@ class RecheckParts extends Command
         $this->info("Rechecking {$this->option('lib')} parts");
         $manager = app(\App\LDraw\PartManager::class);
         $count = Part::when(
-                $this->option('lib') == 'unofficial',
-                fn (Builder $query) => $query->unofficial()
-            )
+            $this->option('lib') == 'unofficial',
+            fn (Builder $query) => $query->unofficial()
+        )
             ->when(
                 $this->option('lib') == 'official',
                 fn (Builder $query) => $query->where(fn (Builder $query2) => $query2->official()->whereJsonLength('part_check_messages->errors', '>', 0))
@@ -30,20 +30,20 @@ class RecheckParts extends Command
         $num = intdiv($count, $div) + 1;
         $iter = 1;
         Part::when(
-                $this->option('lib') == 'unofficial',
-                fn (Builder $query) => $query->unofficial()
-            )
+            $this->option('lib') == 'unofficial',
+            fn (Builder $query) => $query->unofficial()
+        )
             ->when(
                 $this->option('lib') == 'official',
                 fn (Builder $query) => $query->where(fn (Builder $query2) => $query2->official()->whereJsonLength('part_check_messages->errors', '>', 0))
             )
             ->chunkById($div, function (Collection $parts) use ($manager, $num, &$iter) {
-            $this->info("Processing chunk {$iter} of {$num}");
-            foreach ($parts as $part) {
-                /** @var Part $part */
-                $manager->checkPart($part);
-            }
-            $iter += 1;
-        });
+                $this->info("Processing chunk {$iter} of {$num}");
+                foreach ($parts as $part) {
+                    /** @var Part $part */
+                    $manager->checkPart($part);
+                }
+                $iter += 1;
+            });
     }
 }

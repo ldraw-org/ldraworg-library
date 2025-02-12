@@ -32,7 +32,7 @@ class VoteManager
                 $vote->delete();
                 PartReviewed::dispatch($part, $user, null, $comment);
                 break;
-            // Comment, doesn't create a vote object
+                // Comment, doesn't create a vote object
             case VoteType::Comment:
                 PartComment::dispatch($part, $user, $comment);
                 break;
@@ -41,7 +41,7 @@ class VoteManager
                 if (!is_null($vote)) {
                     $vote->vote_type = $vt;
                     $vote->save();
-                // New vote
+                    // New vote
                 } else {
                     Vote::create([
                         'part_id' => $part->id,

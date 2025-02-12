@@ -44,7 +44,7 @@ class PatternKeyword implements DataAwareRule, ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $keywords = array_map(fn(string $kw) => trim($kw), explode(',', str_replace("\n", ",", $value)));
+        $keywords = array_map(fn (string $kw) => trim($kw), explode(',', str_replace("\n", ",", $value)));
         $part = Part::find($this->data['part']['id']);
         if (
             $part->type->inPartsFolder() &&
@@ -57,4 +57,3 @@ class PatternKeyword implements DataAwareRule, ValidationRule
         }
     }
 }
-

@@ -16,8 +16,8 @@ class MassHeaderGenerate implements ShouldQueue
      */
     public function __construct(
         public Collection $parts
-    )
-    {}
+    ) {
+    }
 
     /**
      * Execute the job.

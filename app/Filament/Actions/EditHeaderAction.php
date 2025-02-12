@@ -18,7 +18,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class EditHeaderAction
@@ -222,7 +221,7 @@ class EditHeaderAction
         if (!array_key_exists('keywords', $data)) {
             $data['keywords'] = [];
         } else {
-            $data['keywords'] = array_map(fn(string $kw) => trim($kw), explode(',', str_replace("\n", ",", $data['keywords'])));
+            $data['keywords'] = array_map(fn (string $kw) => trim($kw), explode(',', str_replace("\n", ",", $data['keywords'])));
         }
         $partKeywords = $part->keywords->pluck('keyword')->all();
         if ($partKeywords !== $data['keywords']) {

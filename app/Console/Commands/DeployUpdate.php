@@ -3,10 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Part\Part;
-use App\Models\Part\PartRelease;
-use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -32,19 +29,6 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-
-        $role = Role::create(['name' =>'LDraw Member']);
-        $perms = [];
-        $perms[] = Permission::create(['name' =>'member.poll.vote']);
-        $perms[] = Permission::create(['name' =>'member.access']);
-        $role->givePermissionTo($perms);
-
-        $role = Role::create(['name' =>'Membership Admin']);
-        $perms = [];
-        $perms[] = Permission::create(['name' =>'member.poll.manage']);
-        $role->givePermissionTo($perms);
-
         /*
         Part::query()->update(['rebrickable' => null]);
         $rb = app(\App\LDraw\Rebrickable::class);

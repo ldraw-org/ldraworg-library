@@ -23,7 +23,8 @@ class StickerSheet extends Model
         'part_colors'
     ];
 
-    protected function casts(): array {
+    protected function casts(): array
+    {
         return [
             'rebrickable' => AsArrayObject::class,
             'part_colors' => AsArrayObject::class
@@ -48,7 +49,7 @@ class StickerSheet extends Model
     public function complete_set(): Collection
     {
         return $this->parts->whereNull('unofficial_part')
-            ->reject(function (Part $p){
+            ->reject(function (Part $p) {
                 $hasShortcut = $p->parents->where('category.category', 'Sticker Shortcut')->count() > 0;
                 $name = basename($p->filename, '.dat');
                 $hasFormed = $this->parts()->where('filename', 'LIKE', "parts/{$name}c__.dat")->where('filename', '<>', $p->filename)->count() > 0;

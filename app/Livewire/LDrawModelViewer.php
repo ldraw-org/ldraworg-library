@@ -3,12 +3,10 @@
 namespace App\Livewire;
 
 use App\LDraw\LDrawModelMaker;
-use App\Models\Part\Part;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 

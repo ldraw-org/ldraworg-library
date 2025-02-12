@@ -12,8 +12,8 @@ class StickerSheetManager
 {
     public function __construct(
         protected Rebrickable $rebrickable
-    )
-    {}
+    ) {
+    }
 
     public function addStickerSheet(string $number): StickerSheet
     {
@@ -36,7 +36,8 @@ class StickerSheetManager
         }
 
         $bricklink = PartKeyword::whereHas(
-            'parts', fn (Builder $query): Builder => $query->where('sticker_sheet_id', $sheet->id)
+            'parts',
+            fn (Builder $query): Builder => $query->where('sticker_sheet_id', $sheet->id)
         )
         ->where('keyword', 'LIKE', 'Bricklink %')
         ->pluck('keyword')
@@ -59,11 +60,12 @@ class StickerSheetManager
         }
 
         $set_nums = PartKeyword::whereHas(
-            'parts', fn (Builder $query): Builder => $query->where('sticker_sheet_id', $sheet->id)
+            'parts',
+            fn (Builder $query): Builder => $query->where('sticker_sheet_id', $sheet->id)
         )
         ->where('keyword', 'LIKE', 'Set %')
         ->pluck('keyword')
-        ->transform(function(string $set) {
+        ->transform(function (string $set) {
             $set = Str::chopStart(Str::lower($set), 'set ');
             if (!Str::endsWith($set, ['-1', '-2'])) {
                 $set .= '-1';

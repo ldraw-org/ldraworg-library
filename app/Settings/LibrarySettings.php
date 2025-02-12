@@ -2,7 +2,6 @@
 
 namespace App\Settings;
 
-use App\Enums\License;
 use Spatie\LaravelSettings\Settings;
 
 class LibrarySettings extends Settings

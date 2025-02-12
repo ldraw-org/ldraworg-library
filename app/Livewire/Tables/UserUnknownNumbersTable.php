@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Tables;
 
-use App\Livewire\Tables\BasicTable;
-use App\Models\Part\Part;
 use App\Models\Part\UnknownPartNumber;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\DeleteAction;
@@ -12,7 +10,6 @@ use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use LaraZeus\Quantity\Components\Quantity;
-use Livewire\Attributes\Computed;
 
 class UserUnknownNumbersTable extends BasicTable
 {
@@ -22,8 +19,11 @@ class UserUnknownNumbersTable extends BasicTable
             ->query(
                 UnknownPartNumber::with('parts')
                     ->where('user_id', auth()->user()->id)
-                    ->where(fn (Builder $query) => 
-                        $query->orDoesntHave('parts')->orWhereHas('parts', fn (Builder $query2) =>
+                    ->where(
+                        fn (Builder $query) =>
+                        $query->orDoesntHave('parts')->orWhereHas(
+                            'parts',
+                            fn (Builder $query2) =>
                             $query2->unofficial()->doesntHave('official_part')
                         )
                     )
@@ -34,21 +34,21 @@ class UserUnknownNumbersTable extends BasicTable
                     ->state(fn (UnknownPartNumber $unk) => "u{$unk->number}")
                     ->sortable(),
                 TextColumn::make('in_use')
-                    ->state(fn(UnknownPartNumber $unk) => $unk->parts->count() > 0 ? 'Yes' : 'No'),
+                    ->state(fn (UnknownPartNumber $unk) => $unk->parts->count() > 0 ? 'Yes' : 'No'),
                 TextColumn::make('in_use_desciption')
-                    ->state(fn(UnknownPartNumber $unk) => $unk->parts->count() > 0 ? $unk->parts->first()->description : ''),
+                    ->state(fn (UnknownPartNumber $unk) => $unk->parts->count() > 0 ? $unk->parts->first()->description : ''),
                 TextInputColumn::make('notes')
                     ->rules(['required', 'max:255'])
             ])
             ->defaultSort('number', 'asc')
             ->actions([
                 Action::make('view')
-                    ->url(fn(UnknownPartNumber $unk) => route('parts.list', ['tableSearch' => "u{$unk->number}"]))
-                    ->visible(fn(UnknownPartNumber $unk) => $unk->parts->count() > 0),
+                    ->url(fn (UnknownPartNumber $unk) => route('parts.list', ['tableSearch' => "u{$unk->number}"]))
+                    ->visible(fn (UnknownPartNumber $unk) => $unk->parts->count() > 0),
                 DeleteAction::make('delete')
-                    ->modalHeading(fn(UnknownPartNumber $unk) => "Remove your reservation of u{$unk->number}?")
+                    ->modalHeading(fn (UnknownPartNumber $unk) => "Remove your reservation of u{$unk->number}?")
                     ->modalDescription('Are you sure you\'d like to remove this number from your reservation list? This cannot be undone.')
-                    ->visible(fn(UnknownPartNumber $unk) => $unk->parts->count() == 0)
+                    ->visible(fn (UnknownPartNumber $unk) => $unk->parts->count() == 0)
             ])
             ->headerActions([
                 Action::make('request')
@@ -72,7 +72,7 @@ class UserUnknownNumbersTable extends BasicTable
                                 break;
                             }
                         }
-                        foreach($request_list as $num) {
+                        foreach ($request_list as $num) {
                             $unk = UnknownPartNumber::create([
                                 'number' => $num,
                                 'user_id' => auth()->user()->id

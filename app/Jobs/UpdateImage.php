@@ -34,10 +34,9 @@ class UpdateImage implements ShouldQueue
     {
         if ($this->m instanceof Part) {
             app(PartManager::class)->updateImage($this->m);
-        }
-        elseif ($this->m instanceof OmrModel) {
+        } elseif ($this->m instanceof OmrModel) {
             app(OmrModelManager::class)->updateImage($this->m);
-        }   
+        }
 
     }
 }

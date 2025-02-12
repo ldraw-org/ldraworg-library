@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\License;
-use App\Models\MybbUser;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
@@ -11,7 +10,6 @@ use App\Models\Part\UnknownPartNumber;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use App\Models\Traits\HasLicense;
 use App\Models\Traits\HasParts;
 use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;

@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-
 class Show extends Component implements HasForms
 {
     use InteractsWithForms;
@@ -38,13 +37,13 @@ class Show extends Component implements HasForms
                     ->required()
                     ->rules([
                        fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
-                            if (count($value) > $this->poll->choices_limit) {
-                                $fail ("You can only choose up to {$this->poll->choices_limit} option(s)");
-                            }
-                        },
+                           if (count($value) > $this->poll->choices_limit) {
+                               $fail("You can only choose up to {$this->poll->choices_limit} option(s)");
+                           }
+                       },
                     ])
                     ->validationMessages([
-                        'required' => 'You choose at least one option',
+                       'required' => 'You choose at least one option',
                     ])
             ])
             ->statePath('data');
@@ -53,7 +52,7 @@ class Show extends Component implements HasForms
     public function castVote()
     {
         $this->form->getState();
-        foreach($this->data['votes'] as $id => $item_id) {
+        foreach ($this->data['votes'] as $id => $item_id) {
             PollVote::create([
                 'poll_item_id' => $item_id,
                 'user_id' => Auth::user()->id,

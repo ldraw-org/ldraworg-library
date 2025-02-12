@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\Part\PartKeyword;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 

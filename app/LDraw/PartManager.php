@@ -10,13 +10,11 @@ use App\LDraw\Render\LDView;
 use App\Models\Part\Part;
 use App\Models\Part\PartCategory;
 use App\Models\Part\UnknownPartNumber;
-use App\Models\Rebrickable\RebrickablePart;
 use App\Models\StickerSheet;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Image\Image;
@@ -222,7 +220,8 @@ class PartManager
         });
     }
 
-    function updateBasePart(Part $part, bool $force = false): void {
+    public function updateBasePart(Part $part, bool $force = false): void
+    {
         if (!$force && ($part->is_pattern || $part->is_composite || $part->is_dual_mould || !is_null($part->base_part))) {
             return;
         }
@@ -249,7 +248,7 @@ class PartManager
         if (!is_null($bp) && $matches[5] != '') {
             $part->base_part()->associate($bp);
         }
-        if($matches[5] != '') {
+        if ($matches[5] != '') {
             $part->is_pattern = mb_substr($matches[5], 0, 1) == 'p' ||
                 mb_substr($matches[6], 0, 1) == 'p' ||
                 mb_substr($matches[7], 0, 1) == 'p';
@@ -388,8 +387,7 @@ class PartManager
                 ['user_id' => $p->user->id]
             );
             $p->unknown_part_number()->associate($unk);
-        }
-        else {
+        } else {
             $p->unknown_part_number_id = null;
         }
         $p->save();

@@ -5,7 +5,6 @@ namespace App\Livewire\Tables;
 use App\Enums\EventType;
 use App\Enums\PartType;
 use App\Models\Part\Part;
-use App\Livewire\Tables\PartTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;

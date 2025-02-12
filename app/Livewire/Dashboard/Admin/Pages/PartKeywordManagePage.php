@@ -61,7 +61,8 @@ class PartKeywordManagePage extends BasicResourceManagePage
         ];
     }
 
-    protected function editKeyword(PartKeyword $keyword, array $data) {
+    protected function editKeyword(PartKeyword $keyword, array $data)
+    {
         if ($keyword->keyword != trim($data['keyword'])) {
             $keyword->keyword = trim($data['keyword']);
             $keyword->save();
@@ -88,14 +89,15 @@ class PartKeywordManagePage extends BasicResourceManagePage
                 ->readOnly(),
             Select::make('merge-keyword')
                 ->label('Keyword to merge in')
-                ->options(PartKeyword::pluck('keyword','id'))
+                ->options(PartKeyword::pluck('keyword', 'id'))
                 ->searchable()
                 ->exists(table: PartKeyword::class, column: 'id')
                 ->required()
         ];
     }
 
-    protected function mergeKeyword(PartKeyword $keyword, array $data) {
+    protected function mergeKeyword(PartKeyword $keyword, array $data)
+    {
         $finalKeyword = PartKeyword::find($data['merge-keyword']);
         $finalKeyword->parts()->official()->update(['has_minor_edit' => true]);
         $finalKeyword->parts->each(fn (Part $p) => $p->keywords()->toggle([$keyword->id, $finalKeyword->id]));

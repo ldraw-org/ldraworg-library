@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class UnknownPartNumber extends Model
 {
-    use HasUser,
-        HasParts;
-    
+    use HasUser;
+    use HasParts;
+
     protected $fillable = [
         'number',
         'user_id',
