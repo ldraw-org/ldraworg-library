@@ -225,8 +225,8 @@ class PartManager
         if (!$force && ($part->is_pattern || $part->is_composite || $part->is_dual_mould || !is_null($part->base_part))) {
             return;
         }
-        $pattern = '#^(((([0-9a-z]+?)((?:p[0-9a-z]{2,3}|p\d{4}|d[0-9a-z]{2}|d\d{4}|c[0-9a-z]{2}|c\d{4})?))((?:p[0-9a-z]{2,3}|p\d{4}|d[0-9a-z]{2}|d\d{4}|c[0-9a-z]{2}|c\d{4})?))((?:p[0-9a-z]{2,3}|p\d{4}|d[0-9a-z]{2}|d\d{4}|c[0-9a-z]{2}|c\d{4})?))(?:-f\d)?\.(?:dat|png)$#i';
-        $result = preg_match($pattern, basename($part->filename), $matches);
+
+        $result = preg_match(config('ldraw.patterns.base'), basename($part->filename), $matches);
         if (!$result) {
             return;
         }
