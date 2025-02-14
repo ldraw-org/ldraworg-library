@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Image\Image;
@@ -31,21 +32,22 @@ class PartManager
     ) {
     }
 
-    public function submit(array $files, User $user): Collection
+    public function submit(LDrawFile|array $files, User $user): Collection
     {
-        $parts = new Collection();
-        // Parse each part into the tracker
-        foreach ($files as $file) {
-            if ($file['type'] == 'image') {
-                $parts->add($this->makePartFromImage($file['filename'], $file['contents'], $user, $this->guessPartType($file['filename'], $files)));
-            } elseif ($file['type'] == 'text') {
-                $parts->add($this->makePartFromText($file['contents']));
-            }
+        if ($files instanceof LDrawFile) {
+            $files = [$files];
         }
+        // Parse each part into the tracker
+        $parts = new Collection(Arr::map($files, function (LDrawFile $file, int $key) use ($files, $user) {
+            if ($file->mimetype == 'image/png') {
+                return $this->makePartFromImage($file->filename, $file->contents, $user, $this->guessPartType($file->filename, $files));
+            } elseif ($file->mimetype == 'text/plain') {
+                return $this->makePartFromText($file->contents);
+            }
+            return null;
+        }));
 
-        $parts->each(function (Part $p) {
-            $this->finalizePart($p);
-        });
+        $parts->each(fn (Part $p) => $this->finalizePart($p));
         return $parts;
     }
 
@@ -58,9 +60,9 @@ class PartManager
         }
         // Texmap is used in one of the submitted files, use the type appropriate for that part
         foreach ($partfiles as $file) {
-            if ($file['type'] == 'text' && $filename !== $file['filename'] && stripos($filename, $file['contents']) !== false) {
-                $type = $this->parser->parse($file['contents'])->type;
-                $pt = PartType::from($type);
+            if ($file->mimetype == 'text/plain' && $filename !== $file->filename && stripos($filename, $file->contents) !== false) {
+                $type = $this->parser->getType($file->contents);
+                $pt = PartType::from(Arr::get($type, 'type'));
                 $textype = PartType::tryFrom("{$pt->value}_Texmap");
                 if (!is_null($textype)) {
                     return $textype;

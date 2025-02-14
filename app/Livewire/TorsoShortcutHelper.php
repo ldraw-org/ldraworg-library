@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Events\PartSubmitted;
 use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Jobs\UpdateZip;
+use App\LDraw\LDrawFile;
 use App\LDraw\Rebrickable;
 use App\Models\Part\Part;
 use Closure;
@@ -266,13 +267,13 @@ class TorsoShortcutHelper extends Component implements HasForms
             return;
         }
         $pm = app(\App\LDraw\PartManager::class);
-        $file = [
+        $file = LDrawFile::fromArray(
             [
                 'type' => 'text',
                 'filename' => $this->data['name'],
                 'contents' => $this->makeShortcut()
             ]
-        ];
+        );
         $p = $pm->submit($file, $u);
         $newpart = $p->first();
         UpdateZip::dispatch($newpart);

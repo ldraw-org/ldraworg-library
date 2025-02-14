@@ -4,6 +4,7 @@ namespace App\Livewire\Part;
 
 use App\Events\PartSubmitted;
 use App\Jobs\UpdateZip;
+use App\LDraw\LDrawFile;
 use App\LDraw\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
@@ -18,8 +19,11 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Livewire\Component;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 /**
  * @property Form $form
@@ -34,6 +38,7 @@ class Submit extends Component implements HasForms
 
     public function mount(): void
     {
+        $this->authorize('create', Part::class);
         $this->form->fill();
     }
 
@@ -51,9 +56,8 @@ class Submit extends Component implements HasForms
                     ->rules([
                         fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get) {
                             // Check if the fileformat is text or png
-                            $detector = new \League\MimeTypeDetection\FinfoMimeTypeDetector();
-                            $mimeType = $detector->detectMimeTypeFromPath($value->getPath() . '/' . $value->getFilename()) ?: 'text/plain';
-                            if ($mimeType != 'text/plain' && $mimeType != 'image/png') {
+                            $mimeType = $mimeType = $this->getMimeType($value);
+                            if (is_null($mimeType)) {
                                 $this->part_errors[] = "{$value->getClientOriginalName()}: Incorrect file type";
                                 $fail('File errors');
                                 return;
@@ -126,7 +130,6 @@ class Submit extends Component implements HasForms
 
     public function create(): void
     {
-        $this->authorize('create', Part::class);
         $manager = app(PartManager::class);
         $this->part_errors = [];
         $data = $this->form->getState();
@@ -135,16 +138,7 @@ class Submit extends Component implements HasForms
         } else {
             $user = Auth::user();
         }
-        $files = [];
-        foreach ($data['partfiles'] as $file) {
-            $detector = new \League\MimeTypeDetection\FinfoMimeTypeDetector();
-            $mimeType = $detector->detectMimeTypeFromPath($file->getPath() . '/' . $file->getFilename()) ?: 'text/plain';
-            if ($mimeType == 'text/plain') {
-                $files[] = ['type' => 'text', 'filename' => $file->getClientOriginalName(), 'contents' => $file->get()];
-            } elseif ($mimeType == 'image/png') {
-                $files[] = ['type' => 'image', 'filename' => $file->getClientOriginalName(), 'contents' => $file->get()];
-            }
-        }
+        $files = Arr::map($data['partfiles'], fn ($value, $key) => LDrawFile::fromUploadedFile($value));
         $parts = $manager->submit($files, $user);
 
         $parts->each(function (Part $p) use ($user, $data) {
@@ -167,6 +161,25 @@ class Submit extends Component implements HasForms
     {
         $this->submitted_parts = [];
         $this->dispatch('close-modal', id: 'post-submit');
+    }
+
+    public function getMimeType(TemporaryUploadedFile $file): ?string
+    {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $type = finfo_file($finfo, $file->getPath() . '/' . $file->getFilename());
+        switch ($type) {
+            case 'text/plain':
+                break;
+            case 'image/png':
+                if (!$img = @imagecreatefrompng($file->getPath() . '/' . $file->getFilename())) {
+                    $type = null;
+                }
+                break;
+            default:
+                $type = null;
+        }
+
+        return $type;
     }
 
     #[Layout('components.layout.tracker')]
