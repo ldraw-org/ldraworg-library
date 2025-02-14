@@ -32,7 +32,7 @@ class PartListTable extends BasicTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Part::with('votes', 'official_part'))
+            ->query(Part::with('votes', 'official_part', 'unofficial_part'))
             ->emptyState(view('tables.empty', ['none' => 'None']))
             ->columns(PartTable::columns())
             ->actions(PartTable::actions())
