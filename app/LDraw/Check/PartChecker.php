@@ -120,7 +120,6 @@ class PartChecker
             return $errors;
         }
 
-        $pt = PartType::from($part->type);
         $name = str_replace('\\', '/', $part->name);
 
         // Description Checks
@@ -132,7 +131,7 @@ class PartChecker
             $part->descriptionCategory !== 'Moved' &&
             $part->descriptionCategory !== 'Sticker' &&
             $part->metaCategory !== 'Sticker Shortcut' &&
-            $pt->inPartsFolder() &&
+            $part->type->inPartsFolder() &&
             !$this->checkDescriptionForPatternText($name, $part->description)
         ) {
             $errors[] = __('partcheck.description.patternword');
@@ -146,21 +145,20 @@ class PartChecker
 
         // !LDRAW_ORG Part type checks
         if (! $this->checkNameAndPartType($part->name, $part->type)) {
-            $errors[] = __('partcheck.type.path', ['name' => $name, 'type' => $pt->value]);
+            $errors[] = __('partcheck.type.path', ['name' => $name, 'type' => $part->type->value]);
         }
-        if ($pt == PartType::Subpart && $part->description[0] != '~') {
+        if ($part->type == PartType::Subpart && $part->description[0] != '~') {
             $errors[] = __('partcheck.type.subpartdesc');
         }
 
         //Check qualifiers
-        if (!empty($part->qual)) {
-            $pq = PartTypeQualifier::from($part->qual);
-            switch ($pq) {
+        if (!is_null($part->qual)) {
+            switch ($part->qual) {
                 case PartTypeQualifier::PhysicalColour:
                     $errors[] = __('partcheck.type.phycolor');
                     break;
                 case PartTypeQualifier::Alias:
-                    if (!$pt->inPartsFolder()) {
+                    if (!$part->type->inPartsFolder()) {
                         $errors[] = __('partcheck.type.alias');
                     }
                     if ($part->description[0] != '=') {
@@ -168,7 +166,7 @@ class PartChecker
                     }
                     break;
                 case PartTypeQualifier::FlexibleSection:
-                    if ($pt != PartType::Part) {
+                    if ($part->type != PartType::Part) {
                         $errors[] = __('partcheck.type.flex');
                     }
                     if (! preg_match('#^[a-z0-9_-]+?k[a-z0-9]{2}(p[a-z0-9]{2,3})?\.dat#', $name, $matches)) {
@@ -187,7 +185,7 @@ class PartChecker
         }
         // Category Check
         $validCategory = false;
-        if ($pt->inPartsFolder()) {
+        if ($part->type->inPartsFolder()) {
             if (!empty($part->metaCategory)) {
                 $validCategory = $this->checkCategory($part->metaCategory);
                 $cat = $part->metaCategory;
@@ -204,7 +202,7 @@ class PartChecker
         // Keyword Check
         if (
             $part->descriptionCategory !== 'Moved' &&
-            $pt->inPartsFolder() &&
+            $part->type->inPartsFolder() &&
             $part->descriptionCategory !== 'Moved' &&
             $part->descriptionCategory !== 'Sticker' &&
             $part->metaCategory !== 'Sticker Shortcut' &&
@@ -258,17 +256,16 @@ class PartChecker
         return preg_match(config('ldraw.patterns.library_approved_name'), $name, $matches);
     }
 
-    public function checkNameAndPartType(string $name, string $type): bool
+    public function checkNameAndPartType(string $name, ?PartType $type): bool
     {
         $name = str_replace('\\', '/', $name);
-        $pt = PartType::tryFrom($type);
         // Automatic fail if no Name:, LDRAW_ORG line, or DAT file has TEXTURE type
-        if (is_null($pt) || $pt->isImageFormat()) {
+        if (is_null($type) || $type->isImageFormat()) {
             return false;
         }
 
         // Construct the name implied by the part type
-        $aname = str_replace(['p/', 'parts/'], '', $pt->folder() . '/' . basename($name));
+        $aname = str_replace(['p/', 'parts/'], '', $type->folder() . '/' . basename($name));
 
         return $name === $aname;
     }
@@ -278,10 +275,9 @@ class PartChecker
         return !is_null(User::fromAuthor($username, $realname)->first());
     }
 
-    public function checkLibraryApprovedLicense(string $license): bool
+    public function checkLibraryApprovedLicense(?License $license): bool
     {
-        $liblic = License::tryFromText($license);
-        return !is_null($liblic);
+        return !is_null($license);
     }
 
     public function checkLibraryBFCCertify(?string $bfc): bool

@@ -93,16 +93,14 @@ class PartManager
         $part = $this->parser->parse($text);
 
         $user = User::fromAuthor($part->username, $part->realname)->first();
-        $type = PartType::from($part->type);
-        $qual = !is_null($part->qual) ? PartTypeQualifier::tryFrom($part->qual) : null;
         $cat = PartCategory::firstWhere('category', $part->metaCategory ?? $part->descriptionCategory);
-        $filename = $type->folder() . '/' . basename(str_replace('\\', '/', $part->name));
+        $filename = $part->type->folder() . '/' . basename(str_replace('\\', '/', $part->name));
         $values = [
             'description' => $part->description,
             'filename' => $filename,
             'user_id' => $user->id,
-            'type' => $type,
-            'type_qualifier' => $qual,
+            'type' => $part->type,
+            'type_qualifier' => $part->qual,
             'license' => $user->license,
             'bfc' => $part->bfcwinding ?? null,
             'part_category_id' => $cat->id ?? null,

@@ -2,9 +2,11 @@
 
 namespace App\LDraw\Parse;
 
+use App\Enums\License;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Settings\LibrarySettings;
+use Illuminate\Support\Arr;
 
 class Parser
 {
@@ -28,11 +30,11 @@ class Parser
             $author['user'] ?? null,
             $author['realname'] ?? null,
             $type['unofficial'] ?? null,
-            $type['type'] ?? null,
-            $type['qual'] ?? null,
+            PartType::tryFrom(Arr::get($type, 'type')),
+            PartTypeQualifier::tryFrom(Arr::get($type,'qual')),
             $type['releasetype'] ?? null,
             $type['release'] ?? null,
-            $this->getLicense($text),
+            License::tryFromText($this->getLicense($text)),
             $this->getHelp($text),
             !is_null($bfc) && $bfc['bfc'] == 'CERTIFY' ? $bfc['winding'] : null,
             $this->getMetaCategory($text),

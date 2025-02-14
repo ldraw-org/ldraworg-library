@@ -2,6 +2,9 @@
 
 namespace App\LDraw\Parse;
 
+use App\Enums\License;
+use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
 
 class ParsedPart
@@ -12,11 +15,11 @@ class ParsedPart
         public ?string $username,
         public ?string $realname,
         public ?bool $unofficial,
-        public ?string $type,
-        public ?string $qual,
+        public ?PartType $type,
+        public ?PartTypeQualifier $qual,
         public ?string $releasetype,
         public ?string $release,
-        public ?string $license,
+        public ?License $license,
         public ?array $help,
         public ?string $bfcwinding,
         public ?string $metaCategory,
@@ -78,11 +81,11 @@ class ParsedPart
             $part->user->name,
             $part->user->realname,
             is_null($part->release),
-            $part->type->value,
-            $part->type_qualifier->value ?? null,
+            $part->type,
+            $part->type_qualifier ?? null,
             $releasetype,
             $part->release->short ?? null,
-            $part->license->text(),
+            $part->license,
             $part->help->pluck('text')->all(),
             $part->bfc,
             $metaCategory ?? null,
