@@ -203,6 +203,12 @@
         @else
             <livewire:tables.part-dependencies-table :$part official parents />
             <livewire:tables.part-dependencies-table :$part official />
+            <x-accordion id="unofficialParents">
+                <x-slot name="header" class="text-md font-bold">
+                    Unofficial parents
+                </x-slot>
+                <livewire:tables.part-dependencies-table :$part unofficial parents />
+            </x-accordion>
         @endif
         <div class="text-lg font-bold">Part Events:</div>
         <div class="flex flex-col space-y-4">
