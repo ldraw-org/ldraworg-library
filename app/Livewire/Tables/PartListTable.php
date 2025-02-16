@@ -20,6 +20,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Oper
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
@@ -62,6 +63,18 @@ class PartListTable extends BasicTable
     protected function filters(): array
     {
         return [
+            TernaryFilter::make('library_status')
+                ->label('Library Status')
+                ->nullable()
+                ->attribute('part_release_id')
+                ->placeholder('All parts')
+                ->trueLabel('Official Parts')
+                ->falseLabel('Unofficial Parts')
+                ->queries(
+                    true: fn (Builder $query) => $query->official(),
+                    false: fn (Builder $query) => $query->unofficial(),
+                    blank: fn (Builder $query) => $query,
+                ),
             SelectFilter::make('vote_sort')
                 ->label('Vote Status')
                 ->multiple()
@@ -85,14 +98,6 @@ class PartListTable extends BasicTable
                 ->constraintPickerColumns(['md' => 2, 'xl' => 4])
                 ->constraints([
                     // TODO: Part Fixes, Alias, Third Party
-                    Constraint::make('part_release')
-                        ->label('Library Status')
-                        ->operators([
-                            Operator::make('lib_status')
-                                ->label(fn (bool $isInverse): string => $isInverse ? 'Unofficial' : 'Official')
-                                ->summary(fn (bool $isInverse): string => $isInverse ? 'Library Status is Unofficial' : 'Library Status is Unofficial')
-                                ->baseQuery(fn (Builder $query, bool $isInverse) => $isInverse ? $query->unofficial() : $query->official()),
-                        ]),
                     SelectConstraint::make('vote_sort')
                         ->label('Vote Status')
                         ->options([
