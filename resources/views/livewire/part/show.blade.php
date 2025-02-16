@@ -159,6 +159,7 @@
             <div class="text-lg font-bold">Status:</div>
             <x-part.status :$part show-status />
             @if (!$part->can_release)
+                <div>
                 <x-message compact icon type="warning">
                     <x-slot:header>
                         This part is not releaseable
@@ -182,6 +183,7 @@
                         @endforeach
                     </ul>
                 </x-message>
+                <div>
             @endif
             <div class="text-md font-bold">Current Votes:</div>
             <x-vote.table :votes="$part->votes" />

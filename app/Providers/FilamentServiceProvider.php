@@ -28,7 +28,7 @@ class FilamentServiceProvider extends ServiceProvider
             'red' => Color::Red,
             'yellow' => Color::Yellow,
             'blue' => Color::Blue,
-            'green' => Color::Green,
+            'green' => Color::rgb('rgb(' . Color::Green[400] . ')'),
         ]);
 
         Select::configureUsing(function (Select $select): void {
@@ -46,6 +46,9 @@ class FilamentServiceProvider extends ServiceProvider
         Table::configureUsing(function (Table $table): void {
             $table
                 ->emptyState(view('tables.empty', ['none' => 'None']))
+                ->persistFiltersInSession()
+                ->persistSearchInSession()
+                ->persistSortInSession()
                 ->striped()
                 ->paginated([10, 25, 50, 100])
                 ->defaultPaginationPageOption(25);

@@ -15,10 +15,10 @@
                 <x-fas-check class="fill-lime-400" />
                 @break
             @case(\App\Enums\VoteType::Certify)
-                <x-fas-check class="fill-green-600" />
+                <x-fas-check class="fill-green-400" />
                 @break
             @case(\App\Enums\VoteType::Hold)
-                <x-fas-circle-exclamation class="fill-red-600" />
+                <x-fas-circle-exclamation class="fill-red-500" />
                 @break
             @default
                 <x-fas-undo class="fill-black" />
@@ -47,7 +47,7 @@
         <x-fas-comment class="absolute bottom-0 left-0 w-1/2 fill-blue-500" />
     @endif
     @if($is_fix)
-        <x-fas-tools class="absolute bottom-0 right-0 w-1/2 fill-green-600" />
+        <x-fas-tools class="absolute bottom-0 right-0 w-1/2 fill-green-400" />
     @endif
 @endif
 </div>

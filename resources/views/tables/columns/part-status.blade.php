@@ -8,7 +8,7 @@
 @endphp
 <div>
     @if (!is_null($part))
-        <x-part.status :$part show-status />
+        <x-part.status :$part show-my-vote />
     @else
         Part Removed
     @endif

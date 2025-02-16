@@ -14,8 +14,8 @@
             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ $vote->user->name }}</td>
             <td @class([
                   'whitespace-nowrap px-3 py-4 text-sm',
-                  'bg-green-200' => $vote->vote_type == \App\Enums\VoteType::Certify,
-                  'bg-red-200' => $vote->vote_type == \App\Enums\VoteType::Hold,
+                  'bg-green-100' => $vote->vote_type == \App\Enums\VoteType::Certify,
+                  'bg-red-300' => $vote->vote_type == \App\Enums\VoteType::Hold,
                   'bg-lime-200' => $vote->vote_type == \App\Enums\VoteType::AdminCertify || $vote->vote_type == \App\Enums\VoteType::AdminFastTrack,
                   ])>{{ $vote->vote_type->label() }}</td>
           </tr>
