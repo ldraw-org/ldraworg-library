@@ -2,7 +2,7 @@
 @php
     $userVote = $part->votes->where('user_id', auth()->user()?->id)->first()?->vote_type
 @endphp
-<div class="flex flex-row space-x-2 align-contents-center">
+<div>
     @if ($part->isUnofficial())
         @if (!$part->ready_for_admin)
             <x-fas-exclamation-triangle title="Not releaseable" class="inline w-5 text-yellow-800" />

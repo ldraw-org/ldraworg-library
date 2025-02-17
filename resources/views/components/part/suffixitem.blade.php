@@ -17,7 +17,7 @@
                     <p class="text-sm p-2">{{$part->description}}</p>
                     @if($part->isUnofficial())
                         <div class="p-2">
-                            <x-part.status :$part show-status />
+                            <x-part.status :$part show-my-vote />
                         </div>
                     @endif
                 @else
