@@ -9,6 +9,7 @@ use App\LDraw\VoteManager;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class StickerShortcutsReadyForAdminTable extends BasicTable
 {
