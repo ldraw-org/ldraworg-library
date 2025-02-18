@@ -57,6 +57,8 @@ Route::middleware(['throttle:file'])->group(function () {
 Route::get('/model-viewer', LDrawModelViewer::class)->name('model-viewer');
 Route::get('/pbg', PbgGenerator::class)->name('pbg');
 
+Route::view('/icons', 'icon-demo')->name('icon-demo');
+
 Route::get('/joinldraw', JoinLdraw::class)->name('joinldraw');
 
 Route::view('/polls', 'poll.index')->middleware(['ldrawmember'])->name('poll.index');
