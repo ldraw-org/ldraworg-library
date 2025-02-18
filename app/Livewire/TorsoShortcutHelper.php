@@ -269,7 +269,7 @@ class TorsoShortcutHelper extends Component implements HasForms
         $pm = app(\App\LDraw\PartManager::class);
         $file = LDrawFile::fromArray(
             [
-                'type' => 'text',
+                'mimetype' => 'text/plain',
                 'filename' => $this->data['name'],
                 'contents' => $this->makeShortcut()
             ]
