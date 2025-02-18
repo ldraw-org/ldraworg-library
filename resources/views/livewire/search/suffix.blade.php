@@ -18,7 +18,7 @@
         </div>
     @elseif(!is_null($part))
         <div class="text-xl font-bold p-2">
-            Pattern/Composite/Sticker Shortcut Reference for {{$part->name()}} - {{$part->description}}
+            Pattern/Composite/Sticker Shortcut Reference for <a class="underline decoration-dotted hover:decoration-solid" href="{{route('parts.show', $part)}}">{{$part->name()}} - {{$part->description}}</a>
         </div>
         <x-filament::tabs class="p-2">
             <x-filament::tabs.item
