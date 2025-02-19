@@ -20,7 +20,7 @@ enum VoteType: string
         return match ($this) {
             VoteType::Comment => 'fill-blue-500',
             VoteType::CancelVote => 'fill-gray-900',
-            VoteType::AdminCertify, VoteType::AdminFastTrack => 'fill-lime-500',
+            VoteType::AdminCertify, VoteType::AdminFastTrack => 'fill-purple-500',
             VoteType::Certify => 'fill-green-400',
             VoteType::Hold => 'fill-red-500',
         };
