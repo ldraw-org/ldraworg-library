@@ -7,6 +7,7 @@ return [
     'selfreference' => 'Has a self referring Type 1 line',
     'folder' => 'Selected destination (:folder) is invalid for :attribute line (:value)',
     'bfc' => 'All parts must be BFC CERTIFY CCW',
+    'preview' => 'Invalid PREVIEW line or singluar/negative matrix',
     'line' => [
         'invalid' => 'Line :value invalid',
         'invalidmeta' => 'Line :value, invalid META command or comment without //',

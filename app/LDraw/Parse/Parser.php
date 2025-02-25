@@ -7,6 +7,7 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class Parser
 {
@@ -41,6 +42,7 @@ class Parser
             $this->getDescriptionCategory($text),
             $this->getKeywords($text),
             $this->getCmdLine($text),
+            Str::squish($this->getPreview($text)),
             $this->getHistory($text),
             $this->getSubparts($text),
             $this->getBody($text),
@@ -220,6 +222,18 @@ class Parser
     public function getCmdLine(string $text): ?string
     {
         return $this->getSingleValueMeta($text, 'cmdline');
+    }
+
+    /**
+     * getCmdLine - Get !PREVIEW value
+     *
+     * @param string $text
+     *
+     * @return string|null
+     */
+    public function getPreview(string $text): ?string
+    {
+        return $this->getSingleValueMeta($text, 'preview');
     }
 
     /**

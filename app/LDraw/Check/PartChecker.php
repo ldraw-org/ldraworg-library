@@ -10,6 +10,8 @@ use App\Models\Part\Part;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\PartCategory;
 use App\Settings\LibrarySettings;
+use Illuminate\Support\Arr;
+use MathPHP\LinearAlgebra\MatrixFactory;
 
 class PartChecker
 {
@@ -223,6 +225,12 @@ class PartChecker
                 }
             }
         }
+
+        // Check Preview
+        if (! $this->checkValidPreview($part->preview)) {
+            $errors[] = __('partcheck.preview');
+        }
+
         return count($errors) > 0 ? $errors : null;
     }
 
@@ -322,5 +330,26 @@ class PartChecker
         return $words[0] !== '0' ||
             trim($line) === '0' ||
             ($words[0] === '0' && count($words) > 1 && in_array($words[1], $this->settings->allowed_body_metas, true));
+    }
+
+    public function checkValidPreview(?string $preview) {
+        if (is_null($preview) || $preview == '16 0 0 0 1 0 0 0 1 0 0 0 1') {
+            return true;
+        }
+        $result = preg_match_all('/[0-9.-]+/iu', $preview, $matrix);
+        if ($result != 13) {
+            return false;
+        }
+        $matrix = Arr::reject($matrix[0], fn (string $value, int $key) => !is_numeric($value));
+        if (count($matrix) != 13) {
+                return false;
+        }
+        $matrix = [
+            [$matrix[4], $matrix[5], $matrix[6]],
+            [$matrix[7], $matrix[8], $matrix[9]],
+            [$matrix[10], $matrix[11], $matrix[12]],
+        ];
+        $matrix = MatrixFactory::create($matrix);
+        return !$matrix->isSingular() && !$matrix->isNegativeDefinite();
     }
 }

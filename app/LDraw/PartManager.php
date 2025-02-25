@@ -95,6 +95,9 @@ class PartManager
         $user = User::fromAuthor($part->username, $part->realname)->first();
         $cat = PartCategory::firstWhere('category', $part->metaCategory ?? $part->descriptionCategory);
         $filename = $part->type->folder() . '/' . basename(str_replace('\\', '/', $part->name));
+        if ($part->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1') {
+            $part->preview = null;
+        }
         $values = [
             'description' => $part->description,
             'filename' => $filename,
@@ -105,6 +108,7 @@ class PartManager
             'bfc' => $part->bfcwinding ?? null,
             'part_category_id' => $cat->id ?? null,
             'cmdline' => $part->cmdline,
+            'preview' => $part->preview,
             'header' => ''
         ];
         $upart = $this->makePart($values);

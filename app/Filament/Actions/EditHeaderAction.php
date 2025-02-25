@@ -19,6 +19,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class EditHeaderAction
 {
@@ -116,6 +117,17 @@ class EditHeaderAction
                 ->hidden(!$part->type->inPartsFolder())
                 ->disabled(!$part->type->inPartsFolder())
                 ->string(),
+            TextInput::make('preview')
+                ->nullable()
+                ->extraAttributes(['class' => 'font-mono'])
+                ->string()
+                ->rules([
+                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
+                        if (! app(\App\LDraw\Check\PartChecker::class)->checkValidPreview(Str::squish($value))) {
+                            $fail('partcheck.preview')->translate();
+                        }
+                    }
+                ]),
             TextArea::make('history')
                 ->helperText('Must include 0 !HISTORY; ALL changes to existing history must be documented with a comment')
                 ->extraAttributes(['class' => 'font-mono'])
@@ -256,10 +268,25 @@ class EditHeaderAction
             $part->cmdline = $data['cmdline'] ?? null;
         }
 
+        $rotation_changed = false;
+        $data['preview'] = Str::squish($data['preview']);
+        if ($data['preview'] == '16 0 0 0 1 0 0 0 1 0 0 0 1') {
+            $data['preview'] = null;
+        }
+        if ($part->preview !== ($data['preview'])) {
+            $changes['old']['preview'] = $part->preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
+            $changes['new']['preview'] = $data['preview'] ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
+            $part->preview = $data['preview'];
+            $rotation_changed = true;
+        }
+
         if (count($changes['new']) > 0) {
             $part->save();
             $part->refresh();
             $part->generateHeader();
+            if ($rotation_changed) {
+                $manager->updateImage($part);
+            }
             $manager->checkPart($part);
             // Post an event
             PartHeaderEdited::dispatch($part, Auth::user(), $changes, $data['editcomment'] ?? null);

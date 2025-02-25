@@ -10,14 +10,14 @@ use Illuminate\Support\Str;
 
 class LDrawModelMaker
 {
-    public function partMpd(Part $part, string $matrix = '1 0 0 0 1 0 0 0 1'): string
+    public function partMpd(Part $part): string
     {
         if ($part->isTexmap()) {
             return $part->get(true, true);
         }
-
         $topModelName = basename($part->filename, '.dat') . '.ldr';
-        $file = "0 FILE {$topModelName}\r\n1 16 0 0 0 {$matrix} {$part->name()}\r\n0 FILE {$part->name()}\r\n{$part->get()}\r\n";
+        $preview = $part->preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
+        $file = "0 FILE {$topModelName}\r\n1 {$preview} {$part->name()}\r\n0 FILE {$part->name()}\r\n{$part->get()}\r\n";
         if ($part->isUnofficial()) {
             $sparts = $part->descendants->whereNull('unofficial_part');
         } else {

@@ -579,6 +579,11 @@ class Part extends Model
             $header[] = '';
         }
 
+        if (!is_null($this->preview) && $this->preview != '16 0 0 0 1 0 0 0 1 0 0 0 1') {
+            $header[] = "0 !PREVIEW {$this->preview}";
+            $header[] = '';
+        }
+
         if ($this->history->count() > 0) {
             foreach ($this->history as $h) {
                 $header[] = $h->toString();
