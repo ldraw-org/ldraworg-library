@@ -270,7 +270,7 @@ class EditHeaderAction
 
         $rotation_changed = false;
         $data['preview'] = Str::squish($data['preview']);
-        if ($data['preview'] == '16 0 0 0 1 0 0 0 1 0 0 0 1') {
+        if ($data['preview'] == '' || $data['preview'] == '16 0 0 0 1 0 0 0 1 0 0 0 1') {
             $data['preview'] = null;
         }
         if ($part->preview !== ($data['preview'])) {
