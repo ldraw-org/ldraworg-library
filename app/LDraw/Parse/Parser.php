@@ -42,7 +42,7 @@ class Parser
             $this->getDescriptionCategory($text),
             $this->getKeywords($text),
             $this->getCmdLine($text),
-            Str::squish($this->getPreview($text)),
+            $this->getPreview($text),
             $this->getHistory($text),
             $this->getSubparts($text),
             $this->getBody($text),
