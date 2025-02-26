@@ -14,7 +14,7 @@ class OfficialPartsWithErrorsTable extends BasicTable
     {
         return $table
             ->query(
-                Part::whereJsonLength('part_check_messages->errors', '>', 0)->official()
+                Part::whereJsonLength('part_check_messages->errors', '>', 0)->official()->whereDoesntHave('unofficial_part')
             )
             ->heading('Official Parts With Errors')
             ->columns([
