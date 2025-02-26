@@ -42,14 +42,10 @@
         <div class="text-xl font-bold">Part Status Icons</div>
         @foreach(\App\Enums\PartStatus::cases() as $ps)
             <div class="flex flex-row space-x-2 pl-4">
-                <x-fas-square class="{{$ps->iconColor()}} w-8" />
+                <x-dynamic-component :component="$ps->icon()" class="{{$ps->iconColor()}} w-8" />
                 <div class="font-bold">{{$ps->label()}} ({{str_replace('fill-', '',$ps->iconColor())}})</div>
             </div>
         @endforeach
-        <div class="flex flex-row space-x-2 pl-4">
-            <x-fas-award title="Official" class="w-8 text-blue-800" />
-            <div class="font-bold">Official (blue-800)</div>
-        </div>
         <div class="flex flex-row space-x-2 pl-4">
             <x-fas-exclamation-triangle title="Not releaseable" class="w-8 text-yellow-800" />
             <div class="font-bold">Not Releaseable (yellow-800)</div>

@@ -32,7 +32,9 @@ enum VoteType: string
         return match ($this) {
             VoteType::Comment => 'fas-comment',
             VoteType::CancelVote => 'fas-undo',
-            VoteType::AdminCertify, VoteType::AdminFastTrack, VoteType::Certify => 'fas-check',
+            VoteType::AdminCertify => 'fas-clipboard-check',
+            VoteType::AdminFastTrack => 'fas-truck-fast',
+            VoteType::Certify => 'fas-check',
             VoteType::Hold => 'fas-circle-exclamation',
         };
     }
