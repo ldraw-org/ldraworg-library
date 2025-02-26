@@ -5,33 +5,21 @@
 <div>
     @if ($part->isUnofficial())
         @if (!$part->ready_for_admin)
-            <x-fas-exclamation-triangle title="Not releaseable" class="inline w-5 text-yellow-800" />
+            <x-fas-exclamation-triangle title="Not releaseable" class="inline w-5 fill-yellow-800" />
         @endif
         @if ($showMyVote)
-            <x-fas-user-circle @class([
-                'inline w-5',
-                'fill-gray-400' => is_null($userVote),
-                'fill-lime-400' => $userVote == \App\Enums\VoteType::AdminCertify || $userVote == \App\Enums\VoteType::AdminFastTrack,
-                'fill-green-400' => $userVote == \App\Enums\VoteType::Certify,
-                'fill-red-500' => $userVote == \App\Enums\VoteType::Hold,
-
-            ])
-                title="My Vote: {{is_null($userVote) ? 'None' : $userVote->value}}"
-            />
+            @empty($userVote)
+                <x-fas-user-circle class="inline w-5 fill-gray-400" title="My Vote: None"/>
+            @else
+                <x-dynamic-component :component="$userVote->icon()" class="inline w-5 {{$userVote->iconColor()}}" title="My Vote: {{$userVote->label()}}" />
+            @endempty
         @endif
-        <x-fas-square @class([
-            'inline w-5',
-            'fill-lime-400' => $part->vote_sort == 1,
-            'fill-blue-700' => $part->vote_sort == 2,
-            'fill-gray-400' => $part->vote_sort == 3,
-            'fill-red-500' => $part->vote_sort == 5,
-
-        ])
-            title="{{$part->statusText()}} {{$part->statusCode()}}"
+        <x-fas-square class="inline w-5 {{$part->part_status->iconColor()}}"
+            title="{{$part->part_status->label()}} {{$part->statusCode()}}"
         />
-            <span>{{$showStatus ? $part->statusText() : ''}} {{$part->statusCode()}}</span>
+            <span>{{$showStatus ? $part->part_status->label() : ''}} {{$part->statusCode()}}</span>
     @else
-        <x-fas-award title="Official" class="inline w-5 text-blue-800" />
-        <span>Official Part</span>
+        <x-dynamic-component :component="$part->part_status->icon()" class="inline w-5 {{$part->part_status->iconColor()}}" title="{{$part->part_status->label()}}" />
+        <span>{{$part->part_status->label()}}</span>
     @endif
 </div>

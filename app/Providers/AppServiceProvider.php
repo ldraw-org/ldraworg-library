@@ -102,7 +102,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Allow Super Users full access excluding voting
         Gate::before(function ($user, $ability) {
-            return $ability !== 'vote' && $user->hasRole('Super Admin') ? true : null;
+            return !in_array($ability, ['vote', 'allCertify', 'allAdmin']) && $user->hasRole('Super Admin') ? true : null;
         });
 
         //Subscriber

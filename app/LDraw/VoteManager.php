@@ -2,6 +2,7 @@
 
 namespace App\LDraw;
 
+use App\Enums\PartStatus;
 use App\Enums\VoteType;
 use App\Events\PartComment;
 use App\Events\PartReviewed;
@@ -70,14 +71,10 @@ class VoteManager
 
     public function adminCertifyAll(Part $part, User $user): void
     {
-        if (!$part->isUnofficial() ||
-            !$part->type->inPartsFolder() ||
-            $part->descendantsAndSelf->where('vote_sort', '>', 2)->count() > 0 ||
-            $user->cannot('create', [Vote::class, $part, VoteType::AdminCertify]) ||
-            $user->cannot('allAdmin', Vote::class)) {
+        if ($user->cannot('allAdmin', [Vote::class, $part])) {
             return;
         }
-        $parts = $part->descendantsAndSelf->unique()->unofficial()->where('vote_sort', 2);
+        $parts = $part->descendantsAndSelf->unique()->unofficial()->where('part_status', PartStatus::AwaitingAdminReview);
         $parts->each(fn (Part $p) => $this->castVote($p, $user, VoteType::AdminCertify));
 
         // Have to recheck parts since sometimes, based on processing order, subfiles status is missed
@@ -87,16 +84,12 @@ class VoteManager
 
     public function certifyAll(Part $part, User $user): void
     {
-        if (!$part->isUnofficial() ||
-            !$part->type->inPartsFolder() ||
-            $part->descendantsAndSelf->where('vote_sort', '>', 3)->count() > 0 ||
-            $user->cannot('vote', [Vote::class, $part, VoteType::Certify]) ||
-            $user->cannot('all', Vote::class)) {
+        if ($user->cannot('allCertify', [Vote::class, $part])) {
             return;
         }
         $part
             ->descendantsAndSelf()
-            ->where('vote_sort', 3)
+            ->where('part_status', PartStatus::NeedsMoreVotes)
             ->whereDoesntHave('votes', fn (Builder $q) => $q->where('user_id', $user->id)->whereIn('vote_type', [VoteType::AdminCertify, VoteType::AdminFastTrack]))
             ->unofficial()
             ->get()

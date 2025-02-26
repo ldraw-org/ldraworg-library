@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
  */
 class TrackerHistory extends Model
 {
+
+    protected $guarded = [];
+
     /**
     * @return array{
     *     history_data: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',

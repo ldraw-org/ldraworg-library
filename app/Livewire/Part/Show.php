@@ -258,12 +258,7 @@ class Show extends Component implements HasForms, HasActions
                         ->send();
                 })
                 ->visible(
-                    $this->part->isUnofficial() &&
-                    $this->part->type->inPartsFolder() &&
-                    $this->part->ready_for_admin === true &&
-                    $this->part->descendantsAndSelf->where('vote_sort', 2)->count() > 0 &&
-                    (Auth::user()?->can('vote', [Vote::class, $this->part, VoteType::AdminCertify]) ?? false) &&
-                    (Auth::user()?->can('allAdmin', Vote::class) ?? false)
+                    (Auth::user()?->can('allAdmin', [Vote::class, $this->part]) ?? false)
                 )
                 ->color('gray')
                 ->outlined();
@@ -283,12 +278,7 @@ class Show extends Component implements HasForms, HasActions
                         ->send();
                 })
                 ->visible(
-                    $this->part->isUnofficial() &&
-                    $this->part->type->inPartsFolder() &&
-                    $this->part->descendantsAndSelf->where('vote_sort', '>', 3)->count() == 0 &&
-                    $this->part->descendantsAndSelf->where('vote_sort', 3)->count() > 0 &&
-                    (Auth::user()?->can('vote', [Vote::class, $this->part, VoteType::Certify]) ?? false) &&
-                    (Auth::user()?->can('all', Vote::class) ?? false)
+                    (Auth::user()?->can('allCertify', [Vote::class, $this->part]) ?? false)
                 )
                 ->color('gray')
                 ->outlined();

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\PartStatus;
 use App\Enums\VoteType;
 use App\Models\Part\Part;
 use App\Models\Vote;
@@ -19,8 +20,10 @@ class StickerShortcutsReadyForAdminTable extends BasicTable
             ->query(
                 Part::unofficial()
                     ->whereRelation('category', 'category', 'Sticker Shortcut')
-                    ->whereBetween('vote_sort', [2, 4])
-                    ->whereDoesntHave('descendants', fn (Builder $q) => $q->where('vote_sort', '>', 1))
+                    ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes])
+                    ->whereDoesntHave('decendents', function (Builder $q) {
+                        $q->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound]);
+                    })
             )
             ->defaultSort('created_at', 'asc')
             ->heading('Sticker Shortcuts For Admin')

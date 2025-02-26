@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PartStatus;
 use App\Models\TrackerHistory;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,11 +15,11 @@ class TrackerHistoryController extends Controller
         $data = [];
         foreach ($history as $h) {
             $data[] = [
-                'certified' => $h->history_data[1],
-                'needsreview' => $h->history_data[2],
-                'needsvotes' => $h->history_data[3],
-                'subparts' => $h->history_data[4] ?? 0,
-                'held' => $h->history_data[5],
+                PartStatus::Certified->name => $h->history_data[PartStatus::Certified->value],
+                PartStatus::AwaitingAdminReview->name => $h->history_data[PartStatus::AwaitingAdminReview->value],
+                PartStatus::NeedsMoreVotes->name => $h->history_data[PartStatus::NeedsMoreVotes->value],
+                PartStatus::UncertifiedSubfiles->name => $h->history_data[PartStatus::UncertifiedSubfiles->value] ?? 0,
+                PartStatus::ErrorsFound->name => $h->history_data[PartStatus::ErrorsFound->value],
                 'date' => date_format($h->created_at, 'Y-m-d'),
             ];
         }
@@ -29,33 +30,33 @@ class TrackerHistoryController extends Controller
             ->size(['width' => '100%', 'height' => min(count($data), 4875)])
             ->datasets([
                 [
-                    'label' => 'Held',
-                    'data' => array_column($data, 'held'),
-                    'backgroundColor' => 'rgba(255, 0, 0, 1)',
+                    'label' => PartStatus::ErrorsFound->label(),
+                    'data' => array_column($data, PartStatus::ErrorsFound->name),
+                    'backgroundColor' => PartStatus::ErrorsFound->chartColor(),
                     'barThickness' => 1,
                 ],
                 [
-                    'label' => 'Uncertified Subfiles',
-                    'data' => array_column($data, 'subparts'),
-                    'backgroundColor' => 'rgba(255, 255, 0, 1)',
+                    'label' => PartStatus::UncertifiedSubfiles->label(),
+                    'data' => array_column($data, PartStatus::UncertifiedSubfiles->name),
+                    'backgroundColor' => PartStatus::UncertifiedSubfiles->chartColor(),
                     'barThickness' => 1,
                 ],
                 [
-                    'label' => 'Needs Votes',
-                    'data' => array_column($data, 'needsvotes'),
-                    'backgroundColor' => 'rgba(204, 204, 204, 1)',
+                    'label' => PartStatus::NeedsMoreVotes->label(),
+                    'data' => array_column($data, PartStatus::NeedsMoreVotes->name),
+                    'backgroundColor' => PartStatus::NeedsMoreVotes->chartColor(),
                     'barThickness' => 1,
                 ],
                 [
-                    'label' => 'Needs Admin Review',
-                    'data' => array_column($data, 'needsreview'),
-                    'backgroundColor' => 'rgba(0, 0, 255, 1)',
+                    'label' => PartStatus::AwaitingAdminReview->label(),
+                    'data' => array_column($data, PartStatus::AwaitingAdminReview->name),
+                    'backgroundColor' => PartStatus::AwaitingAdminReview->chartColor(),
                     'barThickness' => 1,
                 ],
                 [
-                    'label' => 'Certified',
-                    'data' => array_column($data, 'certified'),
-                    'backgroundColor' => 'rgba(0, 255, 0, 1)',
+                    'label' => PartStatus::Certified->label(),
+                    'data' => array_column($data, PartStatus::Certified->name),
+                    'backgroundColor' => PartStatus::Certified->chartColor(),
                     'barThickness' => 1,
                 ]
             ])

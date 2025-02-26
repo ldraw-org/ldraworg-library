@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 use Illuminate\Console\Command;
@@ -27,29 +28,7 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        $settings = new LibrarySettings();
-        $header_metas = $settings->allowed_header_metas;
-        if (!in_array('!PREVIEW', $header_metas)) {
-            $header_metas[] = "!PREVIEW";
-            $settings->allowed_header_metas = $header_metas;
-            $settings->save();
-        }
-        Part::query()->update(['preview' => null]);
-        Part::doesntHave('unofficial_part')
-            ->lazy()
-            ->each(function (Part $part) use ($settings) {
-                if (array_key_exists(basename($part->filename, '.dat'), $settings->default_render_views)) {
-                    $part->preview = '16 0 0 0 ' . $settings->default_render_views[basename($part->filename, '.dat')];
-                } elseif (array_key_exists(basename($part?->base_part->filename ?? '', '.dat'), $settings->default_render_views)) {
-                    $part->preview = '16 0 0 0 ' . $settings->default_render_views[basename($part->base_part->filename, '.dat')];
-                } else {
-                    return;
-                }
-                if (!$part->isUnofficial()) {
-                    $part->has_minor_edit = true;
-                }
-                $part->generateHeader();
-            });
+        Part::official()->update(['part_status' => PartStatus::Official]);
         /*
         Part::query()->update(['rebrickable' => null]);
         $rb = app(\App\LDraw\Rebrickable::class);

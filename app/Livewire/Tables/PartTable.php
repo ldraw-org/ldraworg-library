@@ -3,6 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Enums\License;
+use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
@@ -33,7 +34,7 @@ class PartTable
                     fn (Builder $q) => $q->unofficial()
                 )
             )
-            ->defaultSort(fn (Builder $q) => $q->orderBy('vote_sort', 'asc')->orderBy('part_type_id', 'asc')->orderBy('description', 'asc'))
+            ->defaultSort(fn (Builder $q) => $q->orderBy('part_status', 'asc')->orderBy('part_type_id', 'asc')->orderBy('description', 'asc'))
             ->columns(self::columns())
             ->filters(self::filters($official), layout: FiltersLayout::AboveContent)
             ->actions(self::actions())
@@ -60,7 +61,7 @@ class PartTable
                 TextColumn::make('description')
                     ->sortable(),
                 ])->alignment(Alignment::Start),
-                ViewColumn::make('vote_sort')
+                ViewColumn::make('part_status')
                     ->view('tables.columns.part-status')
                     ->sortable()
                     ->grow(false)
@@ -96,13 +97,8 @@ class PartTable
     public static function filters(bool $official = true): array
     {
         return [
-            SelectFilter::make('vote_sort')
-                ->options([
-                    '1' => 'Certified',
-                    '2' => 'Needs Admin Review',
-                    '3' => 'Needs More Votes',
-                    '5' => 'Errors Found'
-                ])
+            SelectFilter::make('part_status')
+                ->options(PartStatus::trackerStatusOptions())
                 ->native(false)
                 ->multiple()
                 ->preload()

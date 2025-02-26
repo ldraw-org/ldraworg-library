@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\PartStatus;
 use App\Enums\VoteType;
 use App\Models\User;
 use App\Models\Vote;
@@ -65,17 +66,29 @@ class VotePolicy
             VoteType::AdminCertify => $user->can('part.vote.admincertify'),
             VoteType::AdminFastTrack => $user->can('part.vote.fasttrack'),
             VoteType::Certify => $userIsPartAuthor ? $user->can('part.own.vote.certify') : $user->can('part.vote.certify'),
-            VoteType::Hold =>  $userIsPartAuthor ? $user->canAny(['part.vote.hold', 'part.own.vote.hold']) : $user->can('part.vote.hold'),
+            VoteType::Hold => $userIsPartAuthor ? $user->canAny(['part.vote.hold', 'part.own.vote.hold']) : $user->can('part.vote.hold'),
         };
     }
 
-    public function all(User $user): bool
+    public function allCertify(User $user, Part $part): bool
     {
-        return !$this->settings->tracker_locked && $user->can('part.vote.certify.all');
+        return $part->isUnofficial() &&
+            $part->type->inPartsFolder() &&
+            $part->descendantsAndSelf->unofficial()->where('part_status', '=', PartStatus::ErrorsFound)->count() == 0 &&
+            $part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::NeedsMoreVotes)->count() > 0 &&
+            $user->can('part.vote.certify') &&
+            $user->can('part.vote.certify.all') &&
+            !$this->settings->tracker_locked;
     }
 
-    public function allAdmin(User $user): bool
+    public function allAdmin(User $user, Part $part): bool
     {
-        return !$this->settings->tracker_locked && $user->can('part.vote.admincertify.all');
+        return $part->isUnofficial() &&
+            $part->type->inPartsFolder() &&
+            $part->descendantsAndSelf->unofficial()->where('ready_for_admin', false)->count() == 0 &&
+            $part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->count() > 0 &&
+            $user->can('part.vote.admincertify') &&
+            $user->can('part.vote.admincertify.all') &&
+            !$this->settings->tracker_locked;
     }
 }

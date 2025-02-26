@@ -4,36 +4,14 @@
     'flex-col space-y-2' => !$small,
     'w-fit'
 ])>
-    <div @class([
-        'flex',
-        'flex-col place-items-center' => $small,
-        'flex-row space-x-2 items-center justify-items-start' => !$small
-    ])>
-        <x-fas-square class="w-5 fill-lime-400" />
-        <div>{{$summary['1']}}{{$small ? '' : " certified files"}}</div>
-    </div>
-    <div @class([
-        'flex',
-        'flex-col place-items-center' => $small,
-        'flex-row space-x-2 items-center justify-items-start' => !$small
-    ])>
-        <x-fas-square class="w-5 fill-blue-700" />
-        <div>{{$summary['2']}}{{$small ? '' : " files need admin review"}}</div>
-    </div>
-    <div @class([
-        'flex',
-        'flex-col place-items-center' => $small,
-        'flex-row space-x-2 items-center justify-items-start' => !$small
-    ])>
-        <x-fas-square class="w-5 fill-gray-400" />
-        <div>{{$summary['3']}}{{$small ? '' : " files need more votes"}}</div>
-    </div>
-    <div @class([
-        'flex',
-        'flex-col place-items-center' => $small,
-        'flex-row space-x-2 items-center justify-items-start' => !$small
-    ])>
-        <x-fas-square class="w-5 fill-red-600" />
-        <div>{{$summary['5']}}{{$small ? '' : " files are held for errors"}}</div>
-    </div>
+    @foreach (\App\Enums\PartStatus::trackerStatus() as $status)
+        <div @class([
+            'flex',
+            'flex-col place-items-center' => $small,
+            'flex-row space-x-2 items-center justify-items-start' => !$small
+        ])>
+            <x-dynamic-component :component="$status->icon()" class="inline w-5 {{$status->iconColor()}}" title="{{$status->label()}}" />
+            <div>{{$summary[$status->value]}}{{$small ? '' : ' ' . $status->label()}}</div>
+        </div>
+    @endforeach
 </div>

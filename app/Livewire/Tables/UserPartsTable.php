@@ -3,6 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Enums\EventType;
+use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Models\Part\Part;
 use Filament\Tables\Filters\SelectFilter;
@@ -29,17 +30,12 @@ class UserPartsTable extends BasicTable
             ->heading('MySubmits')
             ->columns(PartTable::columns())
             ->filters([
-                SelectFilter::make('vote_sort')
-                ->options([
-                    '1' => 'Certified',
-                    '2' => 'Needs Admin Review',
-                    '3' => 'Needs More Votes',
-                    '5' => 'Errors Found'
-                ])
+                SelectFilter::make('part_status')
+                ->options(PartStatus::trackerStatusOptions())
                 ->native(false)
                 ->multiple()
                 ->preload()
-                ->label('Unofficial Status'),
+                ->label('Part Status'),
                 SelectFilter::make('type')
                     ->options(PartType::options())
                     ->native(false)

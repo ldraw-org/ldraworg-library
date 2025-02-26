@@ -158,33 +158,9 @@
         @if($part->isUnofficial())
             <div class="text-lg font-bold">Status:</div>
             <x-part.status :$part show-status />
-            @if (!$part->can_release)
-                <div>
-                <x-message compact icon type="warning">
-                    <x-slot:header>
-                        This part is not releaseable
-                    </x-slot:header>
-                    <ul>
-                        @foreach($part->part_check_messages['errors'] as $error)
-                            @if($error == "Has uncertified subfiles")
-                                <x-accordion id="showContents">
-                                    <x-slot name="header">
-                                        <li>{{$error}}</li>
-                                    </x-slot>
-                                    <div class="px-4">
-                                        @foreach($part->descendants->where('vote_sort', '!=', '1') as $p)
-                                            <a href="{{route('parts.show', $p)}}" class="underline decoration-dotted hover:decoration-solid hover:text-gray-500">{{$p->filename}} ({{$p->statusText()}})</a><br/>
-                                        @endforeach
-                                    </div>
-                                </x-accordion>
-                            @else
-                                <li>{{$error}}</li>
-                            @endif
-                        @endforeach
-                    </ul>
-                </x-message>
-                <div>
-            @endif
+            @empty($part->can_release)
+                <x-message.not-releaseable :$part />
+            @endempty
             <div class="text-md font-bold">Current Votes:</div>
             <x-vote.table :votes="$part->votes" />
             @if (count($part->missing_parts) > 0)

@@ -4,6 +4,7 @@ namespace App\Models\Part;
 
 use App\Enums\EventType;
 use App\Enums\License;
+use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
@@ -47,6 +48,7 @@ class Part extends Model
     *     type: 'App\Enums\PartType',
     *     type_qualifier: 'App\Enums\PartTypeQualifier',
     *     license: 'App\Enums\License',
+    *     part_status: 'App\Enums\PartStatus',
     *     delete_flag: 'boolean',
     *     manual_hold_flag: 'boolean',
     *     has_minor_edit: 'boolean',
@@ -64,6 +66,7 @@ class Part extends Model
             'type' => PartType::class,
             'type_qualifier' => PartTypeQualifier::class,
             'license' => License::class,
+            'part_status' => PartStatus::class,
             'delete_flag' => 'boolean',
             'manual_hold_flag' => 'boolean',
             'has_minor_edit' => 'boolean',
@@ -208,24 +211,6 @@ class Part extends Model
         });
     }
 
-    public function scopePartStatus(Builder $query, string $status): void
-    {
-        switch ($status) {
-            case 'certified':
-                $query->where('vote_sort', 1);
-                break;
-            case 'adminreview':
-                $query->where('vote_sort', 2);
-                break;
-            case 'memberreview':
-                $query->where('vote_sort', 3);
-                break;
-            case 'held':
-                $query->where('vote_sort', 5);
-                break;
-        }
-    }
-
     public function scopeSearchPart(Builder $query, string $search, string $scope): void
     {
         if ($search !== '') {
@@ -271,7 +256,7 @@ class Part extends Model
             ->whereIn('type', PartType::partsFolderTypes())
             ->where('ready_for_admin', true)
             ->whereHas('descendantsAndSelf', function ($q) {
-                $q->where('vote_sort', '=', 2);
+                $q->where('part_status', PartStatus::AwaitingAdminReview);
             });
     }
 
@@ -353,30 +338,31 @@ class Part extends Model
     public function updateVoteSort(): void
     {
         if (!$this->isUnofficial()) {
-            return;
+            $this->part_status = PartStatus::Official;
+            $this->saveQuietly();
         }
-        $old_sort = $this->vote_sort;
+        $old_sort = $this->part_status;
         $data = $this->voteTypeCount();
 
         if ($data[VoteType::Hold->value] != 0) {
-            $this->vote_sort = 5;
+            $this->part_status = PartStatus::ErrorsFound;
         }
         // Needs votes
         elseif (($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value] < 2) && $data[VoteType::AdminFastTrack->value] == 0) {
-            $this->vote_sort = 3;
+            $this->part_status = PartStatus::NeedsMoreVotes;
         }
         // Awaiting Admin
         elseif ($data[VoteType::AdminFastTrack->value] == 0 && $data[VoteType::AdminCertify->value] == 0 && $data[VoteType::Certify->value] >= 2) {
-            $this->vote_sort = 2;
+            $this->part_status = PartStatus::AwaitingAdminReview;
         }
         // Certified
         elseif (($data[VoteType::AdminCertify->value] > 0 && ($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value]) > 2) || $data[VoteType::AdminFastTrack->value] > 0) {
-            $this->vote_sort = 1;
+            $this->part_status = PartStatus::Certified;
         }
         $this->saveQuietly();
         if (
-            ($old_sort <= 2 && $this->vote_sort > 2) ||
-            ($old_sort > 2 && $this->vote_sort <= 2)
+            (in_array($old_sort, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) && !in_array($this->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview])) ||
+            (!in_array($old_sort, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) && in_array($this->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]))
         ) {
             $this->updateReadyForAdmin();
         }
@@ -385,12 +371,15 @@ class Part extends Model
     public function updateReadyForAdmin(): void
     {
         $old = $this->ready_for_admin;
-        $this->ready_for_admin = $this->vote_sort <= 2 && $this->descendants->where('vote_sort', '>', 2)->count() == 0;
+        $this->ready_for_admin =
+            in_array($this->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) &&
+            $this->descendants->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->count() == 0;
         if ($old != $this->ready_for_admin) {
             $this->saveQuietly();
             foreach ($this->ancestors as $p) {
-                $p->ready_for_admin = $p->vote_sort <= 2 && $p->descendants->where('vote_sort', '>', 2)->count() == 0;
-                $p->saveQuietly();
+                $p->ready_for_admin =
+                    in_array($p->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) &&
+                    $p->descendants->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->count() == 0;
             }
         }
     }
@@ -618,22 +607,6 @@ class Part extends Model
         Storage::disk('local')->put('deleted/library/' . str_replace(['.png', '.dat'], '.evt', $this->filename). ".{$t}", $this->events->toJson());
     }
 
-    public function statusText(): string
-    {
-        if ($this->isUnofficial()) {
-            $codes = $this->voteTypeCount();
-            return match ($this->vote_sort) {
-                1 => 'Certified!',
-                2 => 'Needs Admin Review',
-                3 => $codes[VoteType::AdminCertify->value] + $codes[VoteType::Certify->value] == 1 ? 'Needs 1 More Vote' : 'Needs 2 More Votes',
-                5 => 'Errors Found',
-                default => 'Needs More Votes'
-            };
-        } else {
-            return "Update {$this->release->name}";
-        }
-    }
-
     public function statusCode(): string
     {
         if ($this->isUnofficial()) {
@@ -644,7 +617,7 @@ class Part extends Model
             }
             return $code .= is_null($this->official_part) ? 'N)' : 'F)';
         } else {
-            return $this->statusText();
+            return $this->part_status->label();
         }
     }
 

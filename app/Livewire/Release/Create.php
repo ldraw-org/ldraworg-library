@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Release;
 
+use App\Enums\PartStatus;
 use App\Jobs\MakePartRelease;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
@@ -35,7 +36,7 @@ class Create extends Component implements HasForms, HasTable
         return $table
             ->query(
                 Part::unofficial()
-                ->where('vote_sort', 1)
+                ->where('part_status', PartStatus::Certified)
                 ->orderBy('type')
                 ->orderBy('filename')
             )
@@ -58,7 +59,7 @@ class Create extends Component implements HasForms, HasTable
                             ->sortable(),
                     ])->alignment(Alignment::Start),
                     Stack::make([
-                        ViewColumn::make('vote_sort')
+                        ViewColumn::make('part_status')
                             ->view('tables.columns.part-status')
                             ->sortable()
                             ->grow(false)
@@ -91,7 +92,7 @@ class Create extends Component implements HasForms, HasTable
                         ]);
                         Part::unofficial()
                             ->where('can_release', true)
-                            ->where('vote_sort', 1)
+                            ->where('part_status', PartStatus::Certified)
                             ->update([
                                 'marked_for_release' => true
                             ]);

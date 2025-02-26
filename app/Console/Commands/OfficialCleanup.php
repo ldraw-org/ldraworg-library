@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
 
@@ -29,7 +30,7 @@ class OfficialCleanup extends Command
         Part::official()->update([
             'uncertified_subpart_count' => 0,
             'vote_summary' => null,
-            'vote_sort' => 1,
+            'part_status' => PartStatus::Official,
             'delete_flag' => 0,
             'has_minor_edit' => false,
             'missing_parts' => null,

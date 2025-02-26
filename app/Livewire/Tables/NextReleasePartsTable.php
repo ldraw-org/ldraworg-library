@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use Filament\Tables\Table;
 
@@ -12,7 +13,7 @@ class NextReleasePartsTable extends BasicTable
         return $table
             ->query(
                 Part::unofficial()
-                    ->where('vote_sort', 1)
+                    ->where('part_status', PartStatus::Certified)
                     ->where('can_release', true)
                     ->orderBy('type')
                     ->orderBy('filename')

@@ -3,6 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Enums\License;
+use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
@@ -75,15 +76,10 @@ class PartListTable extends BasicTable
                     false: fn (Builder $query) => $query->unofficial(),
                     blank: fn (Builder $query) => $query,
                 ),
-            SelectFilter::make('vote_sort')
-                ->label('Vote Status')
+            SelectFilter::make('part_status')
+                ->label('Part Status')
                 ->multiple()
-                ->options([
-                    '1' => 'Certified/Official',
-                    '2' => 'Needs Admin Review',
-                    '3' => 'Needs More Votes',
-                    '5' => 'Errors Found'
-                ]),
+                ->options(PartStatus::trackerStatusOptions()),
             SelectFilter::make('category')
                 ->relationship('category', 'category')
                 ->searchable()
@@ -98,14 +94,9 @@ class PartListTable extends BasicTable
                 ->constraintPickerColumns(['md' => 2, 'xl' => 4])
                 ->constraints([
                     // TODO: Part Fixes, Alias, Third Party
-                    SelectConstraint::make('vote_sort')
-                        ->label('Vote Status')
-                        ->options([
-                            '1' => 'Certified',
-                            '2' => 'Needs Admin Review',
-                            '3' => 'Needs More Votes',
-                            '5' => 'Errors Found'
-                        ]),
+                    SelectConstraint::make('part_status')
+                        ->label('Part Status')
+                        ->options(PartStatus::trackerStatusOptions()),
                     TextConstraint::make('description'),
                     TextConstraint::make('filename')
                         ->label('Part Name'),

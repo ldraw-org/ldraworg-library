@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\PartStatus;
 use App\Models\StickerSheet;
 use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
@@ -58,7 +59,7 @@ class StickerSheetIndex extends BasicTable
                         'parts as stickers_need_votes_count' =>
                             function (Builder $q) {
                                 $q->whereRelation('category', 'category', 'Sticker')
-                                    ->where('vote_sort', '3');
+                                    ->where('part_status', PartStatus::NeedsMoreVotes);
                             }
                     ])
                     ->visible(Auth::user()?->can('part.vote.certify') ?? false),
@@ -72,9 +73,9 @@ class StickerSheetIndex extends BasicTable
                             function (Builder $q) {
                                 $q->whereRelation('category', 'category', 'Sticker Shortcut')
                                 ->whereNull('part_release_id')
-                                ->whereBetween('vote_sort', [2, 4])
+                                ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes])
                                 ->whereDoesntHave('subparts', function (Builder $q) {
-                                    $q->where('vote_sort', '>', '1');
+                                    $q->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound]);
                                 });
                             }
                     ])

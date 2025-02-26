@@ -3,6 +3,7 @@
 namespace App\LDraw\Check;
 
 use App\Enums\License;
+use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Models\User;
@@ -60,12 +61,12 @@ class PartChecker
 
     public function hasCertifiedParentInParts(Part $part): bool
     {
-        return $part->ancestors->whereIn('type', PartType::partsFolderTypes())->where('vote_sort', 1)->count() > 0;
+        return $part->ancestors->whereIn('type', PartType::partsFolderTypes())->where('part_status', PartStatus::Certified)->count() > 0;
     }
 
     public function hasAllSubpartsCertified(Part $part): bool
     {
-        return $part->descendants->where('vote_sort', '!=', 1)->count() == 0;
+        return $part->descendants->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->count() == 0;
     }
 
     public function checkFile(ParsedPart $part, ?string $filename = null): ?array

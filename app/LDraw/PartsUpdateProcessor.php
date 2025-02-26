@@ -2,6 +2,7 @@
 
 namespace App\LDraw;
 
+use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Events\PartReleased;
 use App\Jobs\UpdateImage;
@@ -370,7 +371,7 @@ class PartsUpdateProcessor
         Part::official()->update([
             'uncertified_subpart_count' => 0,
             'vote_summary' => null,
-            'vote_sort' => 1,
+            'part_status' => PartStatus::Official,
             'delete_flag' => 0,
             'has_minor_edit' => false,
             'missing_parts' => null,
@@ -381,7 +382,7 @@ class PartsUpdateProcessor
             $p->votes()->delete();
             $p->notification_users()->sync([]);
         });
-        Part::unofficial()->where('vote_sort', 1)->where('can_release', true)->update([
+        Part::unofficial()->where('part_status', PartStatus::Certified)->where('can_release', true)->update([
             'marked_for_release' => true
         ]);
         Part::unofficial()->where('can_release', false)->where('marked_for_release', true)->update([

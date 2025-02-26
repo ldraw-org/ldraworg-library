@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Part;
 
+use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use App\Livewire\Tables\PartTable;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -37,15 +38,10 @@ class Weekly extends Component implements HasForms, HasTable
                     ->date(),
             ])
             ->filters([
-                SelectFilter::make('vote_sort')
-                ->label('Vote Status')
+                SelectFilter::make('part_status')
+                ->label('Part Status')
                 ->multiple()
-                ->options([
-                    '1' => 'Certified',
-                    '2' => 'Needs Admin Review',
-                    '3' => 'Needs More Votes',
-                    '5' => 'Errors Found'
-                ]),
+                ->options(PartStatus::trackerStatusOptions()),
             ])
             ->actions(PartTable::actions())
             ->defaultGroup('week')
