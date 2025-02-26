@@ -21,7 +21,7 @@ class StickerShortcutsReadyForAdminTable extends BasicTable
                 Part::unofficial()
                     ->whereRelation('category', 'category', 'Sticker Shortcut')
                     ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes])
-                    ->whereDoesntHave('decendents', function (Builder $q) {
+                    ->whereDoesntHave('descendants', function (Builder $q) {
                         $q->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound]);
                     })
             )
