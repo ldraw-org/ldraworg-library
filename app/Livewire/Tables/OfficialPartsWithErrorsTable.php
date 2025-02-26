@@ -3,6 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Models\Part\Part;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -30,6 +31,13 @@ class OfficialPartsWithErrorsTable extends BasicTable
                 TextColumn::make('part_check_messages')
                     ->state(fn (Part $part) => implode(", ", $part->part_check_messages['errors']))
                     ->wrap()
+            ])
+            ->actions([
+                Action::make('download')
+                ->url(fn (Part $part) => route($part->isUnofficial() ? 'unofficial.download' : 'official.download', $part->filename))
+                ->button()
+                ->outlined()
+                ->color('info'),
             ])
             ->recordUrl(fn (Part $p): string => route('parts.show', $p))
             ->queryStringIdentifier('officialErrors');
