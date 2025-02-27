@@ -19,14 +19,17 @@ class StickerShortcutsReadyForAdminTable extends BasicTable
         return $table
             ->query(
                 Part::unofficial()
-                    ->whereRelation('category', 'category', 'Sticker Shortcut')
+                    ->where(function (Builder $q) {
+                        $q->orWhereRelation('category', 'category', 'Sticker Shortcut')
+                            ->orWhere('description', 'LIKE', 'Minifig Torso with Arms %');
+                    })
                     ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes])
                     ->whereDoesntHave('descendants', function (Builder $q) {
                         $q->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound]);
                     })
             )
             ->defaultSort('created_at', 'asc')
-            ->heading('Sticker Shortcuts For Admin')
+            ->heading('Torso/Sticker Shortcuts For Admin')
             ->columns(PartTable::columns())
             ->actions([
                 Action::make('Fast Track')

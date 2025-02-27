@@ -17,7 +17,7 @@
             :active="$activeTab === 'sticker-admin-ready'"
             wire:click="$set('activeTab', 'sticker-admin-ready')"
         >
-            Sticker Shortcuts For Admin Review
+            Torso/Sticker Shortcuts For Admin Review
         </x-filament::tabs.item>
         <x-filament::tabs.item
             :active="$activeTab === 'delete-flag'"
