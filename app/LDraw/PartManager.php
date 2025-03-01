@@ -46,7 +46,7 @@ class PartManager
             }
             return null;
         }));
-
+        $parts->loadMissing('category', 'user', 'history', 'descendants', 'ancestors');
         $parts->each(fn (Part $p) => $this->finalizePart($p));
         return $parts;
     }
@@ -103,9 +103,9 @@ class PartManager
             'filename' => $filename,
             'user_id' => $user->id,
             'type' => $part->type,
-            'type_qualifier' => $part->qual,
+            'type_qualifier' => $part->type_qualifier,
             'license' => $user->license,
-            'bfc' => $part->bfcwinding ?? null,
+            'bfc' => $part->bfc ?? null,
             'part_category_id' => $cat->id ?? null,
             'cmdline' => $part->cmdline,
             'preview' => $part->preview,
@@ -361,22 +361,19 @@ class PartManager
     public function checkPart(Part $part): void
     {
         $messages = $part->part_check_messages ?? [];
+        $check = app(\App\LDraw\Check\PartChecker::class)->checkCanRelease($part);
+        $messages['errors'] = $check['errors'];
+
         if (!$part->isUnofficial()) {
             $part->can_release = true;
-            $check = app(\App\LDraw\Check\PartChecker::class)->checkCanRelease($part);
-            $messages['errors'] = $check['errors'];
             $messages['warnings'] = [];
-            $part->part_check_messages = $messages;
-            $part->save();
-            return;
+        } else {
+            $messages['warnings'] = [];
+            if (isset($part->category) && $part->category->category == "Minifig") {
+                $messages['warnings'] = "Check Minifig category: {$part->category->category}";
+            }
+            $part->can_release = $check['can_release'];
         }
-        $check = app(\App\LDraw\Check\PartChecker::class)->checkCanRelease($part);
-        $messages['warnings'] = [];
-        if (isset($part->category) && $part->category->category == "Minifig") {
-            $messages['warnings'] = "Check Minifig category: {$part->category->category}";
-        }
-        $part->can_release = $check['can_release'];
-        $messages['errors'] = $check['errors'];
         $part->part_check_messages = $messages;
         $part->save();
     }

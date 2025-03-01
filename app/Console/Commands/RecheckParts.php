@@ -29,10 +29,11 @@ class RecheckParts extends Command
         $div = 50;
         $num = intdiv($count, $div) + 1;
         $iter = 1;
-        Part::when(
-            $this->option('lib') == 'unofficial',
-            fn (Builder $query) => $query->unofficial()
-        )
+        Part::with('category', 'user', 'history', 'body', 'descendants', 'ancestors')
+            ->when(
+                $this->option('lib') == 'unofficial',
+                fn (Builder $query) => $query->unofficial()
+            )
             ->when(
                 $this->option('lib') == 'official',
                 fn (Builder $query) => $query->where(fn (Builder $query2) => $query2->official()->whereJsonLength('part_check_messages->errors', '>', 0))

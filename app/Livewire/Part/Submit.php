@@ -69,7 +69,7 @@ class Submit extends Component implements HasForms
                                 $pparts = Part::query()->name($part->name ?? '')->get();
                                 $unofficial_exists = $pparts->unofficial()->count() > 0;
                                 $official_exists = $pparts->official()->count() > 0;
-                                $errors = app(\App\LDraw\Check\PartChecker::class)->check($part, $value->getClientOriginalName());
+                                $errors = app(\App\LDraw\Check\PartChecker::class)->checkSubmittedPart($part, $value->getClientOriginalName());
 
                                 // A part in the p and parts folder cannot have the same name
                                 if (!is_null($pparts) && !is_null($part->type) && !is_null($part->name) &&
@@ -82,7 +82,7 @@ class Submit extends Component implements HasForms
                                     $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('duplicate', ['type' => 'Parts']);
                                 }
 
-                                foreach ($errors ?? [] as $error) {
+                                foreach ($errors as $error) {
                                     $this->part_errors[] = "{$value->getClientOriginalName()}: {$error}";
                                 }
                             } elseif ($mimeType == 'image/png') {

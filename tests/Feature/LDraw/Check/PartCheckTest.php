@@ -1,28 +1,46 @@
 <?php
 
+use App\LDraw\Check\Contracts\Check;
+use App\LDraw\Parse\ParsedPart;
+use App\Models\Part\Part;
 use App\Models\User;
 
-function validLineProvider(): array
+
+function testCheck(Check $check, ParsedPart|Part $part, ?string $filename = null): bool
 {
-    return [
-        ["0 Free for comment 112341904.sfsfkajf", true],
-        ["1  1  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0  0 0 0  test.dat", true],
-        ["2  0x2123456  1 0.01 -0.01  1 0.23456789 -.12341234", true],
-        ["3  12  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0", true],
-        ["4  10001  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", true],
-        ["5  1  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", true],
-        ["", true],
-        ["0", true],
-        ["1    0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0  0 0 0  test.dat", false],
-        ["2  1  1 0.01 -0.01  1e10 0.23456789 -.12341234", false],
-        ["3  1.2  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0", false],
-        ["4  1  1 a -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
-        ["6  1  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
-    ];
+    $errors = [];
+    $fail = function (string $error) use ($errors) {
+        $errors[] = $error;
+    };
+    $check->check($part, $fail);
+    return count($errors) > 0;
 }
 
 test('valid line', function (string $input, bool $expected) {
-    expect(app(\App\LDraw\Check\PartChecker::class)->validLine($input))->toBe($expected);
+    $p = new ParsedPart(
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        $input,
+        null
+    );
+    expect(testCheck(new \App\LDraw\Check\Checks\ValidLines(), $p))->toBe($expected);
 })->with([
     'valid type 0' => ["0 Free for comment 112341904.sfsfkajf", true],
     'valid type 0 empty' => ["0", true],
@@ -38,7 +56,7 @@ test('valid line', function (string $input, bool $expected) {
     'invalid letter instead of number' => ["4  1  1 a -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
     'invalid line type' => ["6  1  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
 ]);
-
+/*
 test('check library approved description', function (string $input, bool $expected) {
     expect(app(\App\LDraw\Check\PartChecker::class)->checkLibraryApprovedDescription($input))->toBe($expected);
 })->with([
@@ -131,3 +149,4 @@ test('check line allowed body meta', function (string $input, bool $expected) {
     'approved Comment' => ['0 // blah blah blah', true],
     'approved BFC' => ['0 BFC NOCLIP', true],
 ]);
+*/

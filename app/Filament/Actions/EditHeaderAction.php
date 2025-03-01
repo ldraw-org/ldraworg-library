@@ -6,6 +6,11 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Events\PartHeaderEdited;
 use App\Jobs\UpdateZip;
+use App\LDraw\Check\Checks\LibraryApprovedName;
+use App\LDraw\Check\Checks\PatternHasSetKeyword;
+use App\LDraw\Check\Checks\PatternPartDesciption;
+use App\LDraw\Check\Checks\PreviewIsValid;
+use App\LDraw\Parse\ParsedPart;
 use App\LDraw\Parse\Parser;
 use App\LDraw\PartManager;
 use App\Models\Part\Part;
@@ -52,17 +57,15 @@ class EditHeaderAction
                 ->string()
                 ->rules([
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
-                        if (! app(\App\LDraw\Check\PartChecker::class)->checkLibraryApprovedDescription($value)) {
-                            $fail('partcheck.description.invalidchars')->translate();
+                        $p = ParsedPart::fromPart($part);
+                        $p->description = $value;
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new LibraryApprovedName());
+                        if (count($errors) > 0) {
+                            $fail($errors[0]);
                         }
-                        if (
-                            $part->type->inPartsFolder() &&
-                            $part->category->category !== 'Moved' &&
-                            $part->category->category !== 'Sticker' &&
-                            $part->category->category !== 'Sticker Shortcut' &&
-                            ! app(\App\LDraw\Check\PartChecker::class)->checkDescriptionForPatternText($part->name(), $value)
-                        ) {
-                            $fail('partcheck.description.patternword')->translate();
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new PatternPartDesciption());
+                        if (count($errors) > 0) {
+                            $fail($errors[0]);
                         }
                     }
                 ]),
@@ -110,7 +113,16 @@ class EditHeaderAction
                 ->rows(3)
                 ->hidden(!$part->type->inPartsFolder())
                 ->disabled(!$part->type->inPartsFolder())
-                ->rules([new PatternKeyword()]),
+                ->rules([
+                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
+                        $p = ParsedPart::fromPart($part);
+                        $p->keywords = array_map(fn (string $kw) => trim($kw), explode(',', str_replace("\n", ",", $value)));;
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new PatternHasSetKeyword());
+                        if (count($errors) > 0) {
+                            $fail($errors[0]);
+                        }
+                    }
+                ]),
             TextInput::make('cmdline')
                 ->nullable()
                 ->extraAttributes(['class' => 'font-mono'])
@@ -123,8 +135,11 @@ class EditHeaderAction
                 ->string()
                 ->rules([
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
-                        if (! app(\App\LDraw\Check\PartChecker::class)->checkValidPreview(Str::squish($value))) {
-                            $fail('partcheck.preview')->translate();
+                        $p = ParsedPart::fromPart($part);
+                        $p->preview = $value;
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new PreviewIsValid());
+                        if (count($errors) > 0) {
+                            $fail($errors[0]);
                         }
                     }
                 ]),

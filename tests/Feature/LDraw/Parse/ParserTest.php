@@ -206,12 +206,12 @@ test('parse', function () {
     expect($part->username)->toBe('grapeape');
     expect($part->unofficial)->toBe(true);
     expect($part->type)->toBe('Part');
-    expect($part->qual)->toBe('Alias');
+    expect($part->type_qualifier)->toBe('Alias');
     expect($part->releasetype)->toBe('');
     expect($part->release)->toBe('');
     expect($part->license)->toBe('Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt');
     expect($part->help)->toBe(['This is help', 'This is more help']);
-    expect($part->bfcwinding)->toBe('CW');
+    expect($part->bfc)->toBe('CW');
     expect($part->metaCategory)->toBe('Minifig Accessory');
     expect($part->descriptionCategory)->toBe('Brick');
     expect($part->keywords)->toBe(['Bespin', 'Boba Fett', 'Cloud City', 'cold sleep', 'deep freeze', 'Set 7144']);

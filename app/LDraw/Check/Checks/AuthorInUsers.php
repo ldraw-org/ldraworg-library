@@ -1,0 +1,21 @@
+<?php
+
+namespace App\LDraw\Check\Checks;
+
+use App\LDraw\Check\Contracts\Check;
+use App\LDraw\Parse\ParsedPart;
+use App\Models\Part\Part;
+use App\Models\User;
+use Closure;
+
+class AuthorInUsers implements Check
+{
+    public function check(ParsedPart|Part $part, Closure $fail): void
+    {
+        if ($part instanceof ParsedPart &&
+            User::fromAuthor($part->username ?? '', $part->realname ?? '')->count() == 0
+        ) {
+            $fail(__('partcheck.author.registered', ['value' => $part->realname ?? $part->username]));
+        }
+    }
+}
