@@ -12,16 +12,12 @@ class CategoryIsValid implements Check
 {
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
-        if ($part instanceof ParsedPart &&
-            !is_null($part->metaCategory) &&
-            is_null(PartCategory::firstWhere('category', $part->metaCategory))
-        ) {
-            $fail(__('partcheck.category.invalid', ['value' => $part->metaCategory]));
-        } elseif ($part instanceof ParsedPart &&
-            (is_null($part->descriptionCategory) ||
-            is_null(PartCategory::firstWhere('category', $part->descriptionCategory)))
-        ) {
-            $fail(__('partcheck.category.invalid', ['value' => $part->descriptionCategory]));
-        }
+        if ($part instanceof ParsedPart) {
+            $pcat = $part->metaCategory ?? $part->descriptionCategory;
+            $cat = PartCategory::firstWhere('category', $pcat);
+            if (is_null($cat)) {
+                $fail(__('partcheck.category.invalid', ['value' => $pcat]));
+            }
+        } 
     }
 }
