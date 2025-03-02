@@ -151,7 +151,7 @@ class EditHeaderAction
                 ->string()
                 ->rules([
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
-                        $value = Parser::dos2unix(trim($value));
+                        $value = Parser::unixLineEndings(trim($value));
                         $lines = explode("\n", $value);
                         if ($value !== '' && count($lines) != mb_substr_count($value, '0 !HISTORY')) {
                             $fail('partcheck.history.invalid')->translate();
@@ -171,7 +171,7 @@ class EditHeaderAction
                         foreach ($part->history()->oldest()->get() as $h) {
                             $hist .= $h->toString() . "\n";
                         }
-                        $hist = Parser::dos2unix(trim($hist));
+                        $hist = Parser::unixLineEndings(trim($hist));
                         if (((!empty($hist) && empty($value)) || $hist !== $value) && empty($get('editcomment'))) {
                             $fail('partcheck.history.alter')->translate();
                         }

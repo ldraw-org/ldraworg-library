@@ -11,14 +11,6 @@ use Illuminate\Support\Str;
 
 class Parser
 {
-    protected readonly array $patterns;
-
-    public function __construct(
-        protected LibrarySettings $settings,
-    ) {
-        $this->patterns = config('ldraw.patterns');
-    }
-
     public function parse(string $part): ParsedPart
     {
         $text = $this->formatText($part);
@@ -51,119 +43,60 @@ class Parser
         );
     }
 
-    /**
-     * fixEncoding - Ensure Correct UTF-8 encoding
-     *
-     * There are/were several badly encoded UTF-8 files in the library.
-     * Hopefully this prevents this from happening in the future
-     *
-     * @param  string $text
-     *
-     * @return string
-     */
-    protected function fixEncoding(string $text): string
+    public static function fixEncoding(string $text): string
     {
         $old_encode = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1', 'ASCII']);
         $new_text = mb_convert_encoding($text, 'UTF-8', $old_encode);
         return $new_text;
     }
 
-    /**
-     * unix2dos - Change to DOS style line endings
-     *
-     * @param  string $text
-     *
-     * @return string
-     */
-    public static function unix2dos(string $text): string
+    public static function dosLineEndings(string $text): string
     {
         return preg_replace('#\R#us', "\r\n", $text);
     }
 
-    /**
-     * dos2unix - Change to UNIX line endings
-     *
-     * @param  string $text
-     *
-     * @return string
-     */
-    public static function dos2unix(string $text): string
+    public static function unixLineEndings(string $text): string
     {
         return preg_replace('#\R#us', "\n", $text);
     }
 
-    /**
-     * formatText - Uniformly format test
-     *
-     * Changes to UNIX style line endings, strips extra spaces and newlines,
-     * and lower cases a type 1 line file references
-     *
-     * @param  string $text
-     *
-     * @return string
-     */
     protected function formatText(string $text): string
     {
-        $text = $this->fixEncoding($text);
-        $text = self::dos2unix($text);
+        $text = self::fixEncoding($text);
+        $text = trim($text);
+        $text = self::unixLineEndings($text);
         $text = preg_replace('#\n{3,}#us', "\n\n", $text);
-        $text = explode("\n", $text);
-        foreach ($text as $index => &$line) {
-            if ($index === array_key_first($text)) {
-                continue;
-            }
+        $lines = explode("\n", $text);
+        $first_line = array_shift($lines);
+        $lines = Arr::map($lines, function (string $line, int $key) {
             $line = preg_replace('#\h+#u', ' ', trim($line));
-            if (! empty($line) && $line[0] === '1') {
+            if (Str::startsWith($line, '1')) {
                 $line = mb_strtolower($line);
             }
-        }
-        $text = implode("\n", $text);
-
-        return $text;
+            return $line;
+        });
+        array_unshift($lines, $first_line);
+        return implode("\n", $lines);
     }
 
-    /**
-     * patternMatch
-     *
-     * @param string $pattern
-     * @param string $text
-     *
-     * @return array|null
-     */
     protected function patternMatch(string $pattern, string $text): ?array
     {
         $text = $this->formatText($text);
-        if (array_key_exists($pattern, $this->patterns) && preg_match($this->patterns[$pattern], $text, $matches)) {
+        if (!is_null(config("ldraw.patterns.{$pattern}")) && preg_match(config("ldraw.patterns.{$pattern}"), $text, $matches)) {
             return $matches;
         }
         return null;
     }
 
-    /**
-     * patternMatchAll
-     *
-     * @param string $pattern
-     * @param string $text
-     *
-     * @return array|null
-     */
     protected function patternMatchAll(string $pattern, string $text, int $flags = 0): ?array
     {
         $text = $this->formatText($text);
-        if (array_key_exists($pattern, $this->patterns) && preg_match_all($this->patterns[$pattern], $text, $matches, $flags)) {
+        if (!is_null(config("ldraw.patterns.{$pattern}")) && preg_match_all(config("ldraw.patterns.{$pattern}"), $text, $matches, $flags)) {
             return $matches;
         }
         return null;
     }
 
-    /**
-     * getSingleValueMeta
-     *
-     * @param string $text
-     * @param string $meta
-     *
-     * @return string|null
-     */
     protected function getSingleValueMeta(string $text, string $meta): ?string
     {
         $matches = $this->patternMatch($meta, $text);
@@ -176,85 +109,36 @@ class Parser
         return null;
     }
 
-    /**
-     * getDescription - Get the file description
-     *
-     * @param string $text
-     *
-     * @return string|null
-     */
     public function getDescription(string $text): ?string
     {
         return $this->getSingleValueMeta($text, 'description');
     }
 
-    /**
-     * getName - Get the Name: meta value
-     *
-     * @param string $text
-     *
-     * @return string|null
-     */
     public function getName(string $text): ?string
     {
         return $this->getSingleValueMeta($text, 'name');
     }
 
-    /**
-     * getLicense - Get the !LICENSE line
-     *
-     * @param string $text
-     *
-     * @return string|null
-     */
     public function getLicense(string $text): ?string
     {
         return $this->getSingleValueMeta($text, 'license');
     }
 
-    /**
-     * getCmdLine - Get !CMDLINE value
-     *
-     * @param string $text
-     *
-     * @return string|null
-     */
     public function getCmdLine(string $text): ?string
     {
         return $this->getSingleValueMeta($text, 'cmdline');
     }
 
-    /**
-     * getCmdLine - Get !PREVIEW value
-     *
-     * @param string $text
-     *
-     * @return string|null
-     */
     public function getPreview(string $text): ?string
     {
         return $this->getSingleValueMeta($text, 'preview');
     }
 
-    /**
-     * getMetaCategory
-     *
-     * @param string $text
-     *
-     * @return string|null
-     */
     public function getMetaCategory(string $text): ?string
     {
         return $this->getSingleValueMeta($text, 'category');
     }
 
-    /**
-     * getDescriptionCategory
-     *
-     * @param string $text
-     *
-     * @return string|null
-     */
     public function getDescriptionCategory(string $text): ?string
     {
         $d = $this->getSingleValueMeta($text, 'description');
@@ -288,13 +172,6 @@ class Parser
         return null;
     }
 
-    /**
-     * getKeywords
-     *
-     * @param string $text
-     *
-     * @return array|null
-     */
     public function getKeywords(string $text): ?array
     {
         $kw = $this->patternMatchAll('keywords', $text);
@@ -316,18 +193,11 @@ class Parser
         return null;
     }
 
-    /**
-     * getType
-     *
-     * @param string $text
-     *
-     * @return array|null
-     */
     public function getType(string $text): ?array
     {
         $text = $this->formatText($text);
-        if (array_key_exists('type', $this->patterns)) {
-            $pattern = str_replace(['###PartTypes###', '###PartTypesQualifiers###'], [implode('|', array_column(PartType::cases(), 'value')), implode('|', array_column(PartTypeQualifier::cases(), 'value'))], $this->patterns['type']);
+        if (config('ldraw.patterns.type')) {
+            $pattern = str_replace(['###PartTypes###', '###PartTypesQualifiers###'], [implode('|', array_column(PartType::cases(), 'value')), implode('|', array_column(PartTypeQualifier::cases(), 'value'))], config('ldraw.patterns.type'));
 
             if (preg_match($pattern, $text, $matches)) {
                 $t = ['unofficial' => false, 'type' => $matches['type'], 'qual' => null, 'releasetype' => null, 'release' => null];
@@ -352,13 +222,6 @@ class Parser
         return null;
     }
 
-    /**
-     * getHelp
-     *
-     * @param string $text
-     *
-     * @return array|null
-     */
     public function getHelp(string $text): ?array
     {
         $help = $this->patternMatchAll('help', $text);
@@ -371,13 +234,6 @@ class Parser
         return null;
     }
 
-    /**
-     * getBFC
-     *
-     * @param string $text
-     *
-     * @return array|null
-     */
     public function getBFC(string $text): ?array
     {
         $bfc = $this->patternMatch('bfc', $text);
@@ -392,13 +248,6 @@ class Parser
         return null;
     }
 
-    /**
-     * getHistory
-     *
-     * @param string $text
-     *
-     * @return array|null
-     */
     public function getHistory(string $text): ?array
     {
         $history = $this->patternMatchAll('history', $text, PREG_SET_ORDER);
@@ -411,13 +260,6 @@ class Parser
         return null;
     }
 
-    /**
-     * getSubparts
-     *
-     * @param string $text
-     *
-     * @return array|null
-     */
     public function getSubparts(string $text): ?array
     {
         $subparts = $this->patternMatchAll('subparts', $text);
@@ -446,13 +288,6 @@ class Parser
         return null;
     }
 
-    /**
-     * getBody
-     *
-     * @param string $text
-     *
-     * @return string
-     */
     public function getBody(string $text): string
     {
         $text = $this->formatText($text);
@@ -462,7 +297,7 @@ class Parser
             $l = explode(' ', $lines[$index]);
             $isEmptyLine = $lines[$index] === '' || $lines[$index] === '0';
             $isHeaderBFC = count($l) >= 2 && $l[1] === 'BFC' && in_array($lines[$index], ['0 BFC CERTIFY CCW', '0 BFC CERTIFY CW', '0 BFC NOCERTIFY']);
-            $isHeaderMeta = count($l) >= 2 && $l[1] !== 'BFC' && in_array($l[1], $this->settings->allowed_header_metas);
+            $isHeaderMeta = count($l) >= 2 && $l[1] !== 'BFC' && in_array($l[1], app(LibrarySettings::class)->allowed_header_metas);
             $headerend = !$isEmptyLine && !($isHeaderMeta || $isHeaderBFC);
             if ($headerend) {
                 break;
@@ -481,7 +316,7 @@ class Parser
             $l = explode(' ', $lines[$index]);
             $isEmptyLine = $lines[$index] === '' || $lines[$index] === '0';
             $isHeaderBFC = count($l) >= 2 && $l[1] === 'BFC' && in_array($lines[$index], ['0 BFC CERTIFY CCW', '0 BFC CERTIFY CW', '0 BFC NOCERTIFY']);
-            $isHeaderMeta = count($l) >= 2 && $l[1] !== 'BFC' && in_array($l[1], $this->settings->allowed_header_metas);
+            $isHeaderMeta = count($l) >= 2 && $l[1] !== 'BFC' && in_array($l[1], app(LibrarySettings::class)->allowed_header_metas);
             $headerend = !$isEmptyLine && !($isHeaderMeta || $isHeaderBFC);
             if ($headerend) {
                 break;
