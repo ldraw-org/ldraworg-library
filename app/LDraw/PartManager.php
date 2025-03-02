@@ -46,8 +46,26 @@ class PartManager
             }
             return null;
         }));
-        $parts->loadMissing('category', 'user', 'history', 'descendants', 'ancestors');
-        $parts->each(fn (Part $p) => $this->finalizePart($p));
+        $parts->loadMissing('category', 'user', 'history');
+        $parts->each(function (Part $p) {
+            $p->generateHeader();
+            $this->updateMissing($p->name());
+            $this->loadSubpartsFromBody($p);
+        });
+        $parts->load('descendants', 'ancestors', 'official_part');
+        $parts->each(function (Part $p) {
+            $p->updateVoteSort();
+            if (!is_null($p->official_part)) {
+                $this->updateUnofficialWithOfficialFix($p->official_part);
+            };
+            $this->updateBasePart($p);
+            $this->updateImage($p);
+            $this->checkPart($p);
+            $this->addStickerSheet($p);
+            $p->updateReadyForAdmin();
+            $this->addUnknownNumber($p);
+            UpdateParentParts::dispatch($p);
+        });
         return $parts;
     }
 
