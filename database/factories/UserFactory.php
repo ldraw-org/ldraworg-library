@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\License;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -22,8 +23,8 @@ class UserFactory extends Factory
             'realname' => fake()->name(),
             'email' => fake()->safeEmail(),
             'email_verified_at' => now(),
-            'part_license_id' => 1,
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'license' => License::CC_BY_4,
+            'password' => bcrypt(Str::random(40)), // password
             'remember_token' => Str::random(10),
         ];
     }

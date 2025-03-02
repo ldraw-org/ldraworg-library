@@ -10,7 +10,7 @@ return new class () extends SettingsMigration {
         $this->migrator->rename('library.default_part_license_id', 'library.default_part_license');
         $this->migrator->update(
             'library.default_part_license',
-            fn (int $l) => License::from(PartLicense::find($l)->name)
+            fn (int $l) => License::CC_BY_4
         );
     }
 };
