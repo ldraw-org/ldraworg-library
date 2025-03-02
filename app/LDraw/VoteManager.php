@@ -54,7 +54,7 @@ class VoteManager
         }
 
         $part->refresh();
-        $part->updateVoteSort();
+        $part->updatePartStatus();
 
         // Admin vote status changed
         if (($oldVoteIsAdminCert && $vt === VoteType::CancelVote) || $newVoteIsAdminCert) {

@@ -341,7 +341,7 @@ class Part extends Model
         );
     }
 
-    public function updateVoteSort(): void
+    public function updatePartStatus(): void
     {
         if (!$this->isUnofficial()) {
             $this->part_status = PartStatus::Official;

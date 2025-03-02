@@ -32,10 +32,10 @@ class DailyMaintenance extends Command
     public function handle()
     {
         $this->info('Reloading all subparts');
-        Part::lazy()->each(fn (Part $p) => app(PartManager::class)->loadSubpartsFromBody($p));
+        Part::lazy()->each(fn (Part $p) => app(PartManager::class)->loadSubparts($p));
 
         $this->info('Recounting all votes');
-        Part::unofficial()->lazy()->each(fn (Part $p) => $p->updateVoteSort());
+        Part::unofficial()->lazy()->each(fn (Part $p) => $p->updatePartStatus());
 
         $this->info('Rechecking all unofficial parts');
         $this->call('lib:check', ['--lib' => 'unofficial']);

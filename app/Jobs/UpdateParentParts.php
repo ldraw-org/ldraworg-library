@@ -37,7 +37,7 @@ class UpdateParentParts implements ShouldQueue
         $pm = app(PartManager::class);
         if (!is_null($this->part->official_part)) {
             $this->part->official_part->parents()->official()->each(
-                fn (Part $p) => $pm->loadSubpartsFromBody($p)
+                fn (Part $p) => $pm->loadSubparts($p)
             );
         }
         $this->part->ancestors()->each(

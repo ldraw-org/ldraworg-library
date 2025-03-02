@@ -50,11 +50,11 @@ class PartManager
         $parts->each(function (Part $p) {
             $p->generateHeader();
             $this->updateMissing($p->name());
-            $this->loadSubpartsFromBody($p);
+            $this->loadSubparts($p);
         });
         $parts->load('descendants', 'ancestors', 'official_part');
         $parts->each(function (Part $p) {
-            $p->updateVoteSort();
+            $p->updatePartStatus();
             if (!is_null($p->official_part)) {
                 $this->updateUnofficialWithOfficialFix($p->official_part);
             };
@@ -193,10 +193,10 @@ class PartManager
 
     public function finalizePart(Part $part): void
     {
-        $part->updateVoteSort();
+        $part->updatePartStatus();
         $part->generateHeader();
         $this->updateMissing($part->name());
-        $this->loadSubpartsFromBody($part);
+        $this->loadSubparts($part);
         if (!is_null($part->official_part)) {
             $this->updateUnofficialWithOfficialFix($part->official_part);
         };
@@ -226,11 +226,13 @@ class PartManager
         $this->imageOptimize($imageThumbPath);
     }
 
-    protected function updateMissing(string $filename): void
+    protected function updateMissing(string $name): void
     {
-        Part::unofficial()->whereJsonContains('missing_parts', $filename)->each(function (Part $p) {
-            $this->loadSubpartsFromBody($p);
-        });
+        Part::unofficial()
+            ->whereJsonContains('missing_parts', $name)
+            ->each(function (Part $p) {
+                $this->loadSubparts($p);
+            });
     }
 
     protected function updateUnofficialWithOfficialFix(Part $officialPart): void
@@ -238,7 +240,7 @@ class PartManager
         Part::unofficial()->whereHas('subparts', function (Builder $query) use ($officialPart) {
             return $query->where('id', $officialPart->id);
         })->each(function (Part $p) {
-            $this->loadSubpartsFromBody($p);
+            $this->loadSubparts($p);
         });
     }
 
@@ -363,7 +365,7 @@ class PartManager
         return true;
     }
 
-    public function loadSubpartsFromBody(Part $part): void
+    public function loadSubparts(Part $part): void
     {
         $hadMissing = is_array($part->missing_parts) && count($part->missing_parts) > 0;
         $part->setSubparts($this->parser->getSubparts($part->body->body) ?? []);
