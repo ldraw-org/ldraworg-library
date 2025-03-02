@@ -1,7 +1,14 @@
 <?php
 
-test('unix2dos', function (string $input, string $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->unix2dos($input))->toBe($expected);
+use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
+use App\Enums\License;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+test('dosLineEndings', function (string $input, string $expected) {
+    expect(app(\App\LDraw\Parse\Parser::class)->dosLineEndings($input))->toBe($expected);
 })->with([
     'unix style' => ["a\nb\nc\n", "a\r\nb\r\nc\r\n"],
     'mac style' => ["a\rb\rc\r", "a\r\nb\r\nc\r\n"],
@@ -9,8 +16,8 @@ test('unix2dos', function (string $input, string $expected) {
     'mix of styles' => ["a\nb\rc\r\n", "a\r\nb\r\nc\r\n"],
 ]);
 
-test('dos2unix', function (string $input, string $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->dos2unix($input))->toBe($expected);
+test('unixLineEndings', function (string $input, string $expected) {
+    expect(app(\App\LDraw\Parse\Parser::class)->unixLineEndings($input))->toBe($expected);
 })->with([
     'unix style' => ["a\nb\nc\n", "a\nb\nc\n"],
     'mac style' => ["a\rb\rc\r", "a\nb\nc\n"],
@@ -121,8 +128,8 @@ test('get keywords', function (string $input, ?array $expected) {
 test('get type', function (string $input, ?array $expected) {
     expect(app(\App\LDraw\Parse\Parser::class)->getType($input))->toBe($expected);
 })->with([
-    'unofficial, no qualifier' => ["0 !LDRAW_ORG Unofficial_Part", ['unofficial' => true, 'type' => 'Part', 'qual' => '', 'releasetype' => '', 'release' => '']],
-    'unofficial with qualifier' => ["0 !LDRAW_ORG Unofficial_Part Flexible_Section", ['unofficial' => true, 'type' => 'Part', 'qual' => 'Flexible_Section', 'releasetype' => '', 'release' => '']],
+    'unofficial, no qualifier' => ["0 !LDRAW_ORG Unofficial_Part", ['unofficial' => true, 'type' => 'Part', 'qual' => null, 'releasetype' => null, 'release' => null]],
+    'unofficial with qualifier' => ["0 !LDRAW_ORG Unofficial_Part Flexible_Section", ['unofficial' => true, 'type' => 'Part', 'qual' => 'Flexible_Section', 'releasetype' => null, 'release' => null]],
     'official update, no qualifier' => ["0 !LDRAW_ORG Part UPDATE 2022-01", ['unofficial' => false, 'type' => 'Part', 'qual' => '', 'releasetype' => 'UPDATE', 'release' => '2022-01']],
     'official update with qualifier' => ["0 !LDRAW_ORG Part Alias UPDATE 2022-01", ['unofficial' => false, 'type' => 'Part', 'qual' => 'Alias', 'releasetype' => 'UPDATE', 'release' => '2022-01']],
     'official original with qualifier' => ["0 !LDRAW_ORG Part Alias ORIGINAL", ['unofficial' => false, 'type' => 'Part', 'qual' => 'Alias', 'releasetype' => 'ORIGINAL', 'release' => 'original']],
@@ -198,6 +205,7 @@ test('get subparts', function (string $input, ?array $expected) {
 ]);
 
 test('parse', function () {
+    $this->seed();
     $text = file_get_contents(__DIR__ . "/testfiles/parsetest.dat");
     $part = app(\App\LDraw\Parse\Parser::class)->parse($text);
     expect($part->description)->toBe('Brick  1 x  2 x  5 with SW Han Solo Carbonite Pattern');
@@ -205,11 +213,11 @@ test('parse', function () {
     expect($part->realname)->toBe('Thomas Burger');
     expect($part->username)->toBe('grapeape');
     expect($part->unofficial)->toBe(true);
-    expect($part->type)->toBe('Part');
-    expect($part->type_qualifier)->toBe('Alias');
-    expect($part->releasetype)->toBe('');
-    expect($part->release)->toBe('');
-    expect($part->license)->toBe('Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt');
+    expect($part->type)->toBe(PartType::Part);
+    expect($part->type_qualifier)->toBe(PartTypeQualifier::Alias);
+    expect($part->releasetype)->toBe(null);
+    expect($part->release)->toBe(null);
+    expect($part->license)->toBe(License::CC_BY_2);
     expect($part->help)->toBe(['This is help', 'This is more help']);
     expect($part->bfc)->toBe('CW');
     expect($part->metaCategory)->toBe('Minifig Accessory');
@@ -224,6 +232,8 @@ test('parse', function () {
         'subparts' => ['s\2454as01.dat'],
         'textures' => ['2454aps5.png']
     ]);
-    expect($part->body)->toBe(app(\App\LDraw\Parse\Parser::class)->dos2unix(file_get_contents(__DIR__ . "/testfiles/getbody.dat")));
+    expect($part->body . "\n")->toBe(app(\App\LDraw\Parse\Parser::class)->unixLineEndings(file_get_contents(__DIR__ . "/testfiles/getbody.dat")));
     expect($part->rawText)->toBe($text);
+
 });
+

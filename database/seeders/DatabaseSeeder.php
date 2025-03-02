@@ -18,8 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         PartCategory::insert(LibraryConfig::partCategories());
         $ls = app(LibrarySettings::class);
-        if (empty($ls->allowed_header_metas)) {
-            $ls->allowed_header_metas = [
+        $ls->allowed_header_metas = [
                 'Name:',
                 'Author:',
                 '!LDRAW_ORG',
@@ -31,15 +30,13 @@ class DatabaseSeeder extends Seeder
                 '!CMDLINE',
                 '!HISTORY'
             ];
-        }
-        if (empty($ls->allowed_body_metas)) {
-            $ls->allowed_body_metas = [
+        $ls->allowed_body_metas = [
                 '!TEXMAP',
                 '!:',
                 'BFC',
                 '//',
             ];
-        }
+
         $ls->save();
     }
 }
