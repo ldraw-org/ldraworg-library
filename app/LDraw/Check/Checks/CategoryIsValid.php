@@ -12,12 +12,12 @@ class CategoryIsValid implements Check
 {
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
-        if ($part instanceof ParsedPart) {
+        if ($part instanceof ParsedPart && $part->type?->inPartsFolder()) {
             $pcat = $part->metaCategory ?? $part->descriptionCategory;
             $cat = PartCategory::firstWhere('category', $pcat);
             if (is_null($cat)) {
                 $fail(__('partcheck.category.invalid', ['value' => $pcat]));
             }
-        } 
+        }
     }
 }
