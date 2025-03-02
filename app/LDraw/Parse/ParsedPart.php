@@ -10,29 +10,40 @@ use App\Models\Part\Part;
 class ParsedPart
 {
     public function __construct(
-        public ?string $description,
-        public ?string $name,
-        public ?string $username,
-        public ?string $realname,
-        public ?bool $unofficial,
-        public ?PartType $type,
-        public ?PartTypeQualifier $type_qualifier,
-        public ?string $releasetype,
-        public ?string $release,
-        public ?License $license,
-        public ?array $help,
-        public ?string $bfc,
-        public ?string $metaCategory,
-        public ?string $descriptionCategory,
-        public ?array $keywords,
-        public ?string $cmdline,
-        public ?string $preview,
-        public ?array $history,
-        public ?array $subparts,
-        public ?string $body,
-        public ?string $rawText,
+        public ?string $description = null,
+        public ?string $name = null,
+        public ?string $username = null,
+        public ?string $realname = null,
+        public ?bool $unofficial = null,
+        public ?PartType $type = null,
+        public ?PartTypeQualifier $type_qualifier = null,
+        public ?string $releasetype = null,
+        public ?string $release = null,
+        public ?License $license = null,
+        public ?array $help = null,
+        public ?string $bfc = null,
+        public ?string $metaCategory = null,
+        public ?string $descriptionCategory = null,
+        public ?array $keywords = null,
+        public ?string $cmdline = null,
+        public ?string $preview = null,
+        public ?array $history = null,
+        public ?array $subparts = null,
+        public ?string $body = null,
+        public ?string $rawText = null,
         public int $header_length = 0,
     ) {
+    }
+
+    public static function fromArray(array $attributes): self
+    {
+        $p = new self();
+        foreach ($attributes as $attribute => $value) {
+            if (property_exists($p, $attribute)) {
+                $p->{$attribute} = $value;
+            }
+        }
+        return $p;
     }
 
     public static function fromPart(Part $part): self
