@@ -148,7 +148,7 @@ class PartListTable extends BasicTable
                         ->options(License::options())
                         ->multiple(),
                     TextConstraint::make('help')
-                        ->relationship(name: 'help', titleAttribute: 'help'),
+                        ->relationship(name: 'help', titleAttribute: 'text'),
                     DateConstraint::make('history_date')
                         ->relationship(name: 'history', titleAttribute: 'created_at'),
                     TextConstraint::make('history_comment')
