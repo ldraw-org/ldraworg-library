@@ -83,8 +83,8 @@ class JoinLdraw extends Component implements HasForms
             if (!Auth::check()) {
                 $u = MybbUser::findFromCookie();
                 $user = User::create([
-                    'name' => $u->username,
-                    'realname' => $u->loginname,
+                    'name' => $u->loginname,
+                    'realname' => $u->username,
                     'license' => License::CC_BY_4,
                     'forum_user_id' => $u->uid,
                     'password' => bcrypt(Str::random(40)),
