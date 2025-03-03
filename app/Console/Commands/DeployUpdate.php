@@ -28,38 +28,5 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::official()->update(['part_status' => PartStatus::Official]);
-        /*
-        Part::query()->update(['rebrickable' => null]);
-        $rb = app(\App\LDraw\Rebrickable::class);
-        Part::partsFolderOnly()
-            ->where('description', 'NOT LIKE', '~%')
-            ->where('description', 'NOT LIKE', '\_%')
-            ->where('description', 'NOT LIKE', '|%')
-            ->where('description', 'NOT LIKE', '%(Obsolete)%')
-            ->whereRelation('category', 'category', '<>', 'Sticker')
-            ->whereRelation('category', 'category', '<>', 'Moved')
-            ->lazy()
-            ->each(function (Part $part) use ($rb) {
-                $number = basename($part->filename, '.dat');
-                $rb_num = Str::lower($part->keywords()->where('keyword', 'LIKE', "Rebrickable %")->first()?->keyword);
-                $bl_num = Str::lower($part->keywords()->where('keyword', 'LIKE', "Bricklink %")->first()?->keyword);
-                $rb_part = $rb->getParts(['ldraw_id' => $number])->first();
-                if (is_null($rb_part) && Str::startsWith($rb_num, 'rebrickable')) {
-                    $rb_num = Str::chopStart(Str::lower($rb_num), 'rebrickable ');
-                    $rb_part = $rb->getPart($rb_num)->first();
-                }
-                if (is_null($rb_part) && Str::startsWith($bl_num, 'bricklink')) {
-                    $bl_num = Str::chopStart(Str::lower($bl_num), 'bricklink ');
-                    $rb_part = $rb->getParts(['bricklink_id' => $number])->first();
-                }
-                if (is_null($rb_part)) {
-                    $this->info($number, $rb_num, $bl_num);
-                    return;
-                }
-                $part->rebrickable = $rb_part;
-                $part->save();
-            });
-        */
     }
 }
