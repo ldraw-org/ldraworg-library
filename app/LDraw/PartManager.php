@@ -46,13 +46,13 @@ class PartManager
             }
             return null;
         }));
-        $parts->loadMissing('category', 'user', 'history');
+        $parts->load('category', 'user', 'history', 'help');
         $parts->each(function (Part $p) {
             $p->generateHeader();
             $this->updateMissing($p->name());
             $this->loadSubparts($p);
         });
-        $parts->load('descendants', 'ancestors', 'official_part');
+        $parts->load('descendantsAndSelf', 'descendants', 'ancestors', 'official_part');
         $parts->each(function (Part $p) {
             $p->updatePartStatus();
             if (!is_null($p->official_part)) {
