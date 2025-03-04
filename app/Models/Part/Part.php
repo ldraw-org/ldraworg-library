@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,6 +28,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 
 /**
@@ -322,7 +325,10 @@ class Part extends Model
                     $file = preg_replace('#\R#us', "\r\n", $file);
                 }
             } else {
-                $file = base64_decode($this->body->body);
+                $png = new \Imagick();
+                $png->readImageBlob(base64_decode($this->body->body));
+                $png->setImageProperty('LDrawHeader', $this->header);
+                $file = $png->getImageBlob();
             }
         } else {
             $file = rtrim($this->header) . "\n\n" . ($this->body->body ?? '');
@@ -353,15 +359,12 @@ class Part extends Model
         if ($data[VoteType::Hold->value] != 0) {
             $this->part_status = PartStatus::ErrorsFound;
         }
-        // Needs votes
         elseif (($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value] < 2) && $data[VoteType::AdminFastTrack->value] == 0) {
             $this->part_status = PartStatus::NeedsMoreVotes;
         }
-        // Awaiting Admin
         elseif ($data[VoteType::AdminFastTrack->value] == 0 && $data[VoteType::AdminCertify->value] == 0 && $data[VoteType::Certify->value] >= 2) {
             $this->part_status = PartStatus::AwaitingAdminReview;
         }
-        // Certified
         elseif (($data[VoteType::AdminCertify->value] > 0 && ($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value]) > 2) || $data[VoteType::AdminFastTrack->value] > 0) {
             $this->part_status = PartStatus::Certified;
         }
@@ -392,61 +395,60 @@ class Part extends Model
 
     public function setKeywords(array|Collection $keywords): void
     {
-        if ($keywords instanceof Collection) {
-            $this->keywords()->sync($keywords->pluck('id')->all());
-        } else {
-            $keywords = array_filter($keywords, fn (string $value) => strlen(trim($value)) > 0);
-            $kws = PartKeyword::whereIn('keyword', $keywords)->get();
-            $ids = $kws->pluck('id')->all();
-            $new_keywords = array_udiff($keywords, $kws->pluck('keyword')->all(), 'strcasecmp');
-            foreach ($new_keywords as $kw) {
-                $ids[] = PartKeyword::create(['keyword' => $kw])->id;
+        if (!$keywords instanceof Collection) {
+            if (is_array($keywords)) {
+                $keywords = collect($keywords);
             }
-            $this->keywords()->sync($ids);
+            $keywords = $keywords
+                ->filter()
+                ->map(fn (string $kw, int $key): string => Str::of($kw)->trim()->squish()->toString())
+                ->filter()
+                ->map(fn (string $kw, int $key): array =>
+                    ['id' => PartKeyword::firstOrCreate(['keyword' => $kw])->id]
+                );
         }
+        $keywords = $keywords->unique('id')->pluck('id')->filter()->all();
+        $this->keywords()->sync($keywords);
     }
 
-    public function setHelp(array|Collection $help): void
+    public function setHelp(array|SupportCollection $help): void
     {
         $this->help()->delete();
-        if ($help instanceof Collection) {
-            foreach ($help as $h) {
-                /** @var PartHelp $h */
-                PartHelp::create(['part_id' => $this->id, 'order' => $h->order, 'text' => $h->text]);
-            }
-        } else {
-            foreach ($help as $index => $h) {
-                /** @var PartHelp $h */
-                PartHelp::create(['part_id' => $this->id, 'order' => $index, 'text' => $h]);
-            }
+        if (!$help instanceof SupportCollection) {
+            $help = collect($help);
         }
+        $help
+            ->each(function (array|string $h, int $key): void {
+                if (is_string ($h)) {
+                    $help = [
+                        'order' => $key,
+                        'text' => $h,
+                    ];
+                } else {
+                    $help = [
+                        'order' => Arr::has($h, 'order') ? $h['order'] : $key,
+                        'text' => $h['text']
+                    ] ;
+                }
+                $this->help()->create($help);
+            });
     }
 
-    public function setHistory(array|Collection $history): void
+    public function setHistory(array|SupportCollection $history): void
     {
         $this->history()->delete();
-        if ($history instanceof Collection) {
-            foreach ($history as $hist) {
-                /** @var PartHistory $hist */
-                PartHistory::create([
-                    'user_id' => $hist->user->id,
-                    'part_id' => $this->id,
-                    'created_at' => $hist->created_at,
-                    'comment' => $hist->comment
-                ]);
-            }
-        } else {
-            foreach ($history as $hist) {
-                /** @var PartHistory $hist */
-                $u = User::fromAuthor($hist['user'])->first();
-                PartHistory::create([
-                    'user_id' => $u->id,
-                    'part_id' => $this->id,
-                    'created_at' => $hist['date'],
-                    'comment' => $hist['comment']
-                ]);
-            }
+        if (!$history instanceof SupportCollection) {
+            $history = collect($history);
         }
+        $history
+            ->each(fn (array $h, int $key) =>
+                $this->history()->create([
+                    'user_id' =>
+                        $h['user'] instanceof User ? $h['user']->id : User::fromAuthor($h['user'])->first()?->id,
+                    'created_at' => $h['date'],
+                    'comment' => $h['comment']
+                ])
+        );
     }
 
     public function setSubparts(array|Collection $subparts): void

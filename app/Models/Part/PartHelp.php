@@ -14,11 +14,7 @@ class PartHelp extends Model
     use HasPart;
     use HasOrder;
 
-    protected $fillable = [
-        'order',
-        'text',
-        'part_id',
-    ];
+    protected $guarded = [];
 
     public $timestamps = false;
 }

@@ -16,7 +16,6 @@ use App\LDraw\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartCategory;
 use App\Models\User;
-use App\Rules\PatternKeyword;
 use Closure;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -248,7 +247,7 @@ class EditHeaderAction
         if (!array_key_exists('keywords', $data)) {
             $data['keywords'] = [];
         } else {
-            $data['keywords'] = array_map(fn (string $kw) => trim($kw), explode(',', str_replace("\n", ",", $data['keywords'])));
+            $data['keywords'] = explode(',', str_replace("\n", ",", $data['keywords']));
         }
         $partKeywords = $part->keywords->pluck('keyword')->all();
         if ($partKeywords !== $data['keywords']) {
