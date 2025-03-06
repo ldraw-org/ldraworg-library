@@ -237,7 +237,7 @@ class PartManager
 
     public function updateBasePart(Part $part): void
     {
-        if (!$part->type->inPartsFolder()) {
+        if (!$part->type->inPartsFolder() || $part->category->category == 'Moved' || Str::endsWith($part->description, '(Obsolete)')) {
             return;
         }
 

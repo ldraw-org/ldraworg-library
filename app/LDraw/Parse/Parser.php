@@ -366,7 +366,7 @@ class Parser
     public function basepart(string $name): ?string
     {
         $part = $this->patternMatch('base', $name);
-        if (is_null($part)) {
+        if (!is_array($part) || !Arr::has($part, 'base')) {
             return null;
         }
 

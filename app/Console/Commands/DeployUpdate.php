@@ -42,7 +42,10 @@ class DeployUpdate extends Command
                 $p->has_minor_edit = true;
                 $p->save();
             });
-        Part::lazy()
+        Part::whereRelation('category', 'category', '!=', 'Moved')
+            ->where('description', 'NOT LIKE', '%(Obsolete)')
+            ->whereIn('type', PartType::partsFolderTypes())
+            ->lazy()
             ->each(function (Part $p) use ($pm) {
                 $pm->updateBasePart($p);
             });
