@@ -40,6 +40,12 @@ class UpdateParentParts implements ShouldQueue
                 fn (Part $p) => $pm->loadSubparts($p)
             );
         }
+        Part::unofficial()
+            ->whereJsonContains('missing_parts', $this->part->name())
+            ->each(function (Part $p) use ($pm) {
+                $pm->loadSubparts($p);
+                $pm->updateImage($p);
+            });
         $this->part->ancestors()->each(
             function (Part $p) use ($pm) {
                 $pm->updateImage($p);

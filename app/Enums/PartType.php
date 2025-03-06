@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
+use Illuminate\Support\Str;
 
 enum PartType: string
 {
@@ -41,6 +42,17 @@ enum PartType: string
             PartType::PrimitiveTexmap => 'p/textures',
             PartType::LowResPrimitiveTexmap => 'p/textures/8',
             PartType::HighResPrimitiveTexmap => 'p/textures/48'
+        };
+    }
+
+    public function nameFolder(): string
+    {
+        return match ($this) {
+            PartType::Part, PartType::Shortcut, PartType::Primitive => '',
+            default => Str::of($this->folder())
+                ->chopStart(['p/', 'parts/'])
+                ->replace('/','\\')
+                ->toString(),
         };
     }
 

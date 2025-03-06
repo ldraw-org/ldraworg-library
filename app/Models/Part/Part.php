@@ -326,7 +326,7 @@ class Part extends Model
                 }
             } else {
                 $png = new \Imagick();
-                $png->readImageBlob(base64_decode($this->body->body));
+                $png->readImageBlob(Str::fromBase64($this->body->body));
                 $png->setImageProperty('LDrawHeader', $this->header);
                 $file = $png->getImageBlob();
             }
@@ -414,8 +414,15 @@ class Part extends Model
     public function setHelp(array|SupportCollection $help): void
     {
         $this->help()->delete();
-        if (!$help instanceof SupportCollection) {
+        if (is_array($help)) {
             $help = collect($help);
+        } elseif ($help instanceof Collection) {
+            $help = collect($help
+                ->map(fn (PartHelp $h) =>
+                    ['order' => $h->order, 'text' => $h->text]
+                )
+                ->all()
+            );
         }
         $help
             ->each(function (array|string $h, int $key): void {
@@ -437,8 +444,19 @@ class Part extends Model
     public function setHistory(array|SupportCollection $history): void
     {
         $this->history()->delete();
-        if (!$history instanceof SupportCollection) {
+        if (is_array($history)) {
             $history = collect($history);
+        } elseif ($history instanceof Collection) {
+            $history = collect($history
+                ->map(fn (PartHistory $h) =>
+                    [
+                        'user' => $h->user->name,
+                        'date' => $h->created_at,
+                        'comment' => $h->comment,
+                    ]
+                )
+                ->all()
+            );
         }
         $history
             ->each(fn (array $h, int $key) =>
@@ -487,18 +505,9 @@ class Part extends Model
 
     public function setBody(string|PartBody $body): void
     {
-        if ($body instanceof PartBody) {
-            $body = $body->body;
-        }
-        if (is_null($this->body)) {
-            PartBody::create([
-                'part_id' => $this->id,
-                'body' => $body,
-            ]);
-        } else {
-            $this->body->body = $body;
-            $this->body->save();
-        }
+        $this->body()->updateOrCreate([
+            'body' => $body instanceof PartBody ? $body->body : $body
+        ]);
     }
 
     public function generateHeader(): void
@@ -628,5 +637,4 @@ class Part extends Model
             return $this->part_status->label();
         }
     }
-
 }

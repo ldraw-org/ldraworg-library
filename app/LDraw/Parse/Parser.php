@@ -362,4 +362,53 @@ class Parser
 
         return null;
     }
+
+    public function basepart(string $name): ?string
+    {
+        $part = $this->patternMatch('base', $name);
+        if (is_null($part)) {
+            return null;
+        }
+
+        $basepart = $part['base'];
+        if (Arr::has($part, 'suffix3')) {
+            $basepart .= $part['suffix1'] . $part['suffix2'];
+        } elseif (Arr::has($part, 'suffix2')){
+            $basepart .= $part['suffix1'];
+        }
+
+        return $basepart;
+    }
+
+    protected function endsWithSuffix(string $name, string $code): bool
+    {
+        $part = $this->patternMatch('base', $name);
+        if (is_null($part)) {
+            return false;
+        }
+        if (Arr::has($part, 'suffix3')) {
+            return Str::startsWith($part['suffix3'], $code);
+        } elseif (Arr::has($part, 'suffix2')){
+            return Str::startsWith($part['suffix2'], $code);
+        } elseif (Arr::has($part, 'suffix1')){
+            return Str::startsWith($part['suffix1'], $code);
+        }
+        return false;
+    }
+
+    public function patternName(string $name): bool
+    {
+        return $this->endsWithSuffix($name, 'p');
+    }
+
+    public function compositeName(string $name): bool
+    {
+        return $this->endsWithSuffix($name, 'c');
+    }
+
+    public function shortcutName(string $name): bool
+    {
+        return $this->endsWithSuffix($name, 'd');
+    }
+
 }

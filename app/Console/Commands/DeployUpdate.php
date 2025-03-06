@@ -36,11 +36,15 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
+        $pm = app(PartManager::class);
         Part::whereIn('type', PartType::imageFormat())
             ->each(function (Part $p) {
-                $body = $p->get();
-                $p->body->body = base64_encode($body);
-                $p->body->save();
+                $p->has_minor_edit = true;
+                $p->save();
+            });
+        Part::lazy()
+            ->each(function (Part $p) use ($pm) {
+                $pm->updateBasePart($p);
             });
     }
 }

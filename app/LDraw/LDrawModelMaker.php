@@ -105,7 +105,7 @@ class LDrawModelMaker
             }
             foreach ($sparts as $s) {
                 /** @var Part $s */
-                $text = base64_encode($s->get());
+                $text = Str::toBase64($s->get());
                 $name = Str::chopStart($s->filename, ['parts/', 'p/']);
                 if ($s->isTexmap()) {
                     $name = Str::chopStart($name, 'textures/');
@@ -116,7 +116,7 @@ class LDrawModelMaker
 
             }
         } elseif ($model instanceof OmrModel) {
-            $webgl[$model->filename()] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
+            $webgl[$model->filename()] = 'data:text/plain;base64,' . Str::toBase64($this->modelMpd($model));
         } else {
             $isMpd = preg_match('/^0\h+FILE\h+((?:.*?)(?:\.ldr|\.dat|\.mpd))/i', $model, $match);
             if ($isMpd) {
@@ -124,9 +124,9 @@ class LDrawModelMaker
             } else {
                 $model = "0 FILE model.ldr\r\n$model";
             }
-            $webgl['model.ldr'] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
+            $webgl['model.ldr'] = 'data:text/plain;base64,' . Str::toBase64($this->modelMpd($model));
         }
-        $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::disk('library')->get('official/LDConfig.ldr'));
+        $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . Str::toBase64(Storage::disk('library')->get('official/LDConfig.ldr'));
         return $webgl;
     }
 

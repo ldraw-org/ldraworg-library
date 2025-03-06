@@ -3,8 +3,8 @@
 namespace App\LDraw;
 
 use App\Enums\PartType;
-use App\Enums\PartTypeQualifier;
 use App\Jobs\UpdateParentParts;
+use App\LDraw\Parse\ParsedPart;
 use App\LDraw\Parse\Parser;
 use App\LDraw\Render\LDView;
 use App\Models\Part\Part;
@@ -16,6 +16,8 @@ use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Image\Image;
@@ -32,90 +34,70 @@ class PartManager
     ) {
     }
 
-    public function submit(LDrawFile|array $files, User $user): Collection
+    public function submit(LDrawFile|SupportCollection|array $files, User $user): Collection
     {
-        if ($files instanceof LDrawFile) {
-            $files = [$files];
+        if (!$files instanceof SupportCollection) {
+            $files = collect($files);
         }
         // Parse each part into the tracker
-        $parts = new Collection(Arr::map($files, function (LDrawFile $file, int $key) use ($files, $user) {
+        $parts = new Collection($files->map(function (LDrawFile $file, int $key) use ($files, $user) {
             if ($file->mimetype == 'image/png') {
-                return $this->makePartFromImage($file->filename, $file->contents, $user, $this->guessPartType($file->filename, $files));
+                return $this->makePartFromImage($file, $user, $this->guessPartType($file->filename, $files));
             } elseif ($file->mimetype == 'text/plain') {
-                return $this->makePartFromText($file->contents);
+                return $this->makePartFromText($file);
             }
             return null;
-        }));
-        $parts->load('category', 'user', 'history', 'help');
-        $parts->each(function (Part $p) {
-            $p->generateHeader();
-            $this->updateMissing($p->name());
-            $this->loadSubparts($p);
-        });
-        $parts->load('descendantsAndSelf', 'descendants', 'ancestors', 'official_part');
-        $parts->each(function (Part $p) {
-            $p->updatePartStatus();
-            if (!is_null($p->official_part)) {
-                $this->updateUnofficialWithOfficialFix($p->official_part);
-            };
-            $this->updateBasePart($p);
-            $this->updateImage($p);
-            $this->checkPart($p);
-            $this->addStickerSheet($p);
-            $p->updateReadyForAdmin();
-            $this->addUnknownNumber($p);
-            UpdateParentParts::dispatch($p);
-        });
+        })->all());
+        $this->finalizePart($parts);
         return $parts;
     }
 
-    protected function guessPartType(string $filename, array $partfiles): PartType
+    public function guessPartType(string $filename, SupportCollection $files): PartType
     {
-        $p = Part::firstWhere('filename', 'LIKE', "%{$filename}");
-        //Texmap exists, use that type
+        // Check if part exists and return that type
+        $p = Part::firstWhere('filename', 'LIKE', "%/textures%/{$filename}");
         if (!is_null($p)) {
             return $p->type;
         }
-        // Texmap is used in one of the submitted files, use the type appropriate for that part
-        foreach ($partfiles as $file) {
-            if ($file->mimetype == 'text/plain' && $filename !== $file->filename && stripos($filename, $file->contents) !== false) {
-                $type = $this->parser->getType($file->contents);
-                $pt = PartType::from(Arr::get($type, 'type'));
-                $textype = PartType::tryFrom("{$pt->value}_Texmap");
-                if (!is_null($textype)) {
-                    return $textype;
-                }
-            }
-        }
-        return PartType::PartTexmap;
+
+        // See if it is used by the group of submitted files
+        $p = $files->first(
+            fn (LDrawFile $f, int $key) =>
+                $f->mimetype == 'text/plain' && Str::containsAll($f->contents, ['!TEXMAP', $filename])
+        );
+
+        return PartType::tryFrom(Arr::get($this->parser->getType($p?->contents ?? ''), 'type') . '_Texmap') ?? PartType::PartTexmap;
     }
 
-    protected function makePartFromImage(string $filename, string $contents, User $user, PartType $type): Part
+    protected function makePartFromImage(LDrawFile $file, User $user, PartType $type): Part
     {
+        $png = new \Imagick();
+        $png->readImageBlob($file->contents);
+        $header = $png->getImageProperty('LDrawHeader') ?: '';
+        $p = $this->parser->parse($header);
+        $u = User::fromAuthor($p->username, $p->realname)->first() ?? $user;
+        $filename = $type->folder() . '/' . basename(str_replace('\\', '/', $p->name ?? $file->filename));
         $attributes = [
-            'user_id' => $user->id,
-            'license' => $user->license,
-            'filename' => "{$type->folder()}/{$filename}",
+            'user_id' => $u->id,
+            'license' => $p->license ?? $user->license,
+            'filename' => $filename,
             'description' => "{$type->description()} {$filename}",
             'type' => $type,
             'header' => '',
         ];
         $upart = $this->makePart($attributes);
-        $upart->setBody(base64_encode($contents));
-        $upart->refresh();
+        $upart->setBody(Str::toBase64($file->contents));
         return $upart;
     }
 
-    protected function makePartFromText(string $text): Part
+    protected function makePartFromText(LDrawFile $file): Part
     {
-        $part = $this->parser->parse($text);
+        $part = $this->parser->parse($file->contents);
 
         $user = User::fromAuthor($part->username, $part->realname)->first();
         $cat = PartCategory::firstWhere('category', $part->metaCategory ?? $part->descriptionCategory);
         $filename = $part->type->folder() . '/' . basename(str_replace('\\', '/', $part->name));
-        if ($part->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1') {
-            $part->preview = null;
-        }
+        $part->preview = $part->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ?: null;
         $values = [
             'description' => $part->description,
             'filename' => $filename,
@@ -137,6 +119,7 @@ class PartManager
         $upart->refresh();
         return $upart;
     }
+
 
     protected function makePart(array $values): Part
     {
@@ -191,22 +174,30 @@ class PartManager
         }
     }
 
-    public function finalizePart(Part $part): void
+    public function finalizePart(Part|Collection $parts): void
     {
-        $part->updatePartStatus();
-        $part->generateHeader();
-        $this->updateMissing($part->name());
-        $this->loadSubparts($part);
-        if (!is_null($part->official_part)) {
-            $this->updateUnofficialWithOfficialFix($part->official_part);
-        };
-        $this->updateBasePart($part);
-        $this->updateImage($part);
-        $this->checkPart($part);
-        $this->addStickerSheet($part);
-        $part->updateReadyForAdmin();
-        $this->addUnknownNumber($part);
-        UpdateParentParts::dispatch($part);
+        if ($parts instanceof Part) {
+            $parts = (new Collection())->add($parts);
+        }
+        $parts->loadMissing('keywords', 'help', 'history', 'body', 'user', 'category');
+        $parts->each(function (Part $p) {
+            $this->loadSubparts($p);
+            $p->generateHeader();
+        });
+        $parts->load('descendantsAndSelf', 'descendants', 'ancestors', 'official_part');
+        $parts->each(function (Part $p) {
+            $p->updatePartStatus();
+            if (!is_null($p->official_part)) {
+                $this->updateUnofficialWithOfficialFix($p->official_part);
+            };
+            $this->updateBasePart($p);
+            $this->updateImage($p);
+            $this->checkPart($p);
+            $this->addStickerSheet($p);
+            $p->updateReadyForAdmin();
+            $this->addUnknownNumber($p);
+            UpdateParentParts::dispatch($p);
+        });
     }
 
     public function updateImage(Part $part): void
@@ -244,42 +235,31 @@ class PartManager
         });
     }
 
-    public function updateBasePart(Part $part, bool $force = false): void
+    public function updateBasePart(Part $part): void
     {
-        if (!$force && ($part->is_pattern || $part->is_composite || $part->is_dual_mould || !is_null($part->base_part))) {
+        if (!$part->type->inPartsFolder()) {
             return;
         }
 
-        $result = preg_match(config('ldraw.patterns.base'), basename($part->filename), $matches);
-        if (!$result) {
+        $base = $this->parser->basepart(basename($part->filename));
+        if (is_null($base)) {
             return;
         }
 
-        $bp = null;
-        for ($i = 7, $j = 2; $i >= 5; $i--, $j++) {
-            if ($matches[$i] != '') {
-                $bp = Part::doesntHave('official_part')
-                    ->where(
-                        fn ($q) => $q
-                            ->orWhere('filename', "parts/{$matches[$j]}.dat")
-                            ->orWhere('filename', "parts/{$matches[$j]}-f1.dat")
-                    )->first();
-                if (!is_null($bp)) {
-                    break;
-                }
-            }
-        }
-        if (!is_null($bp) && $matches[5] != '') {
+        $bp = Part::doesntHave('official_part')
+            ->where(
+                fn ($q) => $q
+                    ->orWhere('filename', "parts/{$base}.dat")
+                    ->orWhere('filename', "parts/{$base}-f1.dat")
+            )
+            ->first();
+
+        if (!is_null($bp)) {
             $part->base_part()->associate($bp);
         }
-        if ($matches[5] != '') {
-            $part->is_pattern = mb_substr($matches[5], 0, 1) == 'p' ||
-                mb_substr($matches[6], 0, 1) == 'p' ||
-                mb_substr($matches[7], 0, 1) == 'p';
-            $part->is_composite = mb_substr($matches[5], 0, 1) == 'c' ||
-                mb_substr($matches[6], 0, 1) == 'c' ||
-                mb_substr($matches[7], 0, 1) == 'c';
-        }
+
+        $part->is_pattern = $this->parser->patternName(basename($part->filename));
+        $part->is_composite = $this->parser->compositeName(basename($part->filename));
         if ($part->isDirty()) {
             $part->save();
         }
@@ -319,7 +299,7 @@ class PartManager
     public function movePart(Part $part, string $newName, PartType $newType): bool
     {
         $oldname = $part->name();
-        if ($newName == '.dat') {
+        if ($newName == '.dat' || $newName == '.png') {
             $newName = basename($part->filename);
         }
         if ($part->isTexmap()) {
@@ -340,7 +320,7 @@ class PartManager
         $part->filename = $newName;
         $part->save();
         $part->generateHeader();
-        $this->updateBasePart($part, true);
+        $this->updateBasePart($part);
         $this->updateImage($part);
         foreach ($part->parents()->unofficial()->get() as $p) {
             if ($part->type->inPartsFolder() && $p->category->category === "Moved") {

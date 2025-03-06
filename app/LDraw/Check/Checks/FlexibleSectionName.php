@@ -7,6 +7,7 @@ use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class FlexibleSectionName implements Check
@@ -21,7 +22,7 @@ class FlexibleSectionName implements Check
 
         $result = preg_match(config('ldraw.patterns.base'), basename($name), $matches);
         if ($part->type_qualifier == PartTypeQualifier::FlexibleSection &&
-            (!$result || (!Str::startsWith($matches[5], 'k') && !Str::startsWith($matches[6], 'k') && !Str::startsWith($matches[7], 'k')))
+            (!$result || (Arr::has($matches, 'suffix1') && !Str::startsWith($matches['suffix1'], 'k')))
         ) {
             $fail(__('partcheck.type.flexname'));
         }

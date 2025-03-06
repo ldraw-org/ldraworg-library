@@ -4,6 +4,7 @@ namespace App\LDraw\Check\Checks;
 
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
+use App\LDraw\Parse\Parser;
 use App\Models\Part\Part;
 use Closure;
 use Illuminate\Support\Str;
@@ -21,8 +22,7 @@ class PatternPartDesciption implements Check
             }
             $cat = $part->category->category;
         } else {
-            $result = preg_match(config('ldraw.patterns.base'), basename(str_replace('\\', '/', $part->name)), $matches);
-            if (!$result || (!Str::startsWith($matches[5], 'p') && !Str::startsWith($matches[6], 'p') && !Str::startsWith($matches[7], 'p'))) {
+            if (!app(Parser::class)->patternName($part->name)) {
                 return;
             }
             $cat = $part->metaCategory ?? $part->descriptionCategory;
