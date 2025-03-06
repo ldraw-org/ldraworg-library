@@ -15,7 +15,6 @@
         "http-interop/http-factory-guzzle": ">=1.2",
         "icehouse-ventures/laravel-chartjs": "^4.2",
         "lara-zeus/quantity": "^1.0.9",
-        "laravel-notification-channels/discord": "^1.6",
         "laravel/framework": "^11.44",
         "laravel/telescope": "^5.5",
         "laravel/tinker": "^2.10.1",

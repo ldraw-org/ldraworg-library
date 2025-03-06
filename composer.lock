@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "466dd2119998281626b7574994530a04",
+    "content-hash": "286b10378dc6de34f001c7338fbe2db3",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2356,74 +2356,6 @@
                 }
             ],
             "time": "2024-12-22T14:48:49+00:00"
-        },
-        {
-            "name": "laravel-notification-channels/discord",
-            "version": "v1.6.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel-notification-channels/discord.git",
-                "reference": "317117f22c6c2b9a4f78976f097c3082e40902da"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laravel-notification-channels/discord/zipball/317117f22c6c2b9a4f78976f097c3082e40902da",
-                "reference": "317117f22c6c2b9a4f78976f097c3082e40902da",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "guzzlehttp/guzzle": "^6.3 || ^7.0",
-                "illuminate/console": "^7.0 || ^8.0 || ^9.0 || ^10.0|^11.0",
-                "illuminate/notifications": "^7.0 || ^8.0 || ^9.0 || ^10.0|^11.0",
-                "illuminate/queue": "^7.0 || ^8.0 || ^9.0 || ^10.0|^11.0",
-                "illuminate/support": "^7.0 || ^8.0 || ^9.0 || ^10.0|^11.0",
-                "php": "^7.2|^8.0",
-                "textalk/websocket": "^1.2"
-            },
-            "require-dev": {
-                "mockery/mockery": "^1.3.3",
-                "orchestra/testbench": "^6.0 || ^7.0 || ^8.0|^9.0",
-                "phpunit/phpunit": "^8.5 || ^9.0|^10.5"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "NotificationChannels\\Discord\\DiscordServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "NotificationChannels\\Discord\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Cody Scott",
-                    "email": "cs475x@icloud.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Laravel notification driver for Discord.",
-            "homepage": "https://github.com/laravel-notification-channels/discord",
-            "keywords": [
-                "channel",
-                "discord",
-                "driver",
-                "laravel",
-                "notification"
-            ],
-            "support": {
-                "issues": "https://github.com/laravel-notification-channels/discord/issues",
-                "source": "https://github.com/laravel-notification-channels/discord/tree/v1.6.0"
-            },
-            "time": "2024-04-01T01:31:08+00:00"
         },
         {
             "name": "laravel/framework",
@@ -9728,55 +9660,6 @@
                 }
             ],
             "time": "2025-01-17T11:39:41+00:00"
-        },
-        {
-            "name": "textalk/websocket",
-            "version": "1.5.8",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Textalk/websocket-php.git",
-                "reference": "d05dbaa97500176447ffb1f1800573f23085ab13"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Textalk/websocket-php/zipball/d05dbaa97500176447ffb1f1800573f23085ab13",
-                "reference": "d05dbaa97500176447ffb1f1800573f23085ab13",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.2 | ^8.0",
-                "psr/log": "^1 | ^2 | ^3"
-            },
-            "require-dev": {
-                "php-coveralls/php-coveralls": "^2.0",
-                "phpunit/phpunit": "^8.0|^9.0",
-                "squizlabs/php_codesniffer": "^3.5"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "WebSocket\\": "lib"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "ISC"
-            ],
-            "authors": [
-                {
-                    "name": "Fredrik Liljegren"
-                },
-                {
-                    "name": "Sören Jensen",
-                    "email": "soren@abicart.se"
-                }
-            ],
-            "description": "WebSocket client and server",
-            "support": {
-                "issues": "https://github.com/Textalk/websocket-php/issues",
-                "source": "https://github.com/Textalk/websocket-php/tree/1.5.8"
-            },
-            "time": "2022-04-26T06:28:24+00:00"
         },
         {
             "name": "tijsverkoyen/css-to-inline-styles",
