@@ -122,6 +122,7 @@ test('check category', function (string $input, bool $expected) {
     $this->seed();
     $p = ParsedPart::fromArray([
         'descriptionCategory' => $input,
+        'type' => PartType::Part,
     ]);
     expect(runSingleCheck($p, new \App\LDraw\Check\Checks\CategoryIsValid()))->toBe($expected);
     $p->descriptionCategory = 'Cheese';

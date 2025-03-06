@@ -14,8 +14,8 @@ class CategoryIsValid implements Check
     {
         if ($part instanceof ParsedPart && $part->type?->inPartsFolder()) {
             $pcat = $part->metaCategory ?? $part->descriptionCategory;
-            $cat = PartCategory::firstWhere('category', $pcat);
-            if (is_null($cat)) {
+            $pcat = PartCategory::firstWhere('category', $pcat);
+            if (is_null($pcat)) {
                 $fail(__('partcheck.category.invalid', ['value' => $pcat]));
             }
         }
