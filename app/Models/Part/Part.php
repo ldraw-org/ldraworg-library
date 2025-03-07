@@ -505,9 +505,15 @@ class Part extends Model
 
     public function setBody(string|PartBody $body): void
     {
-        $this->body()->updateOrCreate([
-            'body' => $body instanceof PartBody ? $body->body : $body
-        ]);
+        $body = $body instanceof PartBody ? $body->body : $body;
+        if (is_null($this->body)) {
+            $this->body()->create([
+                'body' => $body
+            ]);
+            return;
+        }
+        $this->body->body = $body;
+        $this->body->save();
     }
 
     public function generateHeader(): void

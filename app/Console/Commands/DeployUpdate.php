@@ -36,18 +36,5 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        $pm = app(PartManager::class);
-        Part::whereIn('type', PartType::imageFormat())
-            ->each(function (Part $p) {
-                $p->has_minor_edit = true;
-                $p->save();
-            });
-        Part::whereRelation('category', 'category', '!=', 'Moved')
-            ->where('description', 'NOT LIKE', '%(Obsolete)')
-            ->whereIn('type', PartType::partsFolderTypes())
-            ->lazy()
-            ->each(function (Part $p) use ($pm) {
-                $pm->updateBasePart($p);
-            });
     }
 }
