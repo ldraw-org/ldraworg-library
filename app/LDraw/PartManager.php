@@ -37,7 +37,7 @@ class PartManager
     public function submit(LDrawFile|SupportCollection|array $files, User $user): Collection
     {
         if (!$files instanceof SupportCollection) {
-            $files = collect($files);
+            $files = collect([$files]);
         }
         // Parse each part into the tracker
         $parts = new Collection($files->map(function (LDrawFile $file, int $key) use ($files, $user) {
