@@ -4,12 +4,14 @@ namespace App\Models\Part;
 
 use App\Enums\EventType;
 use App\Enums\License;
+use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
 use App\Models\Rebrickable\RebrickablePart;
 use App\Models\StickerSheet;
+use App\Models\Part\PartCategory as PartCategoryModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -52,6 +54,7 @@ class Part extends Model
     *     type_qualifier: 'App\Enums\PartTypeQualifier',
     *     license: 'App\Enums\License',
     *     part_status: 'App\Enums\PartStatus',
+    *     category => 'App\Enums\PartCategory',
     *     delete_flag: 'boolean',
     *     manual_hold_flag: 'boolean',
     *     has_minor_edit: 'boolean',
@@ -73,6 +76,7 @@ class Part extends Model
             'type_qualifier' => PartTypeQualifier::class,
             'license' => License::class,
             'part_status' => PartStatus::class,
+            'category' => PartCategory:: class,
             'delete_flag' => 'boolean',
             'manual_hold_flag' => 'boolean',
             'has_minor_edit' => 'boolean',
@@ -103,9 +107,9 @@ class Part extends Model
         return 'subpart_id';
     }
 
-    public function category(): BelongsTo
+    public function part_category(): BelongsTo
     {
-        return $this->belongsTo(PartCategory::class, 'part_category_id', 'id');
+        return $this->belongsTo(PartCategoryModel::class, 'part_category_id', 'id');
     }
 
     public function subparts(): BelongsToMany
@@ -185,7 +189,7 @@ class Part extends Model
 
     public function shortcuts(): HasMany
     {
-        return $this->HasMany(Part::class, 'base_part_id', 'id')->whereRelation('category', 'category', 'Sticker Shortcut');
+        return $this->HasMany(Part::class, 'base_part_id', 'id')->where('category', PartCategory::StickerShortcut);
     }
 
     public function sticker_sheet(): BelongsTo
@@ -550,14 +554,15 @@ class Part extends Model
         }
 
         $addBlank = false;
-        if (!is_null($this->category) && ($this->type === PartType::Part || $this->type === PartType::Shortcut)) {
-            $d = trim($this->description);
-            if ($d !== '' && in_array($d[0], ['~', '|', '=', '_'])) {
-                $d = trim(substr($d, 1));
+        if (!is_null($this->category) && $this->type->inPartsFolder()) {
+            $word = 1;
+            if (Str::of($this->description)->trim()->words(1,'')->replace(['~', '|', '=', '_'], '') == '') {
+                $word = 2;
             }
-            $cat = mb_strstr($d, " ", true);
-            if ($cat != $this->category->category) {
-                $header[] = $this->category->toString();
+            $cat = Str::of($this->description)->trim()->words($word,'')->replace(['~', '|', '=', '_', ' '], '')->toString();
+            $cat = PartCategory::tryFrom($cat);
+            if ($cat != $this->category) {
+                $header[] = $this->category->ldrawString();
                 $addBlank = true;
             }
         }

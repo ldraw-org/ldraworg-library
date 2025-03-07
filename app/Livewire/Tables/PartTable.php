@@ -3,6 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Enums\License;
+use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -111,8 +112,8 @@ class PartTable
                 ->multiple()
                 ->preload()
                 ->label('Part Type'),
-            SelectFilter::make('part_category_id')
-                ->relationship('category', 'category')
+            SelectFilter::make('category')
+                ->options(PartCategory::options())
                 ->native(false)
                 ->multiple()
                 ->preload()

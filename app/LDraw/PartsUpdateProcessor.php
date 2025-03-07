@@ -2,6 +2,7 @@
 
 namespace App\LDraw;
 
+use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Events\PartReleased;
@@ -102,7 +103,7 @@ class PartsUpdateProcessor
             }
         }
         $data['moved_parts'] = [];
-        $moved = $this->parts->where('category.category', 'Moved');
+        $moved = $this->parts->where('category', PartCategory::Moved);
         foreach ($moved as $part) {
             /** @var Part $part */
             $data['moved_parts'][] = ['name' => $part->name(),  'movedto' => $part->description];
@@ -111,7 +112,7 @@ class PartsUpdateProcessor
         $data['rename'] = [];
         $notMoved = $this->parts
             ->whereNotNull('official_part')
-            ->where('category.category', '!=', 'Moved');
+            ->where('category', '!=', PartCategory::Moved);
         foreach ($notMoved as $part) {
             /** @var Part $part */
             if ($part->description != $part->official_part->description) {
@@ -259,7 +260,7 @@ class PartsUpdateProcessor
             'part_release_id' => $this->release->id,
             'license' => $upart->license,
             'bfc' => $upart->bfc,
-            'part_category_id' => $upart->part_category_id,
+            'category' => $upart->category,
             'cmdline' => $upart->cmdline,
             'header' => $upart->header,
         ];

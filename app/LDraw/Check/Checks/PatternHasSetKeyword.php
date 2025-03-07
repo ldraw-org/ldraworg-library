@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartCategory;
 use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
@@ -23,7 +24,7 @@ class PatternHasSetKeyword implements Check
             if ($part->is_pattern !== true) {
                 return;
             }
-            $cat = $part->category->category;
+            $cat = $part->category;
             $hasSetKw = $part
                 ->keywords
                 ->filter(fn (PartKeyword $kw) => Str::startsWith(Str::lower($kw->keyword), ['set ', 'cmf', 'build-a-minifigure']))
@@ -39,7 +40,7 @@ class PatternHasSetKeyword implements Check
             )) > 0;
         }
 
-        if ($cat != 'Moved' && ! $hasSetKw) {
+        if ($cat != PartCategory::Moved && ! $hasSetKw) {
             $fail(__('partcheck.keywords'));
         }
 

@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Part\Part;
+use App\Enums\PartCategory;
 use App\Models\StickerSheet;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class StickerSheetShowController extends Controller
 {
@@ -13,17 +12,17 @@ class StickerSheetShowController extends Controller
     {
         $flat = $sheet->parts
             ->whereNull('unofficial_part')
-            ->where('category.category', 'Sticker')
-            ->filter(fn (Part $part, int $key) => !Str::contains($part->description, '(Formed)'))
+            ->where('category', PartCategory::Sticker)
+            ->where('is_composite', false)
             ->sortBy('filename');
         $formed = $sheet->parts
             ->whereNull('unofficial_part')
-            ->where('category.category', 'Sticker')
-            ->filter(fn (Part $part, int $key) => Str::contains($part->description, '(Formed)'))
+            ->where('category', PartCategory::Sticker)
+            ->where('is_composite', true)
             ->sortBy('filename');
         $shortcuts = $sheet->parts
             ->whereNull('unofficial_part')
-            ->where('category.category', '<>', 'Sticker')
+            ->where('category', '!=', PartCategory::Sticker)
             ->sortBy('filename');
         return view('sticker-sheet.show', compact('sheet', 'flat', 'formed', 'shortcuts'));
     }

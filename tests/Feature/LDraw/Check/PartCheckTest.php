@@ -118,21 +118,6 @@ test('check library bfc certify', function (string $input, bool $expected) {
     'approved' => ["CCW", true],
 ]);
 
-test('check category', function (string $input, bool $expected) {
-    $this->seed();
-    $p = ParsedPart::fromArray([
-        'descriptionCategory' => $input,
-        'type' => PartType::Part,
-    ]);
-    expect(runSingleCheck($p, new \App\LDraw\Check\Checks\CategoryIsValid()))->toBe($expected);
-    $p->descriptionCategory = 'Cheese';
-    $p->metaCategory = $input;
-    expect(runSingleCheck($p, new \App\LDraw\Check\Checks\CategoryIsValid()))->toBe($expected);
-})->with([
-    'not approved' => ["Big Ugly Rock Piece", false],
-    'approved' => ["Brick", true],
-]);
-
 test('check pattern for set keyword', function (string $name, array $keywords, bool $expected) {
     $p = new ParsedPart();
     $p = ParsedPart::fromArray([

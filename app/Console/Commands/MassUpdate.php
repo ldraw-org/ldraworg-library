@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\VoteType;
 use App\Events\PartSubmitted;
 use App\LDraw\PartManager;
 use App\LDraw\VoteManager;
 use App\Models\Part\Part;
-use App\Models\Part\PartCategory;
 use App\Models\User;
 use Illuminate\Console\Command;
 
@@ -37,14 +37,13 @@ class MassUpdate extends Command
         $pm = app(PartManager::class);
         $vm = app(VoteManager::class);
         $user = User::firstWhere('name', 'OrionP');
-        $ob_cat = PartCategory::firstWhere('category', 'Obsolete');
         Part::where('description', 'LIKE', '%(Obsolete)')
             ->whereIn('type', PartType::partsFolderTypes())
-            ->where('part_category_id', '!=', $ob_cat->id)
+            ->where('category', '!=', PartCategory::Obsolete)
             ->doesntHave('unofficial_part')
-            ->each(function (Part $part) use ($pm, $ob_cat, $user, $vm) {
+            ->each(function (Part $part) use ($pm, $user, $vm) {
                 $up = $pm->copyOfficialToUnofficialPart($part);
-                $up->category()->associate($ob_cat);
+                $up->category = PartCategory::Obsolete;
                 $part->unofficial_part()->associate($up);
                 $part->save();
                 $up->history()->create([

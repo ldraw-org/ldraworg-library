@@ -3,8 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Enums\PartType;
-use App\LDraw\LibraryConfig;
-use App\Models\Part\PartCategory;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,13 +27,6 @@ class UpdateConfig extends Command
      */
     public function handle()
     {
-        foreach (LibraryConfig::partCategories() as $category) {
-            PartCategory::updateOrCreate(
-                ['category' => $category['category']],
-                $category
-            );
-        }
-
         foreach (PartType::cases() as $dir) {
             if (!Storage::disk('images')->exists("library/official/{$dir->value}")) {
                 Storage::disk('images')->makeDirectory("library/official/{$dir->value}");

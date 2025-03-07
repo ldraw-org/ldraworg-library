@@ -2,13 +2,12 @@
 
 namespace App\LDraw;
 
+use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Jobs\UpdateParentParts;
-use App\LDraw\Parse\ParsedPart;
 use App\LDraw\Parse\Parser;
 use App\LDraw\Render\LDView;
 use App\Models\Part\Part;
-use App\Models\Part\PartCategory;
 use App\Models\Part\UnknownPartNumber;
 use App\Models\StickerSheet;
 use App\Models\User;
@@ -96,7 +95,7 @@ class PartManager
         $part = $this->parser->parse($file->contents);
 
         $user = User::fromAuthor($part->username, $part->realname)->first();
-        $cat = PartCategory::firstWhere('category', $part->metaCategory ?? $part->descriptionCategory);
+        $cat = $part->metaCategory ?? $part->descriptionCategory;
         $filename = $part->type->folder() . '/' . basename(str_replace('\\', '/', $part->name));
         $part->preview = $part->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ?: null;
         $values = [
@@ -107,7 +106,7 @@ class PartManager
             'type_qualifier' => $part->type_qualifier,
             'license' => $user->license,
             'bfc' => $part->bfc ?? null,
-            'part_category_id' => $cat->id ?? null,
+            'category' => $cat,
             'cmdline' => $part->cmdline,
             'preview' => $part->preview,
             'header' => ''
@@ -150,7 +149,7 @@ class PartManager
             'type_qualifier' => $part->type_qualifier,
             'license' => $part->license,
             'bfc' => $part->bfc,
-            'part_category_id' => $part->part_category_id,
+            'category' => $part->category,
             'cmdline' => $part->cmdline,
             'header' => $part->header,
         ];
@@ -180,7 +179,7 @@ class PartManager
         if ($parts instanceof Part) {
             $parts = (new Collection())->add($parts);
         }
-        $parts->loadMissing('keywords', 'help', 'history', 'body', 'user', 'category');
+        $parts->loadMissing('keywords', 'help', 'history', 'body', 'user');
         $parts->each(function (Part $p) {
             $this->loadSubparts($p);
             $p->generateHeader();
@@ -238,7 +237,7 @@ class PartManager
 
     public function updateBasePart(Part $part): void
     {
-        if (!$part->type->inPartsFolder() || $part->category->category == 'Moved' || Str::endsWith($part->description, '(Obsolete)')) {
+        if (!$part->type->inPartsFolder() || $part->category == PartCategory::Moved || Str::endsWith($part->description, '(Obsolete)')) {
             return;
         }
 
@@ -285,7 +284,7 @@ class PartManager
             'type_qualifier' => $oldPart->type_qualifier,
             'license' => Auth::user()->license,
             'bfc' => $newPart->bfc,
-            'part_category_id' => PartCategory::firstWhere('category', 'Moved')->id,
+            'category' => PartCategory::Moved,
             'header' => '',
         ];
         $upart = Part::create($values);
@@ -312,8 +311,8 @@ class PartManager
             return false;
         }
         if (!$part->type->inPartsFolder() && $newType->inPartsFolder()) {
-            $dcat = PartCategory::firstWhere('category', $this->parser->getDescriptionCategory($part->header));
-            $part->category()->associate($dcat);
+            $dcat = $this->parser->getDescriptionCategory($part->header);
+            $part->category = $dcat;
         }
         if ($part->type->folder() !== $newType->folder()) {
             $part->type = $newType;
@@ -324,7 +323,7 @@ class PartManager
         $this->updateBasePart($part);
         $this->updateImage($part);
         foreach ($part->parents()->unofficial()->get() as $p) {
-            if ($part->type->inPartsFolder() && $p->category->category === "Moved") {
+            if ($part->type->inPartsFolder() && $p->category === PartCategory::Moved) {
                 $p->description = str_replace($oldname, $part->name(), $p->description);
                 $p->save();
             }
@@ -370,8 +369,8 @@ class PartManager
             $messages['warnings'] = [];
         } else {
             $messages['warnings'] = [];
-            if (isset($part->category) && $part->category->category == "Minifig") {
-                $messages['warnings'] = "Check Minifig category: {$part->category->category}";
+            if (!is_null($part->category) && $part->category == PartCategory::Minifig) {
+                $messages['warnings'] = "Check Minifig category: {$part->category->value}";
             }
             $part->can_release = $check['can_release'];
         }
@@ -397,8 +396,8 @@ class PartManager
 
     public function addStickerSheet(Part $p)
     {
-        $p->refresh();
-        $sticker = $p->descendantsAndSelf->where('category.category', 'Sticker')->partsFolderOnly()->first();
+        $p->load('descendantsAndSelf');
+        $sticker = $p->descendantsAndSelf->where('category', PartCategory::Sticker)->partsFolderOnly()->first();
         if (is_null($sticker)) {
             return;
         }
@@ -422,8 +421,8 @@ class PartManager
                 $p->sticker_sheet_id = null;
             }
         }
-        if (!is_null($p->sticker_sheet_id) && $p->category->category != 'Sticker') {
-            $p->category()->associate(PartCategory::firstWhere('category', 'Sticker Shortcut'));
+        if (!is_null($p->sticker_sheet_id) && $p->category != PartCategory::Sticker) {
+            $p->category = PartCategory::StickerShortcut;
             $p->generateHeader();
         }
         $p->save();

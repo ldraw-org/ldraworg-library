@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
@@ -23,11 +24,11 @@ class DescriptionModifier implements Check
             return;
         }
         if ($part instanceof Part) {
-            $cat = $part->category->category;
+            $cat = $part->category;
         } else {
             $cat = $part->metaCategory ?? $part->descriptionCategory;
         }
-        if (($cat == 'Moved' || $cat == 'Obsolete' || Str::endsWith($part->description, '(Obsolete)')) && !Str::startsWith($part->description, '~')) {
+        if (($cat == PartCategory::Moved || $cat == PartCategory::Obsolete || Str::endsWith($part->description, '(Obsolete)')) && !Str::startsWith($part->description, '~')) {
             $fail(__('partcheck.description.movedorobsolete'));
             return;
         }

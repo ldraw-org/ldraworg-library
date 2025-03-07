@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Events\PartHeaderEdited;
@@ -14,7 +15,7 @@ use App\LDraw\Parse\ParsedPart;
 use App\LDraw\Parse\Parser;
 use App\LDraw\PartManager;
 use App\Models\Part\Part;
-use App\Models\Part\PartCategory;
+use App\Models\Part\PartCategory as PartCategoryModel;
 use App\Models\User;
 use Closure;
 use Filament\Actions\EditAction;
@@ -84,11 +85,8 @@ class EditHeaderAction
                 ->rows(6)
                 ->nullable()
                 ->string(),
-            Select::make('part_category_id')
-                ->relationship(
-                    name: 'category',
-                    titleAttribute: 'category',
-                )
+            Select::make('category')
+                ->options(PartCategory::options())
                 ->helperText('A !CATEGORY meta will be added only if this differs from the first word in the description')
                 ->hidden(!$part->type->inPartsFolder())
                 ->disabled(!$part->type->inPartsFolder())
@@ -98,10 +96,9 @@ class EditHeaderAction
                 ->rules([
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
                         if ($part->type->inPartsFolder()) {
-                            $c = app(\App\LDraw\Parse\Parser::class)->getDescriptionCategory($get('description'));
-                            $cat = PartCategory::firstWhere('category', $c);
-                            if (is_null($cat) && is_null($value)) {
-                                $fail('partcheck.category.invalid')->translate(['value' => $c]);
+                            $cat = app(\App\LDraw\Parse\Parser::class)->getDescriptionCategory($get('description'));
+                            if (is_null($cat) && is_null(PartCategory::tryFrom($value))) {
+                                $fail('partcheck.category.invalid')->translate();
                             }
                         }
                     }
@@ -195,21 +192,20 @@ class EditHeaderAction
             $part->description = $data['description'];
             if ($part->type->inPartsFolder()) {
                 $cat = $manager->parser->getDescriptionCategory($part->description);
-                $cat = PartCategory::firstWhere('category', $cat);
-                if (!is_null($cat) && $part->part_category_id !== $cat->id) {
-                    $part->part_category_id = $cat->id;
+                if (!is_null($cat) && $part->category !== $cat) {
+                    $part->category = $cat;
                 }
             }
         }
 
         if ($part->type->inPartsFolder() &&
-            !is_null($data['part_category_id']) &&
-            $part->part_category_id !== (int)$data['part_category_id']
+            !is_null($data['category']) &&
+            $part->category !== PartCategory::tryFrom($data['category'])
         ) {
-            $cat = PartCategory::find($data['part_category_id']);
-            $changes['old']['category'] = $part->category->category;
-            $changes['new']['category'] = $cat->category;
-            $part->part_category_id = $cat->id;
+            $cat = PartCategory::tryFrom($data['category']);
+            $changes['old']['category'] = $part->category->value;
+            $changes['new']['category'] = $cat->value;
+            $part->category = $cat;
         }
 
         if ($part->type->inPartsFolder() && PartType::tryFrom($data['type']) !== $part->type) {

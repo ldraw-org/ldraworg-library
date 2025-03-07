@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PartCategory;
 use App\Models\Part\Part;
 use App\Models\Rebrickable\RebrickablePart;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -50,7 +51,7 @@ class StickerSheet extends Model
     {
         return $this->parts->whereNull('unofficial_part')
             ->reject(function (Part $p) {
-                $hasShortcut = $p->parents->where('category.category', 'Sticker Shortcut')->count() > 0;
+                $hasShortcut = $p->parents->where('category', PartCategory::StickerShortcut)->count() > 0;
                 $name = basename($p->filename, '.dat');
                 $hasFormed = $this->parts()->where('filename', 'LIKE', "parts/{$name}c__.dat")->where('filename', '<>', $p->filename)->count() > 0;
                 return $hasShortcut || $hasFormed;

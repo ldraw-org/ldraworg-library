@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Models\StickerSheet;
 use Filament\Support\Enums\Alignment;
@@ -37,7 +38,7 @@ class StickerSheetIndex extends BasicTable
                     ->counts([
                         'parts as sticker_count' =>
                             function (Builder $q) {
-                                $q->whereRelation('category', 'category', 'Sticker');
+                                $q->where('category', PartCategory::Sticker);
                             }
                     ]),
                 TextColumn::make('shortcut_count')
@@ -47,7 +48,7 @@ class StickerSheetIndex extends BasicTable
                     ->counts([
                         'parts as shortcut_count' =>
                             function (Builder $q) {
-                                $q->whereRelation('category', 'category', 'Sticker Shortcut');
+                                $q->where('category', PartCategory::StickerShortcut);
                             }
                     ]),
                 TextColumn::make('stickers_need_votes_count')
@@ -58,7 +59,7 @@ class StickerSheetIndex extends BasicTable
                     ->counts([
                         'parts as stickers_need_votes_count' =>
                             function (Builder $q) {
-                                $q->whereRelation('category', 'category', 'Sticker')
+                                $q->where('category', PartCategory::Sticker)
                                     ->where('part_status', PartStatus::NeedsMoreVotes);
                             }
                     ])
@@ -71,8 +72,8 @@ class StickerSheetIndex extends BasicTable
                     ->counts([
                         'parts as shortcut_fast_track_ready_count' =>
                             function (Builder $q) {
-                                $q->whereRelation('category', 'category', 'Sticker Shortcut')
-                                ->whereNull('part_release_id')
+                                $q->where('category', PartCategory::StickerShortcut)
+                                ->unofficial()
                                 ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes])
                                 ->whereDoesntHave('subparts', function (Builder $q) {
                                     $q->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound]);

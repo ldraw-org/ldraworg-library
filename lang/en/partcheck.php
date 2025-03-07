@@ -44,7 +44,7 @@ return [
         'ccby40' => 'CC BY 4.0 License used but all authors listed have not approved the 4.0 CA'
     ],
     'category' => [
-        'invalid' => ':value is not a valid category',
+        'invalid' => 'Category is not valid',
         'movedto' => 'Moved to part description must begin with "~"',
     ],
     'keywords' => 'Pattern parts and sticker shortcuts must have a "Set <setnumber>", "CMF", or "Build-A-Minifigure" keyword',

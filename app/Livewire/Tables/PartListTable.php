@@ -3,6 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Enums\License;
+use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -81,7 +82,7 @@ class PartListTable extends BasicTable
                 ->multiple()
                 ->options(PartStatus::trackerStatusOptions()),
             SelectFilter::make('category')
-                ->relationship('category', 'category')
+                ->options(PartCategory::options())
                 ->searchable()
                 ->preload()
                 ->multiple(),
@@ -124,13 +125,9 @@ class PartListTable extends BasicTable
                         ->label('Alias/Physical Colour/Flex Section')
                         ->options(PartTypeQualifier::options())
                         ->multiple(),
-                    RelationshipConstraint::make('category')
-                        ->selectable(
-                            IsRelatedToOperator::make()
-                                ->titleAttribute('category')
-                                ->preload()
-                                ->multiple(),
-                        ),
+                    SelectConstraint::make('category')
+                        ->options(PartCategory::options())
+                        ->multiple(),
                     RelationshipConstraint::make('keywords')
                         ->selectable(
                             IsRelatedToOperator::make()

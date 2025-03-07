@@ -29,7 +29,7 @@ class RecheckParts extends Command
         $div = 50;
         $num = intdiv($count, $div) + 1;
         $iter = 1;
-        Part::with('category', 'user', 'history', 'body', 'descendants', 'ancestors')
+        Part::with('user', 'history', 'body', 'descendants', 'ancestors')
             ->when(
                 $this->option('lib') == 'unofficial',
                 fn (Builder $query) => $query->unofficial()

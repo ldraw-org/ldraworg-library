@@ -2,8 +2,8 @@
 
 namespace App\LDraw;
 
+use App\Enums\PartCategory;
 use App\Models\Part\Part;
-use App\Models\Part\PartCategory;
 use App\Models\Part\PartRelease;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -12,7 +12,7 @@ class SupportFiles
 {
     public static function categoriesText()
     {
-        return implode("\n", PartCategory::pluck('category')->all());
+        return implode("\n", array_column(PartCategory::cases(), 'value'));
     }
 
     public static function libaryCsv(): string

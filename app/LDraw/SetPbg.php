@@ -2,6 +2,7 @@
 
 namespace App\LDraw;
 
+use App\Enums\PartCategory;
 use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
 use App\Models\StickerSheet;
@@ -103,7 +104,7 @@ class SetPbg
         $ldraw_part = $ldraw_number ?? $part['part']['external_ids']['LDraw'][0];
         $p = Part::where('filename', "parts/{$ldraw_part}.dat")->doesntHave('unofficial_part')->first();
         if (!is_null($p)) {
-            if ($p->category->category == "Moved") {
+            if ($p->category == PartCategory::Moved) {
                 $ldraw_part = basename($p->subparts->first()->filename, '.dat');
             } elseif ($p->type_qualifier == PartTypeQualifier::Alias) {
                 $ldraw_part = basename($p->subparts->first()->filename, '.dat');

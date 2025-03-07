@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\VoteType;
 use App\Models\Part\Part;
@@ -20,7 +21,7 @@ class StickerShortcutsReadyForAdminTable extends BasicTable
             ->query(
                 Part::unofficial()
                     ->where(function (Builder $q) {
-                        $q->orWhereRelation('category', 'category', 'Sticker Shortcut')
+                        $q->orWhere('category', PartCategory::StickerShortcut)
                             ->orWhere('description', 'LIKE', 'Minifig Torso with Arms %');
                     })
                     ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes])

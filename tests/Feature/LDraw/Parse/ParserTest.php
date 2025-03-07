@@ -3,6 +3,7 @@
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\License;
+use App\Enums\PartCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -73,26 +74,27 @@ test('get cmd line', function (string $input, ?string $expected) {
     'with line ending' => ["0 !CMDLINE abcde\n", "abcde"],
 ]);
 
-test('get meta category', function (string $input, ?string $expected) {
+test('get meta category', function (string $input, ?PartCategory $expected) {
     expect(app(\App\LDraw\Parse\Parser::class)->getMetaCategory($input))->toBe($expected);
 })->with([
-    'normal, any text' => ["0 !CATEGORY abcde", "abcde"],
-    'normal, actual one word text' => ["0 !CATEGORY Brick", 'Brick'],
-    'normal, actual multi-word text' => ["0 !CATEGORY Minifig Accessory", 'Minifig Accessory'],
+    'normal, actual one word text' => ["0 !CATEGORY Brick", PartCategory::Brick],
+    'normal, actual multi-word text' => ["0 !CATEGORY Minifig Accessory", PartCategory::MinifigAccessory],
+    'invalid category' => ["0 !CATEGORY abcde", null],
     'blank' => ["0 !CATEGORY", null],
     'empty file' => ["", null],
-    'multi-line' => ["0 Test\n0 !CATEGORY abcde", "abcde"],
-    'with line ending' => ["0 !CATEGORY abcde\n", "abcde"],
+    'multi-line' => ["0 Test\n0 !CATEGORY Brick", PartCategory::Brick],
+    'with line ending' => ["0 !CATEGORY Brick\n", PartCategory::Brick],
 ]);
 
-test('get description category', function (string $input, ?string $expected) {
+test('get description category', function (string $input, ?PartCategory $expected) {
     expect(app(\App\LDraw\Parse\Parser::class)->getDescriptionCategory($input))->toBe($expected);
 })->with([
-    'normal' => ["0 Test Description", "Test"],
-    'with line ending' => ["0 Test Description\n", "Test"],
-    'normal, with prefix' => ["0 ~Test Description", 'Test'],
-    'normal, with multiple prefixes' => ["0 ~|Test Description", 'Test'],
-    'normal, with prefix space' => ["0 ~| Test Description", 'Test'],
+    'normal' => ["0 Brick Description", PartCategory::Brick],
+    'with line ending' => ["0 Brick Description\n", PartCategory::Brick],
+    'normal, with prefix' => ["0 ~Brick Description", PartCategory::Brick],
+    'normal, with multiple prefixes' => ["0 ~|Brick Description", PartCategory::Brick],
+    'normal, with prefix space' => ["0 ~| Brick Description", PartCategory::Brick],
+    'with invalid category' => ["0 Test Description", null],
     'empty file' => ['', null],
 ]);
 
@@ -220,8 +222,8 @@ test('parse', function () {
     expect($part->license)->toBe(License::CC_BY_2);
     expect($part->help)->toBe(['This is help', 'This is more help']);
     expect($part->bfc)->toBe('CW');
-    expect($part->metaCategory)->toBe('Minifig Accessory');
-    expect($part->descriptionCategory)->toBe('Brick');
+    expect($part->metaCategory)->toBe(PartCategory::MinifigAccessory);
+    expect($part->descriptionCategory)->toBe(PartCategory::Brick);
     expect($part->keywords)->toBe(['Bespin', 'Boba Fett', 'Cloud City', 'cold sleep', 'deep freeze', 'Set 7144']);
     expect($part->cmdline)->toBe('-c0');
     expect($part->history)->toBe([

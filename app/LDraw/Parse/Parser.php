@@ -3,6 +3,7 @@
 namespace App\LDraw\Parse;
 
 use App\Enums\License;
+use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Settings\LibrarySettings;
@@ -134,23 +135,22 @@ class Parser
         return $this->getSingleValueMeta($text, 'preview');
     }
 
-    public function getMetaCategory(string $text): ?string
+    public function getMetaCategory(string $text): ?PartCategory
     {
-        return $this->getSingleValueMeta($text, 'category');
+        $cat = $this->getSingleValueMeta($text, 'category');
+        return PartCategory::tryFrom($cat);
     }
 
-    public function getDescriptionCategory(string $text): ?string
+    public function getDescriptionCategory(string $text): ?PartCategory
     {
         $d = $this->getSingleValueMeta($text, 'description');
         if (!is_null($d)) {
-            while ($d !== '' && in_array($d[0], ['~', '|', '=', '_', ' '])) {
-                $d = trim(substr($d, 1));
+            $word = 1;
+            if (Str::of($d)->trim()->words(1,'')->replace(['~', '|', '=', '_'], '') == '') {
+                $word = 2;
             }
-            $dwords = explode(' ', $d);
-            $category = trim($dwords[0]);
-            if ($category !== '') {
-                return $category;
-            }
+            $cat = Str::of($d)->trim()->words($word,'')->replace(['~', '|', '=', '_', ' '], '')->toString();
+            return PartCategory::tryFrom($cat);
         }
         return null;
     }

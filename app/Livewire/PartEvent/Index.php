@@ -3,6 +3,7 @@
 namespace App\Livewire\PartEvent;
 
 use App\Enums\EventType;
+use App\Enums\PartCategory;
 use App\Models\Part\PartEvent;
 use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -121,7 +122,7 @@ class Index extends Component implements HasForms, HasTable
                     ->toggle()
                     ->label('Only unofficial part events'),
                 Filter::make('sticker_shortcuts')
-                    ->query(fn (Builder $query): Builder => $query->whereDoesntHave('part', fn ($q) => $q->whereRelation('category', 'category', 'Sticker Shortcut')))
+                    ->query(fn (Builder $query): Builder => $query->whereDoesntHave('part', fn ($q) => $q->where('category', PartCategory::StickerShortcut)))
                     ->toggle()
                     ->label('Hide sticker shortcuts'),
             ], layout: FiltersLayout::AboveContent)

@@ -3,9 +3,11 @@
 namespace App\LDraw\Parse;
 
 use App\Enums\License;
+use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
+use Illuminate\Support\Str;
 
 class ParsedPart
 {
@@ -22,8 +24,8 @@ class ParsedPart
         public ?License $license = null,
         public ?array $help = null,
         public ?string $bfc = null,
-        public ?string $metaCategory = null,
-        public ?string $descriptionCategory = null,
+        public ?PartCategory $metaCategory = null,
+        public ?PartCategory $descriptionCategory = null,
         public ?array $keywords = null,
         public ?string $cmdline = null,
         public ?string $preview = null,
@@ -56,15 +58,18 @@ class ParsedPart
             $releasetype = '';
         }
         if (!is_null($part->category)) {
-            $d = trim($part->description);
-            if ($d !== '' && in_array($d[0], ['~', '|', '=', '_'])) {
-                $d = trim(substr($d, 1));
+            $word = 1;
+            if (Str::of($part->description)->trim()->words(1,'')->replace(['~', '|', '=', '_'], '') == '') {
+                $word = 2;
             }
-            $cat = mb_strstr($d, " ", true);
-            if ($cat != $part->category->category) {
-                $metaCategory = $part->category->category;
+            $cat = Str::of($part->description)->trim()->words($word,'')->replace(['~', '|', '=', '_', ' '], '')->toString();
+            $cat = PartCategory::tryFrom($cat);
+            if ($cat != $part->category) {
+                $descriptionCategory = null;
+                $metaCategory = $part->category;
             } else {
-                $descriptionCategory = $part->category->category;
+                $descriptionCategory = $part->category;
+                $metaCategory = null;
             }
         }
         $history = [];
@@ -94,14 +99,14 @@ class ParsedPart
             $part->user->realname,
             is_null($part->release),
             $part->type,
-            $part->type_qualifier ?? null,
+            $part->type_qualifier,
             $releasetype,
-            $part->release->short ?? null,
+            $part->release?->short,
             $part->license,
             $part->help->pluck('text')->all(),
             $part->bfc,
-            $metaCategory ?? null,
-            $descriptionCategory ?? null,
+            $metaCategory,
+            $descriptionCategory,
             $part->keywords->pluck('keyword')->all(),
             $part->cmdline,
             $part->preview,

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Part;
 
+use App\Enums\PartCategory;
 use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
 use App\Filament\Actions\EditNumberAction;
@@ -385,7 +386,7 @@ class Show extends Component implements HasForms, HasActions
                         Part::partsFolderOnly()
                             ->doesntHave('official_part')
                             ->where('is_pattern', false)
-                            ->whereRelation('category', 'category', '!=', 'Moved')
+                            ->where('category', '!=', PartCategory::Moved)
                             ->where('description', 'NOT LIKE', '%Obsolete%')
                             ->pluck('filename', 'id')
                     )

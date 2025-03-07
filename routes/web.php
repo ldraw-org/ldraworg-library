@@ -19,7 +19,6 @@ use App\Livewire\Dashboard\Admin\Pages\ReviewSummaryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\RoleManagePage;
 use App\Livewire\Dashboard\Admin\Pages\UserManagePage;
 use App\Livewire\Dashboard\Admin\Pages\LibrarySettingsPage;
-use App\Livewire\Dashboard\Admin\Pages\PartCategoryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
 use App\Livewire\Dashboard\User\Index as UserIndex;
 use App\Livewire\JoinLdraw;
@@ -122,7 +121,6 @@ Route::middleware(['auth', 'can:admin.view-dashboard'])->prefix('admin')->name('
     Route::middleware(['can:create,App\Models\Role'])->get('/roles', RoleManagePage::class)->name('roles.index');
     Route::middleware(['can:documentation.edit'])->get('/documents', DocumentManagePage::class)->name('documents.index');
     Route::middleware(['can:documentation.edit'])->get('/document-categories', DocumentCategoryManagePage::class)->name('document-categories.index');
-    Route::middleware(['can:create,App\Models\Part\PartCategory'])->get('/part-categories', PartCategoryManagePage::class)->name('part-categories.index');
     Route::middleware(['can:manage,App\Models\Part\PartKeyword'])->get('/part-keywords', PartKeywordManagePage::class)->name('part-keywords.index');
     Route::middleware(['can:settings.edit'])->get('/settings', LibrarySettingsPage::class)->name('settings.index');
 });

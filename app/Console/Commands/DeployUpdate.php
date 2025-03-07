@@ -2,17 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\PartStatus;
+use App\Enums\PartCategory;
 use App\Enums\PartType;
-use App\Enums\VoteType;
-use App\Events\PartSubmitted;
-use App\LDraw\PartManager;
-use App\LDraw\VoteManager;
 use App\Models\Part\Part;
-use App\Models\Part\PartCategory;
-use App\Models\Part\PartHistory;
-use App\Models\User;
-use App\Settings\LibrarySettings;
 use Illuminate\Console\Command;
 
 class DeployUpdate extends Command
@@ -36,5 +28,16 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
+        Part::with('part_category')
+            ->whereIn('type', PartType::partsFolderTypes())
+            ->lazy()
+            ->each(function (Part $p){
+                $p->category = PartCategory::from($p->part_category?->category);
+                $p->save();
+                if (!is_null($p->sticker_sheet_id) && $p->category != PartCategory::Sticker) {
+                    $p->category = PartCategory::StickerShortcut;
+                    $p->generateHeader();
+                }
+            });
     }
 }

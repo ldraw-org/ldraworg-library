@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\PartCategory;
 use App\Events\PartSubmitted;
 use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Jobs\UpdateZip;
@@ -83,13 +84,13 @@ class TorsoShortcutHelper extends Component implements HasForms
                                             'parents',
                                             fn (Builder $query): Builder =>
                                             $query->where('description', 'LIKE', 'Minifig Torso%')
-                                                ->whereRelation('category', 'category', '<>', 'Sticker Shortcut')
+                                                ->where('category', '!=', PartCategory::StickerShortcut)
                                         )
                                     )
                                         ->doesntHave('unofficial_part')
                                         ->where('filename', 'LIKE', 'parts/973p%.dat')
                                         ->where('description', 'NOT LIKE', '~%')
-                                        ->whereRelation('category', 'category', '<>', 'Sticker Shortcut')
+                                        ->where('category', '!=', PartCategory::StickerShortcut)
                                         ->orderBy('filename')
                                         ->get();
                                     $options = [];
@@ -330,7 +331,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                 if ($subpart->filename != 'parts/973.dat') {
                     $name = basename($subpart->filename);
                     $parts[$name] = ['default' => $subpart->id, 'subs' => [$subpart->id => "{$name} - {$subpart->description}"]];
-                    $pats = $subpart->suffix_parts->where('is_pattern', true)->where('category.category', '!=', 'Moved');
+                    $pats = $subpart->suffix_parts->where('is_pattern', true)->where('category', '!=', PartCategory::Moved);
                     foreach ($pats as $pat) {
                         $patname = basename($pat->filename);
                         $parts[$name]['subs'][$pat->id] = "{$patname} - {$pat->description}";
