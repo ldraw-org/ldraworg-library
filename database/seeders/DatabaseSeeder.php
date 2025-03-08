@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\LDraw\LibraryConfig;
-use App\Models\Part\PartCategory;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Seeder;
 
@@ -16,7 +14,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        PartCategory::insert(LibraryConfig::partCategories());
         $ls = app(LibrarySettings::class);
         $ls->allowed_header_metas = [
                 'Name:',

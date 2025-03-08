@@ -5,19 +5,14 @@ namespace App\LDraw\Check;
 use App\Enums\License;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
-use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Check\Contracts\FilenameAwareCheck;
 use App\LDraw\Check\Contracts\SettingsAwareCheck;
-use App\Models\User;
 use App\Models\Part\Part;
 use App\LDraw\Parse\ParsedPart;
-use App\Models\Part\PartCategory;
 use App\Settings\LibrarySettings;
 use Closure;
-use Illuminate\Support\Arr;
 use Illuminate\Support\MessageBag;
-use MathPHP\LinearAlgebra\MatrixFactory;
 
 class PartChecker
 {

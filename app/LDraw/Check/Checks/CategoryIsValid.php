@@ -5,7 +5,6 @@ namespace App\LDraw\Check\Checks;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
-use App\Models\Part\PartCategory;
 use Closure;
 
 class CategoryIsValid implements Check

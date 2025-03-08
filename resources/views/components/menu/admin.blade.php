@@ -1,7 +1,6 @@
 <x-menu>
     <x-menu.library-dropdown />
     @if(
-        Auth::user()->can('create', \App\Models\Part\PartCategory::class) ||
         Auth::user()->can('manage', \App\Models\Part\PartKeyword::class) ||
         Auth::user()->can('settings.edit')
     )

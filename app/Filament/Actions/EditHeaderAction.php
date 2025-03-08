@@ -15,7 +15,6 @@ use App\LDraw\Parse\ParsedPart;
 use App\LDraw\Parse\Parser;
 use App\LDraw\PartManager;
 use App\Models\Part\Part;
-use App\Models\Part\PartCategory as PartCategoryModel;
 use App\Models\User;
 use Closure;
 use Filament\Actions\EditAction;

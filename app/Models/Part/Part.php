@@ -11,7 +11,6 @@ use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
 use App\Models\Rebrickable\RebrickablePart;
 use App\Models\StickerSheet;
-use App\Models\Part\PartCategory as PartCategoryModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -105,11 +104,6 @@ class Part extends Model
     public function getChildKeyName(): string
     {
         return 'subpart_id';
-    }
-
-    public function part_category(): BelongsTo
-    {
-        return $this->belongsTo(PartCategoryModel::class, 'part_category_id', 'id');
     }
 
     public function subparts(): BelongsToMany
