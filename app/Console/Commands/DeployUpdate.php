@@ -28,16 +28,16 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::with('part_category')
-            ->whereIn('type', PartType::partsFolderTypes())
-            ->lazy()
+        Part::whereIn('type', PartType::partsFolderTypes())
+            ->whereDoesntHave('sticker_sheet')
+            ->whereDoesntHave('parents')
+            ->whereHas('subparts', fn ($query) => $query->where('category', PartCategory::Sticker))
+            ->where('category', '!=', PartCategory::Sticker)
             ->each(function (Part $p){
-                $p->category = PartCategory::from($p->part_category?->category);
-                $p->save();
-                if (!is_null($p->sticker_sheet_id) && $p->category != PartCategory::Sticker) {
-                    $p->category = PartCategory::StickerShortcut;
-                    $p->generateHeader();
-                }
+                $p->category = PartCategory::StickerShortcut;
+                $sticker = $p->subparts->where('category', PartCategory::Sticker)->first();
+                $p->sticker_sheet()->associate($sticker->sticker_sheet);
+                $p->generateHeader();
             });
     }
 }

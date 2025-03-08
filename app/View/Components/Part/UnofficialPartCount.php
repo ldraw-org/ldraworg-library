@@ -17,7 +17,9 @@ class UnofficialPartCount extends Component
         public array $summary = ['1' => 0, '2' => 0, '3' => 0, '5' => 0],
         public bool $small = true
     ) {
-        $this->summary = Part::unofficial()->pluck('part_status')->countBy(fn (PartStatus $p) => $p->value)->all();
+        foreach (PartStatus::trackerStatus() as $status) {
+            $this->summary[$status->value] = Part::unofficial()->where('part_status', $status)->count();
+        }
     }
 
     /**
