@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\PartCategory;
 use App\Models\Part\Part;
-use App\Models\Rebrickable\RebrickablePart;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -30,11 +29,6 @@ class StickerSheet extends Model
             'rebrickable' => AsArrayObject::class,
             'part_colors' => AsArrayObject::class
         ];
-    }
-
-    public function rebrickable_part(): BelongsTo
-    {
-        return $this->BelongsTo(RebrickablePart::class, 'rebrickable_part_id', 'id');
     }
 
     public function color(): BelongsTo

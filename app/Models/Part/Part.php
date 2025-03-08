@@ -9,7 +9,6 @@ use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
-use App\Models\Rebrickable\RebrickablePart;
 use App\Models\StickerSheet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -144,11 +143,6 @@ class Part extends Model
     public function body(): HasOne
     {
         return $this->hasOne(PartBody::class, 'part_id', 'id');
-    }
-
-    public function rebrickable_part(): HasOne
-    {
-        return $this->hasOne(RebrickablePart::class, 'part_id', 'id');
     }
 
     public function unofficial_part(): BelongsTo
