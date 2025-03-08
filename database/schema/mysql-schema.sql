@@ -204,15 +204,6 @@ CREATE TABLE `part_bodies` (
   CONSTRAINT `part_bodies_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `part_categories`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `part_categories` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `part_events`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -238,7 +229,6 @@ CREATE TABLE `part_events` (
   KEY `part_events_part_id_index` (`part_id`),
   KEY `part_events_event_type_index` (`event_type`),
   KEY `part_events_vote_type_index` (`vote_type`),
-  KEY `part_events_part_release_id_index` (`part_release_id`),
   KEY `part_events_created_at_index` (`created_at`),
   CONSTRAINT `part_events_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
   CONSTRAINT `part_events_part_release_id_foreign` FOREIGN KEY (`part_release_id`) REFERENCES `part_releases` (`id`),
@@ -308,16 +298,12 @@ CREATE TABLE `parts` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `user_id` bigint unsigned NOT NULL,
-  `part_category_id` bigint unsigned DEFAULT NULL,
   `part_release_id` bigint unsigned DEFAULT NULL,
   `filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `header` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `official_part_id` bigint unsigned DEFAULT NULL,
   `unofficial_part_id` bigint unsigned DEFAULT NULL,
-  `uncertified_subpart_count` int NOT NULL DEFAULT '0',
-  `vote_summary` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `vote_sort` int NOT NULL DEFAULT '1',
+  `part_status` int NOT NULL DEFAULT '1',
   `cmdline` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `bfc` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `delete_flag` tinyint(1) NOT NULL DEFAULT '0',
@@ -339,14 +325,14 @@ CREATE TABLE `parts` (
   `type_qualifier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `license` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `external_ids` json DEFAULT NULL,
+  `preview` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `parts_filename_part_release_id_unique` (`filename`,`part_release_id`),
   KEY `parts_part_release_id_foreign` (`part_release_id`),
   KEY `parts_user_id_index` (`user_id`),
-  KEY `parts_part_category_id_index` (`part_category_id`),
   KEY `parts_filename_index` (`filename`),
   KEY `parts_description_index` (`description`),
-  KEY `parts_official_part_id_foreign` (`official_part_id`),
   KEY `parts_unofficial_part_id_foreign` (`unofficial_part_id`),
   KEY `parts_sticker_sheet_id_foreign` (`sticker_sheet_id`),
   KEY `parts_base_part_id_foreign` (`base_part_id`),
@@ -354,12 +340,9 @@ CREATE TABLE `parts` (
   KEY `parts_type_index` (`type`),
   KEY `parts_type_qualifier_index` (`type_qualifier`),
   KEY `parts_license_index` (`license`),
-  KEY `parts_part_release_id_index` (`part_release_id`),
-  KEY `parts_unofficial_part_id_index` (`unofficial_part_id`),
-  KEY `parts_vote_sort_index` (`vote_sort`),
+  KEY `parts_vote_sort_index` (`part_status`),
+  KEY `parts_category_index` (`category`),
   CONSTRAINT `parts_base_part_id_foreign` FOREIGN KEY (`base_part_id`) REFERENCES `parts` (`id`),
-  CONSTRAINT `parts_official_part_id_foreign` FOREIGN KEY (`official_part_id`) REFERENCES `parts` (`id`),
-  CONSTRAINT `parts_part_category_id_foreign` FOREIGN KEY (`part_category_id`) REFERENCES `part_categories` (`id`),
   CONSTRAINT `parts_part_release_id_foreign` FOREIGN KEY (`part_release_id`) REFERENCES `part_releases` (`id`),
   CONSTRAINT `parts_sticker_sheet_id_foreign` FOREIGN KEY (`sticker_sheet_id`) REFERENCES `sticker_sheets` (`id`),
   CONSTRAINT `parts_unknown_part_number_id_foreign` FOREIGN KEY (`unknown_part_number_id`) REFERENCES `unknown_part_numbers` (`id`),
@@ -458,21 +441,6 @@ CREATE TABLE `polls` (
   `choices_limit` int NOT NULL,
   `enabled` tinyint(1) NOT NULL DEFAULT '0',
   `has_been_enabled` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `rebrickable_parts`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `rebrickable_parts` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `part_num` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `part_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `part_img_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `part_id` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -586,7 +554,6 @@ CREATE TABLE `sticker_sheets` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `rebrickable_part_id` bigint unsigned DEFAULT NULL,
   `rebrickable` json NOT NULL,
   `ldraw_colour_id` bigint unsigned DEFAULT NULL,
   `part_colors` json NOT NULL,
@@ -701,9 +668,7 @@ CREATE TABLE `users` (
   `realname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `forum_user_id` bigint DEFAULT NULL,
-  `settings` json DEFAULT NULL,
   `loginkey` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `profile_settings` json DEFAULT NULL,
   `is_synthetic` tinyint(1) NOT NULL DEFAULT '0',
   `is_legacy` tinyint(1) NOT NULL DEFAULT '0',
   `is_ptadmin` tinyint(1) NOT NULL DEFAULT '0',
@@ -849,3 +814,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (110,'2025_02_02_00
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (111,'2025_02_03_034228_create_polls_table',35);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (112,'2025_02_03_034235_create_poll_items_table',35);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (113,'2025_02_04_164900_create_poll_votes_table',35);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (114,'2025_02_19_235340_add_preview_to_parts_table',36);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (115,'2025_02_26_055827_alter_vote_sort_to_part_status_in_parts_table',37);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (116,'2025_03_07_180323_add_category_to_parts_table',38);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (117,'2025_03_08_071837_drop_part_category_table',39);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (118,'2025_03_08_072853_library_database_cleanup',40);
