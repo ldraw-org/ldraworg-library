@@ -18,7 +18,7 @@ class UnofficialPartCount extends Component
         public bool $small = true
     ) {
         foreach (PartStatus::trackerStatus() as $status) {
-            $this->summary[$status->value] = Part::unofficial()->where('part_status', $status)->count();
+            $this->summary[$status->value] = Part::where('part_status', $status)->count();
         }
     }
 
