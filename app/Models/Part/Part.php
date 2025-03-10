@@ -616,6 +616,10 @@ class Part extends Model
             $this->official_part->unofficial_part()->dissociate();
             $p->save();
         }
+        if (!is_null($this->base_part)) {
+            $this->base_part_id = null;
+            $this->save();
+        }
     }
 
     public function putDeletedBackup(): void
