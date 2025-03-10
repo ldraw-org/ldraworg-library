@@ -375,6 +375,7 @@ class PartManager
             $part->can_release = $check['can_release'];
         }
         $part->part_check_messages = $messages;
+        $part->updateReadyForAdmin();
         $part->save();
     }
 
