@@ -24,6 +24,7 @@ use App\Models\User;
 use App\Models\Vote;
 use App\Observers\PartObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -41,6 +42,7 @@ class Part extends Model
     use HasGraphRelationships;
     use HasPartRelease;
     use HasUser;
+    use HasFactory;
 
     protected $guarded = [];
 
@@ -360,13 +362,13 @@ class Part extends Model
         elseif (($data[VoteType::AdminCertify->value] > 0 && ($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value]) > 2) || $data[VoteType::AdminFastTrack->value] > 0) {
             $this->part_status = PartStatus::Certified;
         }
-        $this->saveQuietly();
         if (
             (in_array($old_sort, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) && !in_array($this->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview])) ||
             (!in_array($old_sort, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) && in_array($this->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]))
         ) {
             $this->updateReadyForAdmin();
         }
+        $this->saveQuietly();
     }
 
     public function updateReadyForAdmin(): void
