@@ -242,7 +242,11 @@ class PartManager
         }
 
         $base = $this->parser->basepart(basename($part->filename));
-        if (is_null($base)) {
+        if (is_null($base) || ("{$base}.dat" == $part->name() || "{$base}-f1.dat" == $part->name())) {
+            $part->base_part()->disassociate();
+            $part->is_pattern = false;
+            $part->is_composite = false;
+            $part->save();
             return;
         }
 
