@@ -9,6 +9,7 @@ use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
+use App\Models\ReviewSummary\ReviewSummaryItem;
 use App\Models\StickerSheet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -191,6 +192,12 @@ class Part extends Model
     public function unknown_part_number(): BelongsTo
     {
         return $this->BelongsTo(UnknownPartNumber::class, 'unknown_part_number_id', 'id');
+
+    }
+
+    public function review_summary_items(): HasMany
+    {
+        return $this->HasMany(ReviewSummaryItem::class, 'part_id', 'id');
 
     }
 
@@ -599,27 +606,6 @@ class Part extends Model
 
         $this->header = implode("\n", $header);
         $this->saveQuietly();
-    }
-
-    public function deleteRelationships(): void
-    {
-        $this->history()->delete();
-        $this->votes()->delete();
-        $this->events()->delete();
-        $this->help()->delete();
-        $this->body->delete();
-        $this->keywords()->sync([]);
-        $this->subparts()->sync([]);
-        $this->notification_users()->sync([]);
-        if (!is_null($this->official_part)) {
-            $p = $this->official_part;
-            $this->official_part->unofficial_part()->dissociate();
-            $p->save();
-        }
-        if (!is_null($this->base_part)) {
-            $this->base_part_id = null;
-            $this->save();
-        }
     }
 
     public function putDeletedBackup(): void
