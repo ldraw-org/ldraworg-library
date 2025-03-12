@@ -28,7 +28,7 @@ class RefreshDB extends Command
      */
     public function handle()
     {
-        if (app()->environment('local') && Storage::disk('local')->exists('db/lib.sql')) {
+        if (app()->environment('local')) {
             $this->info('Copying production db backup');
             $db = config('database.connections.mysql.database');
             $prod_db = config('database.connections.mysql.prod_db');
