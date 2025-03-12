@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
+use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class RefreshDB extends Command
 {
@@ -30,12 +31,18 @@ class RefreshDB extends Command
         if (app()->environment('local') && Storage::disk('local')->exists('db/lib.sql')) {
             $this->info('Copying production db backup');
             $db = config('database.connections.mysql.database');
+            $prod_db = config('database.connections.mysql.prod_db');
             $db_port = config('database.connections.mysql.port');
             $db_host = config('database.connections.mysql.host');
             $db_user = config('database.connections.mysql.username');
             $db_pw = config('database.connections.mysql.password');
-            $backup = Storage::disk('local')->path('db/lib.sql');
-            $result = Process::forever()->run("mysql --user={$db_user} --password={$db_pw} --host={$db_host} --port={$db_port} --database={$db} < {$backup}");
+            $tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
+            $file = "[client]\nhost={$db_host}\nuser={$db_user}\npassword={$db_pw}\nport={$db_port}";
+            $path = $tempDir->path(".my.cnf");
+            file_put_contents($path, $file);
+            $dumpcommand = "mysqldump --defaults-extra-file=\"{$path}\" --add-drop-table --single-transaction --set-gtid-purged=off --no-tablespaces {$prod_db}";
+            $import_command = "mysql --defaults-extra-file=\"{$path}\" {$db}";
+            $result = Process::forever()->run("{$dumpcommand} | {$import_command}");
             $this->info($result->output());
             $this->info($result->errorOutput());
             $this->call('migrate');
