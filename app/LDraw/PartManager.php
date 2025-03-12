@@ -97,7 +97,7 @@ class PartManager
         $user = User::fromAuthor($part->username, $part->realname)->first();
         $cat = $part->metaCategory ?? $part->descriptionCategory;
         $filename = $part->type->folder() . '/' . basename(str_replace('\\', '/', $part->name));
-        $part->preview = $part->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ?: null;
+        $part->preview = $part->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $part->preview;
         $values = [
             'description' => $part->description,
             'filename' => $filename,
