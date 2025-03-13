@@ -38,7 +38,7 @@ class DailyMaintenance extends Command
         Part::unofficial()->lazy()->each(fn (Part $p) => $p->updatePartStatus());
 
         $this->info('Rechecking all unofficial parts');
-        $this->call('lib:check', ['--lib' => 'unofficial']);
+        $this->call('lib:check', ['--unofficial-only' => true]);
 
         $this->info('Removing orphan keywords');
         PartKeyword::doesntHave('parts')->delete();
@@ -69,22 +69,9 @@ class DailyMaintenance extends Command
             }
         }
 
-        $this->info('Regenerating missing images');
-        Part::unofficial()->lazy()->each(function (Part $p) {
-            $image = str_replace('.dat', '.png', "library/unofficial/{$p->filename}");
-            $thumb = str_replace('.png', '_thumb.png', $image);
-            if (!Storage::disk('images')->exists($image) || !Storage::disk('images')->exists($thumb)) {
-                UpdateImage::dispatch($p);
-            }
-        });
-
-        OmrModel::lazy()->each(function (OmrModel $m) {
-            $image = str_replace(['.dat','.mpd','.ldr'], '.png', "omr/models/{$m->filename()}");
-            $thumb = str_replace('.png', '_thumb.png', $image);
-            if (!Storage::disk('images')->exists($image) || !Storage::disk('images')->exists($thumb)) {
-                UpdateImage::dispatch($m);
-            }
-        });
+        $this->info('Queueing missing images');
+        $this->call('lib:render-parts', ['--unofficial-only' => true, '--missing' => true]);
+        $this->call('lib:render-models', ['--missing' => true]);
 
         $this->info('Reloading colors for LDConfig');
         $this->call('lib:update-colours');
