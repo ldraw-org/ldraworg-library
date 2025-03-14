@@ -9,6 +9,7 @@ use App\Filament\Actions\EditNumberAction;
 use App\LDraw\PartManager;
 use App\LDraw\VoteManager;
 use App\Models\Part\Part;
+use App\Models\Part\PartKeyword;
 use App\Models\Vote;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -16,7 +17,6 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -27,6 +27,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -165,6 +167,19 @@ class Show extends Component implements HasForms, HasActions
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Image Updated')
+                        ->success()
+                        ->send();
+                })
+                ->visible(Auth::user()?->can('update', $this->part) ?? false);
+    }
+
+    public function updateRebrickableDataAction(): Action
+    {
+        return Action::make('updateRebrickableData')
+                ->action(function () {
+                    app(PartManager::class)->updateRebrickable($this->part);
+                    Notification::make()
+                        ->title('Rebrickable data refreshed')
                         ->success()
                         ->send();
                 })
@@ -410,32 +425,55 @@ class Show extends Component implements HasForms, HasActions
         return $this->externalSiteAction('Rebrickable');
     }
 
-    public function viewBricklinkAction(): Action
+    public function viewBrickLinkAction(): Action
     {
-        return $this->externalSiteAction('Bricklink');
+        return $this->externalSiteAction('BrickLink');
     }
 
-    public function viewBrickowlAction(): Action
+    public function viewBrickOwlAction(): Action
     {
         return $this->externalSiteAction('BrickOwl');
     }
 
+    public function viewBricksetAction(): Action
+    {
+        return $this->externalSiteAction('Brickset');
+    }
+
     protected function externalSiteAction(string $site): Action
     {
-        $kw = $this->part->keywords()->where('keyword', 'LIKE', "$site %")->first()?->keyword;
-        $kw = Str::lower($kw);
-        if (array_key_exists(strtolower($site), config('ldraw.external_sites')) && Str::startsWith($kw, Str::lower($site))) {
-            $number = Str::chopStart($kw, Str::lower($site) . ' ');
-            return Action::make("view{$site}")
-                ->button()
-                ->color('gray')
-                ->label("View on $site")
-                ->icon('fas-external-link-alt')
-                ->iconPosition(IconPosition::After)
-                ->url(config('ldraw.external_sites')[strtolower($site)] . $number, shouldOpenInNewTab: true);
+        $url = '';
+        if ($this->part->type->inPartsFolder() &&
+            !is_null($this->part->rebrickable) &&
+            Arr::has($this->part->rebrickable, 'data') &&
+            count(Arr::get($this->part->rebrickable, 'data')) > 0
+        ) {
+            $rb_part = Arr::first($this->part->rebrickable['data']);
+            if ($site == 'Rebrickable') {
+                $url = Arr::get($rb_part, 'part_url');
+            } else {
+                $url_start = config("ldraw.external_sites.{$site}");
+                $num = Arr::get($rb_part, "external_ids.{$site}.0");
+                $url = !is_null($num) && !is_null($url_start) ? $url_start . $num : '';
+            }
+        } else if ($this->part->type->inPartsFolder()) {
+            $site_lower = Str::of($site)->lower()->toString();
+            $site_kw = $this->part->keywords?->first(fn (PartKeyword $kw) => Str::of($kw->keyword)->lower()->startsWith($site_lower));
+            if (!is_null($site_kw)) {
+                $url_start = config("ldraw.external_sites.{$site}");
+                $num = Str::of($site_kw->keyword)->lower()->chopStart($site_lower)->trim()->toString();
+                $url = $url_start . $num;
+            }
+            
         }
-
-        return Action::make("view{$site}Action")->visible(false);
+        return Action::make("view{$site}")
+            ->button()
+            ->color('gray')
+            ->label("View on $site")
+            ->icon('fas-external-link-alt')
+            ->iconPosition(IconPosition::After)
+            ->url($url, shouldOpenInNewTab: true)
+            ->visible($url != '');
     }
     public function viewFixAction(): Action
     {

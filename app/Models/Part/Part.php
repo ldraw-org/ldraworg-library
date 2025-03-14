@@ -67,7 +67,7 @@ class Part extends Model
     *     is_dual_mould: 'boolean',
     *     part_check_messages: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
     *     ready_for_admin: 'boolean'
-    *     extarnal_ids: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
+    *     rebrickable: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
     * }
     */
     protected function casts(): array
@@ -89,7 +89,7 @@ class Part extends Model
             'is_dual_mould' => 'boolean',
             'part_check_messages' => AsArrayObject::class,
             'ready_for_admin' => 'boolean',
-            'external_ids' => AsArrayObject::class,
+            'rebrickable' => AsArrayObject::class,
         ];
     }
 
@@ -275,6 +275,14 @@ class Part extends Model
         $query->whereIn('type', PartType::partsFolderTypes());
     }
 
+    public function scopeCanHaveExternalData(Builder $query) {
+        $query->partsFolderOnly()
+            ->where('description', 'NOT LIKE', '~%')
+            ->where('description', 'NOT LIKE', '%(Obsolete)')
+            ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete])
+            ->doesntHave('sticker_sheet');
+    }
+
     public function isTexmap(): bool
     {
         return $this->type->isImageFormat();
@@ -283,6 +291,18 @@ class Part extends Model
     public function isUnofficial(): bool
     {
         return is_null($this->part_release_id);
+    }
+
+    public function canSetExternalData(): bool
+    {
+        return $this->type->inPartsFolder() &&
+            $this->category != PartCategory::Moved &&
+            $this->category != PartCategory::Obsolete &&
+            $this->category != PartCategory::Sticker &&
+            $this->category != PartCategory::StickerShortcut &&
+            is_null($this->sticker_sheet_id) &&
+            !Str::of($this->description)->startsWith('~') &&
+            !Str::of($this->description)->contains('(Obsolete)');
     }
 
     public function lastChange(): Carbon
@@ -517,7 +537,7 @@ class Part extends Model
         $this->body->save();
     }
 
-    public function generateHeader(): void
+    public function generateHeader(bool $save = true): void
     {
         $header = [];
         $header[] = "0 {$this->description}" ?? '' ;
@@ -605,7 +625,9 @@ class Part extends Model
         }
 
         $this->header = implode("\n", $header);
-        $this->saveQuietly();
+        if ($save) {
+            $this->saveQuietly();
+        }
     }
 
     public function putDeletedBackup(): void

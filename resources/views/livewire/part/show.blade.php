@@ -48,6 +48,7 @@
                 $this->updateImageAction->isVisible() ||
                 $this->recheckPartAction->isVisible() ||
                 $this->updateSubpartsAction->isVisible() ||
+                $this->updateRebrickableDataAction->isVisible() ||
                 $this->retieFixAction->isVisible() ||
                 $this->deleteAction->isVisible()
             )
@@ -60,6 +61,7 @@
                         $this->updateImageAction,
                         $this->recheckPartAction,
                         $this->updateSubpartsAction,
+                        $this->updateRebrickableDataAction,
                         $this->retieFixAction,
                         $this->deleteAction
                     ]"
@@ -94,44 +96,53 @@
                 <x-filament-action action="toggleManualHoldAction" />
             @endif
         </div>
-        <div>
-            <span class="font-bold text-lg">
-                Part Attributes:
-            </span>
-            <x-filament-action action="viewBasePartAction" />
-            <x-filament-action action="toggleIsPatternAction" />
-            @if (!$this->toggleIsPatternAction->isVisible())
-                <x-filament::button
-                    color="gray"
-                >
-                  {{$this->part->is_pattern ? 'Printed' : 'Not Printed'}}
-                </x-filament::button>
+        @if ($this->part->type->inPartsFolder())
+            <div>
+                <span class="font-bold text-lg">
+                    Part Attributes:
+                </span>
+                <x-filament-action action="viewBasePartAction" />
+                <x-filament-action action="toggleIsPatternAction" />
+                @if (!$this->toggleIsPatternAction->isVisible())
+                    <x-filament::button
+                        color="gray"
+                    >
+                    {{$this->part->is_pattern ? 'Printed' : 'Not Printed'}}
+                    </x-filament::button>
+                @endif
+                <x-filament-action action="toggleIsCompositeAction" />
+                @if (!$this->toggleIsCompositeAction->isVisible())
+                    <x-filament::button
+                        color="gray"
+                    >
+                        {{$this->part->is_composite ? 'Assembly' : 'Single Part'}}
+                    </x-filament::button>
+                @endif
+                <x-filament-action action="toggleIsDualMouldAction" />
+                @if (!$this->toggleIsDualMouldAction->isVisible())
+                    <x-filament::button
+                        color="gray"
+                    >
+                        {{$this->part->is_dual_mould ? 'Dual Moulded' : 'Single Mould'}}
+                    </x-filament::button>
+                @endif
+            </div>
+            @if ($this->viewRebrickableAction->isVisible() || 
+                $this->viewBrickLinkAction->isVisible() || 
+                $this->viewBricksetAction->isVisible() || 
+                $this->viewBrickOwlAction->isVisible()
+            )
+                <div>
+                    <span class="font-bold text-lg">
+                        External Sites:
+                    </span>
+                    <x-filament-action action="viewRebrickableAction" />
+                    <x-filament-action action="viewBrickLinkAction" />
+                    <x-filament-action action="viewBrickSetAction" />
+                    <x-filament-action action="viewBrickOwlAction" />
+                </div>
             @endif
-            <x-filament-action action="toggleIsCompositeAction" />
-            @if (!$this->toggleIsCompositeAction->isVisible())
-                <x-filament::button
-                    color="gray"
-                >
-                    {{$this->part->is_composite ? 'Assembly' : 'Single Part'}}
-                </x-filament::button>
-            @endif
-            <x-filament-action action="toggleIsDualMouldAction" />
-            @if (!$this->toggleIsDualMouldAction->isVisible())
-                <x-filament::button
-                    color="gray"
-                >
-                    {{$this->part->is_dual_mould ? 'Dual Moulded' : 'Single Mould'}}
-                </x-filament::button>
-            @endif
-        </div>
-        <div>
-            <span class="font-bold text-lg">
-                External Sites:
-            </span>
-             <x-filament-action action="viewRebrickableAction" />
-            <x-filament-action action="viewBricklinkAction" />
-            <x-filament-action action="viewBrickowlAction" />
-        </div>
+        @endif
         <div class="w-full p-4 border rounded-md">
           <div class="flex flex-col md:flex-row-reverse w-full">
             <div class="flex w-full justify-center items-center md:w-1/3">

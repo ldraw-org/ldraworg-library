@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdateImage;
+use App\Jobs\UpdateRebrickable;
 use App\LDraw\PartManager;
-use App\Models\Omr\OmrModel;
 use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
 use Illuminate\Console\Command;
@@ -68,6 +67,16 @@ class DailyMaintenance extends Command
                 Storage::disk('images')->delete($image);
             }
         }
+
+        $this->info('Refreshing Rebrickable data');
+        Part::unofficial()
+            ->where(fn ($query) =>
+                $query
+                    ->orwhereBetween('created_at', [now(), now()->subDay()])
+                    ->orWhereBetween('created_at', [now()->subWeek()->subDay(), now()->subWeek()])
+                    ->orWhereBetween('created_at', [now()->subMonth()->subDay(), now()->subMonth()])
+            )
+            ->each(fn (Part $part) => UpdateRebrickable::dispatch($part));
 
         $this->info('Queueing missing images');
         $this->call('lib:render-parts', ['--unofficial-only' => true, '--missing' => true]);

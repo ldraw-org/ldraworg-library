@@ -22,9 +22,10 @@ return [
 
     // External Site URL Stubs
     'external_sites' => [
-        'bricklink' => 'https://www.bricklink.com/v2/catalog/catalogitem.page?P=',
-        'rebrickable' => 'https://rebrickable.com/parts/',
-        'brickowl' => 'https://www.brickowl.com//catalog/',
+        'BrickLink' => 'https://www.bricklink.com/v2/catalog/catalogitem.page?P=',
+        'Rebrickable' => 'https://rebrickable.com/parts/',
+        'BrickOwl' => 'https://www.brickowl.com/catalog/',
+        'Brickset' => 'https://brickset.com/parts/design-'
     ],
 
     // Match patterns

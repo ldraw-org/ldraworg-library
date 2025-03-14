@@ -4,10 +4,12 @@ namespace App\LDraw;
 
 use App\Enums\PartCategory;
 use App\Enums\PartType;
+use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateParentParts;
 use App\LDraw\Parse\Parser;
 use App\LDraw\Render\LDView;
 use App\Models\Part\Part;
+use App\Models\Part\PartKeyword;
 use App\Models\Part\UnknownPartNumber;
 use App\Models\StickerSheet;
 use App\Models\User;
@@ -197,6 +199,7 @@ class PartManager
             $p->updateReadyForAdmin();
             $this->addUnknownNumber($p);
             UpdateParentParts::dispatch($p);
+            UpdateRebrickable::dispatch($p);
         });
     }
 
@@ -432,5 +435,49 @@ class PartManager
         }
         $p->save();
         $p->refresh();
+    }
+
+    public function updateRebrickable(Part $part): void
+    {
+        if ($part->canSetExternalData()) {
+            $rb = new Rebrickable();
+            $part_rb = $part->rebrickable;
+            $part_rb['data'] = [];
+            $part_num = basename($part->filename, '.dat');
+
+            $rb_data = $rb->getParts(['ldraw_id' => $part_num]);
+            if (!$rb_data->isEmpty() && $part->isUnofficial()) {
+                $part_rb['data'] = $rb_data->all();
+                $rb_part = Arr::first($rb_data);
+                $okws = $part->keywords
+                    ->filter(fn (PartKeyword $key) =>
+                        Str::of($key->keyword)->lower()->startsWith('rebrickable') ||
+                        Str::of($key->keyword)->lower()->startsWith('bricklink') ||
+                        Str::of($key->keyword)->lower()->startsWith('brickset') ||
+                        Str::of($key->keyword)->lower()->startsWith('brickowl')
+                    )
+                    ->pluck('id');
+                if (!$okws->isEmpty()) {
+                    $part->keywords()->detach($okws->all());
+                    $part->load('keywords');
+                }
+                $kws = $part->keywords->pluck('keyword')->all();
+
+                $rb_num = Arr::get($rb_part, 'part_num');
+                if ($rb_num != $part_num) {
+                    $kws[] = "Rebrickable {$rb_num}";
+                }
+                $bl_num = Arr::get($rb_part, 'external_ids.BrickLink.0');
+                if (!is_null($bl_num) && $bl_num != $part_num) {
+                    $kws[] = "BrickLink {$bl_num}";
+                }
+                $part->setKeywords($kws);
+                $part->load('keywords');
+                $part->generateHeader();
+            }
+            $part_rb['updated_at'] = time();
+            $part->rebrickable = $part_rb;
+            $part->save();
+        }
     }
 }
