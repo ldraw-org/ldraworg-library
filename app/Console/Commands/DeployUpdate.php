@@ -27,10 +27,5 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        $q = Part::canHaveExternalData();
-        $this->info("Queueing {$q->count()} parts");
-        $q->lazy()
-            ->each(fn (Part $p) => UpdateRebrickable::dispatch($p));
-        $this->info("Queueing complete");
     }
 }
