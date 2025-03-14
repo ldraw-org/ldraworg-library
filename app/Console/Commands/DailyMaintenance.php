@@ -70,6 +70,7 @@ class DailyMaintenance extends Command
 
         $this->info('Refreshing Rebrickable data');
         Part::unofficial()
+            ->canHaveExternalData()
             ->where(fn ($query) =>
                 $query
                     ->orwhereBetween('created_at', [now(), now()->subDay()])
