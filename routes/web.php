@@ -104,7 +104,7 @@ Route::prefix('omr')->name('omr.')->group(function () {
     Route::view('/', 'omr.main')->name('main');
     Route::get('/sets', Index::class)->name('sets.index');
     Route::get('sets/{set}', SetShow::class)->name('sets.show');
-    Route::get('/set/{setnumber}', [SetShow::class, 'show'])->name('show.setnumber');
+    Route::get('/set/{setnumber}', SetShow::class)->name('show.setnumber');
 });
 
 

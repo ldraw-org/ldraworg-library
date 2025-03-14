@@ -14,6 +14,16 @@ class Show extends Component
     public array $parts = ['model.ldr' => ''];
     public ?int $model_id = null;
 
+    public function mount(?Set $set, ?Set $setnumber) {
+        if (!is_null($set) && $set->exists) {
+            $this->set = $set;
+        } elseif (!is_null($setnumber) && $setnumber->exists) {
+            $this->set = $setnumber;
+        } else {
+            return response('404');
+        }
+    }
+
     public function openModal(int $id): void
     {
         if ($id != $this->model_id) {
