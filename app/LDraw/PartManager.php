@@ -446,8 +446,8 @@ class PartManager
             $part_num = basename($part->filename, '.dat');
 
             $rb_data = $rb->getParts(['ldraw_id' => $part_num]);
+            $part_rb['data'] = $rb_data->all();
             if (!$rb_data->isEmpty() && $part->isUnofficial()) {
-                $part_rb['data'] = $rb_data->all();
                 $rb_part = Arr::first($rb_data);
                 $okws = $part->keywords
                     ->filter(fn (PartKeyword $key) =>
