@@ -40,7 +40,6 @@ class LDrawModelViewer extends Component implements HasForms
 
     public function makeModel()
     {
-
         if (count($this->data['ldraw-model']) != 1) {
             return;
         }

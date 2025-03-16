@@ -73,15 +73,16 @@
                     wire:click="$dispatch('ldbi-physical-mode')"
                 />
             </div>
-            <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" :$parts />
+            <x-3d-viewer class="border w-full h-[80vh]" modeltype="omr" />
         </div>
     </x-filament::modal>
     @push('scripts')
         @script
         <script>
             $wire.on('open-modal', (modal) => {
-                if (scene == null || parts['model.ldr'] != $wire.parts['model.ldr']) {
-                    parts = $wire.parts;
+                if (scene == null || modelid != $wire.model_id) {
+                    modelid = $wire.model_id;
+                    partname = $wire.model_name;
                     $wire.dispatch('ldbi-render-model');
                 }
             });

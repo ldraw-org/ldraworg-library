@@ -1,5 +1,4 @@
-@props(['partname' => '', 'parts' => []])
-
+@props(['partname' => '', 'modeltype' => 'part', 'modelid' => null, 'parts' => []])
 <div id="ldbi-container" {{ $attributes }}>
     <canvas id="ldbi-canvas" class="size-full"></canvas>
 </div>
@@ -7,6 +6,8 @@
     <x-layout.ldbi-scripts />
     <script type="text/javascript">
         var scene = null;
+        var modelid = "{{$modelid}}";
+        var modeltype = "{{$modeltype}}";
         var parts = {{ Js::from($parts) }};
         var partname = "{{$partname}}";
         LDR.Options.bgColor = 0xFFFFFF;
@@ -45,9 +46,8 @@
 
         var renderModel = function() {
             if (WEBGL.isWebGLAvailable()) {
-                if (scene != null) {
-                    scene.setModel(partname, true);
-                } else {
+                scene = null;
+                if (modeltype == 'user') {
                     LDR.Colors.load(() => {
                         scene = new LDrawOrg.Model(
                             document.getElementById('ldbi-canvas'),
@@ -55,7 +55,27 @@
                             {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
                         );
                     },() => {},parts['ldconfig.ldr']);
-                    addEventListener('resize', () => scene.onChange());
+                    addEventListener('resize', () => scene.onChange())
+                } else {
+                    if (modeltype == 'omr') {
+                        url = '/webgl/omr/';
+                    } else {
+                        url = '/webgl/part/';
+                    }
+                    fetch(url + modelid)
+                        .then(response => response.json())
+                        .then((response) => {
+                            parts = response;
+                            document.getElementById('ldbi-canvas').innerHTML = parts;
+                            LDR.Colors.load(() => {
+                                scene = new LDrawOrg.Model(
+                                    document.getElementById('ldbi-canvas'),
+                                    partname,
+                                    {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
+                                );
+                            },() => {},parts['ldconfig.ldr']);
+                            addEventListener('resize', () => scene.onChange())
+                        });
                 }
             }
         };

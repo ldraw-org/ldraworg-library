@@ -44,7 +44,7 @@
                 wire:click="$dispatch('ldbi-physical-mode')"
             />
         </div>
-        <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" :$parts />
+        <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" modeltype="user" />
     </div>
 
     <div class="border rounded p-2">
