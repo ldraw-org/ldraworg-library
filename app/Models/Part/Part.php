@@ -406,7 +406,7 @@ class Part extends Model
             $this->descendants->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->count() == 0;
         if ($old != $this->ready_for_admin) {
             $this->saveQuietly();
-            $this->ancestors->each(function (Part $p) {
+            $this->ancestors->unofficial()->each(function (Part $p) {
                 $p->ready_for_admin =
                     in_array($p->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) &&
                     $p->descendants->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->count() == 0;
