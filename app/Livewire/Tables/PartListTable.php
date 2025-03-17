@@ -18,6 +18,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\Constraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\Operators\Operator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsEmptyOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
@@ -95,9 +96,6 @@ class PartListTable extends BasicTable
                 ->constraintPickerColumns(['md' => 2, 'xl' => 4])
                 ->constraints([
                     // TODO: Part Fixes, Alias, Third Party
-                    SelectConstraint::make('part_status')
-                        ->label('Part Status')
-                        ->options(PartStatus::trackerStatusOptions()),
                     TextConstraint::make('description'),
                     TextConstraint::make('filename')
                         ->label('Part Name'),
@@ -156,6 +154,16 @@ class PartListTable extends BasicTable
                     BooleanConstraint::make('is_pattern'),
                     BooleanConstraint::make('is_composite'),
                     BooleanConstraint::make('is_dual_mould'),
+                    BooleanConstraint::make('is_fix')
+                        ->label('Is Fix')
+                        ->operators([
+                            Operator::make('is_fix')
+                                ->label(fn (bool $isInverse): string => $isInverse ? 'Not a part fix' : 'Is a part fix')
+                                ->summary(fn (bool $isInverse): string => $isInverse ? 'Not fixes' : 'Fixes')
+                                ->query(fn (Builder $query, bool $isInverse) => $query->{$isInverse ? 'whereDoesntHave' : 'whereHas'}(
+                                    'official_part'
+                                )),
+                        ]),
                     RelationshipConstraint::make('base_part')
                         ->selectable(
                             IsRelatedToOperator::make()
