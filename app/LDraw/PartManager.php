@@ -78,7 +78,7 @@ class PartManager
         $header = $png->getImageProperty('LDrawHeader') ?: '';
         $p = $this->parser->parse($header);
         $u = User::fromAuthor($p->username, $p->realname)->first() ?? $user;
-        $filename = $type->folder() . '/' . basename(str_replace('\\', '/', $p->name ?? $file->filename));
+        $filename = $type->folder() . '/' . basename(str_replace('\\', '/', $file->filename));
         $attributes = [
             'user_id' => $u->id,
             'license' => $p->license ?? $user->license,

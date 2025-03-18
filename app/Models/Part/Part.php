@@ -532,8 +532,9 @@ class Part extends Model
             $this->body()->create([
                 'body' => $body
             ]);
+            $this->load('body');
             return;
-        }
+        } 
         $this->body->body = $body;
         $this->body->save();
     }
