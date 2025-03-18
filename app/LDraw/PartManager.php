@@ -73,15 +73,10 @@ class PartManager
 
     protected function makePartFromImage(LDrawFile $file, User $user, PartType $type): Part
     {
-        $png = new \Imagick();
-        $png->readImageBlob($file->contents);
-        $header = $png->getImageProperty('LDrawHeader') ?: '';
-        $p = $this->parser->parse($header);
-        $u = User::fromAuthor($p->username, $p->realname)->first() ?? $user;
         $filename = $type->folder() . '/' . basename(str_replace('\\', '/', $file->filename));
         $attributes = [
-            'user_id' => $u->id,
-            'license' => $p->license ?? $user->license,
+            'user_id' => $user->id,
+            'license' => $user->license,
             'filename' => $filename,
             'description' => "{$type->description()} {$filename}",
             'type' => $type,
