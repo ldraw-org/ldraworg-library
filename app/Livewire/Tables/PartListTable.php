@@ -95,7 +95,7 @@ class PartListTable extends BasicTable
             QueryBuilder::make()
                 ->constraintPickerColumns(['md' => 2, 'xl' => 4])
                 ->constraints([
-                    // TODO: Part Fixes, Alias, Third Party
+                    // TODO: Third Party
                     TextConstraint::make('description'),
                     TextConstraint::make('filename')
                         ->label('Part Name'),
@@ -154,12 +154,13 @@ class PartListTable extends BasicTable
                     BooleanConstraint::make('is_pattern'),
                     BooleanConstraint::make('is_composite'),
                     BooleanConstraint::make('is_dual_mould'),
-                    BooleanConstraint::make('is_fix')
+                    Constraint::make('is_fix')
                         ->label('Is Fix')
+                        ->icon('heroicon-m-check-circle')
                         ->operators([
                             Operator::make('is_fix')
                                 ->label(fn (bool $isInverse): string => $isInverse ? 'Not a part fix' : 'Is a part fix')
-                                ->summary(fn (bool $isInverse): string => $isInverse ? 'Not fixes' : 'Fixes')
+                                ->summary('Is Fix')
                                 ->query(fn (Builder $query, bool $isInverse) => $query->{$isInverse ? 'whereDoesntHave' : 'whereHas'}(
                                     'official_part'
                                 )),
