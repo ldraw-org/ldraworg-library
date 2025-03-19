@@ -10,6 +10,7 @@ use App\Models\Part\Part;
 use App\Models\User;
 use App\Models\Vote;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class VoteManager
 {
@@ -19,8 +20,10 @@ class VoteManager
 
         $vote = $user->votes->firstWhere('part_id', $part->id);
 
+        $comment = Str::of($comment)->trim()->toString();
+        $comment = $comment == '' ? null : $comment;
         // Can't vote or same vote type
-        if (!$canVote || $vote?->vote_type == $vt) {
+        if (!$canVote || $vote?->vote_type == $vt || ($vt == VoteType::Comment && is_null($comment))) {
             return;
         }
 

@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdateRebrickable;
-use App\Models\Part\Part;
+use App\Models\Part\PartEvent;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class DeployUpdate extends Command
 {
@@ -27,5 +27,13 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
+        PartEvent::whereNotNull('comment')
+            ->each(function (PartEvent $e) {
+                $comment = Str::of($e->comment)->trim()->toString();
+                if ($comment == '') {
+                    $e->comment = null;
+                    $e->save();
+                }
+            });
     }
 }
