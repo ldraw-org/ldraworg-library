@@ -31,10 +31,12 @@ class CheckPart implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->p instanceof Part) {
-            $this->p = new Collection([$this->p]);
-        }
         $pm = app(PartManager::class);
-        $this->p->each(fn (Part $part) => $pm->checkPart($part));
+
+        if ($this->p instanceof Part) {
+            $pm->checkPart($this->p);
+        } else {
+            $this->p->each(fn (Part $part) => $pm->checkPart($part));
+        }
     }
 }
