@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\LDraw\Check\ErrorCheckBag;
 use App\Models\Part\Part;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
@@ -29,7 +30,7 @@ class OfficialPartsWithErrorsTable extends BasicTable
                 TextColumn::make('description')
                     ->sortable(),
                 TextColumn::make('part_check_messages')
-                    ->state(fn (Part $part) => implode(", ", $part->part_check_messages['errors']))
+                    ->state(fn (Part $part) => implode(", ", ErrorCheckBag::errorsFromArray($part->errors)))
                     ->wrap()
             ])
             ->actions([
