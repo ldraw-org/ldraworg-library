@@ -24,11 +24,11 @@ class Parser
             $author['user'] ?? null,
             $author['realname'] ?? null,
             $type['unofficial'] ?? null,
-            PartType::tryFrom(Arr::get($type, 'type')),
-            PartTypeQualifier::tryFrom(Arr::get($type,'qual')),
+            PartType::tryFrom(Arr::get($type, 'type') ?? ''),
+            PartTypeQualifier::tryFrom(Arr::get($type,'qual') ?? ''),
             $type['releasetype'] ?? null,
             $type['release'] ?? null,
-            License::tryFromText($this->getLicense($text)),
+            License::tryFromText($this->getLicense($text) ?? ''),
             $this->getHelp($text),
             !is_null($bfc) && $bfc['bfc'] == 'CERTIFY' ? $bfc['winding'] : null,
             $this->getMetaCategory($text),
@@ -200,23 +200,13 @@ class Parser
             $pattern = str_replace(['###PartTypes###', '###PartTypesQualifiers###'], [implode('|', array_column(PartType::cases(), 'value')), implode('|', array_column(PartTypeQualifier::cases(), 'value'))], config('ldraw.patterns.type'));
 
             if (preg_match($pattern, $text, $matches)) {
-                $t = ['unofficial' => false, 'type' => $matches['type'], 'qual' => null, 'releasetype' => null, 'release' => null];
-                if (array_key_exists('unofficial', $matches) && $matches['unofficial'] !== '') {
-                    $t['unofficial'] = true;
-                }
-                if (array_key_exists('qual', $matches)) {
-                    $t['qual'] = $matches['qual'];
-                }
-                if (array_key_exists('releasetype', $matches)) {
-                    $t['releasetype'] = $matches['releasetype'];
-                }
-                if (array_key_exists('release', $matches)) {
-                    $t['release'] = $matches['release'];
-                }
-                if (array_key_exists('releasetype', $matches) && $matches['releasetype'] == 'ORIGINAL') {
-                    $t['release'] = 'original';
-                }
-                return $t;
+                return [
+                    'unofficial' => Arr::get($matches, 'unofficial') !== '',
+                    'type' => Arr::get($matches, 'type'),
+                    'qual' => Arr::get($matches, 'qual'),
+                    'releasetype' => Arr::get($matches, 'releasetype'),
+                    'release' => Arr::get($matches, 'releasetype') == 'ORIGINAL' ? 'original' : Arr::get($matches, 'release'),
+                ];
             }
         }
         return null;

@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartError;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Check\Contracts\SettingsAwareCheck;
 use App\LDraw\Parse\ParsedPart;
@@ -35,7 +36,7 @@ class ValidBodyMeta implements Check, SettingsAwareCheck
             }
             $lineStart = Str::words($line, 2, '');
             if (Str::startsWith($lineStart, '0') && !Str::endsWith($lineStart, $this->settings->allowed_body_metas)) {
-                $fail(__('partcheck.line.invalidmeta', ['value' => $index + $header_length]));
+                $fail(PartError::InvalidLineType0, ['value' => $index + $header_length]);
             }
         }
     }

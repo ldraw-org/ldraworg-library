@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartError;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
@@ -16,7 +17,7 @@ class CategoryIsValid implements Check
             is_null($part->metaCategory) &&
             is_null($part->descriptionCategory)
         ) {
-            $fail(__('partcheck.category.invalid'));
+            $fail(PartError::CategoryInvalid);
         }
     }
 }

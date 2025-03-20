@@ -3,6 +3,7 @@
 namespace App\LDraw\Check\Checks;
 
 use App\Enums\PartCategory;
+use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
@@ -16,7 +17,7 @@ class DescriptionModifier implements Check
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
         if ($part->type == PartType::Subpart && !Str::startsWith($part->description, '~')) {
-            $fail(__('partcheck.description.subpartdesc'));
+            $fail(PartError::NoTildeForSubpart);
             return;
         }
 
@@ -29,11 +30,11 @@ class DescriptionModifier implements Check
             $cat = $part->metaCategory ?? $part->descriptionCategory;
         }
         if (($cat == PartCategory::Moved || $cat == PartCategory::Obsolete || Str::endsWith($part->description, '(Obsolete)')) && !Str::startsWith($part->description, '~')) {
-            $fail(__('partcheck.description.movedorobsolete'));
+            $fail(PartError::NoTildeForMovedObsolete);
             return;
         }
         if ($part->type_qualifier == PartTypeQualifier::Alias && !Str::startsWith($part->description, '=')) {
-            $fail(__('partcheck.description.aliasdesc'));
+            $fail(PartError::NoEqualsForAlias);
             return;
         }
         if ($part instanceof Part) {
@@ -41,10 +42,9 @@ class DescriptionModifier implements Check
         } else {
             $name = basename(str_replace('\\', '/', $part->name));
         }
-        if ($part->type == PartType::partsFolderTypes() &&
-            Str::startsWith($name, 't') &&
+        if (Str::startsWith($name, 't') &&
             !Str::startsWith($part->description, '|')) {
-            $fail(__('partcheck.description.thirdpartydesc'));
+            $fail(PartError::NoPipeForThirdParty);
         }
 
     }

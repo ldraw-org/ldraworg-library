@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartError;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
@@ -15,7 +16,7 @@ class AuthorInUsers implements Check
         if ($part instanceof ParsedPart &&
             User::fromAuthor($part->username ?? '', $part->realname ?? '')->count() == 0
         ) {
-            $fail(__('partcheck.author.registered', ['value' => $part->realname ?? $part->username]));
+            $fail(PartError::AuthorNotRegistered, ['value' => $part->realname ?? $part->username]);
         }
     }
 }

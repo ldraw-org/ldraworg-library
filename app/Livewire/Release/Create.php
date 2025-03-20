@@ -4,6 +4,7 @@ namespace App\Livewire\Release;
 
 use App\Enums\PartStatus;
 use App\Jobs\MakePartRelease;
+use App\LDraw\Check\ErrorCheckBag;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
 use Filament\Forms\Components\FileUpload;
@@ -65,13 +66,13 @@ class Create extends Component implements HasForms, HasTable
                             ->grow(false)
                             ->label('Status'),
                         TextColumn::make('part_check_messages')
-                            ->state(fn (Part $part) => implode(", ", $part->part_check_messages['errors']))
+                            ->state(fn (Part $part) => implode(", ", ErrorCheckBag::errorsFromArray($part->errors)))
                             ->wrap()
                             ->alignment(Alignment::End),
                     ])->alignment(Alignment::End),
                 ])->from('md')
             ])
-            ->recordClasses(fn (Part $p) => count($p->part_check_messages['errors']) > 0 ? '!bg-red-300' : null)
+            ->recordClasses(fn (Part $p) => count($p->errors) > 0 ? '!bg-red-300' : null)
             ->actions([
                 Action::make('view')
                     ->url(fn (Part $p) => route('parts.show', $p))

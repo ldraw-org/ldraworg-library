@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartError;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Check\Contracts\FilenameAwareCheck;
 use App\LDraw\Parse\ParsedPart;
@@ -19,13 +20,11 @@ class NameFileNameMatch implements Check, FilenameAwareCheck
 
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
-        if ($part instanceof Part) {
-            return;
-        } else {
-            $name = basename(str_replace('\\', '/', $part->name));
-        }
-        if (!is_null($this->filename) && $name !== mb_strtolower($this->filename)) {
-            $fail("Name: and filename do not match");
+        if ($part instanceof ParsedPart &&
+            !is_null($this->filename) &&
+            basename(str_replace('\\', '/', $part->name)) !== mb_strtolower($this->filename)
+        ) {
+            $fail(PartError::NameAndFilenameNotEqual);
         }
     }
 }

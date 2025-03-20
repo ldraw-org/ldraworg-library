@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartError;
 use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
@@ -10,7 +11,7 @@ use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
-class FlexibleSectionName implements Check
+class FlexibleHasCorrectSuffix implements Check
 {
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
@@ -22,9 +23,9 @@ class FlexibleSectionName implements Check
 
         $result = preg_match(config('ldraw.patterns.base'), basename($name), $matches);
         if ($part->type_qualifier == PartTypeQualifier::FlexibleSection &&
-            (!$result || (Arr::has($matches, 'suffix1') && !Str::startsWith($matches['suffix1'], 'k')))
+            (!$result || !Arr::has($matches, 'suffix1') || !Str::startsWith($matches['suffix1'], 'k'))
         ) {
-            $fail(__('partcheck.type.flexname'));
+            $fail(PartError::FlexSectionIncorrectSuffix);
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
@@ -16,7 +17,7 @@ class FlexibleSectionIsPart implements Check
         if ($part->type_qualifier == PartTypeQualifier::FlexibleSection &&
             $part->type != PartType::Part
         ) {
-            $fail(__('partcheck.type.flex'));
+            $fail(PartError::FlexSectionNotPart);
         }
     }
 }

@@ -9,14 +9,15 @@ use App\Models\Part\Part;
 use App\Models\User;
 use Closure;
 
-class HistoryIsValid implements Check
+class HistoryUserIsRegistered implements Check
 {
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
         if ($part instanceof ParsedPart) {
-            $hcount = count($part->history ?? []);
-            if ($hcount != mb_substr_count($part->rawText, '!HISTORY')) {
-                $fail(PartError::HistoryInvalid);
+            foreach ($part->history ?? [] as $hist) {
+                if (is_null(User::fromAuthor($hist['user'], $hist['user'])->first())) {
+                    $fail(PartError::HistoryAuthorNotRegistered);
+                }
             }
         }
     }

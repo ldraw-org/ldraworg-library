@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartError;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
@@ -27,7 +28,7 @@ class ValidLines implements Check
             if (is_null(config('ldraw.patterns.line_type_' . $line[0])) ||
                 ! preg_match(config('ldraw.patterns.line_type_' . $line[0]), $line, $matches)
             ) {
-                $fail(__('partcheck.line.invalid', ['value' => $index + $header_length]));
+                $fail(PartError::LineInvalid, ['value' => $index + $header_length]);
             }
         }
     }

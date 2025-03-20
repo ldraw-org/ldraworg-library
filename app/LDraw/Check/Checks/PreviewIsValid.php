@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartError;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
@@ -18,12 +19,12 @@ class PreviewIsValid implements Check
         }
         $result = preg_match_all('/[0-9.-]+/iu', $part->preview, $matrix);
         if ($result != 13) {
-            $fail(__('partcheck.preview'));
+            $fail(PartError::PreviewInvalid);
             return;
         }
         $matrix = Arr::reject($matrix[0], fn (string $value, int $key) => !is_numeric($value));
         if (count($matrix) != 13) {
-            $fail(__('partcheck.preview'));
+            $fail(PartError::PreviewInvalid);
             return;
         }
         $matrix = [
@@ -33,7 +34,7 @@ class PreviewIsValid implements Check
         ];
         $matrix = MatrixFactory::create($matrix);
         if ($matrix->isSingular() || $matrix->isNegativeDefinite()) {
-            $fail(__('partcheck.preview'));
+            $fail(PartError::PreviewInvalid);
         }
     }
 }

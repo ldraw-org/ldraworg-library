@@ -5,6 +5,7 @@ namespace App\Models\Part;
 use App\Enums\EventType;
 use App\Enums\License;
 use App\Enums\PartCategory;
+use App\Enums\PartError;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -204,8 +205,7 @@ class Part extends Model
     protected function errors(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value, array $attributes) => $attributes['part_check_messages']['errors'] ?? [],
-            set: fn (array $value, array $attributes) => $attributes['part_check_messages']['errors'] = $value,
+            get: fn (?string $value, array $attributes) => Arr::get(json_decode($attributes['part_check_messages'], true), 'errors', []),
         );
     }
 
@@ -275,12 +275,23 @@ class Part extends Model
         $query->whereIn('type', PartType::partsFolderTypes());
     }
 
-    public function scopeCanHaveExternalData(Builder $query) {
+    public function scopeCanHaveExternalData(Builder $query)
+    {
         $query->partsFolderOnly()
             ->where('description', 'NOT LIKE', '~%')
             ->where('description', 'NOT LIKE', '%(Obsolete)')
             ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete])
             ->doesntHave('sticker_sheet');
+    }
+
+    public function scopeHasError(Builder $query, PartError $error): void
+    {
+        $query->whereJsonContainsKey("part_check_messages->errors->{$error->value}");
+    }
+
+    public function scopeOrHasError(Builder $query, PartError $error): void
+    {
+        $query->orWhereJsonContainsKey("part_check_messages->errors->{$error->value}");
     }
 
     public function isTexmap(): bool
@@ -534,7 +545,7 @@ class Part extends Model
             ]);
             $this->load('body');
             return;
-        } 
+        }
         $this->body->body = $body;
         $this->body->save();
     }

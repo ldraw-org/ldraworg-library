@@ -3,6 +3,7 @@
 namespace App\LDraw\Check;
 
 use App\Enums\License;
+use App\Enums\PartError;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\LDraw\Check\Contracts\Check;
@@ -12,20 +13,19 @@ use App\Models\Part\Part;
 use App\LDraw\Parse\ParsedPart;
 use App\Settings\LibrarySettings;
 use Closure;
-use Illuminate\Support\MessageBag;
 
 class PartChecker
 {
-    protected MessageBag $errors;
+    protected ErrorCheckBag $errors;
 
     public function __construct(
         protected LibrarySettings $settings
     ) {
-        $this->errors = new MessageBag();
+        $this->errors = new ErrorCheckBag();
     }
 
     public function runChecks(Part|ParsedPart $part, array $checks = [], ?string $filename = null): bool {
-        $this->errors = new MessageBag();
+        $this->errors = new ErrorCheckBag();
         foreach ($checks as $check) {
             if (!$check instanceof Check) {
                 continue;
@@ -44,36 +44,33 @@ class PartChecker
         return $this->hasErrors();
     }
 
-    public function addError(string $error): void
+    public function addError(PartError $error, array $context = []): void
     {
-        $this->errors->add('errors', $error);
+        $this->errors->add($error, $context);
     }
 
     public function hasErrors(): bool
     {
-        return $this->errors->isNotEmpty();
+        return !$this->errors->isEmpty();
     }
 
     public function getErrors(): array
     {
-        return $this->errors->get('errors');
+        return $this->errors->getErrors();
     }
 
-    public function checkSubmittedPart(ParsedPart $part, ?string $filename = null): array
+    public function getErrorStorageArray(): array
     {
-        $ferrors = $this->checkFile($part, $filename);
-        $herrors = $this->checkHeader($part);
-        return array_merge($herrors, $ferrors);
+        return $this->errors->toArray();
     }
 
-    public function checkCanRelease(Part $part): array
+    public function checkCanRelease(Part $part): bool
     {
         $part->loadMissing('descendants', 'ancestors');
         $errors = [];
+
         if (!$part->isTexmap()) {
-            $ferrors = $this->checkFile($part);
-            $herrors = $this->checkHeader($part);
-            $errors = array_merge($herrors, $ferrors);
+            $this->standardChecks($part);
         }
 
         if ($part->isUnofficial()) {
@@ -81,23 +78,23 @@ class PartChecker
                 $part->type->inPartsFolder() || $part->type == PartType::Helper ||
                 $this->hasCertifiedParentInParts($part);
             if (!$hascertparents) {
-                $errors[] = 'No certified parents in the parts directory';
+                $this->addError(PartError::NoCertifiedParents);
             }
             if (!$this->hasAllSubpartsCertified($part)) {
-                $errors[] = 'Has uncertified subfiles';
+                $this->addError(PartError::HasUncertifiedSubfiles);
             }
             if (count($part->missing_parts) > 0) {
-                $errors[] = 'Has missing part references';
+                $this->addError(PartError::HasMissingSubfiles);
             }
             if ($part->manual_hold_flag) {
-                $errors[] = 'Manual hold back by admin';
+                $this->addError(PartError::AdminHold);
             }
             if ($part->license !== License::CC_BY_4) {
-                $errors[] = "Part License {$part->license->value} not authorized for library";
+                $this->addError(PartError::LicenseNotLibraryApproved, ['license' => $part->license->value]);
             }
         }
-        $can_release = count($errors) == 0;
-        return compact('can_release', 'errors');
+        $errors = $this->getErrors();
+        return count($errors) == 0;
     }
 
     public function hasCertifiedParentInParts(Part $part): bool
@@ -116,7 +113,7 @@ class PartChecker
         return $this->getErrors();
     }
 
-    public function checkFile(Part|ParsedPart $part, ?string $filename = null): array
+    public function standardChecks(Part|ParsedPart $part, ?string $filename = null): bool
     {
         $this->runChecks($part, [
             new \App\LDraw\Check\Checks\LibraryApprovedName(),
@@ -124,32 +121,26 @@ class PartChecker
             new \App\LDraw\Check\Checks\UnknownPartNumber(),
             new \App\LDraw\Check\Checks\ValidBodyMeta(),
             new \App\LDraw\Check\Checks\ValidLines(),
-            new \App\LDraw\Check\Checks\NoSelfReference()
-        ], $filename);
+            new \App\LDraw\Check\Checks\NoSelfReference(),
 
-        return $this->getErrors();
-    }
-
-    public function checkHeader(Part|ParsedPart $part): array
-    {
-        $this->runChecks($part, [
-            new \App\LDraw\Check\Checks\MissingHeaderMeta(),
+            new \App\LDraw\Check\Checks\HasRequiredHeaderMeta(),
             new \App\LDraw\Check\Checks\LibraryApprovedDescription(),
             new \App\LDraw\Check\Checks\PatternPartDesciption(),
             new \App\LDraw\Check\Checks\AuthorInUsers(),
             new \App\LDraw\Check\Checks\NameAndPartType(),
             new \App\LDraw\Check\Checks\DescriptionModifier(),
-            new \App\LDraw\Check\Checks\PhysicalColor(),
+            new \App\LDraw\Check\Checks\NewPartNotPhysicalColor(),
             new \App\LDraw\Check\Checks\AliasInParts(),
             new \App\LDraw\Check\Checks\FlexibleSectionIsPart(),
-            new \App\LDraw\Check\Checks\FlexibleSectionName(),
+            new \App\LDraw\Check\Checks\FlexibleHasCorrectSuffix(),
             new \App\LDraw\Check\Checks\BfcIsCcw(),
             new \App\LDraw\Check\Checks\CategoryIsValid(),
             new \App\LDraw\Check\Checks\PatternHasSetKeyword(),
             new \App\LDraw\Check\Checks\HistoryIsValid(),
+            new \App\LDraw\Check\Checks\HistoryUserIsRegistered(),
             new \App\LDraw\Check\Checks\PreviewIsValid(),
-        ]);
+        ], $filename);
 
-        return $this->getErrors();
+        return $this->hasErrors();
     }
 }

@@ -3,6 +3,7 @@
 namespace App\LDraw\Check\Checks;
 
 use App\Enums\PartCategory;
+use App\Enums\PartError;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\LDraw\Parse\Parser;
@@ -31,7 +32,7 @@ class PatternPartDesciption implements Check
 
         if (! in_array($cat, [PartCategory::Moved, PartCategory::Sticker, PartCategory::StickerShortcut]) &&
             ! preg_match('#^.*?\h+Pattern(?:\h+\(.*\))?$#ui', $part->description, $matches)) {
-                $fail(__('partcheck.description.patternword'));
+                $fail(PartError::PatternNotInDescription);
         }
     }
 }

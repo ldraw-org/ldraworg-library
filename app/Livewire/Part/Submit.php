@@ -69,7 +69,9 @@ class Submit extends Component implements HasForms
                                 $pparts = Part::query()->name($part->name ?? '')->get();
                                 $unofficial_exists = $pparts->unofficial()->count() > 0;
                                 $official_exists = $pparts->official()->count() > 0;
-                                $errors = app(\App\LDraw\Check\PartChecker::class)->checkSubmittedPart($part, $value->getClientOriginalName());
+                                $pc = app(\App\LDraw\Check\PartChecker::class);
+                                $pc->standardChecks($part, $value->getClientOriginalName());
+                                $errors = $pc->getErrors();
 
                                 // A part in the p and parts folder cannot have the same name
                                 if (!is_null($pparts) && !is_null($part->type) && !is_null($part->name) &&

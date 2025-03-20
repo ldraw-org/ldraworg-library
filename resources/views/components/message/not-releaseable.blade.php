@@ -4,12 +4,12 @@
         This part is not releaseable
     </x-slot:header>
     <ul>
-        @foreach($part->part_check_messages['errors'] as $error)
+        @foreach($part->errors as $error => $context)
             <li wire:key="part-error-{{$loop->iteration}}">
-                @if ($error == 'Has uncertified subfiles')
+                @if ($error == 'tracker.uncertsubs')
                     <x-accordion id="showContents">
                         <x-slot name="header">
-                            <div>Has uncertified subfiles</div>
+                            <div>{{__("partcheck.{$error}")}}</div>
                         </x-slot>
                         <div class="px-4">
                             @foreach($part->descendants->whereIn('part_status', [\App\Enums\PartStatus::AwaitingAdminReview, \App\Enums\PartStatus::NeedsMoreVotes, \App\Enums\PartStatus::ErrorsFound]) as $p)
@@ -18,7 +18,13 @@
                         </div>
                     </x-accordion>
                 @else
-                    {{$error}}
+                    @if ($context)
+                        @foreach ($context as $replace)
+                            {{__("partcheck.{$error}", $replace)}}
+                        @endforeach
+                    @else
+                        {{__("partcheck.{$error}")}}
+                    @endif
                 @endif
             </li>
         @endforeach

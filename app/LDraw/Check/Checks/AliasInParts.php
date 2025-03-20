@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check\Checks;
 
+use App\Enums\PartError;
 use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
@@ -15,7 +16,7 @@ class AliasInParts implements Check
         if ($part->type_qualifier == PartTypeQualifier::Alias &&
             ! $part->type->inPartsFolder()
         ) {
-            $fail(__('partcheck.type.alias'));
+            $fail(PartError::AliasNotInParts);
         }
     }
 }

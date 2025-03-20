@@ -363,8 +363,9 @@ class PartManager
     public function checkPart(Part $part): void
     {
         $messages = $part->part_check_messages ?? [];
-        $check = app(\App\LDraw\Check\PartChecker::class)->checkCanRelease($part);
-        $messages['errors'] = $check['errors'];
+        $pc = app(\App\LDraw\Check\PartChecker::class);
+        $can_release = $pc->checkCanRelease($part);
+        $messages['errors'] = $pc->getErrorStorageArray();
 
         if (!$part->isUnofficial()) {
             $part->can_release = true;
@@ -374,7 +375,7 @@ class PartManager
             if (!is_null($part->category) && $part->category == PartCategory::Minifig) {
                 $messages['warnings'] = "Check Minifig category: {$part->category->value}";
             }
-            $part->can_release = $check['can_release'];
+            $part->can_release = $can_release;
         }
         $part->part_check_messages = $messages;
         $part->updateReadyForAdmin();
