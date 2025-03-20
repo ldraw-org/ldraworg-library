@@ -35,7 +35,7 @@ class CheckParts extends Command
             );
             $count = $q->count();
             if ($count > 0) {
-                $q->lazy()->each(fn (Part $part)=> CheckPart::dispatch($part));
+                $q->cursor()->each(fn (Part $part)=> CheckPart::dispatch($part));
             }
         }
         $this->info("{$count} parts queued for error check");
