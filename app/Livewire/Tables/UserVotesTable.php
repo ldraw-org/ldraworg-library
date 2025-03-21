@@ -27,7 +27,7 @@ class UserVotesTable extends BasicTable
                 Split::make([
                     ImageColumn::make('image')
                         ->state(
-                            fn (Vote $v): string => version('images/library/unofficial/' . substr($v->part->filename, 0, -4) . '_thumb.png')
+                            fn (Vote $v): string => version("images/library/{$v->part->imageThumbPath()}")
                         )
                         ->grow(false)
                         ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]']),

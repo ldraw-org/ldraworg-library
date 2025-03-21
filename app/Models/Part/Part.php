@@ -314,6 +314,16 @@ class Part extends Model
         return $this->isUnofficial() ? 'unofficial' : 'official';
     }
 
+    public function imagePath(): string
+    {
+        return "{$this->libFolder()}/{$this->type->folder()}/" . basename($this->filename, ".{$this->type->format()}") . '.png';
+    }
+
+    public function imageThumbPath(): string
+    {
+        return "{$this->libFolder()}/{$this->type->folder()}/" . basename($this->filename, ".{$this->type->format()}") . '_thumb.png';
+    }
+
     public function name(): string
     {
         return str_replace('/', '\\', str_replace(["parts/", "p/"], '', $this->filename));

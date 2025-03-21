@@ -13,7 +13,7 @@
                     {{basename($part->filename, '.dat')}}
                 </div>
                 @if(stripos($part->description, "obsolete") === false || $show_obsolete)
-                    <img class="p-2 object-scale-down max-h-[150px]" src="{{version('images/library/' . $part->libFolder() . '/' . substr($part->filename, 0, -4) . '.png')}}" title="{{$part->description}}" alt="{{$part->description}}" loading="lazy">
+                    <img class="p-2 object-scale-down max-h-[150px]" src="{{version("images/library/{$part->imagePath()}}" title="{{$part->description}}" alt="{{$part->description}}" loading="lazy">
                     <p class="text-sm p-2">{{$part->description}}</p>
                     @if($part->isUnofficial())
                         <div class="p-2">

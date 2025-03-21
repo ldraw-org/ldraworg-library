@@ -99,7 +99,7 @@ class Show extends Component implements HasForms, HasActions
             return response('404');
         }
         $this->image =
-            $this->part->isTexmap() ? route("{$this->part->libFolder()}.download", $this->part->filename) : version("images/library/{$this->part->libFolder()}/" . substr($this->part->filename, 0, -4) . '.png');
+            $this->part->isTexmap() ? route("{$this->part->libFolder()}.download", $this->part->filename) : version("images/library/{$part->imagePath()}");
         $this->form->fill();
     }
 
@@ -464,7 +464,7 @@ class Show extends Component implements HasForms, HasActions
                 $num = Str::of($site_kw->keyword)->lower()->chopStart($site_lower)->trim()->toString();
                 $url = $url_start . $num;
             }
-            
+
         }
         return Action::make("view{$site}")
             ->button()

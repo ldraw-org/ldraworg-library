@@ -1,10 +1,4 @@
-<div>
-    <x-fas-square @class([
-        'inline w-5',
-        'fill-lime-400' => $getRecord()->vote_type == \App\Enums\VoteType::AdminCertify || $getRecord()->vote_type == \App\Enums\VoteType::AdminFastTrack,
-        'fill-green-400' => $getRecord()->vote_type == \App\Enums\VoteType::Certify,
-        'fill-red-500' => $getRecord()->vote_type == \App\Enums\VoteType::Hold,
-
-    ]) />
-    <span>{{$getRecord()->vote_type->label()}}</span>
+<div class="flex flex-row space-x-2">
+    <x-dynamic-component :component="$getRecord()->vote_type->icon()" class="w-5 {{$getRecord()->vote_type->iconColor()}}" />
+    <div>{{$getRecord()->vote_type->label()}}</div>
 </div>

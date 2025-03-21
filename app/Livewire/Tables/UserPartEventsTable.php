@@ -42,7 +42,7 @@ class UserPartEventsTable extends BasicTable
                         ->state(
                             function (PartEvent $event) {
                                 if (!is_null($event->part)) {
-                                    return version("images/library/{$event->part->libFolder()}/" . substr($event->part->filename, 0, -4) . '_thumb.png');
+                                    return version("images/library/{$event->part->imageThumbPath()}");
                                 } else {
                                     return asset('images/library/placeholder.png');
                                 }
