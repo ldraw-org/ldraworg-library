@@ -300,6 +300,22 @@ class Part extends Model
         $query->orWhereJsonContainsKey("part_check_messages->errors->{$error}");
     }
 
+    public function scopeDoesntHaveError(Builder $query, string|PartError $error): void
+    {
+        if ($error instanceof PartError) {
+            $error = $error->value;
+        }
+        $query->whereJsonDoesntContainKey("part_check_messages->errors->{$error}");
+    }
+
+    public function scopeOrDoesntHaveError(Builder $query, string|PartError $error): void
+    {
+        if ($error instanceof PartError) {
+            $error = $error->value;
+        }
+        $query->orWhereJsonDoesntContainKey("part_check_messages->errors->{$error}");
+    }
+
     public function isTexmap(): bool
     {
         return $this->type->isImageFormat();

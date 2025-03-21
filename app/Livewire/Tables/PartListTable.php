@@ -4,6 +4,7 @@ namespace App\Livewire\Tables;
 
 use App\Enums\License;
 use App\Enums\PartCategory;
+use App\Enums\PartError;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -21,6 +22,7 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsEmptyOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint\Operators\IsOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -126,6 +128,18 @@ class PartListTable extends BasicTable
                     SelectConstraint::make('category')
                         ->options(PartCategory::options())
                         ->multiple(),
+                    SelectConstraint::make('part_errors')
+                        ->options(PartError::options())
+                        ->multiple()
+                        ->operators([
+                            IsOperator::make('error')
+                                ->query(function (Builder $query, bool $isInverse, IsOperator $operator) {
+                                    $values = $operator->getSettings()['values'];
+                                    foreach ($values as $value) {
+                                        $query->{$isInverse ? 'orDoesntHaveError' : 'orHasError'}($value);
+                                    }
+                                })
+                        ]),
                     RelationshipConstraint::make('keywords')
                         ->selectable(
                             IsRelatedToOperator::make()
