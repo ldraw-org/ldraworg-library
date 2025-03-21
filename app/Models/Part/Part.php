@@ -221,55 +221,6 @@ class Part extends Model
         });
     }
 
-    public function scopeSearchPart(Builder $query, string $search, string $scope): void
-    {
-        if ($search !== '') {
-            //Pull the terms out of the search string
-            $pattern = '#([^\s"]+)|"([^"]*)"#u';
-            preg_match_all($pattern, $search, $matches, PREG_SET_ORDER);
-
-            foreach ($matches as $m) {
-                $char = '\\';
-                $term = str_replace(
-                    [$char, '%', '_'],
-                    [$char.$char, $char.'%', $char.'_'],
-                    $m[count($m) - 1]
-                );
-                switch ($scope) {
-                    case 'description':
-                        $query->where(function (Builder $q) use ($term) {
-                            $q->orWhere('filename', 'LIKE', "%{$term}%")->orWhere('description', 'LIKE', "%{$term}%");
-                        });
-                        break;
-                    case 'filename':
-                    case 'header':
-                        $query->where($scope, 'LIKE', "%{$term}%");
-                        break;
-                    case 'file':
-                        $query->where(function (Builder $q) use ($term) {
-                            $q->orWhere('header', 'LIKE', "%{$term}%")->orWhereRelation('body', 'body', 'LIKE', "%{$term}%");
-                        });
-                        break;
-                    default:
-                        $query->where('header', 'LIKE', "%{$term}%");
-                        break;
-                }
-            }
-        } else {
-            $query->where('filename', '');
-        }
-    }
-
-    public function scopeAdminReady(Builder $query): void
-    {
-        $query->whereNull('part_release_id')
-            ->whereIn('type', PartType::partsFolderTypes())
-            ->where('ready_for_admin', true)
-            ->whereHas('descendantsAndSelf', function ($q) {
-                $q->where('part_status', PartStatus::AwaitingAdminReview);
-            });
-    }
-
     public function scopePartsFolderOnly(Builder $query): void
     {
         $query->whereIn('type', PartType::partsFolderTypes());

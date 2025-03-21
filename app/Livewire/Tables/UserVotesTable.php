@@ -19,17 +19,12 @@ class UserVotesTable extends BasicTable
     {
         return $table
             ->query(
-                Auth::user()->votes()->getQuery()->with('part', 'part.votes', 'part.official_part')
+                Vote::with('part', 'part.votes', 'part.official_part')->where('user_id', Auth::user()->id)
             )
             ->defaultSort('created_at', 'desc')
             ->heading('My Votes')
             ->columns([
                 Split::make([
-                    ViewColumn::make('vote_type')
-                    ->view('tables.columns.vote-status')
-                    ->sortable()
-                    ->grow(false)
-                    ->label('My Vote'),
                     ImageColumn::make('image')
                         ->state(
                             fn (Vote $v): string => version('images/library/unofficial/' . substr($v->part->filename, 0, -4) . '_thumb.png')
