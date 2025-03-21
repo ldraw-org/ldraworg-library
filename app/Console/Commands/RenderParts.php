@@ -51,7 +51,7 @@ class RenderParts extends Command
                 $thumb = str_replace('.png', '_thumb.png', $image);
                 $image_missing = !Storage::disk('images')->exists($image) && !Storage::disk('images')->exists($thumb);
                 if (!$this->option('missing') || ($this->option('missing') && $image_missing)) {
-                    UpdateImage::dispatch($p);
+                    UpdateImage::dispatch($p)->onQueue('maintenance');
                     $count++;
                 }
             });

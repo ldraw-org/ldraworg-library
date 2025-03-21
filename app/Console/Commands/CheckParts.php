@@ -16,15 +16,16 @@ class CheckParts extends Command
 
     public function handle()
     {
+        set_time_limit(0);
         $this->info("Queuing parts for error check");
         if ($this->argument('part')) {
             $q = Part::whereIn('id', $this->argument('part'));
             $count = $q->count();
             if ($count > 0) {
-                CheckPart::dispatch($q->get());
+                CheckPart::dispatch($q->get()->onQueue('maintenance'));
             }
         } else {
-            $q = Part::with('user', 'history', 'body', 'descendants', 'ancestors')
+            $q = Part::query()
             ->when(
                 $this->option('unofficial-only') && !$this->option('official-only'),
                 fn (Builder $query) => $query->unofficial()
@@ -35,7 +36,7 @@ class CheckParts extends Command
             );
             $count = $q->count();
             if ($count > 0) {
-                $q->cursor()->each(fn (Part $part)=> CheckPart::dispatch($part));
+                $q->chunkById(100, fn(Collection $part) => CheckPart::dispatch($part)->onQueue('maintenance'));
             }
         }
         $this->info("{$count} parts queued for error check");

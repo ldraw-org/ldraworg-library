@@ -36,6 +36,7 @@ class CheckPart implements ShouldQueue
         if ($this->p instanceof Part) {
             $pm->checkPart($this->p);
         } else {
+            $this->p->load('user', 'history', 'body', 'descendants', 'ancestors');
             $this->p->each(fn (Part $part) => $pm->checkPart($part));
         }
     }
