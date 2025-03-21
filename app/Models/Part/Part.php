@@ -284,14 +284,20 @@ class Part extends Model
             ->doesntHave('sticker_sheet');
     }
 
-    public function scopeHasError(Builder $query, PartError $error): void
+    public function scopeHasError(Builder $query, string|PartError $error): void
     {
-        $query->whereJsonContainsKey("part_check_messages->errors->{$error->value}");
+        if ($error instanceof PartError) {
+            $error = $error->value;
+        }
+        $query->whereJsonContainsKey("part_check_messages->errors->{$error}");
     }
 
-    public function scopeOrHasError(Builder $query, PartError $error): void
+    public function scopeOrHasError(Builder $query, string|PartError $error): void
     {
-        $query->orWhereJsonContainsKey("part_check_messages->errors->{$error->value}");
+        if ($error instanceof PartError) {
+            $error = $error->value;
+        }
+        $query->orWhereJsonContainsKey("part_check_messages->errors->{$error}");
     }
 
     public function isTexmap(): bool

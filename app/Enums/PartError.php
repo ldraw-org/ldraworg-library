@@ -39,7 +39,7 @@ enum PartError: string
 
     case CategoryInvalid = 'category.invalid';
 
-    case NoSetKeywordForPattern = 'keyword.partternset';
+    case NoSetKeywordForPattern = 'keywords.patternset';
 
     case HistoryInvalid = 'history.invalid';
     case HistoryAuthorNotRegistered = 'history.authorregistered';

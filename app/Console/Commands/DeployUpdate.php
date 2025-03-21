@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\PartError;
+use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
@@ -27,13 +29,14 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        PartEvent::whereNotNull('comment')
-            ->each(function (PartEvent $e) {
-                $comment = Str::of($e->comment)->trim()->toString();
-                if ($comment == '') {
-                    $e->comment = null;
-                    $e->save();
-                }
+        Part::hasError('keyword.partternset')
+            ->cursor()
+            ->each(function (Part $part) {
+                $m = $part->part_check_messages;
+                unset($m['errors']['keyword.partternset']);
+                $m['errors'][PartError::NoSetKeywordForPattern->value] = [];
+                $part->part_check_messages = $m;
+                $part->save();
             });
     }
 }
