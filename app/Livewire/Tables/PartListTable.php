@@ -135,10 +135,12 @@ class PartListTable extends BasicTable
                             IsOperator::make('error')
                                 ->query(function (Builder $query, bool $isInverse, IsOperator $operator) {
                                     $values = $operator->getSettings()['values'];
-                                    foreach ($values as $value) {
-                                        $query->{$isInverse ? 'orDoesntHaveError' : 'orHasError'}($value);
-                                    }
-                                })
+                                    $query->where(function (Builder $query_inner) use ($values, $isInverse) {
+                                        foreach ($values as $value) {
+                                            $query_inner->{$isInverse ? 'orDoesntHaveError' : 'orHasError'}($value);
+                                        }
+                                    });
+                               })
                         ]),
                     RelationshipConstraint::make('keywords')
                         ->selectable(
