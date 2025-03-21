@@ -1,6 +1,6 @@
 @props(['part'])
 <div >
-    @if(stripos($part->description, "obsolete") === false)
+    @if(!$part->isObsolete())
         <a href="{{route(('parts.show', $part)}}">
     @endif
             <div @class([
@@ -24,7 +24,7 @@
                     <p class="p-2">Obsolete file</p>
                 @endif
             </div>
-    @if(stripos($part->description, "obsolete") === false)
+    @if(!$part->isObsolete())
         </a>
     @endif
 </div>

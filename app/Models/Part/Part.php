@@ -277,16 +277,22 @@ class Part extends Model
         return is_null($this->part_release_id);
     }
 
+    public function isObsolete(): bool
+    {
+        return $this->category == PartCategory::Obsolete ||
+            Str::of($this->description)->contains('(Obsolete)') ||
+            Str::of($this->description)->startsWith('~Obsolete');
+    }
+
     public function canSetExternalData(): bool
     {
         return $this->type->inPartsFolder() &&
+            !$this->isObsolete() &&
             $this->category != PartCategory::Moved &&
-            $this->category != PartCategory::Obsolete &&
             $this->category != PartCategory::Sticker &&
             $this->category != PartCategory::StickerShortcut &&
             is_null($this->sticker_sheet_id) &&
-            !Str::of($this->description)->startsWith('~') &&
-            !Str::of($this->description)->contains('(Obsolete)');
+            !Str::of($this->description)->startsWith('~');
     }
 
     public function lastChange(): Carbon
