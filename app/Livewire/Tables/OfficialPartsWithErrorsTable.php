@@ -2,12 +2,16 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\PartError;
 use App\LDraw\Check\ErrorCheckBag;
 use App\Models\Part\Part;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 
 class OfficialPartsWithErrorsTable extends BasicTable
 {
@@ -39,6 +43,23 @@ class OfficialPartsWithErrorsTable extends BasicTable
                 ->button()
                 ->outlined()
                 ->color('info'),
+            ])
+            ->filters([
+                SelectFilter::make('errors')
+                    ->label('Part Errors')
+                    ->options(PartError::options())
+                    ->multiple()
+                    ->query(function (Builder $query, array $data) {
+                        if (count($data['values']) == 1) {
+                            $query->hasError($data['values'][0]);
+                        } else {
+                            $query->where(function (Builder $query_inner) use ($data) {
+                                foreach ($data['values'] as $value) {
+                                    $query_inner->orHasError($value);
+                                }
+                            });
+                        }
+                   })
             ])
             ->recordUrl(fn (Part $p): string => route('parts.show', $p))
             ->queryStringIdentifier('officialErrors');
