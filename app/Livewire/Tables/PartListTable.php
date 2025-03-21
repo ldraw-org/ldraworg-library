@@ -59,7 +59,7 @@ class PartListTable extends BasicTable
     protected function applySearchToTableQuery(Builder $query): Builder
     {
         if (filled($search = $this->getTableSearch())) {
-            $query->searchPart($search, 'header');
+            $query->searchHeader($search);
         }
 
         return $query;

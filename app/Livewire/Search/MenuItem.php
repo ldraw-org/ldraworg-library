@@ -22,8 +22,8 @@ class MenuItem extends Component
             return;
         }
         $limit = $settings->quick_search_limit;
-        $uparts = Part::select(['id', 'filename', 'description'])->unofficial()->searchPart($this->search, 'header')->orderBy('filename')->take($limit)->get();
-        $oparts = Part::select(['id', 'filename', 'description'])->official()->searchPart($this->search, 'header')->orderBy('filename')->take($limit)->get();
+        $uparts = Part::select(['id', 'filename', 'description'])->unofficial()->searchHeader($this->search)->orderBy('filename')->take($limit)->get();
+        $oparts = Part::select(['id', 'filename', 'description'])->official()->searchHeader($this->search)->orderBy('filename')->take($limit)->get();
         if ($uparts->count() > 0) {
             $this->hasResults = true;
             foreach ($uparts as $part) {

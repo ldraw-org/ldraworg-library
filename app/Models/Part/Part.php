@@ -221,6 +221,25 @@ class Part extends Model
         });
     }
 
+    public function scopeSearchHeader(Builder $query, string $search): void
+    {
+        if ($search !== '') {
+            //Pull the terms out of the search string
+            $pattern = '#([^\s"]+)|"([^"]*)"#u';
+            preg_match_all($pattern, $search, $matches, PREG_SET_ORDER);
+
+            foreach ($matches as $m) {
+                $char = '\\';
+                $term = str_replace(
+                    [$char, '%', '_'],
+                    [$char.$char, $char.'%', $char.'_'],
+                    $m[count($m) - 1]
+                );
+                $query->where('header', 'LIKE', "%{$term}%");
+            }
+        }
+    }
+
     public function scopePartsFolderOnly(Builder $query): void
     {
         $query->whereIn('type', PartType::partsFolderTypes());
