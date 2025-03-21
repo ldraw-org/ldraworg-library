@@ -37,7 +37,7 @@ class PartChecker
                 $check->setSettings($this->settings);
             }
             $check->check($part, Closure::fromCallable([$this, 'addError']));
-            if ($this->hasErrors() && property_exists($check, 'stopOnError')) {
+            if ($this->hasErrors() && property_exists($check, 'stopOnError') && $check->stopOnError === true) {
                 break;
             }
         }
@@ -116,6 +116,8 @@ class PartChecker
     public function standardChecks(Part|ParsedPart $part, ?string $filename = null): bool
     {
         $this->runChecks($part, [
+            new \App\LDraw\Check\Checks\HasRequiredHeaderMeta(),
+
             new \App\LDraw\Check\Checks\LibraryApprovedName(),
             new \App\LDraw\Check\Checks\NameFileNameMatch(),
             new \App\LDraw\Check\Checks\UnknownPartNumber(),
@@ -123,7 +125,6 @@ class PartChecker
             new \App\LDraw\Check\Checks\ValidLines(),
             new \App\LDraw\Check\Checks\NoSelfReference(),
 
-            new \App\LDraw\Check\Checks\HasRequiredHeaderMeta(),
             new \App\LDraw\Check\Checks\LibraryApprovedDescription(),
             new \App\LDraw\Check\Checks\PatternPartDesciption(),
             new \App\LDraw\Check\Checks\AuthorInUsers(),

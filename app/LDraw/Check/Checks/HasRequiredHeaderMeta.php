@@ -10,7 +10,7 @@ use Closure;
 
 class HasRequiredHeaderMeta implements Check
 {
-    public $stopOnError;
+    public bool $stopOnError = true;
 
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
