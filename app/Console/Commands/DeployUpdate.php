@@ -29,14 +29,5 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::hasError('keyword.partternset')
-            ->cursor()
-            ->each(function (Part $part) {
-                $m = $part->part_check_messages;
-                unset($m['errors']['keyword.partternset']);
-                $m['errors'][PartError::NoSetKeywordForPattern->value] = [];
-                $part->part_check_messages = $m;
-                $part->save();
-            });
     }
 }
