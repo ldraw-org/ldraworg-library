@@ -16,7 +16,6 @@ class CheckParts extends Command
 
     public function handle()
     {
-        set_time_limit(0);
         $this->info("Queuing parts for error check");
         if ($this->argument('part')) {
             $q = Part::whereIn('id', $this->argument('part'));

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class CheckPart implements ShouldQueue
 {
@@ -31,12 +32,13 @@ class CheckPart implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::debug(implode(',', $this->p->pluck('id')->all()));
         $pm = app(PartManager::class);
 
         if ($this->p instanceof Part) {
             $pm->checkPart($this->p);
         } else {
-            $this->p->load('user', 'history', 'body', 'descendants', 'ancestors');
+            $this->p->load('user', 'history', 'body');
             $this->p->each(fn (Part $part) => $pm->checkPart($part));
         }
     }

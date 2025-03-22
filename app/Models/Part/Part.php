@@ -48,8 +48,6 @@ class Part extends Model
 
     protected $guarded = [];
 
-    protected $with = ['release'];
-
     /**
     * @return array{
     *     type: 'App\Enums\PartType',

@@ -68,7 +68,7 @@ return [
 
     'tracker' => [
         'uncertsubs' => 'Has uncertified subfiles',
-        'nocertparents' => 'No certified or official parents in the parts folder',
+        'nocertparents' => 'No path of certified files to a certified or official parent in the parts folder',
         'missing' => 'Has missing subfiles',
         'adminhold' => 'On admimistrative hold'
     ]

@@ -66,7 +66,6 @@ class PartChecker
 
     public function checkCanRelease(Part $part): bool
     {
-        $part->loadMissing('descendants', 'ancestors');
         $errors = [];
 
         if (!$part->isTexmap()) {
@@ -99,12 +98,21 @@ class PartChecker
 
     public function hasCertifiedParentInParts(Part $part): bool
     {
-        return $part->ancestors->whereIn('type', PartType::partsFolderTypes())->where('part_status', PartStatus::Certified)->count() > 0;
+        return Part::withQueryConstraint(
+            fn ($query) =>
+                $query->whereIn('parts.part_status', [PartStatus::Certified, PartStatus::Official]),
+            fn () =>
+                $part->ancestors()
+        )
+        ->whereIn('type', PartType::partsFolderTypes())
+        ->exists();
     }
 
     public function hasAllSubpartsCertified(Part $part): bool
     {
-        return $part->descendants->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->count() == 0;
+        return !$part->descendants()
+            ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])
+            ->exists();
     }
 
     public function singleCheck(Part|ParsedPart $part, Check $check, ?string $filename = null): array
