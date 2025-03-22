@@ -6,6 +6,7 @@ use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Events\PartHeaderEdited;
+use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
 use App\LDraw\Check\Checks\LibraryApprovedName;
 use App\LDraw\Check\Checks\PatternHasSetKeyword;
@@ -15,6 +16,7 @@ use App\LDraw\Parse\ParsedPart;
 use App\LDraw\Parse\Parser;
 use App\LDraw\PartManager;
 use App\Models\Part\Part;
+use App\Models\Part\PartKeyword;
 use App\Models\User;
 use Closure;
 use Filament\Actions\EditAction;
@@ -35,7 +37,18 @@ class EditHeaderAction
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
-                $data['keywords'] = implode(', ', $part->keywords->sortBy('keyword')->pluck('keyword')->all());
+                if (is_null($part->rebrickable) || !$part->rebrickable['data']) {
+                    $kws = $part->keywords;
+                } else {
+                    $kws = $part->keywords
+                        ->reject(function (PartKeyword $kw) {
+                            return Str::of($kw->keyword)->lower()->startsWith('rebrickable') ||
+                            Str::of($kw->keyword)->lower()->startsWith('brickset') ||
+                            Str::of($kw->keyword)->lower()->startsWith('brickowl') ||
+                            Str::of($kw->keyword)->lower()->startsWith('bricklink');
+                        });
+                }
+                $data['keywords'] = implode(', ', $kws->sortBy('keyword')->pluck('keyword')->all());
                 $data['history'] = '';
                 foreach ($part->history as $h) {
                     $data['history'] .= $h->toString() . "\n";
@@ -103,7 +116,11 @@ class EditHeaderAction
                     }
                 ]),
             Textarea::make('keywords')
-                ->helperText('Note: keyword order will not be preserved')
+                ->helperText(fn (Part $p) =>
+                    'Note: keyword order' .
+                    (!is_null($part->rebrickable) && $part->rebrickable['data'] ? ' and external site keywords' : '') .
+                    ' will not be preserved'
+                )
                 ->extraAttributes(['class' => 'font-mono'])
                 ->rows(3)
                 ->hidden(!$part->type->inPartsFolder())
@@ -111,7 +128,7 @@ class EditHeaderAction
                 ->rules([
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
                         $p = ParsedPart::fromPart($part);
-                        $p->keywords = array_map(fn (string $kw) => trim($kw), explode(',', str_replace("\n", ",", $value)));;
+                        $p->keywords = array_map(fn (string $kw) => trim($kw), explode(',', str_replace("\n", ",", $value)));
                         $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new PatternHasSetKeyword());
                         if (count($errors) > 0) {
                             $fail($errors[0]);
@@ -240,15 +257,17 @@ class EditHeaderAction
         }
 
         if (!array_key_exists('keywords', $data)) {
-            $data['keywords'] = [];
+            $new_kws = collect([]);
         } else {
-            $data['keywords'] = explode(',', str_replace("\n", ",", $data['keywords']));
+            $new_kws = collect(explode(',', Str::of($data['keywords'])->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter();
         }
-        $partKeywords = $part->keywords->pluck('keyword')->all();
-        if ($partKeywords !== $data['keywords']) {
-            $changes['old']['keywords'] = implode(", ", $partKeywords);
-            $changes['new']['keywords'] = implode(", ", $data['keywords']);
-            $part->setKeywords($data['keywords']);
+        $partKeywords = collect($part->keywords->pluck('keyword')->all());
+        if ($new_kws->diff($partKeywords)->all()) {
+            $new_kws = $partKeywords->merge($new_kws)->unique();
+            $changes['old']['keywords'] = implode(", ", $partKeywords->all());
+            $changes['new']['keywords'] = implode(", ", $new_kws->all());
+            $part->setKeywords($new_kws->all());
+            UpdateRebrickable::dispatch($part);
         }
 
         $newHistory = $manager->parser->getHistory($data['history'] ?? '');
