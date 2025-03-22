@@ -207,6 +207,14 @@ class Part extends Model
         );
     }
 
+    public function uncertified_subparts(): Collection
+    {
+        return $this
+            ->descendants()
+            ->whereIn('part_status', [\App\Enums\PartStatus::AwaitingAdminReview, \App\Enums\PartStatus::NeedsMoreVotes, \App\Enums\PartStatus::ErrorsFound])
+            ->get();
+    }
+
     public function scopeName(Builder $query, string $name): void
     {
         $name = str_replace('\\', '/', $name);
@@ -420,13 +428,13 @@ class Part extends Model
         $old = $this->ready_for_admin;
         $this->ready_for_admin =
             in_array($this->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) &&
-            $this->descendants->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->count() == 0;
+            !$this->descendants()->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->exists();
         if ($old != $this->ready_for_admin) {
             $this->saveQuietly();
-            $this->ancestors->unofficial()->each(function (Part $p) {
+            $this->ancestors->unique()->unofficial()->each(function (Part $p) {
                 $p->ready_for_admin =
                     in_array($p->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) &&
-                    $p->descendants->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->count() == 0;
+                    !$p->descendants()->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->exists();
                 $p->saveQuietly();
             });
         }

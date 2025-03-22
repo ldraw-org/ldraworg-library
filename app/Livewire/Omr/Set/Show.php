@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Omr\Set;
 
+use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
 use Livewire\Attributes\Layout;
 use Livewire\Component;

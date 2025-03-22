@@ -12,7 +12,7 @@ class PartReadyForAdminTable extends BasicTable
     {
         return $table
             ->query(
-                Part::with(['votes', 'official_part', 'descendantsAndSelf'])
+                Part::with(['votes', 'official_part'])
                     ->partsFolderOnly()
                     ->where('ready_for_admin', true)
                     ->whereNotIn('part_status', [PartStatus::Certified, PartStatus::Official])

@@ -63,7 +63,7 @@ class VoteManager
         if (($oldVoteIsAdminCert && $vt === VoteType::CancelVote) || $newVoteIsAdminCert) {
             $part
                 ->parentsAndSelf
-                ->merge($part->descendants)
+                ->merge($part->descendants->unique())
                 ->unofficial()
                 ->each(fn (Part $p) => app(PartManager::class)->checkPart($p));
         }
@@ -77,7 +77,7 @@ class VoteManager
         if ($user->cannot('allAdmin', [Vote::class, $part])) {
             return;
         }
-        $parts = $part->descendantsAndSelf->unique()->unofficial()->where('part_status', PartStatus::AwaitingAdminReview);
+        $parts = $part->descendantsAndSelf()->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->get()->unique();
         $parts->each(fn (Part $p) => $this->castVote($p, $user, VoteType::AdminCertify));
 
         // Have to recheck parts since sometimes, based on processing order, subfiles status is missed

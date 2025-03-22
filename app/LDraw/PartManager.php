@@ -181,7 +181,7 @@ class PartManager
             $this->loadSubparts($p);
             $p->generateHeader();
         });
-        $parts->load('descendantsAndSelf', 'descendants', 'ancestors', 'official_part');
+        $parts->load('official_part');
         $parts->each(function (Part $p) {
             $p->updatePartStatus();
             if (!is_null($p->official_part)) {
@@ -400,8 +400,7 @@ class PartManager
 
     public function addStickerSheet(Part $p)
     {
-        $p->load('descendantsAndSelf');
-        $sticker = $p->descendantsAndSelf->where('category', PartCategory::Sticker)->partsFolderOnly()->first();
+        $sticker = $p->descendantsAndSelf()->where('category', PartCategory::Sticker)->partsFolderOnly()->first();
         if (is_null($sticker)) {
             return;
         }

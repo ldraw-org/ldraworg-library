@@ -397,7 +397,7 @@ class PartsUpdateProcessor
         $affectedParts = new Collection();
         foreach ($this->release->parts as $part) {
             /** @var Part $part */
-            $affectedParts = $affectedParts->concat($part->ancestorsAndSelf)->unique();
+            $affectedParts = $affectedParts->concat($part->ancestorsAndSelf->unique())->unique();
         }
         $affectedParts->each(function (Part $p) {
             UpdateImage::dispatch($p);

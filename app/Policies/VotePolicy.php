@@ -74,8 +74,8 @@ class VotePolicy
     {
         return $part->isUnofficial() &&
             $part->type->inPartsFolder() &&
-            $part->descendantsAndSelf->unofficial()->where('part_status', '=', PartStatus::ErrorsFound)->count() == 0 &&
-            $part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::NeedsMoreVotes)->count() > 0 &&
+            $part->descendantsAndSelf->unofficial()->where('part_status', '=', PartStatus::ErrorsFound)->isEmpty() &&
+            !$part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::NeedsMoreVotes)->isEmpty() &&
             $user->can('part.vote.certify') &&
             $user->can('part.vote.certify.all') &&
             !$this->settings->tracker_locked;
@@ -85,8 +85,8 @@ class VotePolicy
     {
         return $part->isUnofficial() &&
             $part->type->inPartsFolder() &&
-            $part->descendantsAndSelf->unofficial()->where('ready_for_admin', false)->count() == 0 &&
-            $part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->count() > 0 &&
+            $part->descendantsAndSelf->unofficial()->where('ready_for_admin', false)->isEmpty() &&
+            !$part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->isEmpty() &&
             $user->can('part.vote.admincertify') &&
             $user->can('part.vote.admincertify.all') &&
             !$this->settings->tracker_locked;

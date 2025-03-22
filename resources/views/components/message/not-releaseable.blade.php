@@ -12,7 +12,7 @@
                                 <div>{{__("partcheck.{$error}")}}</div>
                             </x-slot>
                             <div class="px-4">
-                                @foreach($part->descendants->whereIn('part_status', [\App\Enums\PartStatus::AwaitingAdminReview, \App\Enums\PartStatus::NeedsMoreVotes, \App\Enums\PartStatus::ErrorsFound]) as $p)
+                                @foreach($part->uncertified_subparts() as $p)
                                     <a wire:key="uncer-subfile-{{$p->id}}" href="{{route('parts.show', $p)}}" class="underline decoration-dotted hover:decoration-solid hover:text-gray-500">{{$p->filename}} ({{$p->part_status->label()}})</a><br/>
                                 @endforeach
                             </div>

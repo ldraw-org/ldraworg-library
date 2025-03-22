@@ -19,18 +19,18 @@ class LDrawModelMaker
         $preview = $part->preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
         $file = "0 FILE {$topModelName}\r\n1 {$preview} {$part->name()}\r\n0 FILE {$part->name()}\r\n{$part->get()}\r\n";
         if ($part->isUnofficial()) {
-            $sparts = $part->descendants->whereNull('unofficial_part');
+            $sparts = $part->descendants()->doesntHave('unofficial_part')->get()->unique();
         } else {
-            $sparts = $part->descendants->whereNotNull('part_release_id');
+            $sparts = $part->descendants->official()->unique();
         }
-        foreach ($sparts as $s) {
-            /** @var Part $s */
-            if ($s->isTexmap()) {
-                $file .= $s->get(true, true);
+        $sparts->load('body');
+        $sparts->each(function (Part $p) use (&$file){
+            if ($p->isTexmap()) {
+                $file .= $p->get(true, true);
             } else {
-                $file .= "0 FILE {$s->name()}\r\n{$s->get()}\r\n";
+                $file .= "0 FILE {$p->name()}\r\n{$p->get()}\r\n";
             }
-        }
+        });
         return $file;
     }
 
@@ -41,7 +41,6 @@ class LDrawModelMaker
         } else {
             $file = $model;
         }
-
         $parts = app(\App\LDraw\Parse\Parser::class)->getSubparts($file);
         $subs = [];
         foreach ($parts['subparts'] ?? [] as $s) {
@@ -54,19 +53,22 @@ class LDrawModelMaker
             $subs[] = "parts/textures/{$s}";
             $subs[] = "p/textures/{$s}";
         }
-        $parts = new Collection();
-        foreach (Part::doesntHave('unofficial_part')->whereIn('filename', $subs)->get() as $part) {
-            $parts = $parts->merge($part->descendantsAndSelf()->official()->get());
-        }
-        $parts = $parts->unique();
-        foreach ($parts as $s) {
-            /** @var Part $s */
-            if ($s->isTexmap()) {
-                $file .= $s->get(true, true);
-            } else {
-                $file .= "0 FILE {$s->name()}\r\n{$s->get()}\r\n";
-            }
-        }
+        $parts = [];
+        Part::with('descendantsAndSelf')
+            ->doesntHave('unofficial_part')
+            ->whereIn('filename', $subs)
+            ->each(function (Part $p) use (&$parts){
+                $parts = array_merge($parts, $p->descendantsAndSelf->official()->unique()->all());
+            });
+        collect($parts)
+            ->unique()
+            ->each(function (Part $p) use (&$file) {
+                if ($p->isTexmap()) {
+                    $file .= $p->get(true, true);
+                } else {
+                    $file .= "0 FILE {$p->name()}\r\n{$p->get()}\r\n";
+                }
+            });
         return $file;
     }
 
@@ -99,22 +101,21 @@ class LDrawModelMaker
         $webgl = [];
         if ($model instanceof Part) {
             if ($model->isUnofficial()) {
-                $sparts = $model->descendantsAndSelf->whereNull('unofficial_part');
+                $sparts = $model->descendantsAndSelf()->doesntHave('unofficial_part')->get()->unique();
             } else {
-                $sparts = $model->descendantsAndSelf->whereNotNull('part_release_id');
+                $sparts = $model->descendantsAndSelf->official()->unique();
             }
-            foreach ($sparts as $s) {
-                /** @var Part $s */
-                $text = Str::toBase64($s->get());
-                $name = Str::chopStart($s->filename, ['parts/', 'p/']);
-                if ($s->isTexmap()) {
+            $sparts->load('body');
+            $sparts->each(function (Part $p) use (&$webgl){
+                $text = Str::toBase64($p->get());
+                $name = Str::chopStart($p->filename, ['parts/', 'p/']);
+                if ($p->isTexmap()) {
                     $name = Str::chopStart($name, 'textures/');
                     $webgl[$name] = "data:img/png;base64,{$text}";
                 } else {
                     $webgl[$name] = "data:text/plain;base64,{$text}";
                 }
-
-            }
+            });
         } elseif ($model instanceof OmrModel) {
             $webgl[$model->filename()] = 'data:text/plain;base64,' . Str::toBase64($this->modelMpd($model));
         } else {
