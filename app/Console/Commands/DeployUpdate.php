@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\PartError;
+use App\Enums\PartType;
+use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use Illuminate\Console\Command;
