@@ -83,7 +83,7 @@ class PartManager
             'header' => '',
         ];
         $upart = $this->makePart($attributes);
-        $upart->setBody(Str::toBase64($file->contents));
+        $upart->setBody(base64_encode($file->contents));
         return $upart;
     }
 

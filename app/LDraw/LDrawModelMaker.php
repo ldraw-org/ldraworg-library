@@ -4,7 +4,6 @@ namespace App\LDraw;
 
 use App\Models\Omr\OmrModel;
 use App\Models\Part\Part;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -107,7 +106,7 @@ class LDrawModelMaker
             }
             $sparts->load('body');
             $sparts->each(function (Part $p) use (&$webgl){
-                $text = Str::toBase64($p->get());
+                $text = base64_encode($p->get());
                 $name = Str::chopStart($p->filename, ['parts/', 'p/']);
                 if ($p->isTexmap()) {
                     $name = Str::chopStart($name, 'textures/');
@@ -117,7 +116,7 @@ class LDrawModelMaker
                 }
             });
         } elseif ($model instanceof OmrModel) {
-            $webgl[$model->filename()] = 'data:text/plain;base64,' . Str::toBase64($this->modelMpd($model));
+            $webgl[$model->filename()] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
         } else {
             $isMpd = preg_match('/^0\h+FILE\h+((?:.*?)(?:\.ldr|\.dat|\.mpd))/i', $model, $match);
             if ($isMpd) {
@@ -125,9 +124,9 @@ class LDrawModelMaker
             } else {
                 $model = "0 FILE model.ldr\r\n$model";
             }
-            $webgl['model.ldr'] = 'data:text/plain;base64,' . Str::toBase64($this->modelMpd($model));
+            $webgl['model.ldr'] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
         }
-        $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . Str::toBase64(Storage::disk('library')->get('official/LDConfig.ldr'));
+        $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::disk('library')->get('official/LDConfig.ldr'));
         return $webgl;
     }
 

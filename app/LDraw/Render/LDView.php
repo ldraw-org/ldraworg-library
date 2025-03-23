@@ -72,7 +72,7 @@ class LDView
             Storage::put("/db/ldview.ini", file_get_contents($inipath));
         }
         if (!file_exists($imagepath)) {
-            file_put_contents($imagepath, Str::fromBase64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII="));
+            file_put_contents($imagepath, base64_decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII="));
         }
         $png = imagecreatefrompng($imagepath);
         imagesavealpha($png, true);
