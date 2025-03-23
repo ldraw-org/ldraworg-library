@@ -54,7 +54,7 @@ return [
 
     'history' => [
         'invalid' => 'Invalid history line(s)',
-        'author' => 'History has an author who is not registered with the Parts Tracker',
+        'authorregistered' => 'History has an author who is not registered with the Parts Tracker',
         'alter' => 'All changes to existing history must be documented with a comment',
     ],
 

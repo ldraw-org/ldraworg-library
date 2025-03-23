@@ -6,26 +6,27 @@ use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Events\PartHeaderEdited;
+use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
-use App\LDraw\Check\Checks\LibraryApprovedName;
-use App\LDraw\Check\Checks\PatternHasSetKeyword;
-use App\LDraw\Check\Checks\PatternPartDesciption;
-use App\LDraw\Check\Checks\PreviewIsValid;
 use App\LDraw\Parse\ParsedPart;
-use App\LDraw\Parse\Parser;
 use App\LDraw\PartManager;
+use App\Models\LdrawColour;
 use App\Models\Part\Part;
+use App\Models\Part\PartHistory;
 use App\Models\Part\PartKeyword;
-use App\Models\User;
+use App\Rules\PreviewIsValid;
 use Closure;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class EditHeaderAction
 {
@@ -37,7 +38,7 @@ class EditHeaderAction
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
-                if (is_null($part->rebrickable) || !$part->rebrickable['data']) {
+                if (!$part->canHaveExternalData() || !$part->rebrickable['data']) {
                     $kws = $part->keywords;
                 } else {
                     $kws = $part->keywords
@@ -48,11 +49,14 @@ class EditHeaderAction
                             Str::of($kw->keyword)->lower()->startsWith('bricklink');
                         });
                 }
-                $data['keywords'] = implode(', ', $kws->sortBy('keyword')->pluck('keyword')->all());
-                $data['history'] = '';
-                foreach ($part->history as $h) {
-                    $data['history'] .= $h->toString() . "\n";
-                }
+                $preview = $part->previewValues();
+                $data['preview_color'] = $preview['color'];
+                $data['preview_x'] = $preview['x'];
+                $data['preview_y'] = $preview['y'];
+                $data['preview_z'] = $preview['z'];
+                $data['preview_rotation'] = $preview['rotation'];
+                $data['keywords'] = $kws->sortBy('keyword')->implode('keyword', ', ');
+                $data['history'] = $part->history->sortBy('created_at')->implode(fn (PartHistory $h) => $h->toString(), "\n");
                 return $data;
             })
             ->using(fn (Part $p, array $data) => self::updateHeader($p, $data))
@@ -69,13 +73,13 @@ class EditHeaderAction
                 ->string()
                 ->rules([
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
-                        $p = ParsedPart::fromPart($part);
-                        $p->description = $value;
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new LibraryApprovedName());
+                        $part->description = $value;
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($part, new \App\LDraw\Check\Checks\LibraryApprovedDescription());
                         if (count($errors) > 0) {
                             $fail($errors[0]);
+                            return;
                         }
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new PatternPartDesciption());
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($part, new \App\LDraw\Check\Checks\PatternPartDesciption());
                         if (count($errors) > 0) {
                             $fail($errors[0]);
                         }
@@ -85,12 +89,14 @@ class EditHeaderAction
                 ->options(PartType::options(PartType::partsFolderTypes()))
                 ->hidden(!$part->type->inPartsFolder())
                 ->disabled(!$part->type->inPartsFolder())
-                ->selectablePlaceholder(false),
+                ->selectablePlaceholder(false)
+                ->in(PartType::partsFolderTypes()),
             Select::make('type_qualifier')
                 ->options(PartTypeQualifier::options())
                 ->nullable()
                 ->hidden(!$part->type->inPartsFolder())
-                ->disabled(!$part->type->inPartsFolder()),
+                ->disabled(!$part->type->inPartsFolder())
+                ->in(PartTypeQualifier::cases()),
             Textarea::make('help')
                 ->helperText('Do not include 0 !HELP; each line will be a separate help line')
                 ->extraAttributes(['class' => 'font-mono'])
@@ -105,20 +111,11 @@ class EditHeaderAction
                 ->searchable()
                 ->preload()
                 ->selectablePlaceholder(false)
-                ->rules([
-                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
-                        if ($part->type->inPartsFolder()) {
-                            $cat = app(\App\LDraw\Parse\Parser::class)->getDescriptionCategory($get('description'));
-                            if (is_null($cat) && is_null(PartCategory::tryFrom($value))) {
-                                $fail('partcheck.category.invalid')->translate();
-                            }
-                        }
-                    }
-                ]),
+                ->in(PartCategory::cases()),
             Textarea::make('keywords')
                 ->helperText(fn (Part $p) =>
                     'Note: keyword order' .
-                    (!is_null($part->rebrickable) && $part->rebrickable['data'] ? ' and external site keywords' : '') .
+                    ($part->canHaveExternalData() && $part->rebrickable['data'] ? ' and external site keywords' : '') .
                     ' will not be preserved'
                 )
                 ->extraAttributes(['class' => 'font-mono'])
@@ -128,8 +125,8 @@ class EditHeaderAction
                 ->rules([
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
                         $p = ParsedPart::fromPart($part);
-                        $p->keywords = array_map(fn (string $kw) => trim($kw), explode(',', str_replace("\n", ",", $value)));
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new PatternHasSetKeyword());
+                        $p->keywords = collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all();
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\PatternHasSetKeyword());
                         if (count($errors) > 0) {
                             $fail($errors[0]);
                         }
@@ -141,50 +138,73 @@ class EditHeaderAction
                 ->hidden(!$part->type->inPartsFolder())
                 ->disabled(!$part->type->inPartsFolder())
                 ->string(),
-            TextInput::make('preview')
-                ->nullable()
-                ->extraAttributes(['class' => 'font-mono'])
-                ->string()
-                ->rules([
-                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
-                        $p = ParsedPart::fromPart($part);
-                        $p->preview = $value;
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new PreviewIsValid());
-                        if (count($errors) > 0) {
-                            $fail($errors[0]);
-                        }
-                    }
-                ]),
+            Fieldset::make('preview')
+                ->schema([
+                    LDrawColourSelect::make('preview_color')
+                        ->requiredWith('preview_x,preview_y,preview_z,preview_rotation')
+                        ->exists(table: LdrawColour::class, column: 'code')
+                        ->columnSpan(3),
+                    TextInput::make('preview_x')
+                        ->extraAttributes(['class' => 'font-mono'])
+                        ->numeric()
+                        ->rules([new PreviewIsValid()])
+                        ->requiredWith('preview_color,preview_y,preview_z,preview_rotation'),
+                    TextInput::make('preview_y')
+                        ->extraAttributes(['class' => 'font-mono'])
+                        ->numeric()
+                        ->rules([new PreviewIsValid()])
+                        ->requiredWith('preview_color,preview_x,preview_z,preview_rotation'),
+                    TextInput::make('preview_z')
+                        ->extraAttributes(['class' => 'font-mono'])
+                        ->numeric()
+                        ->rules([new PreviewIsValid()])
+                        ->requiredWith('preview_color,preview_x,preview_y,preview_rotation'),
+                    Select::make('preview_rotation')
+                        ->extraAttributes(['class' => 'font-mono'])
+                        ->options([
+                            '1 0 0 0 1 0 0 0 1' => 'Standard',
+                            '1 0 0 0 0 1 0 -1 0' => 'Rotated -90 around X',
+                            '1 0 0 0 -1 0 0 0 -1' => 'Rotated 180 around X',
+                            '1 0 0 0 0 -1 0 1 0' => 'Rotated 90 around X',
+                            '0 0 1 0 1 0 -1 0 0' => 'Rotated -90 around Y',
+                            '-1 0 0 0 1 0 0 0 -1' => 'Rotated 180 around Y',
+                            '0 0 -1 0 1 0 1 0 0' => 'Rotated 90 around Y',
+                            '0 -1 0 1 0 0 0 0 1' => 'Rotated -90 around Z',
+                            '-1 0 0 0 -1 0 0 0 1' => 'Rotated 180 around Z',
+                            '0 1 0 -1 0 0 0 0 1' => 'Rotated 90 around Z',
+                        ])
+                        ->requiredWith('preview_color,preview_x,preview_y,preview_z')
+                        ->rules([new PreviewIsValid()])
+                        ->columnSpan(3),
+                ])
+                ->columns(3),
             TextArea::make('history')
                 ->helperText('Must include 0 !HISTORY; ALL changes to existing history must be documented with a comment')
                 ->extraAttributes(['class' => 'font-mono'])
                 ->rows(6)
-                ->nullable()
                 ->string()
                 ->rules([
+                    Rule::requiredIf(!$part->history->isEmpty()),
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
-                        $value = Parser::unixLineEndings(trim($value));
-                        $lines = explode("\n", $value);
-                        if ($value !== '' && count($lines) != mb_substr_count($value, '0 !HISTORY')) {
-                            $fail('partcheck.history.invalid')->translate();
+                        $p = app(\App\LDraw\Parse\Parser::class)->parse($value);
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\ValidLines());
+                        if (count($errors) > 0) {
+                            $fail($errors[0]);
                             return;
                         }
-
-                        $history = app(Parser::class)->getHistory($value);
-                        if (! is_null($history)) {
-                            foreach ($history as $hist) {
-                                if (is_null(User::fromAuthor($hist['user'])->first())) {
-                                    $fail('partcheck.history.author')->translate();
-                                }
-                            }
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\HistoryIsValid());
+                        if (count($errors) > 0) {
+                            $fail($errors[0]);
+                            return;
                         }
-
-                        $hist = '';
-                        foreach ($part->history()->oldest()->get() as $h) {
-                            $hist .= $h->toString() . "\n";
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\HistoryUserIsRegistered());
+                        if (count($errors) > 0) {
+                            $fail($errors[0]);
+                            return;
                         }
-                        $hist = Parser::unixLineEndings(trim($hist));
-                        if (((!empty($hist) && empty($value)) || $hist !== $value) && empty($get('editcomment'))) {
+                        $old_hist = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()));
+                        $new_hist = collect(explode("\n", Str::of($value)->trim()->toString()))->filter()->map(fn (string $h) => Str::of($h)->squish()->trim()->toString);
+                        if ($old_hist->diff($new_hist)->all() && is_null($get('editcomment'))) {
                             $fail('partcheck.history.alter')->translate();
                         }
                     }
@@ -215,7 +235,7 @@ class EditHeaderAction
         }
 
         if ($part->type->inPartsFolder() &&
-            !is_null($data['category']) &&
+            Arr::has($data, 'category') &&
             $part->category !== PartCategory::tryFrom($data['category'])
         ) {
             $cat = PartCategory::tryFrom($data['category']);
@@ -224,14 +244,14 @@ class EditHeaderAction
             $part->category = $cat;
         }
 
-        if ($part->type->inPartsFolder() && PartType::tryFrom($data['type']) !== $part->type) {
+        if ($part->type->inPartsFolder() && Arr::has($data, 'type') && PartType::tryFrom($data['type']) !== $part->type) {
             $pt = PartType::tryFrom($data['type']);
             $changes['old']['type'] = $part->type->value;
             $changes['new']['type'] = $pt->value;
             $part->type = $pt;
         }
 
-        if (!is_null($data['type_qualifier'] ?? null)) {
+        if (Arr::has($data, 'type_qualifier')) {
             $pq = PartTypeQualifier::tryFrom($data['type_qualifier']);
         } else {
             $pq = null;
@@ -241,8 +261,7 @@ class EditHeaderAction
             $changes['new']['qual'] = $pq->value ?? '';
             $part->type_qualifier = $pq;
         }
-
-        if (!is_null($data['help'] ?? null) && trim($data['help']) !== '') {
+        if (Arr::has($data, 'help') && !Str::of($data['help'])->squish()->trim()->isEmpty()) {
             $newHelp = "0 !HELP " . str_replace(["\n","\r"], ["\n0 !HELP ",''], $data['help']);
             $newHelp = $manager->parser->getHelp($newHelp);
         } else {
@@ -256,10 +275,10 @@ class EditHeaderAction
             $part->setHelp($newHelp);
         }
 
-        if (!array_key_exists('keywords', $data)) {
+        if (!Arr::has($data, 'keywords')) {
             $new_kws = collect([]);
         } else {
-            $new_kws = collect(explode(',', Str::of($data['keywords'])->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter();
+            $new_kws = collect(explode(',', Str::of($data['keywords'])->trim()->squish()->replace(["\n", ', ',' ,'], ',')->toString()))->filter();
         }
         $partKeywords = collect($part->keywords->pluck('keyword')->all());
         if ($new_kws->diff($partKeywords)->all()) {
@@ -270,49 +289,46 @@ class EditHeaderAction
             UpdateRebrickable::dispatch($part);
         }
 
-        $newHistory = $manager->parser->getHistory($data['history'] ?? '');
-        $partHistory = [];
-        if ($part->history->count() > 0) {
-            foreach ($part->history as $h) {
-                $partHistory[] = $h->toString();
-            }
-        }
-        $partHistory = implode("\n", $partHistory);
-        if ($manager->parser->getHistory($partHistory) !== $newHistory) {
-            $changes['old']['history'] = $partHistory;
-            $part->setHistory($newHistory ?? []);
-            $part->refresh();
-            $changes['new']['history'] = '';
-            if ($part->history->count() > 0) {
-                foreach ($part->history as $h) {
-                    $changes['new']['history'] .= $h->toString() . "\n";
-                }
-            }
+        $old_hist = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()));
+        $new_hist = collect(explode("\n", Str::of(Arr::get($data, 'history', ''))->trim()->toString()))->filter()->map(fn (string $h) => Str::of($h)->squish()->trim()->toString);
+        if ($new_hist->diff($old_hist)->all()) {
+            $changes['old']['history'] = $old_hist->implode("\n");
+            $part->setHistory($manager->parser->parse($new_hist->implode("\n"))->history ?? []);
+            $part->load('history');
+            $changes['new']['history'] = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()))->implode("\n");
         }
 
-        if ($part->cmdline !== ($data['cmdline'] ?? null)) {
+        if ($part->cmdline !== Arr::get($data, 'cmdline')) {
             $changes['old']['cmdline'] = $part->cmdline ?? '';
-            $changes['new']['cmdline'] = $data['cmdline'] ?? '';
-            $part->cmdline = $data['cmdline'] ?? null;
+            $changes['new']['cmdline'] = Arr::get($data, 'cmdline', '');
+            $part->cmdline = Arr::get($data, 'cmdline');
         }
 
-        $rotation_changed = false;
-        $data['preview'] = Str::squish($data['preview']);
-        if ($data['preview'] == '' || $data['preview'] == '16 0 0 0 1 0 0 0 1 0 0 0 1') {
-            $data['preview'] = null;
+        $preview = null;
+        if (Arr::has($data, 'preview_rotation')) {
+            $preview = implode(' ', [
+                Arr::get($data, 'preview_color'),
+                Arr::get($data, 'preview_x'),
+                Arr::get($data, 'preview_y'),
+                Arr::get($data, 'preview_z'),
+                Str::of(Arr::get($data, 'preview_rotation'))->squish()
+            ]);
+            $preview = $preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $preview;
         }
-        if ($part->preview !== ($data['preview'])) {
+
+        $preview_changed = false;
+        if ($part->preview !== $preview) {
             $changes['old']['preview'] = $part->preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
-            $changes['new']['preview'] = $data['preview'] ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
-            $part->preview = $data['preview'];
-            $rotation_changed = true;
+            $changes['new']['preview'] = $preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
+            $part->preview = $preview;
+            $preview_changed = true;
         }
 
         if (count($changes['new']) > 0) {
             $part->save();
             $part->refresh();
             $part->generateHeader();
-            if ($rotation_changed) {
+            if ($preview_changed) {
                 $manager->updateImage($part);
             }
             $manager->checkPart($part);
@@ -324,5 +340,4 @@ class EditHeaderAction
 
         return $part;
     }
-
 }

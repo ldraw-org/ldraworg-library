@@ -360,6 +360,19 @@ class Part extends Model
         return str_replace('/', '\\', str_replace(["parts/", "p/"], '', $this->filename));
     }
 
+    public function previewValues(): array
+    {
+        $preview = is_null($this->preview) ? '16 0 0 0 1 0 0 0 1 0 0 0 1' : $this->preview;
+        preg_match('/([0-9.-]+) ([0-9.-]+) ([0-9.-]+) ([0-9.-]+) ((?:[0-9.-]+ ){8}[0-9.-]+)/u', $preview, $matrix);
+        return [
+            'color' => $matrix[1],
+            'x' => $matrix[2],
+            'y' => $matrix[3],
+            'z' => $matrix[4],
+            'rotation' => $matrix[5]
+        ];
+    }
+
     public function get(bool $dos = true, bool $dataFile = false): string
     {
         if ($this->isTexmap()) {
@@ -372,7 +385,7 @@ class Part extends Model
                 }
             } else {
                 $png = new \Imagick();
-                $png->readImageBlob(Str::fromBase64($this->body->body));
+                $png->readImageBlob(base64_decode($this->body->body));
                 $png->setImageProperty('LDrawHeader', $this->header);
                 $file = $png->getImageBlob();
             }
