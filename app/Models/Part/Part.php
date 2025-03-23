@@ -384,10 +384,17 @@ class Part extends Model
                     $file = preg_replace('#\R#us', "\r\n", $file);
                 }
             } else {
+                /*
+                Removing the header embed code for now until the reason why it causing LDview to error is found.
+
                 $png = new \Imagick();
                 $png->readImageBlob(base64_decode($this->body->body));
                 $png->setImageProperty('LDrawHeader', $this->header);
+                $png->setImageColorspace(\imagick::COLORSPACE_SRGB);
+                $png->setImageFormat('png');
                 $file = $png->getImageBlob();
+                */
+                $file = base64_decode($this->body->body);
             }
         } else {
             $file = rtrim($this->header) . "\n\n" . ($this->body->body ?? '');
