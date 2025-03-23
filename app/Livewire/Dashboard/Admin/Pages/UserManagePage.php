@@ -3,6 +3,7 @@
 namespace App\Livewire\Dashboard\Admin\Pages;
 
 use App\Enums\License;
+use App\Enums\Permission;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\MybbUser;
 use App\Models\User;
@@ -47,7 +48,7 @@ class UserManagePage extends BasicResourceManagePage
                     ->searchable(),
                 TextColumn::make('email')
                     ->searchable()
-                    ->visible(Auth::user()?->can('user.view.email')),
+                    ->visible(Auth::user()?->can(Permission::UserViewEmail)),
                 TextColumn::make('license.name')
                     ->sortable(),
                 TextColumn::make('roles.name')

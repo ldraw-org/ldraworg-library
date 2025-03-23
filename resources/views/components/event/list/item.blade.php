@@ -11,15 +11,15 @@
               <div>{{ $event->user->author_string }}</div>
             @endif
             <div class="flex flex-row">
-                @if($event->user->can('part.vote.admincertify'))
+                @if($event->user->hasRole('Library Admin'))
                     <x-fas-crown class="h-4 w-4" title="Part Library Admin"/>
-                @elseif($event->user->can('part.vote.fasttrack'))
+                @elseif($event->user->hasRole('Senior Reviewer'))
                     <x-fas-user-graduate class="h-4 w-4" title="Senior Part Reviewer"/>
-                @elseif($event->user->can('part.edit.header'))
+                @elseif($event->user->hasRole('Part Header Editor'))
                     <x-fas-user-plus class="h-4 w-4" title="Part Header Editor"/>
-                @elseif($event->user->can('part.vote.certify'))
+                @elseif($event->user->hasRole('Part Reviewer'))
                     <x-fas-user-check class="h-4 w-4" title="Part Reviewer"/>
-                @elseif($event->user->can('part.submit.regular'))
+                @elseif($event->user->hasRole('Part Author'))
                     <x-fas-user-pen class="h-4 w-4" title="Part Author"/>
                 @endif
             </div>

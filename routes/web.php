@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Permission;
 use App\Http\Controllers\DocumentShowController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SupportFilesController;
@@ -62,8 +63,10 @@ Route::view('/icons', 'icon-demo')->name('icon-demo');
 
 Route::get('/joinldraw', JoinLdraw::class)->name('joinldraw');
 
-Route::view('/polls', 'poll.index')->middleware(['ldrawmember'])->name('poll.index');
-Route::get('/polls/{poll}', PollShow::class)->middleware(['ldrawmember'])->name('poll.show');
+Route::middleware(['ldrawmember'])->group(function () {
+    Route::view('/polls', 'poll.index')->can('voteAny', App\Models\Poll\Poll::class)->name('poll.index');
+    Route::get('/polls/{poll}', PollShow::class)->can('vote', 'poll')->name('poll.show');
+});
 
 // Updates
 Route::get('/updates', [PartUpdateController::class, 'index'])->name('part-update.index');
@@ -87,8 +90,10 @@ Route::prefix('parts')->name('parts.')->group(function () {
 Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::view('/', 'tracker.main')->name('main');
 
-    Route::middleware(['auth', 'can:create,App\Models\Part\Part', 'currentlic'])->get('/submit', Submit::class)->name('submit');
-    Route::middleware(['auth', 'can:create,App\Models\Part\Part', 'currentlic'])->get('/torso-helper', TorsoShortcutHelper::class)->name('torso-helper');
+    Route::middleware(['currentlic'])->group(function () {
+        Route::get('/submit', Submit::class)->name('submit');
+        Route::get('/torso-helper', TorsoShortcutHelper::class)->name('torso-helper');
+    })->can('create', App\Models\Part\Part::class);
 
     Route::get('/weekly', Weekly::class)->name('weekly');
     Route::get('/history', TrackerHistoryController::class)->name('history');
@@ -99,7 +104,7 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
 
     Route::view('/next-release', 'part.nextrelease')->name('next-release');
 
-    Route::middleware(['can:release.create'])->get('/release/create', Create::class)->name('release.create');
+    Route::can('create', App\Models\Part\PartRelease::class)->get('/release/create', Create::class)->name('release.create');
 });
 
 Route::prefix('omr')->name('omr.')->group(function () {
@@ -116,16 +121,16 @@ Route::prefix('documentation')->name('documentation.')->group(function () {
     Route::get('/{document}', DocumentShowController::class, 'show')->name('show');
 });
 
-Route::middleware(['auth', 'can:admin.view-dashboard'])->prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', AdminIndex::class)->name('index');
-    Route::middleware(['can:create,App\Models\Users'])->get('/users', UserManagePage::class)->name('users.index');
-    Route::middleware(['can:viewAny,App\Models\ReviewSummary\ReviewSummary'])->get('/summaries', ReviewSummaryManagePage::class)->name('summaries.index');
-    Route::middleware(['can:create,App\Models\Role'])->get('/roles', RoleManagePage::class)->name('roles.index');
-    Route::middleware(['can:documentation.edit'])->get('/documents', DocumentManagePage::class)->name('documents.index');
-    Route::middleware(['can:documentation.edit'])->get('/document-categories', DocumentCategoryManagePage::class)->name('document-categories.index');
-    Route::middleware(['can:manage,App\Models\Part\PartKeyword'])->get('/part-keywords', PartKeywordManagePage::class)->name('part-keywords.index');
-    Route::middleware(['can:settings.edit'])->get('/settings', LibrarySettingsPage::class)->name('settings.index');
-});
+    Route::get('/users', UserManagePage::class)->can('create', App\Models\User::class)->name('users.index');
+    Route::get('/summaries', ReviewSummaryManagePage::class)->can('manage', App\Models\ReviewSummary\ReviewSummary::class)->name('summaries.index');
+    Route::get('/roles', RoleManagePage::class)->can('viewAny', Spatie\Permission\Models\Role::class)->name('roles.index');
+    Route::get('/documents', DocumentManagePage::class)->can('manage', App\Models\Document\Document::class)->name('documents.index');
+    Route::get('/document-categories', DocumentCategoryManagePage::class)->can('manage', App\Models\Document\Document::class)->name('document-categories.index');
+    Route::get('/part-keywords', PartKeywordManagePage::class)->can('manage', App\Models\Part\PartKeyword::class)->name('part-keywords.index');
+    Route::get('/settings', LibrarySettingsPage::class)->can(Permission::SiteSettingsEdit)->name('settings.index');
+})->can(Permission::AdminDashboardView);
 
 
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
@@ -138,27 +143,29 @@ Route::middleware(['auth'])->get('/logout', function () {
 });
 
 // permanentRedirects
-Route::permanentRedirect('/login', 'https://forums.ldraw.org/member.php?action=login');
-Route::permanentRedirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
+Route::name('permanentRedirects.')->group(function() {
+    Route::permanentRedirect('/login', 'https://forums.ldraw.org/member.php?action=login')->name('login');
+    Route::permanentRedirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
 
-Route::permanentRedirect('/official/search', '/parts/list');
-Route::permanentRedirect('/official/suffixsearch', '/search/suffix');
-Route::permanentRedirect('/official/list', '/parts/list');
-Route::permanentRedirect('/official/{part:id}', 'parts/{part:id}');
-Route::permanentRedirect('/official/{partfile}', '/parts/{partfile}');
+    Route::permanentRedirect('/official/search', '/parts/list')->name('official.search');
+    Route::permanentRedirect('/official/suffixsearch', '/search/suffix')->name('official.suffix');
+    Route::permanentRedirect('/official/list', '/parts/list')->name('official.list');
+    Route::permanentRedirect('/official/{part:id}', 'parts/{part:id}')->name('official.part.show');
+    Route::permanentRedirect('/official/{partfile}', '/parts/{partfile}')->name('official.part.name');
 
-Route::permanentRedirect('/ptreleases', '/ptreleases/tab');
+    Route::permanentRedirect('/ptreleases', '/ptreleases/tab')->name('ptreleases');
 
-Route::permanentRedirect('/search', '/parts/list');
-Route::permanentRedirect('/search/part', '/parts/list');
-Route::permanentRedirect('/search/sticker', '/sticker-sheets');
-Route::permanentRedirect('/search/suffix', '/parts/search/suffix');
+    Route::permanentRedirect('/search', '/parts/list')->name('search');
+    Route::permanentRedirect('/search/part', '/parts/list')->name('search.part');
+    Route::permanentRedirect('/search/sticker', '/sticker-sheets')->name('search.sticker');
+    Route::permanentRedirect('/search/suffix', '/parts/search/suffix')->name('search.suffix');
 
-Route::permanentRedirect('/sticker-sheets', '/parts/sticker-sheets');
-Route::permanentRedirect('/sticker-sheets/{sheet}', '/parts/sticker-sheets/{sheet}');
+    Route::permanentRedirect('/sticker-sheets', '/parts/sticker-sheets')->name('sticker-sheets.index');
+    Route::permanentRedirect('/sticker-sheets/{sheet}', '/parts/sticker-sheets/{sheet}')->name('sticker-sheet.show');
 
-Route::permanentRedirect('/tracker/list', '/parts/list');
-Route::permanentRedirect('/tracker/search', '/parts/list');
-Route::permanentRedirect('/tracker/suffixsearch', '/search/suffix');
-Route::permanentRedirect('/tracker/{part:id}', '/parts/{part:id}');
-Route::permanentRedirect('/tracker/{partfile}', '/parts/{partfile}');
+    Route::permanentRedirect('/tracker/list', '/parts/list')->name('tracker.list');
+    Route::permanentRedirect('/tracker/search', '/parts/list')->name('tracker.search');
+    Route::permanentRedirect('/tracker/suffixsearch', '/search/suffix')->name('tracker.suffix');
+    Route::permanentRedirect('/tracker/{part:id}', '/parts/{part:id}')->name('tracker.part.show');
+    Route::permanentRedirect('/tracker/{partfile}', '/parts/{partfile}')->name('tracker.part.name');
+});

@@ -65,7 +65,7 @@
                 @auth
                     Welcome {{Auth::user()->realname}}
                     <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('dashboard.index')}}">User Dashboard</a>
-                    @can('admin.view-dashboard')
+                    @can(\App\Enums\Permission::AdminDashboardView)
                         :: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('admin.index')}}">Admin Dashboard</a>
                     @endcan
                 @endauth

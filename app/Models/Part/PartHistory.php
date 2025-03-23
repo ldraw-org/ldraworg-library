@@ -4,6 +4,7 @@ namespace App\Models\Part;
 
 use App\Models\Traits\HasPart;
 use App\Models\Traits\HasUser;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -13,6 +14,7 @@ class PartHistory extends Model
 {
     use HasPart;
     use HasUser;
+    use HasFactory;
 
     protected $fillable = [
         'user_id',

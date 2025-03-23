@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Part;
 
+use App\Enums\Permission;
 use App\Events\PartSubmitted;
 use App\Jobs\UpdateZip;
 use App\LDraw\LDrawFile;
@@ -120,7 +121,7 @@ class Submit extends Component implements HasForms
                     ->selectablePlaceholder(false)
                     ->native(false)
                     ->label('Proxy User')
-                    ->visible(Auth::user()->can('part.submit.proxy')),
+                    ->visible(Auth::user()->can(Permission::PartSubmitProxy)),
                 Textarea::make('comments')
                     ->rows(5)
                     ->nullable()
@@ -135,7 +136,7 @@ class Submit extends Component implements HasForms
         $manager = app(PartManager::class);
         $this->part_errors = [];
         $data = $this->form->getState();
-        if (array_key_exists('user_id', $data) && Auth::user()->can('part.submit.proxy')) {
+        if (array_key_exists('user_id', $data) && Auth::user()->can(Permission::PartSubmitProxy)) {
             $user = User::find($data['user_id']);
         } else {
             $user = Auth::user();

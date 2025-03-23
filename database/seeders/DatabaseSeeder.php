@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use App\Settings\LibrarySettings;
+use App\Enums\Permission;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission as PermissionModel;
 
 class DatabaseSeeder extends Seeder
 {
@@ -35,5 +37,10 @@ class DatabaseSeeder extends Seeder
             ];
 
         $ls->save();
+
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        foreach (Permission::cases() as $permission) {
+            PermissionModel::create(['name' => $permission->value]);
+        }
     }
 }

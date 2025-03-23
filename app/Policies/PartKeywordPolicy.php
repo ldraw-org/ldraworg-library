@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Permission;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 
@@ -15,6 +16,6 @@ class PartKeywordPolicy
     public function manage(User $user)
     {
         return !$this->settings->tracker_locked &&
-            $user->can('part.keyword.edit');
+            $user->can(Permission::PartKeywordsManage);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Enums\License;
+use App\Enums\Permission;
 use App\Models\MybbUser;
 use App\Models\User;
 use Filament\Forms\Components\Checkbox;
@@ -29,7 +30,7 @@ class JoinLdraw extends Component implements HasForms
 
     public function mount()
     {
-        if (Auth::check() && Auth::user()->can('member.access')) {
+        if (Auth::check() && Auth::user()->can(Permission::LdrawMemberAccess)) {
             $this->redirectIntended();
         }
 

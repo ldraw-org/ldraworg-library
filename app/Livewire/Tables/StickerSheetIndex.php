@@ -4,6 +4,7 @@ namespace App\Livewire\Tables;
 
 use App\Enums\PartCategory;
 use App\Enums\PartStatus;
+use App\Enums\Permission;
 use App\Models\StickerSheet;
 use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
@@ -63,7 +64,7 @@ class StickerSheetIndex extends BasicTable
                                     ->where('part_status', PartStatus::NeedsMoreVotes);
                             }
                     ])
-                    ->visible(Auth::user()?->can('part.vote.certify') ?? false),
+                    ->visible(Auth::user()?->can(Permission::PartVoteCertify) ?? false),
                 TextColumn::make('shortcut_fast_track_ready_count')
                     ->sortable()
                     ->label('Shortcuts Can Be Fast Tracked')
@@ -80,7 +81,7 @@ class StickerSheetIndex extends BasicTable
                                 });
                             }
                     ])
-                    ->visible(Auth::user()?->can('part.vote.fasttrack') ?? false),
+                    ->visible(Auth::user()?->can(Permission::PartVoteFasttrack) ?? false),
             ])
             ->persistSortInSession()
             ->persistSearchInSession()

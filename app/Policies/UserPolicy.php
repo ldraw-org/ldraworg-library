@@ -2,34 +2,27 @@
 
 namespace App\Policies;
 
+use App\Enums\Permission;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class UserPolicy
 {
-    public function viewAny(?User $user)
+    public function add(User $user)
     {
-        return true;
-    }
-
-    public function view(?User $user, User $model)
-    {
-        return true;
-    }
-
-    public function create(User $user)
-    {
-        return $user->canAny([
-            'user.add',
-            'user.add.nonadmin',
-        ]);
+        return $user->can(Permission::UserAdd);
     }
 
     public function update(User $user, User $model)
     {
-        return Auth::user()?->id !== $user->id
-            ? !in_array($user->id, config('auth.superusers')) && $user->can('user.modify.superuser')
-            : $user->can('user.modify');
-        ;
+        return $user->id !== $model->id &&
+            (($user->can(Permission::UserUpdate) && !$model->hasRole('Super Admin')) ||
+            $user->can(Permission::UserUpdateSuperuser));
     }
+
+    public function delete(User $user, User $model)
+    {
+        return $user->can('update', $model) && $user->can(Permission::UserDelete);
+    }
+
 }

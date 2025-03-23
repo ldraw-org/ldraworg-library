@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\PartStatus;
+use App\Enums\Permission;
 use App\Enums\VoteType;
 use App\Models\User;
 use App\Models\Vote;
@@ -61,12 +62,12 @@ class VotePolicy
         $userIsPartAuthor = (is_null($part->official_part) && $part->user_id === $user->id) ||
             (!is_null($part->official_part) && $part->events->firstWhere('initial_submit', true)?->user_id === $user->id);
         return match($vote_type) {
-            VoteType::Comment => $user->can('part.comment'),
+            VoteType::Comment => $user->can(Permission::PartComment),
             VoteType::CancelVote => !is_null($vote) && $vote->user_id === $user->id,
-            VoteType::AdminCertify => $user->can('part.vote.admincertify'),
-            VoteType::AdminFastTrack => $user->can('part.vote.fasttrack'),
-            VoteType::Certify => $userIsPartAuthor ? $user->can('part.own.vote.certify') : $user->can('part.vote.certify'),
-            VoteType::Hold => $userIsPartAuthor ? $user->canAny(['part.vote.hold', 'part.own.vote.hold']) : $user->can('part.vote.hold'),
+            VoteType::AdminCertify => $user->can(Permission::PartVoteAdminCertify),
+            VoteType::AdminFastTrack => $user->can(Permission::PartVoteFastTrack),
+            VoteType::Certify => $userIsPartAuthor ? $user->can(Permission::PartOwnVoteCertify) : $user->can(Permission::PartVoteCertify),
+            VoteType::Hold => $userIsPartAuthor ? $user->canAny([Permission::PartVoteHold, Permission::PartOwnVoteHold]) : $user->can(Permission::PartVoteHold),
         };
     }
 
@@ -76,8 +77,8 @@ class VotePolicy
             $part->type->inPartsFolder() &&
             $part->descendantsAndSelf->unofficial()->where('part_status', '=', PartStatus::ErrorsFound)->isEmpty() &&
             !$part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::NeedsMoreVotes)->isEmpty() &&
-            $user->can('part.vote.certify') &&
-            $user->can('part.vote.certify.all') &&
+            $user->can('vote', $part, VoteType::Certify) &&
+            $user->can(Permission::PartVoteCertifyAll) &&
             !$this->settings->tracker_locked;
     }
 
@@ -87,8 +88,8 @@ class VotePolicy
             $part->type->inPartsFolder() &&
             $part->descendantsAndSelf->unofficial()->where('ready_for_admin', false)->isEmpty() &&
             !$part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->isEmpty() &&
-            $user->can('part.vote.admincertify') &&
-            $user->can('part.vote.admincertify.all') &&
+            $user->can('vote', $part, VoteType::AdminCertify) &&
+            $user->can(Permission::PartVoteAdminCertifyAll) &&
             !$this->settings->tracker_locked;
     }
 }

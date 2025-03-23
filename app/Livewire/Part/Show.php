@@ -360,7 +360,7 @@ class Show extends Component implements HasForms, HasActions
                 $this->part->is_pattern = !$this->part->is_pattern;
                 $this->part->save();
             })
-            ->visible(Auth::user()?->can('part.edit.header', $this->part) ?? false);
+            ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 
     public function toggleIsCompositeAction(): Action
@@ -373,7 +373,7 @@ class Show extends Component implements HasForms, HasActions
                 $this->part->is_composite = !$this->part->is_composite;
                 $this->part->save();
             })
-            ->visible(Auth::user()?->can('part.edit.header', $this->part) ?? false);
+            ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 
     public function toggleIsDualMouldAction(): Action
@@ -386,7 +386,7 @@ class Show extends Component implements HasForms, HasActions
                 $this->part->is_dual_mould = !$this->part->is_dual_mould;
                 $this->part->save();
             })
-            ->visible(Auth::user()?->can('part.edit.header', $this->part) ?? false);
+            ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 
     public function editBasePartAction(): Action
@@ -407,7 +407,7 @@ class Show extends Component implements HasForms, HasActions
                     )
                     ->optionsLimit(50000),
             ])
-            ->visible(Auth::user()?->can('part.edit.header', $this->part) ?? false);
+            ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 
     public function viewBasePartAction(): Action

@@ -31,7 +31,7 @@ class PollIndex extends BasicTable
             ->query(
                 Poll::query()
                 ->when(
-                    !Auth::user()->can('manage.polls'),
+                    !Auth::user()->can('manage', Poll::class),
                     fn (Builder $query) => $query
                         ->has('items')
                         ->where('enabled', true)
@@ -47,16 +47,16 @@ class PollIndex extends BasicTable
             ->headerActions([
                 CreateAction::make()
                     ->form($this->pollForm())
-                    ->visible(Auth::user()->can('polls.manage'))
+                    ->visible(Auth::user()->can('manage', Poll::class))
             ])
             ->actions([
                 EditAction::make()
                     ->form($this->pollForm())
-                    ->visible(fn (Poll $p) => !$p->enabled && Auth::user()->can('polls.manage')),
+                    ->visible(fn (Poll $p) => !$p->enabled && Auth::user()->can('manage', Poll::class)),
                 DeleteAction::make()
-                    ->visible(fn (Poll $p) => ($p->ends_on < now() || !$p->enabled) && Auth::user()->can('polls.manage')),
+                    ->visible(fn (Poll $p) => ($p->ends_on < now() || !$p->enabled) && Auth::user()->can('manage', Poll::class)),
                 Action::make('view_results')
-                    ->visible(fn (Poll $p) => $p->ends_on < now() && Auth::user()->can('polls.manage'))
+                    ->visible(fn (Poll $p) => $p->ends_on < now() && Auth::user()->can('manage', Poll::class))
                     ->form([
                         View::make('poll.results')
                     ]),
@@ -67,7 +67,7 @@ class PollIndex extends BasicTable
                 TextColumn::make('title'),
                 TextColumn::make('ends_on'),
                 CheckboxColumn::make('enabled')
-                    ->visible(Auth::user()->can('manage.polls'))
+                    ->visible(Auth::user()->can('manage', Poll::class))
                     ->beforeStateUpdated(function (Poll $p, bool $state) {
                         if ($state && !$p->has_been_enabled) {
                             $p->has_been_enabled = true;

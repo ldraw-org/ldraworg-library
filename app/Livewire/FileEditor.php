@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\Permission;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -88,7 +89,7 @@ class FileEditor extends Component implements HasForms
         }
         if (file_exists(base_path($file)) &&
             $this->fileInWhitelist() === true &&
-            Auth::user()->can('edit-files')
+            Auth::user()->can(Permission::EditFiles)
         ) {
             $contents = file_get_contents(base_path($file));
             $this->dispatch('file-loaded', contents: $contents, mode: $mode);
@@ -115,7 +116,7 @@ class FileEditor extends Component implements HasForms
         $file = $files[$this->file];
         if (file_exists(base_path($file)) &&
             $this->fileInWhitelist() === true &&
-            Auth::user()->can('edit-files')
+            Auth::user()->can(Permission::EditFiles)
         ) {
             file_put_contents(base_path($file), $contents);
         }
