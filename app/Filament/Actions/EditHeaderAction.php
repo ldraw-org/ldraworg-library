@@ -38,7 +38,7 @@ class EditHeaderAction
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
-                if (!$part->canHaveExternalData() || !$part->rebrickable['data']) {
+                if (!$part->canHaveExternalData() || !Arr::has($part->rebrickable, 'data')) {
                     $kws = $part->keywords;
                 } else {
                     $kws = $part->keywords
@@ -116,7 +116,7 @@ class EditHeaderAction
             Textarea::make('keywords')
                 ->helperText(fn (Part $p) =>
                     'Note: keyword order' .
-                    ($part->canHaveExternalData() && $part->rebrickable['data'] ? ' and external site keywords' : '') .
+                    ($part->canHaveExternalData() && Arr::has($part->rebrickable, 'data') ? ' and external site keywords' : '') .
                     ' will not be preserved'
                 )
                 ->extraAttributes(['class' => 'font-mono'])
