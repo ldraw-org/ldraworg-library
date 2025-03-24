@@ -24,21 +24,21 @@ class VotePolicy
         }
         if ($part->user_id !== $user->id) {
             return $user->canAny([
-                    'part.vote.admincertify',
-                    'part.vote.fasttrack',
-                    'part.vote.certify',
-                    'part.vote.hold',
-                    'part.comment',
+                Permission::PartVoteAdminCertify,
+                Permission::PartVoteFastTrack,
+                Permission::PartVoteCertify,
+                Permission::PartVoteHold,
+                Permission::PartComment,
             ]);
         }
 
         return $user->canAny([
-                'part.vote.admincertify',
-                'part.vote.fasttrack',
-                'part.vote.own.certify',
-                'part.vote.own.hold',
-                'part.comment',
-            ]);
+            Permission::PartVoteAdminCertify,
+            Permission::PartVoteFastTrack,
+            Permission::PartOwnVoteCertify,
+            Permission::PartOwnVoteHold,
+            Permission::PartComment,
+        ]);
     }
 
     public function vote(?User $user, Part $part, VoteType $vote_type): bool
@@ -46,15 +46,13 @@ class VotePolicy
         if (is_null($user) || !$part->isUnofficial() || $this->settings->tracker_locked) {
             return false;
         }
-
         $vote = $user->votes->firstWhere('part_id', $part->id);
 
-        if (!is_null($vote) && ($vote->user_id !== $user->id || $vote->vote_type === $vote_type)) {
+        if (!is_null($vote) && $vote->vote_type === $vote_type) {
             return false;
         }
 
         return $this->canCastVoteType($user, $part, $vote_type, $vote);
-
     }
 
     protected function canCastVoteType(User $user, Part $part, VoteType $vote_type, ?Vote $vote): bool
@@ -75,9 +73,9 @@ class VotePolicy
     {
         return $part->isUnofficial() &&
             $part->type->inPartsFolder() &&
-            $part->descendantsAndSelf->unofficial()->where('part_status', '=', PartStatus::ErrorsFound)->isEmpty() &&
+            $part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::ErrorsFound)->isEmpty() &&
             !$part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::NeedsMoreVotes)->isEmpty() &&
-            $user->can('vote', $part, VoteType::Certify) &&
+            $this->vote($user, $part, VoteType::Certify) &&
             $user->can(Permission::PartVoteCertifyAll) &&
             !$this->settings->tracker_locked;
     }
@@ -88,7 +86,7 @@ class VotePolicy
             $part->type->inPartsFolder() &&
             $part->descendantsAndSelf->unofficial()->where('ready_for_admin', false)->isEmpty() &&
             !$part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->isEmpty() &&
-            $user->can('vote', $part, VoteType::AdminCertify) &&
+            $this->vote($user, $part, VoteType::AdminCertify) &&
             $user->can(Permission::PartVoteAdminCertifyAll) &&
             !$this->settings->tracker_locked;
     }
