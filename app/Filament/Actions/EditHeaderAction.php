@@ -73,13 +73,14 @@ class EditHeaderAction
                 ->string()
                 ->rules([
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
-                        $part->description = $value;
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($part, new \App\LDraw\Check\Checks\LibraryApprovedDescription());
+                        $p = ParsedPart::fromPart($part);
+                        $p->description = $value;
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\LibraryApprovedDescription());
                         if (count($errors) > 0) {
                             $fail($errors[0]);
                             return;
                         }
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($part, new \App\LDraw\Check\Checks\PatternPartDesciption());
+                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\PatternPartDesciption());
                         if (count($errors) > 0) {
                             $fail($errors[0]);
                         }
@@ -233,7 +234,6 @@ class EditHeaderAction
                 }
             }
         }
-
         if ($part->type->inPartsFolder() &&
             Arr::has($data, 'category') &&
             $part->category !== PartCategory::tryFrom($data['category'])
@@ -324,6 +324,7 @@ class EditHeaderAction
             $preview_changed = true;
         }
 
+        dd($changes);
         if (count($changes['new']) > 0) {
             $part->save();
             $part->refresh();
