@@ -118,8 +118,18 @@ describe('part check', function () {
             'name' => 's\\1test.dat',
             'type' => PartType::Subpart,
         ], false],
-        'subpart, tilde' => [[
+        'subpart, tilde not first' => [[
+            'description' => '=~Test Description',
+            'name' => 's\\1test.dat',
+            'type' => PartType::Subpart,
+        ], false],
+        'subpart, tilde only' => [[
             'description' => '~Test Description',
+            'name' => 's\\1test.dat',
+            'type' => PartType::Subpart,
+        ], true],
+        'subpart, tilde first' => [[
+            'description' => '~=Test Description',
             'name' => 's\\1test.dat',
             'type' => PartType::Subpart,
         ], true],
@@ -135,12 +145,30 @@ describe('part check', function () {
             'type' => PartType::Part,
             'type_qualifier' => PartTypeQualifier::Alias
         ], true],
+        'alias, equals with tilde' => [[
+            'description' => '~=Test Description',
+            'name' => '1test.dat',
+            'type' => PartType::Part,
+            'type_qualifier' => PartTypeQualifier::Alias
+        ], true],
         'moved, no tilde' => [[
             'description' => 'Test Description',
             'name' => '1test.dat',
             'type' => PartType::Part,
             'metaCategory' => PartCategory::Moved,
         ], false],
+        'moved, tilde not first' => [[
+            'description' => '=~Test Description',
+            'name' => '1test.dat',
+            'type' => PartType::Part,
+            'metaCategory' => PartCategory::Moved,
+        ], false],
+        'moved, tilde' => [[
+            'description' => '~Test Description',
+            'name' => '1test.dat',
+            'type' => PartType::Part,
+            'metaCategory' => PartCategory::Moved,
+        ], true],
         'moved, tilde' => [[
             'description' => '~Test Description',
             'name' => '1test.dat',
@@ -176,6 +204,11 @@ describe('part check', function () {
         ], false],
         'third party, pipe' => [[
             'description' => '|Test Description',
+            'name' => 't1000.dat',
+            'type' => PartType::Part,
+        ], true],
+        'third party, pipe with tilde' => [[
+            'description' => '~|Test Description',
             'name' => 't1000.dat',
             'type' => PartType::Part,
         ], true],

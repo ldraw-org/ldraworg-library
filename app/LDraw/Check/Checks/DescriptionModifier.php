@@ -16,7 +16,9 @@ class DescriptionModifier implements Check
 {
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
-        if ($part->type == PartType::Subpart && !Str::startsWith($part->description, '~')) {
+        $hasprefixes = preg_match('/^([~=|_]+).*$/', $part->description, $prefixes);
+        $prefixes = $hasprefixes ? $prefixes[1] : '';
+        if ($part->type == PartType::Subpart && !Str::startsWith($prefixes, '~')) {
             $fail(PartError::NoTildeForSubpart);
             return;
         }
@@ -29,11 +31,11 @@ class DescriptionModifier implements Check
         } else {
             $cat = $part->metaCategory ?? $part->descriptionCategory;
         }
-        if (($cat == PartCategory::Moved || $cat == PartCategory::Obsolete || Str::endsWith($part->description, '(Obsolete)')) && !Str::startsWith($part->description, '~')) {
+        if (($cat == PartCategory::Moved || $cat == PartCategory::Obsolete || Str::endsWith($part->description, '(Obsolete)')) && !Str::startsWith($prefixes, '~')) {
             $fail(PartError::NoTildeForMovedObsolete);
             return;
         }
-        if ($part->type_qualifier == PartTypeQualifier::Alias && !Str::startsWith($part->description, '=')) {
+        if ($part->type_qualifier == PartTypeQualifier::Alias && !Str::contains($prefixes, '=')) {
             $fail(PartError::NoEqualsForAlias);
             return;
         }
@@ -43,7 +45,7 @@ class DescriptionModifier implements Check
             $name = basename(str_replace('\\', '/', $part->name));
         }
         if (Str::startsWith($name, 't') &&
-            !Str::startsWith($part->description, '|')) {
+            !Str::contains($prefixes, '|')) {
             $fail(PartError::NoPipeForThirdParty);
         }
 
