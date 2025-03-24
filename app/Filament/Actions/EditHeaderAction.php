@@ -324,7 +324,6 @@ class EditHeaderAction
             $preview_changed = true;
         }
 
-        dd($changes);
         if (count($changes['new']) > 0) {
             $part->save();
             $part->refresh();
