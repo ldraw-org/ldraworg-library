@@ -385,7 +385,6 @@ describe('part check', function () {
     ]);
 
     test('check line allowed body meta', function (string $input, bool $expected) {
-        $this->seed();
         $p = ParsedPart::fromArray([
             'body' => $input,
         ]);

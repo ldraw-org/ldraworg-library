@@ -4,6 +4,7 @@ namespace App\LDraw\Check\Checks;
 
 use App\Enums\PartError;
 use App\LDraw\Check\Contracts\Check;
+use App\LDraw\Check\VectorMath;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
 use Closure;
@@ -24,8 +25,6 @@ class ValidType3Lines implements Check
         if (!$hasType3Lines) {
             return;
         }
-        $max_angle = config('ldraw.check.max_point_angle');
-        $min_angle = config('ldraw.check.min_point_angle');
         foreach ($matches as $match) {
             $lineNumber = $header_length + substr_count(substr($body, 0, strpos($body, $match[0])), "\n");
             $points = [
@@ -40,14 +39,7 @@ class ValidType3Lines implements Check
                 $fail(PartError::IndenticalPoints, ['value' => $lineNumber]);
                 continue;
             }
-            $p1 = new Vector($points[0]);
-            $p2 = new Vector($points[1]);
-            $p3 = new Vector($points[2]);
-            $angle1 = rad2deg(acos($p1->subtractVector($p2)->dotProduct($p3->subtractVector($p2)) / ($p1->subtractVector($p2)->length() * $p3->subtractVector($p2)->length())));
-            $angle2 = rad2deg(acos($p2->subtractVector($p3)->dotProduct($p1->subtractVector($p3)) / ($p2->subtractVector($p3)->length() * $p1->subtractVector($p3)->length())));
-            $angle3 = rad2deg(acos($p3->subtractVector($p1)->dotProduct($p2->subtractVector($p1)) / ($p3->subtractVector($p1)->length() * $p2->subtractVector($p1)->length())));
-
-            if (max($angle1, $angle2, $angle3) > $max_angle || min($angle1, $angle2, $angle3) < $min_angle) {
+            if (VectorMath::hasColinearPoints($points)) {
                 $fail(PartError::PointsColinear, ['value' => $lineNumber]);
             }
         }

@@ -207,7 +207,6 @@ test('get subparts', function (string $input, ?array $expected) {
 ]);
 
 test('parse', function () {
-    $this->seed();
     $text = file_get_contents(__DIR__ . "/testfiles/parsetest.dat");
     $part = app(\App\LDraw\Parse\Parser::class)->parse($text);
     expect($part->description)->toBe('Brick  1 x  2 x  5 with SW Han Solo Carbonite Pattern');
