@@ -7,8 +7,7 @@ use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
 use Closure;
-use MathPHP\LinearAlgebra\MatrixFactory;
-use MathPHP\LinearAlgebra\Vector;
+use MCordingley\LinearAlgebra\Vector;
 
 class ValidType3Lines implements Check
 {
@@ -29,11 +28,11 @@ class ValidType3Lines implements Check
         $min_angle = config('ldraw.check.min_point_angle');
         foreach ($matches as $match) {
             $lineNumber = $header_length + substr_count(substr($body, 0, strpos($body, $match[0])), "\n");
-            $points = MatrixFactory::create([
-                [$match[2], $match[3], $match[4]],
-                [$match[5], $match[6], $match[7]],
-                [$match[8], $match[9], $match[10]],
-            ]);
+            $points = [
+                [(float) $match[2], (float) $match[3], (float) $match[4]],
+                [(float) $match[5], (float) $match[6], (float) $match[7]],
+                [(float) $match[8], (float) $match[9], (float) $match[10]],
+            ];
             if ($points[0] == $points[1] ||
                 $points[1] == $points[2] ||
                 $points[2] == $points[0]
@@ -44,9 +43,9 @@ class ValidType3Lines implements Check
             $p1 = new Vector($points[0]);
             $p2 = new Vector($points[1]);
             $p3 = new Vector($points[2]);
-            $angle1 = $p1->subtract($p2)->angleBetween($p3->subtract($p2), true);
-            $angle2 = $p2->subtract($p3)->angleBetween($p1->subtract($p3), true);
-            $angle3 = $p3->subtract($p1)->angleBetween($p2->subtract($p1), true);
+            $angle1 = rad2deg(acos($p1->subtractVector($p2)->dotProduct($p3->subtractVector($p2)) / ($p1->subtractVector($p2)->length() * $p3->subtractVector($p2)->length())));
+            $angle2 = rad2deg(acos($p2->subtractVector($p3)->dotProduct($p1->subtractVector($p3)) / ($p2->subtractVector($p3)->length() * $p1->subtractVector($p3)->length())));
+            $angle3 = rad2deg(acos($p3->subtractVector($p1)->dotProduct($p2->subtractVector($p1)) / ($p3->subtractVector($p1)->length() * $p2->subtractVector($p1)->length())));
 
             if (max($angle1, $angle2, $angle3) > $max_angle || min($angle1, $angle2, $angle3) < $min_angle) {
                 $fail(PartError::PointsColinear, ['value' => $lineNumber]);

@@ -61,7 +61,7 @@ return [
     'check' => [
         'max_point_angle' => 179.9,
         'min_point_angle' => 0.025,
-        'coplaner_angle' => 1.0,
+        'coplaner_angle' => 3.0,
     ],
 
 ];
