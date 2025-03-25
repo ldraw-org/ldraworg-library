@@ -2,14 +2,20 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\PartType;
-use App\Enums\PartStatus;
-use App\Enums\Permission;
+use App\Enums\PartError;
+use App\LDraw\Check\Checks\ValidType2Lines;
+use App\LDraw\Check\Checks\ValidType3Lines;
+use App\LDraw\Check\Checks\ValidType4Lines;
+use App\LDraw\Check\Checks\ValidType5Lines;
+use App\LDraw\PartManager;
+use App\Models\LdrawColour;
 use App\Models\Part\Part;
-use App\Models\Part\PartEvent;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
-use Spatie\Permission\Models\Permission as PermissionModel;
+use Illuminate\Support\Facades\Cache;
+use MathPHP\LinearAlgebra\MatrixFactory;
+use MathPHP\LinearAlgebra\Vector;
+use MCordingley\LinearAlgebra\Matrix;
+use MCordingley\LinearAlgebra\Vector as LinearAlgebraVector;
 
 class DeployUpdate extends Command
 {
@@ -32,41 +38,14 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        $nameupdates = [
-            'admin.view-dashboard' => Permission::AdminDashboardView,
-            'member.access' => Permission::LdrawMemberAccess,
-            'member.poll.manage' => Permission::PollManage,
-            'member.poll.vote' => Permission::PollVote,
-            'omr.create' => Permission::OmrModelSubmit,
-            'omr.delete' => null,
-            'omr.update' => Permission::OmrModelEdit,
-            'part' => null,
-            'part.keyword.edit' => Permission::PartKeywordsManage,
-            'part.vote.fasttrack' => Permission::PartVoteFastTrack,
-            'reviewsummary.manage' => Permission::ReviewSummaryManage,
-            'role' => null,
-            'user' => null,
-            'user.add.nonadmin' => null,
-            'user.modify' => Permission::UserUpdate,
-            'user.modify.email' => null,
-            'user.modify.role.nonadmin' => Permission::UserUpdateSuperuser
-        ];
-        foreach ($nameupdates as $name => $permission) {
-            $model = PermissionModel::firstWhere('name', $name);
-            if (is_null($model)) {
-                continue;
-            }
-            if (is_null($permission)) {
-                $model->delete();
-            } else {
-                $model->name = $permission->value;
-                $model->save();
-            }
-        }
-
-        foreach (Permission::cases() as $permission) {
-            PermissionModel::findOrCreate($permission->value);
-        }
+        $t = microtime(true);
+        $ldraw_color = Cache::get('ldraw_color_codes');
+        $total = microtime(true) - $t;
+        $this->info($total);
+        $t = microtime(true);
+        $ldraw_color = LdrawColour::pluck('code')->all();
+        $total = microtime(true) - $t;
+        $this->info($total);
 
     }
 }

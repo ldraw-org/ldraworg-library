@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\LDraw\LDrawColourManager;
+use App\Models\LdrawColour;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
 class UpdateColours extends Command
 {
@@ -27,5 +29,6 @@ class UpdateColours extends Command
     public function handle()
     {
         app(LDrawColourManager::class)->importColours();
+        Cache::set('ldraw_colour_codes', LdrawColour::pluck('code')->all());
     }
 }
