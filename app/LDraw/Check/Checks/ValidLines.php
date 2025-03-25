@@ -7,6 +7,7 @@ use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\LdrawColour;
 use App\Models\Part\Part;
+use Cache;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -22,6 +23,7 @@ class ValidLines implements Check
             $header_length = $part->header_length;
             $body = explode("\n", $part->body);
         }
+        $codes = LdrawColour::pluck('code')->all();//Cache::get('ldraw_colours', LdrawColour::all());
         foreach ($body as $index => $line) {
             $line = Str::squish($line);
             if (empty($line)) {
@@ -31,7 +33,7 @@ class ValidLines implements Check
                 ! preg_match(config('ldraw.patterns.line_type_' . $line[0]), $line, $matches)
             ) {
                 $fail(PartError::LineInvalid, ['value' => $index + $header_length]);
-                return;
+                continue;
             }
             if ($line[0] == '0') {
                 continue;
@@ -51,13 +53,15 @@ class ValidLines implements Check
             }
             if (count(Arr::reject($numbers, fn (string $value, int $key) => !is_numeric($value))) != count($numbers)) {
                 $fail(PartError::InvalidLineNumbers, ['value' => $index + $header_length]);
-                return;
+                continue;
             }
-            if (!Str::of($matches['color'])->startsWith('0x') && LdrawColour::where('code', $matches['color'])->doesntExist()) {
+            if (!Str::of($matches['color'])->startsWith('0x') && !in_array($matches['color'], $codes)) {
                 $fail(PartError::InvalidLineColor, ['value' => $index + $header_length]);
+                continue;
             }
             if ($matches['color'] == '24' && in_array($line[0],['1','3','4'])) {
                 $fail(PartError::InvalidLineColor, ['value' => $index + $header_length]);
+                continue;
             }
             if ($matches['color'] == '16' && in_array($line[0],['2','5'])) {
                 $fail(PartError::InvalidLineColor, ['value' => $index + $header_length]);
