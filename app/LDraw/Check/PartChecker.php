@@ -131,7 +131,12 @@ class PartChecker
             new \App\LDraw\Check\Checks\UnknownPartNumber(),
             new \App\LDraw\Check\Checks\ValidBodyMeta(),
             new \App\LDraw\Check\Checks\ValidLines(),
+            new \App\LDraw\Check\Checks\ValidType1Lines(),
             new \App\LDraw\Check\Checks\NoSelfReference(),
+            new \App\LDraw\Check\Checks\ValidType2Lines(),
+            new \App\LDraw\Check\Checks\ValidType3Lines(),
+            new \App\LDraw\Check\Checks\ValidType4Lines(),
+            new \App\LDraw\Check\Checks\ValidType5Lines(),
 
             new \App\LDraw\Check\Checks\LibraryApprovedDescription(),
             new \App\LDraw\Check\Checks\PatternPartDesciption(),

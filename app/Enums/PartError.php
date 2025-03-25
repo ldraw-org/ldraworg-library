@@ -15,6 +15,13 @@ enum PartError: string
 
     case LineInvalid = 'line.invalid';
     case InvalidLineType0 = 'line.invalidmeta';
+    case InvalidLineColor = 'line.invalidcolor';
+    case InvalidLineNumbers = 'line.invalidnumbers';
+    case RotationMatrixIsSigular = 'line.singular';
+    case IndenticalPoints = 'line.identicalpoints';
+    case PointsColinear = 'line.colinear';
+    case QuadNotConvex = 'line.notconvex';
+    case QuadNotCoplanar = 'line.notcoplaner';
 
     case PartNameInvalid = 'name.invalidchars';
     case NameAndFilenameNotEqual = 'name.mismatch';

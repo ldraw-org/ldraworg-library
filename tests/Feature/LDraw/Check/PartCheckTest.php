@@ -6,6 +6,7 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
+use App\Models\LdrawColour;
 use App\Models\Part\Part;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,6 +26,12 @@ beforeEach(function () {
     User::factory()->create([
         'name' => 'TestUser2',
         'realname' => 'Test User 2'
+    ]);
+    LdrawColour::factory()->create([
+        'code' => '16',
+    ]);
+    LdrawColour::factory()->create([
+        'code' => '24',
     ]);
 });
 
@@ -398,17 +405,108 @@ describe('part check', function () {
     })->with([
         'valid type 0' => ["0 // Free for comment 112341904.sfsfkajf", true],
         'valid type 0 empty' => ["0", true],
-        'valid type 1' => ["1  1  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0  0 0 0  test.dat", true],
+        'valid type 1' => ["1  16  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0  0 0 0  test.dat", true],
         'valid type 2' => ["2  0x2123456  1 0.01 -0.01  1 0.23456789 -.12341234", true],
-        'valid type 3' => ["3  12  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0", true],
-        'valid type 4' => ["4  10001  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", true],
-        'valid type 5' => ["5  1  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", true],
+        'valid type 3' => ["3  16  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0", true],
+        'valid type 4' => ["4  16  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", true],
+        'valid type 5' => ["5  24  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", true],
         'valid blank line' => ["", true],
-        'invalid type 1' => ["1    0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0  0 0 0  test.dat", false],
-        'invalid scientific notation' => ["2  1  1 0.01 -0.01  1e10 0.23456789 -.12341234", false],
+        'invalid type 1' => ["1  16  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0 0 0 0 0 test.dat", false],
+        'invalid type 2' => ["2  24  0.01 -0.01 1  0.23456789 -.12341234 1  0", false],
+        'invalid type 3' => ["3  16  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0 0", false],
+        'invalid type 4' => ["4  16  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0 0 0 0 0", false],
+        'invalid type 5' => ["5  24  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0 0 0 0 0", false],
+        'invalid scientific notation' => ["2  16  1 0.01 -0.01  1e10 0.23456789 -.12341234", false],
         'invalid decimal number for color' => ["3  1.2  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0", false],
+        'invalid color code' => ["3  30000  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0", false],
+        'invalid color 24' => ["1  24  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0  0 0 0  test.dat", false],
+        'invalid color 16' => ["2  16  1 0.01 -0.01  1 0.23456789 -.12341234", false],
         'invalid letter instead of number' => ["4  1  1 a -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
-        'invalid line type' => ["6  1  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
+        'invalid number' => ["4  16  1 1 .-01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
+        'invalid line type' => ["6  16  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
+    ]);
+
+    test('valid type 1 line', function (string $input, bool $expected) {
+        $p = ParsedPart::fromArray([
+            'body' => $input,
+        ]);
+        expect(runSingleCheck($p, new \App\LDraw\Check\Checks\ValidType1Lines()))->toBe($expected);
+    })->with([
+        'valid' => ["1 16 0 0 0 1 0 0 0 1 0 0 0 1 test.dat", true],
+        'valid, no type 1 lines' => ["2 24 0 0 0 0 0 1", true],
+        'invalid matrix' => ["1 16 0 0 0 1 0 0 0 0 0 0 0 1 test.dat", false],
+    ]);
+
+    test('valid type 2 line', function (string $input, bool $expected) {
+        $p = ParsedPart::fromArray([
+            'body' => $input,
+        ]);
+        expect(runSingleCheck($p, new \App\LDraw\Check\Checks\ValidType2Lines()))->toBe($expected);
+    })->with([
+        'valid' => ["2 24 0 0 1.11 0 0 1.111", true],
+        'valid, no type 2 lines' => ["3 16 -1 0 0 1 0 0 0 1 0", true],
+        'invalid, identical points' => ["2 24 0 0 1.234 0 0 1.234", false],
+    ]);
+
+    test('valid type 3 line', function (string $input, bool $expected) {
+        $p = ParsedPart::fromArray([
+            'body' => $input,
+        ]);
+        expect(runSingleCheck($p, new \App\LDraw\Check\Checks\ValidType3Lines()))->toBe($expected);
+    })->with([
+        'invalid, identical points 1, 2' => ["3 16 0 0 0 0 0 0 1 1 0", false],
+        'invalid, identical points 2, 3' => ["3 16 0 0 0 -1 1 0 -1 1 0", false],
+        'invalid, identical points 3, 1' => ["3 16 0 0 0 -1 1 0 0 0 0", false],
+        'invalid, angle too small 1, 2, 3' => ["3 16 1 0.0001 0 -1 0 0 1 0 0", false],
+        'invalid, angle too small 2, 3, 1' => ["3 16 1 0 0 1 0.0001 0 -1 0 0", false],
+        'invalid, angle too small 3, 1, 2' => ["3 16 -1 0 0 1 0 0 1 0.0001 0", false],
+        'invalid, angle too large 1, 2, 3' => ["3 16 -1 0 0 1 0 0 2 0.0001 0", false],
+        'invalid, angle too large 2, 3, 1' => ["3 16 2 0.0001 0 -1 0 0 1 0 0", false],
+        'invalid, angle too large 3, 1, 2' => ["3 16 1 0 0 2 0.0001 0 -1 0 0", false],
+        'valid' => ["3 16 -1 0 0 1 0 0 1 1 0", true],
+        'valid, no type 2 lines' => ["2 24 0 0 1 0 0 0", true],
+    ]);
+
+    test('valid type 4 line', function (string $input, bool $expected) {
+        $p = ParsedPart::fromArray([
+            'body' => $input,
+        ]);
+        expect(runSingleCheck($p, new \App\LDraw\Check\Checks\ValidType4Lines()))->toBe($expected);
+    })->with([
+        'invalid, identical points 1, 2' => ["4 16 1 1 0 1 1 0 -1 -1 0 -1 1 0", false],
+        'invalid, identical points 2, 3' => ["4 16 1 1 0 1 -1 0 1 -1 0 -1 1 0", false],
+        'invalid, identical points 3, 4' => ["4 16 1 1 0 1 -1 0 -1 -1 0 -1 -1 0", false],
+        'invalid, identical points 4, 1' => ["4 16 1 1 0 1 -1 0 -1 -1 0 1 1 0", false],
+        'invalid, identical points 1, 3' => ["4 16 1 1 0 1 -1 0 1 1 0 -1 1 0", false],
+        'invalid, identical points 4, 2' => ["4 16 1 1 0 1 -1 0 -1 -1 0 1 -1 0", false],
+        'invalid, angle too large 1, 2, 3' => ["4 16 1 0 0 0 -0.0001 0 -1 0 0 0 1 0", false],
+        'invalid, angle too large 2, 3, 4' => ["4 16 0 1 0 1 0 0 0 -0.0001 0 -1 0 0", false],
+        'invalid, angle too large 3, 4, 1' => ["4 16 -1 0 0 0 1 0 1 0 0 0 -0.0001 0", false],
+        'invalid, angle too large 4, 1, 2' => ["4 16 0 -0.0001 0 -1 0 0 0 1 0 1 0 0", false],
+        'invalid, angle too small 1, 2, 3' => ["4 16 -0.001 0 0 0 15 0 0.001 0 0 0 -0.01 0", false],
+        'invalid, angle too small 2, 3, 4' => ["4 16 0 -0.01 0 -0.001 0 0 0 15 0 0.001 0 0", false],
+        'invalid, angle too small 3, 4, 1' => ["4 16 0.001 0 0 0 -0.01 0 -0.001 0 0 0 15 0", false],
+        'invalid, angle too small 4, 1, 2' => ["4 16 0 15 0 0.001 0 0 0 -0.01 0 -0.001 0 0", false],
+        'invalid, not coplaner 13' => ["4 16 1 1 0 1 -1 0 -1 -1 0 -1 1 1", false],
+        'invalid, not coplaner 24' => ["4 16 1 1 0 1 -1 0 -1 -1 1 -1 1 0", false],
+        'invalid, bowtie 1324' => ["4 16 -1 -1 0 1 1 0 -1 1 0 1 -1 0", false],
+        'invalid, bowtie 1243' => ["4 16 -1 -1 0 -1 1 0 1 -1 0 1 1 0", false],
+        'invalid, convex 13' => ["4 16 1 0 0 0 1 0 0.5 0 0 0 -1 0", false],
+        'invalid, convex 24' => ["4 16 1 0 0 0 1 0 -1 0 0 0 0.5 0", false],
+        'valid' => ["4 16 1 1 0 1 -1 0 -1 -1 0 -1 1 0", true],
+        'valid, no type 2 lines' => ["2 24 0 0 1 0 0 0", true],
+    ]);
+
+    test('valid type 5 line', function (string $input, bool $expected) {
+        $p = ParsedPart::fromArray([
+            'body' => $input,
+        ]);
+        expect(runSingleCheck($p, new \App\LDraw\Check\Checks\ValidType5Lines()))->toBe($expected);
+    })->with([
+        'valid' => ["5 24 0 1 0 0 -1 0 1 1 0 0 1 1", true],
+        'valid, no type 2 lines' => ["3 16 -1 0 0 1 0 0 0 1 0", true],
+        'invalid, identical line points' => ["5 24 0 1 0 0 1 0 1 1 0 0 1 1", false],
+        'invalid, identical control points' => ["5 24 0 1 0 0 -1 0 0 1 1 0 1 1", false],
     ]);
 
     test('check no self reference', function (array $input, bool $expected) {

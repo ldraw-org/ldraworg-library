@@ -11,6 +11,13 @@ return [
     'line' => [
         'invalid' => 'Line :value invalid',
         'invalidmeta' => 'Line :value, invalid META command or comment without //',
+        'invalidcolor' => 'Line :value, Color code not in LDConfig.ldr',
+        'invalidnumbers' => 'Line :value invalid',
+        'singular' => 'Line :value, singular rotation matrix',
+        'identicalpoints' => 'Line :value, indential points',
+        'colinear' => 'Line :value, points are colinear',
+        'notconvex' => 'Line :value, quad is concave or bowtie',
+        'notcoplaner' => 'Line :value, quad is not coplaner',
     ],
 
     'name' => [

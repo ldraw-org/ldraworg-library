@@ -57,4 +57,11 @@ return [
         'line_type_5' => '#^\h*5\h+(?P<color>0x2[a-fA-F\d]{6}|\d+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h+([\d.-]+)\h*$#um',
         'base' => '#^(?P<base>[0-9a-z]+?)(?P<suffix1>p[0-9a-z][0-9a-z]|p[cd][1-9a-z]{2}|[cdk][0-9a-z]{2}|[pcd]\d{4})?(?P<suffix2>p[0-9a-z][0-9a-z]|p[cd][1-9a-z]{2}|[cd][0-9a-z]{2}|[pcd]\d{4})?(?P<suffix3>p[0-9a-z][0-9a-z]|p[cd][1-9a-z]{2}|[cd][0-9a-z]{2}|[pcd]\d{4})?(?:-f\d)?\.(?:dat|png)$#i',
     ],
+
+    'check' => [
+        'max_point_angle' => 179.9,
+        'min_point_angle' => 0.025,
+        'coplaner_angle' => 1.0,
+    ],
+
 ];
