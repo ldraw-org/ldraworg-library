@@ -23,7 +23,7 @@ class ValidLines implements Check
             $header_length = $part->header_length;
             $body = explode("\n", $part->body);
         }
-        $codes = LdrawColour::pluck('code')->all();//Cache::get('ldraw_colours', LdrawColour::all());
+        $codes = Cache::get('ldraw_colour_codes', LdrawColour::pluck('code')->all());
         foreach ($body as $index => $line) {
             $line = Str::squish($line);
             if (empty($line)) {
