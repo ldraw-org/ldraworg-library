@@ -21,8 +21,8 @@ class MakePartRelease implements ShouldQueue, ShouldBeUnique
     use Queueable;
     use SerializesModels;
 
-    public $uniqueFor = 1800;
-    public $timeout = 1800;
+    public $uniqueFor = 3600;
+    public $timeout = 3600;
 
     /**
      * Create a new job instance.

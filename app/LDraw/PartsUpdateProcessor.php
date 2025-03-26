@@ -6,6 +6,7 @@ use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Events\PartReleased;
+use App\Jobs\CheckPart;
 use App\Jobs\UpdateImage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,6 +15,7 @@ use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
 use App\Models\User;
+use App\Settings\LibrarySettings;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -23,6 +25,7 @@ class PartsUpdateProcessor
     protected PartRelease $release;
     protected PartManager $manager;
     protected TemporaryDirectory $tempDir;
+    protected LibrarySettings $settings;
 
     public function __construct(
         protected Collection $parts,
@@ -32,16 +35,19 @@ class PartsUpdateProcessor
     ) {
         $this->manager = app(PartManager::class);
         $this->tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
+        $this->settings = app(LibrarySettings::class);
     }
 
     public function createRelease(): void
     {
+        $this->settings->tracker_locked = true;
+        $this->settings->save();
         $this->makeNextRelease();
         $this->releaseParts();
-        $this->makeReleaseZips();
+        $this->settings->tracker_locked = false;
+        $this->settings->save();
         $this->copyReleaseFiles();
         $this->postReleaseCleanup();
-        $this->regenerateImages();
     }
 
     protected function makeNextRelease(): void
@@ -121,7 +127,7 @@ class PartsUpdateProcessor
                 $data['fixed'][] = ['name' => $part->name(), 'decription' => $part->description];
             }
         }
-        //$data['minor_edits'] = Part::official()->where('has_minor_edit', true)->count();
+        $data['minor_edits'] = Part::official()->where('has_minor_edit', true)->count();
         return $data;
     }
 
@@ -237,8 +243,6 @@ class PartsUpdateProcessor
             PartEvent::where('part_release_id', $this->release->id)
                 ->where('part_id', $part->id)
                 ->update(['part_id' => $opart->id]);
-            $part->deleteRelationships();
-            \App\Models\ReviewSummary\ReviewSummaryItem::where('part_id', $part->id)->delete();
             $part->deleteQuietly();
         } else {
             $part->part_release_id = $this->release->id;
@@ -263,6 +267,8 @@ class PartsUpdateProcessor
             'category' => $upart->category,
             'cmdline' => $upart->cmdline,
             'header' => $upart->header,
+            'rebrickable' => $upart->rebrickable,
+            'sticker_sheet_id' => $upart->sticker_sheet_id,
         ];
         $opart->fill($values);
         $opart->setSubparts($upart->subparts);
@@ -274,64 +280,8 @@ class PartsUpdateProcessor
         $opart->refresh();
         $opart->generateHeader();
         $this->manager->updateBasePart($opart);
-        $this->manager->updateImage($opart);
-        $this->manager->checkPart($opart);
-        $this->manager->addStickerSheet($opart);
         $opart->save();
         return $opart;
-    }
-
-    public function makeReleaseZips(): void
-    {
-        $uzipname = $this->tempDir->path("lcad{$this->release->short}.zip");
-        $zipname = $this->tempDir->path("complete.zip");
-
-        copy(Storage::disk('library')->path('updates/complete.zip'), $zipname);
-        $uzip = new \ZipArchive();
-        $uzip->open($uzipname, \ZipArchive::CREATE);
-
-        $zip = new \ZipArchive();
-        $zip->open($zipname);
-
-        foreach ($this->extraFiles as $filename => $contents) {
-            $filename = "ldraw/{$filename}";
-            $uzip->addFromString($filename, $contents);
-            if ($zip->getFromName($filename) !== false) {
-                $zip->deleteName($filename);
-            }
-            $zip->addFromString($filename, $contents);
-        }
-
-        $notes = file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt"));
-        $zip->addFromString("ldraw/models/Note{$this->release->short}CA.txt", $notes);
-        $uzip->addFromString("ldraw/models/Note{$this->release->short}CA.txt", $notes);
-
-        if ($this->includeLdconfig === true) {
-            $zip->deleteName('ldraw/LDConfig.ldr');
-            $zip->deleteName('ldraw/LDCfgalt.ldr');
-            $zip->addFromString('ldraw/LDConfig.ldr', Storage::disk('library')->get('official/LDConfig.ldr'));
-            $zip->addFromString('ldraw/LDCfgalt.ldr', Storage::disk('library')->get('official/LDCfgalt.ldr'));
-            $uzip->addFromString('ldraw/LDConfig.ldr', Storage::disk('library')->get('official/LDConfig.ldr'));
-            $uzip->addFromString('ldraw/LDCfgalt.ldr', Storage::disk('library')->get('official/LDCfgalt.ldr'));
-        }
-
-        $zip->close();
-        $uzip->close();
-
-        $zip->open($zipname);
-        $uzip->open($uzipname);
-
-        Part::where('part_release_id', $this->release->id)
-            ->each(function (Part $part) use ($zip, $uzip) {
-                $content = $part->get();
-                if ($zip->getFromName('ldraw/' . $part->filename) !== false) {
-                    $zip->deleteName('ldraw/' . $part->filename);
-                }
-                $zip->addFromString('ldraw/' . $part->filename, $content);
-                $uzip->addFromString('ldraw/' . $part->filename, $content);
-            });
-        $zip->close();
-        $uzip->close();
     }
 
     protected function copyReleaseFiles(): void
@@ -342,7 +292,8 @@ class PartsUpdateProcessor
         Storage::disk('library')->move('updates/complete.zip', "updates/complete-{$previousRelease->short}.zip");
         Storage::disk('library')->move('updates/LDrawParts.exe', "updates/LDraw{$previousRelease->short}.exe");
 
-        // Copy the new archives to the library
+        // Make and copy the new archives to the library
+        ZipFiles::releaseZips($this->release, $this->extraFiles, file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt")), $this->includeLdconfig, $this->tempDir);
         Storage::disk('library')->put("updates/lcad{$this->release->short}.zip", file_get_contents($this->tempDir->path("lcad{$this->release->short}.zip")));
         Storage::disk('library')->put("updates/complete.zip", file_get_contents($this->tempDir->path("complete.zip")));
 
@@ -364,6 +315,9 @@ class PartsUpdateProcessor
                 Storage::disk('images')->put("library/updates/view{$this->release->short}{$fn}", $image);
             }
         }
+
+        $this->release->enabled = true;
+        $this->release->save();
     }
 
     public function postReleaseCleanup()
@@ -387,21 +341,24 @@ class PartsUpdateProcessor
         Part::unofficial()->where('can_release', false)->where('marked_for_release', true)->update([
             'marked_for_release' => false
         ]);
+
         // Reset the unofficial zip file
         Storage::disk('library')->delete('unofficial/ldrawunf.zip');
         ZipFiles::unofficialZip(Part::unofficial()->first());
-    }
 
-    protected function regenerateImages()
-    {
+        //Recheck and regenerate affected parts
         $affectedParts = new Collection();
-        foreach ($this->release->parts as $part) {
-            /** @var Part $part */
-            $affectedParts = $affectedParts->concat($part->ancestorsAndSelf->unique())->unique();
-        }
+        $this->release
+            ->load('parts')
+            ->parts
+            ->load('ancestorsAndSelf')
+            ->each(function (Part $p) use (&$affectedParts) {
+                $affectedParts = $affectedParts->concat($p->ancestorsAndSelf->unique())->unique();
+            });
         $affectedParts->each(function (Part $p) {
             UpdateImage::dispatch($p);
+            $this->manager->loadSubparts($p);
         });
-    }
-
+        CheckPart::dispatch($affectedParts);
+   }
 }
