@@ -14,7 +14,7 @@ return [
         'invalidcolor' => 'Line :value, Color code not in LDConfig.ldr',
         'invalidnumbers' => 'Line :value invalid',
         'singular' => 'Line :value, singular rotation matrix',
-        'identicalpoints' => 'Line :value, indential points',
+        'identicalpoints' => 'Line :value, indentical points',
         'colinear' => 'Line :value, points are colinear',
         'notconvex' => 'Line :value, quad is concave or bowtie',
         'notcoplaner' => 'Line :value, quad is not coplaner',
@@ -48,7 +48,7 @@ return [
     ],
 
     'license' => [
-        'approved' => 'All parts are rquired to be CC BY 4.0',
+        'approved' => 'All parts are required to be CC BY 4.0',
     ],
 
     'category' => [
