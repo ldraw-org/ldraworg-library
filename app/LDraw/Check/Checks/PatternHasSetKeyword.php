@@ -36,7 +36,7 @@ class PatternHasSetKeyword implements Check
             }
             $cat = $part->metaCategory ?? $part->descriptionCategory;
             $hasSetKw = count(Arr::reject(
-                $part->keywords,
+                $part?->keywords ?? [],
                 fn (string $kw) => !Str::startsWith(Str::lower($kw), ['set ', 'cmf', 'build-a-minifigure'])
             )) > 0;
         }

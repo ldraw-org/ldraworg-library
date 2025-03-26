@@ -81,7 +81,7 @@ class StickerSheetIndex extends BasicTable
                                 });
                             }
                     ])
-                    ->visible(Auth::user()?->can(Permission::PartVoteFasttrack) ?? false),
+                    ->visible(Auth::user()?->can(Permission::PartVoteFastTrack) ?? false),
             ])
             ->persistSortInSession()
             ->persistSearchInSession()

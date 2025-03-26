@@ -8,7 +8,7 @@ use App\Models\User;
 
 class ReviewSummaryPolicy
 {
-    public function manage(User $user, ReviewSummary $summary): bool
+    public function manage(User $user): bool
     {
         return $user->can(Permission::ReviewSummaryManage);
     }
