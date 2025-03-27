@@ -38,7 +38,7 @@ class EditHeaderAction
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
-                if (!$part->canHaveExternalData() || !Arr::has($part->rebrickable, 'data')) {
+                if (!$part->canHaveExternalData() || !Arr::get($part->rebrickable ?? [], 'data')) {
                     $kws = $part->keywords;
                 } else {
                     $kws = $part->keywords
