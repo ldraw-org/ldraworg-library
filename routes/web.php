@@ -121,7 +121,7 @@ Route::prefix('documentation')->name('documentation.')->group(function () {
     Route::get('/{document}', DocumentShowController::class, 'show')->name('show');
 });
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', AdminIndex::class)->name('index');
     Route::get('/users', UserManagePage::class)->can('create', App\Models\User::class)->name('users.index');
     Route::get('/summaries', ReviewSummaryManagePage::class)->can('manage', App\Models\ReviewSummary\ReviewSummary::class)->name('summaries.index');
@@ -130,7 +130,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/document-categories', DocumentCategoryManagePage::class)->can('manage', App\Models\Document\Document::class)->name('document-categories.index');
     Route::get('/part-keywords', PartKeywordManagePage::class)->can('manage', App\Models\Part\PartKeyword::class)->name('part-keywords.index');
     Route::get('/settings', LibrarySettingsPage::class)->can(Permission::SiteSettingsEdit)->name('settings.index');
-})->middleware(['auth'])->can(Permission::AdminDashboardView);
+})->can(Permission::AdminDashboardView);
 
 
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
