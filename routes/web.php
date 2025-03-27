@@ -90,7 +90,7 @@ Route::prefix('parts')->name('parts.')->group(function () {
 Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::view('/', 'tracker.main')->name('main');
 
-    Route::middleware(['currentlic'])->group(function () {
+    Route::middleware(['auth', 'currentlic'])->group(function () {
         Route::get('/submit', Submit::class)->name('submit');
         Route::get('/torso-helper', TorsoShortcutHelper::class)->name('torso-helper');
     })->can('create', App\Models\Part\Part::class);
@@ -104,7 +104,7 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
 
     Route::view('/next-release', 'part.nextrelease')->name('next-release');
 
-    Route::can('create', App\Models\Part\PartRelease::class)->get('/release/create', Create::class)->name('release.create');
+    Route::middleware(['auth'])->get('/release/create', Create::class)->can('create', App\Models\Part\PartRelease::class)->name('release.create');
 });
 
 Route::prefix('omr')->name('omr.')->group(function () {
@@ -130,7 +130,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/document-categories', DocumentCategoryManagePage::class)->can('manage', App\Models\Document\Document::class)->name('document-categories.index');
     Route::get('/part-keywords', PartKeywordManagePage::class)->can('manage', App\Models\Part\PartKeyword::class)->name('part-keywords.index');
     Route::get('/settings', LibrarySettingsPage::class)->can(Permission::SiteSettingsEdit)->name('settings.index');
-})->can(Permission::AdminDashboardView);
+})->middleware(['auth'])->can(Permission::AdminDashboardView);
 
 
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
