@@ -127,19 +127,22 @@
                     </x-filament::button>
                 @endif
             </div>
-            @if ($this->viewRebrickableAction->isVisible() || 
-                $this->viewBrickLinkAction->isVisible() || 
-                $this->viewBricksetAction->isVisible() || 
+            @if ($this->viewRebrickableAction->isVisible() ||
+                $this->viewBrickLinkAction->isVisible() ||
+                $this->viewBricksetAction->isVisible() ||
                 $this->viewBrickOwlAction->isVisible()
             )
-                <div>
-                    <span class="font-bold text-lg">
+                <div class="flex space-x-2 place-items-center">
+                    <div class="font-bold text-lg">
                         External Sites:
-                    </span>
+                    </div>
                     <x-filament-action action="viewRebrickableAction" />
                     <x-filament-action action="viewBrickLinkAction" />
                     <x-filament-action action="viewBrickSetAction" />
                     <x-filament-action action="viewBrickOwlAction" />
+                    @if (Arr::get($part->rebrickable ?? [], 'data'))
+                        <x-fas-info-circle class="w-5 h-5 fill-gray-400" title="External site data provided by Rebrickable.com" />
+                    @endif
                 </div>
             @endif
         @endif
