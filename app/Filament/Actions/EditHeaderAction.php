@@ -116,7 +116,7 @@ class EditHeaderAction
             Textarea::make('keywords')
                 ->helperText(fn (Part $p) =>
                     'Note: keyword order' .
-                    ($part->canHaveExternalData() && Arr::has($part->rebrickable, 'data') ? ' and external site keywords' : '') .
+                    ($part->canHaveExternalData() && Arr::get($part->rebrickable ?? [], 'data') ? ' and external site keywords' : '') .
                     ' will not be preserved'
                 )
                 ->extraAttributes(['class' => 'font-mono'])
