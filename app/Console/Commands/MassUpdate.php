@@ -33,17 +33,5 @@ class MassUpdate extends Command
      */
     public function handle()
     {
-        $this->info('Updating category of all obsolete files in the parts folder');
-        Part::where('description', 'LIKE', '%(Obsolete)')
-            ->whereIn('type', PartType::partsFolderTypes())
-            ->where('category', '!=', PartCategory::Obsolete)
-            ->doesntHave('unofficial_part')
-            ->each(function (Part $part) {
-                $part->category = PartCategory::Obsolete;
-                $part->has_minor_edit = true;
-                $part->save();
-                $part->refresh();
-                $part->generateHeader();
-            });
     }
 }
