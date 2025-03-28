@@ -3,6 +3,7 @@
 namespace App\Filament\Actions;
 
 use App\Enums\PartCategory;
+use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Events\PartHeaderEdited;
@@ -27,6 +28,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class EditHeaderAction
 {
@@ -124,6 +126,7 @@ class EditHeaderAction
                 ->hidden(!$part->type->inPartsFolder())
                 ->disabled(!$part->type->inPartsFolder())
                 ->rules([
+                    Rule::requiredIf($part->is_pattern),
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
                         $p = ParsedPart::fromPart($part);
                         $p->keywords = collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all();
@@ -132,6 +135,9 @@ class EditHeaderAction
                             $fail($errors[0]);
                         }
                     }
+                ])
+                ->validationMessages([
+                    'required_if' => __(PartError::NoSetKeywordForPattern->value),
                 ]),
             TextInput::make('cmdline')
                 ->nullable()
@@ -185,7 +191,7 @@ class EditHeaderAction
                 ->rows(6)
                 ->string()
                 ->rules([
-                    Rule::requiredIf(!$part->history->isEmpty()),
+                    Rule::requiredIf($part->history->isNotEmpty()),
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
                         $p = app(\App\LDraw\Parse\Parser::class)->parse($value);
                         $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\ValidLines());
@@ -217,6 +223,11 @@ class EditHeaderAction
                 ->nullable()
                 ->string()
             ];
+    }
+
+    protected function onValidationError(ValidationException $exception): void
+    {
+        dd($exception);
     }
 
     protected static function updateHeader(Part $part, array $data): Part
@@ -280,9 +291,27 @@ class EditHeaderAction
         } else {
             $new_kws = collect(explode(',', Str::of($data['keywords'])->trim()->squish()->replace(["\n", ', ',' ,'], ',')->toString()))->filter();
         }
+        if ($part->canHaveExternalData() && Arr::get($part->rebrickable ?? [], 'data')) {
+            $extKeywords = collect($part->keywords
+                ->filter(function (PartKeyword $kw) {
+                    return Str::of($kw->keyword)->lower()->startsWith('rebrickable') ||
+                    Str::of($kw->keyword)->lower()->startsWith('brickset') ||
+                    Str::of($kw->keyword)->lower()->startsWith('brickowl') ||
+                    Str::of($kw->keyword)->lower()->startsWith('bricklink');
+                })
+                ->pluck('keyword')
+                ->all());
+            $new_kws = $new_kws
+                ->reject(function (string $kw) {
+                    return Str::of($kw)->lower()->startsWith('rebrickable') ||
+                    Str::of($kw)->lower()->startsWith('brickset') ||
+                    Str::of($kw)->lower()->startsWith('brickowl') ||
+                    Str::of($kw)->lower()->startsWith('bricklink');
+                })
+                ->merge($extKeywords);
+        }
         $partKeywords = collect($part->keywords->pluck('keyword')->all());
-        if ($new_kws->diff($partKeywords)->all()) {
-            $new_kws = $partKeywords->merge($new_kws)->unique();
+        if ($partKeywords->diff($new_kws)->isNotEmpty() || $new_kws->diff($partKeywords)->isNotEmpty()) {
             $changes['old']['keywords'] = implode(", ", $partKeywords->all());
             $changes['new']['keywords'] = implode(", ", $new_kws->all());
             $part->setKeywords($new_kws->all());
