@@ -34,27 +34,16 @@ class MassUpdate extends Command
     public function handle()
     {
         $this->info('Updating category of all obsolete files in the parts folder');
-        $pm = app(PartManager::class);
-        $vm = app(VoteManager::class);
-        $user = User::firstWhere('name', 'OrionP');
         Part::where('description', 'LIKE', '%(Obsolete)')
             ->whereIn('type', PartType::partsFolderTypes())
             ->where('category', '!=', PartCategory::Obsolete)
             ->doesntHave('unofficial_part')
-            ->each(function (Part $part) use ($pm, $user, $vm) {
-                $up = $pm->copyOfficialToUnofficialPart($part);
-                $up->category = PartCategory::Obsolete;
-                $part->unofficial_part()->associate($up);
+            ->each(function (Part $part) {
+                $part->category = PartCategory::Obsolete;
+                $part->has_minor_edit = true;
                 $part->save();
-                $up->history()->create([
-                        'user_id' => $user->id,
-                        'comment' => 'Change category to Obsolete'
-                ]);
-                $up->save();
-                $up->refresh();
-                $up->generateHeader();
-                PartSubmitted::dispatch($up, $user);
-                $vm->castVote($up, $user, VoteType::AdminFastTrack);
+                $part->refresh();
+                $part->generateHeader();
             });
     }
 }
