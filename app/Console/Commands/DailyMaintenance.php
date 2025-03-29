@@ -47,17 +47,19 @@ class DailyMaintenance extends Command
             $this->info('Removing orphan keywords');
             PartKeyword::doesntHave('parts')->delete();
 
-            $this->info('Removing orphan rebrickable parts');
-            RebrickablePart::doesntHave('parts')->delete();
 
             $this->info('Refreshing Rebrickable data');
-            RebrickablePart::where(fn ($query) =>
+            Part::canHaveRebrickablePart()
+                ->where(fn ($query) =>
                     $query
                         ->orwhereBetween('created_at', [now(), now()->subDay()])
                         ->orWhereBetween('created_at', [now()->subWeek()->subDay(), now()->subWeek()])
                         ->orWhereBetween('created_at', [now()->subMonth()->subDay(), now()->subMonth()])
                 )
-                ->each(fn (RebrickablePart $rb) => $rb->parts->each(fn (Part $part) => UpdateRebrickable::dispatch($part)));
+                ->each(fn (Part $part) => UpdateRebrickable::dispatch($part));
+
+            $this->info('Removing orphan rebrickable parts');
+            RebrickablePart::doesntHave('parts')->delete();
 
             $this->info('Reloading colors for LDConfig');
             $this->call('lib:update-colours');
