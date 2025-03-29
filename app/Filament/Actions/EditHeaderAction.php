@@ -40,7 +40,7 @@ class EditHeaderAction
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
-                if (!is_null($part->rebrickable_part)) {
+                if (is_null($part->rebrickable_part)) {
                     $kws = $part->keywords;
                 } else {
                     $kws = $part->keywords
