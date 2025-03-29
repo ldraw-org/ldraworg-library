@@ -402,12 +402,12 @@ class PartManager
 
     public function addStickerSheet(Part $p)
     {
-        $sticker = $p->descendantsAndSelf()->where('category', PartCategory::Sticker)->partsFolderOnly()->first();
+        $sticker = $p->childrenAndSelf()->where('category', PartCategory::Sticker)->partsFolderOnly()->first();
         if (is_null($sticker)) {
             return;
         }
         if (!is_null($sticker->sticker_sheet)) {
-            $p->ancestorsAndSelf()->update(['sticker_sheet_id' => $sticker->sticker_sheet->id]);
+            $p->parentsAndSelf()->update(['sticker_sheet_id' => $sticker->sticker_sheet->id]);
         } else {
             $m = preg_match('#^([0-9]+)[a-z]+(?:c[0-9]{2})?\.dat$#iu', $sticker->name(), $s);
             if ($m === 1) {
@@ -420,7 +420,7 @@ class PartManager
                     ]);
                     app(\App\LDraw\StickerSheetManager::class)->updateRebrickablePart($sheet);
                 }
-                $p->ancestorsAndSelf()->update(['sticker_sheet_id' => $sheet->id]);
+                $p->parentsAndSelf()->update(['sticker_sheet_id' => $sheet->id]);
             } else {
                 $p->sticker_sheet_id = null;
             }
