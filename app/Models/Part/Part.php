@@ -33,7 +33,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
@@ -207,6 +206,8 @@ class Part extends Model
     {
         if (!is_null($this->sticker_sheet_id) && $this->category != PartCategory::StickerShortcut) {
             return $this->sticker_sheet->rebrickable_part();
+        } elseif ($this->type_qualifier == PartTypeQualifier::Alias) {
+            return $this->subparts->first()->rebrickable_part();
         }
         return $this->belongsTo(RebrickablePart::class, 'rebrickable_part_id', 'id');
     }
@@ -265,12 +266,12 @@ class Part extends Model
     public function scopeCanHaveRebrickablePart(Builder $query)
     {
         $query->partsFolderOnly()
+            ->whereDoesntHave('sticker_sheet')
+            ->whereNull('type_qualifier')
             ->where('description', 'NOT LIKE', '~%')
             ->where('description', 'NOT LIKE', '|%')
             ->where('description', 'NOT LIKE', '%(Obsolete)')
-            ->whereNotIn('type_qualifier', [PartTypeQualifier::FlexibleSection, PartTypeQualifier::PhysicalColour])
-            ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete])
-            ->doesntHave('sticker_sheet');
+            ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete]);
     }
 
     public function scopeHasError(Builder $query, string|PartError $error): void
@@ -326,11 +327,8 @@ class Part extends Model
     {
         return $this->type->inPartsFolder() &&
             !$this->isObsolete() &&
-            $this->type_qualifier != PartTypeQualifier::FlexibleSection &&
-            $this->type_qualifier != PartTypeQualifier::PhysicalColour &&
             $this->category != PartCategory::Moved &&
-            $this->category != PartCategory::Sticker &&
-            $this->category != PartCategory::StickerShortcut &&
+            is_null($this->type_qualifier) &&
             is_null($this->sticker_sheet_id) &&
             !Str::of($this->description)->startsWith('~') &&
             !Str::of($this->description)->startsWith('|');
