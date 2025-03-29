@@ -205,7 +205,7 @@ class Part extends Model
 
     public function rebrickable_part(): BelongsTo
     {
-        if (!is_null($this->sticker_sheet_id)) {
+        if (!is_null($this->sticker_sheet_id) && $this->category != PartCategory::StickerShortcut) {
             return $this->sticker_sheet->rebrickable_part();
         }
         return $this->belongsTo(RebrickablePart::class, 'rebrickable_part_id', 'id');
