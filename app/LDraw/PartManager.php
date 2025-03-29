@@ -407,7 +407,9 @@ class PartManager
             return;
         }
         if (!is_null($sticker->sticker_sheet)) {
-            $p->parentsAndSelf()->update(['sticker_sheet_id' => $sticker->sticker_sheet->id]);
+            $p->parents()->update(['sticker_sheet_id' => $sticker->sticker_sheet->id]);
+            $p->sticker_sheet_id = $sticker->sticker_sheet->id;
+            $p->save();
         } else {
             $m = preg_match('#^([0-9]+)[a-z]+(?:c[0-9]{2})?\.dat$#iu', $sticker->name(), $s);
             if ($m === 1) {
@@ -420,7 +422,9 @@ class PartManager
                     ]);
                     app(\App\LDraw\StickerSheetManager::class)->updateRebrickablePart($sheet);
                 }
-                $p->parentsAndSelf()->update(['sticker_sheet_id' => $sheet->id]);
+                $p->parents()->update(['sticker_sheet_id' => $sheet->id]);
+                $p->sticker_sheet_id = $sheet->id;
+                $p->save();
             } else {
                 $p->sticker_sheet_id = null;
             }
