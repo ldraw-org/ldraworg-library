@@ -26,8 +26,8 @@ class StickerSheetIndex extends BasicTable
                 TextColumn::make('number')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('description')
-                    ->state(fn (StickerSheet $s) => $s?->rebrickable_part->name ?? '')
+                TextColumn::make('rebrickable_part.name')
+                    ->label('Description')
                     ->grow()
                     ->sortable()
                     ->searchable(),
