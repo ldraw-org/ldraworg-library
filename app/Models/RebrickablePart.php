@@ -66,7 +66,7 @@ class RebrickablePart extends Model
         }
         $rb_data = $rb_data->where('part_num', $part_num)->isEmpty() ? $rb_data->first() : $rb_data->where('part_num', $part_num)->first();
         $rb = self::findOrCreateFromArray($rb_data);
-        $part->rebrickable_part->associate($rb);
+        $part->rebrickable_part()->associate($rb);
         $part->save();
         return $rb;
     }

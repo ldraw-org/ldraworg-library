@@ -442,7 +442,7 @@ class PartManager
         $part_num = basename($part->filename, '.dat');
         RebrickablePart::findOrCreateFromPart($part);
         $part->load('rebrickable_part');
-        if (!is_null($part->rebrickable) && $part->isUnofficial()) {
+        if (!is_null($part->rebrickable_part) && $part->isUnofficial()) {
             $okws = $part->keywords
                 ->filter(fn (PartKeyword $key) =>
                     Str::of($key->keyword)->lower()->startsWith('rebrickable') ||

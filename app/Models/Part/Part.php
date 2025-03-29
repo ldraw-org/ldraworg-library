@@ -339,8 +339,10 @@ class Part extends Model
     public function getExternalSiteNumber(ExternalSite $external): ?string
     {
         if (is_null($this->rebrickable_part)) {
-            return $this->keywords
-                ->first(fn (PartKeyword $kw) => Str::of($kw->keyword)->lower()->startsWith($external->value));
+            $kw = $this->keywords
+            ->first(fn (PartKeyword $kw) => Str::of($kw->keyword)->lower()->startsWith($external->value))?->keyword ?? '';
+            $number = Str::of($kw)->lower()->chopStart("{$external->value} ")->trim();
+            return $number == '' ? null : $number;
         }
         if ($external == ExternalSite::Rebrickable) {
             return $this->rebrickable_part->number;
