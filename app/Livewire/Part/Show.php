@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Part;
 
+use App\Enums\ExternalSite;
 use App\Enums\PartCategory;
 use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
@@ -422,58 +423,35 @@ class Show extends Component implements HasForms, HasActions
 
     public function viewRebrickableAction(): Action
     {
-        return $this->externalSiteAction('Rebrickable');
+        return $this->externalSiteAction(ExternalSite::Rebrickable);
     }
 
     public function viewBrickLinkAction(): Action
     {
-        return $this->externalSiteAction('BrickLink');
+        return $this->externalSiteAction(ExternalSite::BrickLink);
     }
 
     public function viewBrickOwlAction(): Action
     {
-        return $this->externalSiteAction('BrickOwl');
+        return $this->externalSiteAction(ExternalSite::BrickOwl);
     }
 
     public function viewBricksetAction(): Action
     {
-        return $this->externalSiteAction('Brickset');
+        return $this->externalSiteAction(ExternalSite::Brickset);
     }
 
-    protected function externalSiteAction(string $site): Action
+    protected function externalSiteAction(ExternalSite $site): Action
     {
-        $url = '';
-        if ($this->part->type->inPartsFolder() &&
-            !is_null($this->part->rebrickable) &&
-            Arr::has($this->part->rebrickable, 'data') &&
-            count(Arr::get($this->part->rebrickable, 'data')) > 0
-        ) {
-            $rb_part = Arr::first($this->part->rebrickable['data']);
-            if ($site == 'Rebrickable') {
-                $url = Arr::get($rb_part, 'part_url');
-            } else {
-                $url_start = config("ldraw.external_sites.{$site}");
-                $num = Arr::get($rb_part, "external_ids.{$site}.0");
-                $url = !is_null($num) && !is_null($url_start) ? $url_start . $num : '';
-            }
-        } else if ($this->part->type->inPartsFolder()) {
-            $site_lower = Str::of($site)->lower()->toString();
-            $site_kw = $this->part->keywords?->first(fn (PartKeyword $kw) => Str::of($kw->keyword)->lower()->startsWith($site_lower));
-            if (!is_null($site_kw)) {
-                $url_start = config("ldraw.external_sites.{$site}");
-                $num = Str::of($site_kw->keyword)->lower()->chopStart($site_lower)->trim()->toString();
-                $url = $url_start . $num;
-            }
-
-        }
-        return Action::make("view{$site}")
+        $url = $site->url($this->part->getExternalSiteNumber($site));
+        return Action::make("view{$site->name}")
             ->button()
             ->color('gray')
-            ->label("View on $site")
+            ->label("View on {$site->name}")
             ->icon('fas-external-link-alt')
             ->iconPosition(IconPosition::After)
-            ->url($url, shouldOpenInNewTab: true)
-            ->visible($url != '');
+            ->url($url ?? '', shouldOpenInNewTab: true)
+            ->visible(!is_null($url));
     }
     public function viewFixAction(): Action
     {

@@ -2,6 +2,7 @@
 
 namespace App\LDraw;
 
+use App\Enums\ExternalSite;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Jobs\UpdateRebrickable;
@@ -11,6 +12,7 @@ use App\LDraw\Render\LDView;
 use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
 use App\Models\Part\UnknownPartNumber;
+use App\Models\RebrickablePart;
 use App\Models\StickerSheet;
 use App\Models\User;
 use App\Settings\LibrarySettings;
@@ -414,10 +416,9 @@ class PartManager
                     $sheet = StickerSheet::create([
                         'number' => $s[1],
                         'part_colors' => [],
-                        'rebrickable' => null,
+                        'rebrickable' => [],
                     ]);
-                    $sheet->rebrickable = app(\App\LDraw\StickerSheetManager::class)->getRebrickableData($sheet);
-                    $sheet->save();
+                    app(\App\LDraw\StickerSheetManager::class)->updateRebrickablePart($sheet);
                 }
                 $p->ancestorsAndSelf()->update(['sticker_sheet_id' => $sheet->id]);
             } else {
@@ -434,45 +435,38 @@ class PartManager
 
     public function updateRebrickable(Part $part): void
     {
-        if ($part->canSetExternalData()) {
-            $rb = new Rebrickable();
-            $part_rb = $part->rebrickable;
-            $part_rb['data'] = [];
-            $part_num = basename($part->filename, '.dat');
+        if (!$part->canSetRebrickablePart()) {
+            return;
+        }
 
-            $rb_data = $rb->getParts(['ldraw_id' => $part_num]);
-            $part_rb['data'] = $rb_data->all();
-            if (!$rb_data->isEmpty() && $part->isUnofficial()) {
-                $rb_part = Arr::first($rb_data);
-                $okws = $part->keywords
-                    ->filter(fn (PartKeyword $key) =>
-                        Str::of($key->keyword)->lower()->startsWith('rebrickable') ||
-                        Str::of($key->keyword)->lower()->startsWith('bricklink') ||
-                        Str::of($key->keyword)->lower()->startsWith('brickset') ||
-                        Str::of($key->keyword)->lower()->startsWith('brickowl')
-                    )
-                    ->pluck('id');
-                if (!$okws->isEmpty()) {
-                    $part->keywords()->detach($okws->all());
-                    $part->load('keywords');
-                }
-                $kws = $part->keywords->pluck('keyword')->all();
-
-                $rb_num = Arr::get($rb_part, 'part_num');
-                if ($rb_num != $part_num) {
-                    $kws[] = "Rebrickable {$rb_num}";
-                }
-                $bl_num = Arr::get($rb_part, 'external_ids.BrickLink.0');
-                if (!is_null($bl_num) && $bl_num != $part_num) {
-                    $kws[] = "BrickLink {$bl_num}";
-                }
-                $part->setKeywords($kws);
+        $part_num = basename($part->filename, '.dat');
+        RebrickablePart::findOrCreateFromPart($part);
+        $part->load('rebrickable_part');
+        if (!is_null($part->rebrickable) && $part->isUnofficial()) {
+            $okws = $part->keywords
+                ->filter(fn (PartKeyword $key) =>
+                    Str::of($key->keyword)->lower()->startsWith('rebrickable') ||
+                    Str::of($key->keyword)->lower()->startsWith('bricklink') ||
+                    Str::of($key->keyword)->lower()->startsWith('brickset') ||
+                    Str::of($key->keyword)->lower()->startsWith('brickowl')
+                )
+                ->pluck('id');
+            if ($okws->isNotEmpty()) {
+                $part->keywords()->detach($okws->all());
                 $part->load('keywords');
-                $part->generateHeader();
             }
-            $part_rb['updated_at'] = time();
-            $part->rebrickable = $part_rb;
-            $part->save();
+            $kws = $part->keywords->pluck('keyword')->all();
+
+            if ($part->rebrickable_part->number != $part_num) {
+                $kws[] = "Rebrickable {$part->rebrickable_part->number}";
+            }
+            $bl = $part->getExternalSite(ExternalSite::BrickLink);
+            if (!is_null($bl) && $bl != $part_num) {
+                $kws[] = "BrickLink {$bl}";
+            }
+            $part->setKeywords($kws);
+            $part->load('keywords');
+            $part->generateHeader();
         }
     }
 }

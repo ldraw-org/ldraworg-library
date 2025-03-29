@@ -7,7 +7,7 @@
     </x-slot>
     <div>
         <div class="text-3xl font-bold">
-            <span>Sticker Sheet {{$sheet->number}} - @if (!is_null($sheet->rebrickable)) <a class="underline decoration-dotted hover:decoration-solid" href="{{config('ldraw.external_sites.Rebrickable')}}\{{$sheet->rebrickable['part_num']}}">{{$sheet->rebrickable['name']}} ({{$sheet->rebrickable['part_num']}})</a> @endif </span>
+            <span>Sticker Sheet {{$sheet->number}} - @if (!is_null($sheet->rebrickable_part)) <a class="underline decoration-dotted hover:decoration-solid" href="{{$sheet->rebrickable_part->url}}">{{$sheet->rebrickable_part->name}} ({{$sheet->rebrickable_part->number}})</a> @endif </span>
         </div>
         <div class="space-y-2">
             @if (!is_null($sheet->parts))

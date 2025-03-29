@@ -15,13 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class StickerSheet extends Model
 {
-    protected $fillable = [
-        'number',
-        'rebrickable_part_id',
-        'rebrickable',
-        'ldraw_colour_id',
-        'part_colors'
-    ];
+    protected $guarded = [];
 
     protected function casts(): array
     {
@@ -29,6 +23,11 @@ class StickerSheet extends Model
             'rebrickable' => AsArrayObject::class,
             'part_colors' => AsArrayObject::class
         ];
+    }
+
+    public function rebrickable_part(): BelongsTo
+    {
+        return $this->BelongsTo(RebrickablePart::class, 'rebrickable_part_id', 'id');
     }
 
     public function color(): BelongsTo

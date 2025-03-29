@@ -3,6 +3,7 @@
 namespace App\Models\Part;
 
 use App\Enums\EventType;
+use App\Enums\ExternalSite;
 use App\Enums\License;
 use App\Enums\PartCategory;
 use App\Enums\PartError;
@@ -10,6 +11,7 @@ use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
+use App\Models\RebrickablePart;
 use App\Models\ReviewSummary\ReviewSummaryItem;
 use App\Models\StickerSheet;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
@@ -200,6 +203,14 @@ class Part extends Model
 
     }
 
+    public function rebrickable_part(): BelongsTo
+    {
+        if (!is_null($this->sticker_sheet_id)) {
+            return $this->sticker_sheet->rebrickable_part();
+        }
+        return $this->belongsTo(RebrickablePart::class, 'rebrickable_part_id', 'id');
+    }
+
     protected function errors(): Attribute
     {
         return Attribute::make(
@@ -251,11 +262,13 @@ class Part extends Model
         $query->whereIn('type', PartType::partsFolderTypes());
     }
 
-    public function scopeCanHaveExternalData(Builder $query)
+    public function scopeCanHaveRebrickablePart(Builder $query)
     {
         $query->partsFolderOnly()
             ->where('description', 'NOT LIKE', '~%')
+            ->where('description', 'NOT LIKE', '|%')
             ->where('description', 'NOT LIKE', '%(Obsolete)')
+            ->whereNotIn('type_qualifier', [PartTypeQualifier::FlexibleSection, PartTypeQualifier::PhysicalColour])
             ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete])
             ->doesntHave('sticker_sheet');
     }
@@ -309,15 +322,32 @@ class Part extends Model
             Str::of($this->description)->startsWith('~Obsolete');
     }
 
-    public function canSetExternalData(): bool
+    public function canSetRebrickablePart(): bool
     {
         return $this->type->inPartsFolder() &&
             !$this->isObsolete() &&
+            $this->type_qualifier != PartTypeQualifier::FlexibleSection &&
+            $this->type_qualifier != PartTypeQualifier::PhysicalColour &&
             $this->category != PartCategory::Moved &&
             $this->category != PartCategory::Sticker &&
             $this->category != PartCategory::StickerShortcut &&
             is_null($this->sticker_sheet_id) &&
-            !Str::of($this->description)->startsWith('~');
+            !Str::of($this->description)->startsWith('~') &&
+            !Str::of($this->description)->startsWith('|');
+    }
+
+    public function getExternalSiteNumber(ExternalSite $external): ?string
+    {
+        if (is_null($this->rebrickable_part)) {
+            return $this->keywords
+                ->first(fn (PartKeyword $kw) => Str::of($kw->keyword)->lower()->startsWith($external->value));
+        }
+        if ($external == ExternalSite::Rebrickable) {
+            return $this->rebrickable_part->number;
+        }
+        $name = $this?->sticker_sheet->number ?? basename($this->filename, '.dat');
+        $site_data = ($this?->rebrickable_part->{$external->value}) ?? [];
+        return Arr::first($site_data, fn(string $number, int $key) => $number == $name) ?? Arr::first($site_data);
     }
 
     public function lastChange(): Carbon

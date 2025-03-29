@@ -136,13 +136,15 @@
                     <div class="font-bold text-lg">
                         External Sites:
                     </div>
+                    @if (!is_null($part->rebrickable_part))
+                        <x-fas-link class="w-5 h-5 fill-gray-400" title="External site data provided by Rebrickable.com" />
+                    @else
+                        <x-fas-link-slash class="w-5 h-5 fill-gray-400" title="External site data provided by part keywords" />
+                    @endif
                     <x-filament-action action="viewRebrickableAction" />
                     <x-filament-action action="viewBrickLinkAction" />
                     <x-filament-action action="viewBrickSetAction" />
                     <x-filament-action action="viewBrickOwlAction" />
-                    @if (Arr::get($part->rebrickable ?? [], 'data'))
-                        <x-fas-info-circle class="w-5 h-5 fill-gray-400" title="External site data provided by Rebrickable.com" />
-                    @endif
                 </div>
             @endif
         @endif

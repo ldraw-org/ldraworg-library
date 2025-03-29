@@ -3,6 +3,7 @@
 namespace App\LDraw;
 
 use App\Models\Part\PartKeyword;
+use App\Models\RebrickablePart;
 use App\Models\StickerSheet;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -21,18 +22,19 @@ class StickerSheetManager
         if (is_null($sheet)) {
             return StickerSheet::create([
                 'number' => $number,
-                'rebrickable' => null,
-                'part_colors' => null,
+                'part_colors' => [],
+                'rebrickable' => [],
             ]);
         }
         return $sheet;
     }
 
-    public function getRebrickableData(StickerSheet $sheet): ?array
+    public function updateRebrickablePart(StickerSheet $sheet): void
     {
         $rb_part = $this->rebrickable->getPart($sheet->number);
-        if (!$rb_part->isEmpty()) {
-            return $rb_part->all();
+        $rb = [];
+        if ($rb_part->isNotEmpty()) {
+            $rb = $rb_part->all();
         }
 
         $bricklink = PartKeyword::whereHas(
@@ -47,16 +49,16 @@ class StickerSheetManager
             $bricklink = Str::chopStart(Str::lower($bricklink), 'bricklink ');
             $rb_part = $this->rebrickable->getParts(['bricklink_id' => $bricklink]);
             if (!$rb_part->isEmpty()) {
-                return $rb_part->first();
+                $rb = $rb_part->first()->all();
             }
         }
 
         $rb_part = $this->rebrickable->getParts(['search' => $sheet->number]);
-        if (!$rb_part->isEmpty()) {
+        if ($rb_part->isNotEmpty()) {
             $part = $rb_part->first(function (array $item): bool {
                 return Str::startsWith($item['name'], 'Sticker Sheet');
             });
-            return $part;
+            $rb = $part;
         }
 
         $set_nums = PartKeyword::whereHas(
@@ -74,15 +76,17 @@ class StickerSheetManager
         });
         foreach ($set_nums as $set_num) {
             $rb_part = $this->rebrickable->getSetParts($set_num ?? '');
-            if (!$rb_part->isEmpty()) {
+            if ($rb_part->isNotEmpty()) {
                 $part = $rb_part->first(function (array $item): bool {
                     return Str::startsWith($item['part']['name'], 'Sticker Sheet');
                 });
                 if (!is_null(Arr::get($part, 'part'))) {
-                    return $part['part'];
+                    $rb = $part['part'];
                 }
             }
         }
-        return null;
+        $rb = RebrickablePart::findOrCreateFromArray($rb);
+        $sheet->rebrickable_part()->associate($rb);
+        $sheet->save();
     }
 }

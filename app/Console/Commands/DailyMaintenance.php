@@ -7,6 +7,7 @@ use App\Jobs\UpdateRebrickable;
 use App\LDraw\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
+use App\Models\RebrickablePart;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
@@ -46,16 +47,17 @@ class DailyMaintenance extends Command
             $this->info('Removing orphan keywords');
             PartKeyword::doesntHave('parts')->delete();
 
+            $this->info('Removing orphan rebrickable parts');
+            RebrickablePart::doesntHave('parts')->delete();
+
             $this->info('Refreshing Rebrickable data');
-            Part::unofficial()
-                ->canHaveExternalData()
-                ->where(fn ($query) =>
+            RebrickablePart::where(fn ($query) =>
                     $query
                         ->orwhereBetween('created_at', [now(), now()->subDay()])
                         ->orWhereBetween('created_at', [now()->subWeek()->subDay(), now()->subWeek()])
                         ->orWhereBetween('created_at', [now()->subMonth()->subDay(), now()->subMonth()])
                 )
-                ->each(fn (Part $part) => UpdateRebrickable::dispatch($part));
+                ->each(fn (RebrickablePart $rb) => $rb->parts->each(fn (Part $part) => UpdateRebrickable::dispatch($part)));
 
             $this->info('Reloading colors for LDConfig');
             $this->call('lib:update-colours');

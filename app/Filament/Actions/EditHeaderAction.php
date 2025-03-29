@@ -40,7 +40,7 @@ class EditHeaderAction
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
-                if (!$part->canHaveExternalData() || !Arr::get($part->rebrickable ?? [], 'data')) {
+                if (!is_null($part->rebrickable_part)) {
                     $kws = $part->keywords;
                 } else {
                     $kws = $part->keywords
@@ -118,7 +118,7 @@ class EditHeaderAction
             Textarea::make('keywords')
                 ->helperText(fn (Part $p) =>
                     'Note: keyword order' .
-                    ($part->canHaveExternalData() && Arr::get($part->rebrickable ?? [], 'data') ? ' and external site keywords' : '') .
+                    (!is_null($part->rebrickable_part) ? ' and external site keywords' : '') .
                     ' will not be preserved'
                 )
                 ->extraAttributes(['class' => 'font-mono'])
@@ -291,7 +291,7 @@ class EditHeaderAction
         } else {
             $new_kws = collect(explode(',', Str::of($data['keywords'])->trim()->squish()->replace(["\n", ', ',' ,'], ',')->toString()))->filter();
         }
-        if ($part->canHaveExternalData() && Arr::get($part->rebrickable ?? [], 'data')) {
+        if (!is_null($part->rebrickable_part)) {
             $extKeywords = collect($part->keywords
                 ->filter(function (PartKeyword $kw) {
                     return Str::of($kw->keyword)->lower()->startsWith('rebrickable') ||

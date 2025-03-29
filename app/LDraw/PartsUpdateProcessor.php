@@ -267,7 +267,7 @@ class PartsUpdateProcessor
             'category' => $upart->category,
             'cmdline' => $upart->cmdline,
             'header' => $upart->header,
-            'rebrickable' => $upart->rebrickable,
+            'rebrickable_part_id' => $upart->rebrickable_part_id,
             'sticker_sheet_id' => $upart->sticker_sheet_id,
         ];
         $opart->fill($values);

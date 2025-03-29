@@ -75,7 +75,7 @@ class SetPbg
 
         foreach ($rb_parts->whereNull('part.external_ids.LDraw') as $part) {
             $p = Part::firstWhere('filename', 'parts/' . $part['part']['part_num'] . '.dat');
-            $sticker_sheet = StickerSheet::where('rebrickable->part_num', $part['part']['part_num'])->first();
+            $sticker_sheet = StickerSheet::whereRelation('rebrickable_part', 'number', $part['part']['part_num'])->first();
             if (!is_null($p)) {
                 $this->addPart($part, basename($p->name(), '.dat'));
             } elseif (!is_null($sticker_sheet)) {
