@@ -29,6 +29,13 @@ class PartPolicy
             $user->ca_confirm === true;
     }
 
+    public function updatePreview(User $user, Part $part)
+    {
+        return !$this->settings->tracker_locked &&
+            $user->can(Permission::PartEditHeader) &&
+            $user->ca_confirm === true;
+    }
+
     public function move(User $user, Part $part)
     {
         return !$this->settings->tracker_locked &&

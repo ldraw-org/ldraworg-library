@@ -44,6 +44,7 @@
 
             @if ($this->editHeaderAction->isVisible() ||
                 $this->editNumberAction->isVisible() ||
+                $this->editPreviewAction->isVisible() ||
                 $this->editBasePartAction->isVisible() ||
                 $this->updateImageAction->isVisible() ||
                 $this->recheckPartAction->isVisible() ||
@@ -57,6 +58,7 @@
                     :actions="[
                         $this->editHeaderAction,
                         $this->editNumberAction,
+                        $this->editPreviewAction,
                         $this->editBasePartAction,
                         $this->updateImageAction,
                         $this->recheckPartAction,

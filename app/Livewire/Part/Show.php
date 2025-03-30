@@ -7,6 +7,7 @@ use App\Enums\PartCategory;
 use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
 use App\Filament\Actions\EditNumberAction;
+use App\Filament\Actions\EditPreviewAction;
 use App\LDraw\PartManager;
 use App\LDraw\VoteManager;
 use App\Models\Part\Part;
@@ -124,6 +125,11 @@ class Show extends Component implements HasForms, HasActions
     public function editNumberAction(): EditAction
     {
         return  EditNumberAction::make($this->part, 'editNumber');
+    }
+
+    public function editPreviewAction(): EditAction
+    {
+        return EditPreviewAction::make($this->part, 'editPreview');
     }
 
     public function patternPartAction(): Action
