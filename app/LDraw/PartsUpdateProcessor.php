@@ -44,6 +44,12 @@ class PartsUpdateProcessor
         $this->settings->save();
         $this->makeNextRelease();
         $this->releaseParts();
+        Part::canHaveRebrickablePart()
+            ->doesntHave('sticker_sheet')
+            ->where(
+                    fn ($q) => $q->where('part_release_id', $this->release->id)->orWhere('has_minor_edit', true)
+            )
+            ->each(fn (Part $p) => $p->setExternalSiteKeywords(true));
         $this->settings->tracker_locked = false;
         $this->settings->save();
         $this->copyReleaseFiles();

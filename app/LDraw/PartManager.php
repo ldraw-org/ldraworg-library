@@ -437,40 +437,13 @@ class PartManager
         $p->refresh();
     }
 
-    public function updateRebrickable(Part $part): void
+    public function updateRebrickable(Part $part, bool $updateOfficial = false): void
     {
         if (!$part->canSetRebrickablePart()) {
             return;
         }
-
-        $part_num = basename($part->filename, '.dat');
         RebrickablePart::findOrCreateFromPart($part);
-        $part->load('rebrickable_part');
-        if (!is_null($part->rebrickable_part) && $part->isUnofficial()) {
-            $okws = $part->keywords
-                ->filter(fn (PartKeyword $key) =>
-                    Str::of($key->keyword)->lower()->startsWith('rebrickable') ||
-                    Str::of($key->keyword)->lower()->startsWith('bricklink') ||
-                    Str::of($key->keyword)->lower()->startsWith('brickset') ||
-                    Str::of($key->keyword)->lower()->startsWith('brickowl')
-                )
-                ->pluck('id');
-            if ($okws->isNotEmpty()) {
-                $part->keywords()->detach($okws->all());
-                $part->load('keywords');
-            }
-            $kws = $part->keywords->pluck('keyword')->all();
-
-            if ($part->rebrickable_part->number != $part_num) {
-                $kws[] = "Rebrickable {$part->rebrickable_part->number}";
-            }
-            $bl = $part->getExternalSite(ExternalSite::BrickLink);
-            if (!is_null($bl) && $bl != $part_num) {
-                $kws[] = "BrickLink {$bl}";
-            }
-            $part->setKeywords($kws);
-            $part->load('keywords');
-            $part->generateHeader();
-        }
+        $part->setExternalSiteKeywords($updateOfficial);
     }
+
 }

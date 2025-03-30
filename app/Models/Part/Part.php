@@ -508,6 +508,38 @@ class Part extends Model
         $this->keywords()->sync($keywords);
     }
 
+    public function setExternalSiteKeywords(bool $updateOfficial = false): void
+    {
+        $this->load('rebrickable_part');
+        if (!is_null($this->rebrickable_part) && ($updateOfficial || $this->isUnofficial())) {
+            $part_num = basename($this->filename, '.dat');
+            $okws = $this->keywords
+                ->filter(fn (PartKeyword $key) =>
+                    Str::of($key->keyword)->lower()->startsWith('rebrickable') ||
+                    Str::of($key->keyword)->lower()->startsWith('bricklink') ||
+                    Str::of($key->keyword)->lower()->startsWith('brickset') ||
+                    Str::of($key->keyword)->lower()->startsWith('brickowl')
+                )
+                ->pluck('id');
+            if ($okws->isNotEmpty()) {
+                $this->keywords()->detach($okws->all());
+                $this->load('keywords');
+            }
+            $kws = $this->keywords->pluck('keyword')->all();
+
+            if ($this->rebrickable_part->number != $part_num) {
+                $kws[] = "Rebrickable {$this->rebrickable_part->number}";
+            }
+            $bl = $this->getExternalSiteNumber(ExternalSite::BrickLink);
+            if (!is_null($bl) && $bl != $part_num) {
+                $kws[] = "BrickLink {$bl}";
+            }
+            $this->setKeywords($kws);
+            $this->load('keywords');
+            $this->generateHeader();
+        }
+    }
+
     public function setHelp(array|SupportCollection $help): void
     {
         $this->help()->delete();
