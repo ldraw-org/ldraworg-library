@@ -47,7 +47,7 @@ class ZipFiles
         $completeZip = new ZipArchive();
         $completeZip->open($completeZipName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-        foreach (Storage::disk('library')->files('official') as $file) {
+        foreach (Storage::disk('library')->allFiles('official') as $file) {
             $filename = str_replace('official/', 'ldraw/', $file);
             $completeZip->addFromString($filename, Storage::disk('library')->get($file));
             if (($file == 'official/LDConfig.ldr' || $file == 'official/LDCfgalt.ldr') && $includeLDConfig) {

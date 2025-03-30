@@ -275,6 +275,7 @@ class PartsUpdateProcessor
             'header' => $upart->header,
             'rebrickable_part_id' => $upart->rebrickable_part_id,
             'sticker_sheet_id' => $upart->sticker_sheet_id,
+            'preview' => $upart->preview,
         ];
         $opart->fill($values);
         $opart->setSubparts($upart->subparts);
