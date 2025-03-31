@@ -49,8 +49,8 @@ class RebrickablePart extends Model
             'url' => Arr::get($part, 'part_url'),
             'image_url' => Arr::get($part, 'part_img_url'),
             'bricklink' => Arr::get($part, 'external_ids.BrickLink'),
-            'brickset' => Arr::get($part, 'external_ids.BrickOwl'),
-            'brickowl' => Arr::get($part, 'external_ids.Brickset'),
+            'brickset' => Arr::get($part, 'external_ids.Brickset'),
+            'brickowl' => Arr::get($part, 'external_ids.BrickOwl'),
             'lego' => Arr::get($part, 'external_ids.LEGO'),
         ];
         $rb = self::create($values);

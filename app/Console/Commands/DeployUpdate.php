@@ -30,28 +30,11 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::has('sticker_sheet')
-            ->whereDoesntHave('childrenAndSelf',
-                fn ($query) => $query->where('category', PartCategory::Sticker)
-            )
-            ->each(function (Part $p) {
-                $p->sticker_sheet_id = null;
-                if ($p->category == PartCategory::StickerShortcut) {
-                    $word = 1;
-                    if (Str::of($p->description)->trim()->words(1,'')->replace(['~', '|', '=', '_'], '') == '') {
-                        $word = 2;
-                    }
-                    $cat = Str::of($p->description)->trim()->words($word,'')->replace(['~', '|', '=', '_', ' '], '')->toString();
-                    $cat = PartCategory::tryFrom($cat);
-                    if (!is_null($cat)) {
-                        $p->category = $cat;
-                        if (!$p->isUnofficial()) {
-                            $p->has_minor_edit = true;
-                        }
-                    }
-                    $p->generateHeader();
-                }
-                $p->save();
-            });
-     }
+        RebrickablePart::query()->each(function (RebrickablePart $rb) {
+            $temp_bo = $rb->brickset;
+            $rb->brickset = $rb->brickowl;
+            $rb->brickowl = $temp_bo;
+            $rb->save();
+        });
+    }
 }
