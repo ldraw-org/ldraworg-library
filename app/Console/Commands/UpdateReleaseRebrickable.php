@@ -6,6 +6,7 @@ use App\Jobs\UpdateRebrickable;
 use App\LDraw\Rebrickable;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 
 class UpdateReleaseRebrickable extends Command
 {
@@ -38,17 +39,21 @@ class UpdateReleaseRebrickable extends Command
             ->pluck('rebrickable_part.number')
             ->filter()
             ->unique();
-        $rb = (new Rebrickable)->getParts([
-            'part_nums' => $rb_part_nums->implode(','),
-            'page_size' => 1000]
-        );
-        $rb_nums = $rb->pluck('part_num');
-        if ($rb_part_nums->count() == $rb_nums->count()) {
+        $rb_nums = new Collection();
+        $rb_part_nums->chunk(500)
+            ->each(function (Collection $r) use (&$rb_nums) {
+                $rb = (new Rebrickable)->getParts([
+                    'part_nums' => $r->implode(','),
+                    'page_size' => 1000]
+                );
+                $rb_nums = $rb_nums->merge($rb->pluck('part_num'));    
+            });
+        $rb_nums = $rb_nums->filter()->unique();
+        if ($rb_part_nums->diff($rb_nums)->isEmpty()) {
             $this->info("All existing RB information is correct");
         } else {
             $parts->whereIn('rebrickable_part.number', $rb_part_nums->diff($rb_nums)->all())
                 ->each(fn (Part $p) => UpdateRebrickable::dispatch($p, true));
-
         }
         $reject_list = [
             '973.dat',
