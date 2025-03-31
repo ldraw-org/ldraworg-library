@@ -316,6 +316,11 @@ class Part extends Model
         return is_null($this->part_release_id);
     }
 
+    public function isOfficial(): bool
+    {
+        return !$this->isUnofficial();
+    }
+
     public function isObsolete(): bool
     {
         return $this->category == PartCategory::Obsolete ||
@@ -526,13 +531,18 @@ class Part extends Model
                 $this->load('keywords');
             }
             $kws = $this->keywords->pluck('keyword')->all();
-
+            $kw_set = false;
             if ($this->rebrickable_part->number != $part_num) {
                 $kws[] = "Rebrickable {$this->rebrickable_part->number}";
+                $kw_set = true;
             }
             $bl = $this->getExternalSiteNumber(ExternalSite::BrickLink);
             if (!is_null($bl) && $bl != $part_num) {
                 $kws[] = "BrickLink {$bl}";
+                $kw_set = true;
+            }
+            if ($this->isOfficial() && $kw_set) {
+                $this->has_minor_edit = true;
             }
             $this->setKeywords($kws);
             $this->load('keywords');
