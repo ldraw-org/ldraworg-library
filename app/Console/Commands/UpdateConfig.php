@@ -28,11 +28,11 @@ class UpdateConfig extends Command
     public function handle()
     {
         foreach (PartType::cases() as $dir) {
-            if (!Storage::disk('images')->exists("library/official/{$dir->value}")) {
-                Storage::disk('images')->makeDirectory("library/official/{$dir->value}");
+            if (!Storage::disk('images')->exists("library/official/{$dir->folder()}")) {
+                Storage::disk('images')->makeDirectory("library/official/{$dir->folder()}");
             }
-            if (!Storage::disk('images')->exists("library/unofficial/{$dir->value}")) {
-                Storage::disk('images')->makeDirectory("library/unofficial/{$dir->value}");
+            if (!Storage::disk('images')->exists("library/unofficial/{$dir->folder()}")) {
+                Storage::disk('images')->makeDirectory("library/unofficial/{$dir->folder()}");
             }
         }
 
