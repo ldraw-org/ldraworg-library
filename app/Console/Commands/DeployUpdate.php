@@ -30,10 +30,5 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::canHaveRebrickablePart()
-            ->has('rebrickable_part')
-            ->each(function (Part $p) {
-                $p->setExternalSiteKeywords('true');
-            });
     }
 }
