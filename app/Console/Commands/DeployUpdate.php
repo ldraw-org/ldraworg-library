@@ -30,11 +30,12 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        RebrickablePart::query()->each(function (RebrickablePart $rb) {
-            $temp_bo = $rb->brickset;
-            $rb->brickset = $rb->brickowl;
-            $rb->brickowl = $temp_bo;
-            $rb->save();
+        StickerSheet::whereJsonLength('rebrickable', '>', 0)
+        ->each(function (StickerSheet $s) {
+            $rb = RebrickablePart::findOrCreateFromArray($s->rebrickable->getArrayCopy());
+            if (is_null($rb)) { dd($s); }
+            $s->rebrickable_part()->associate($rb);
+            $s->save();
         });
     }
 }
