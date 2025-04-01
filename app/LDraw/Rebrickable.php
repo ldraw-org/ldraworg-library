@@ -17,7 +17,7 @@ class Rebrickable
         $this->api_key = config('ldraw.rebrickable_api_key', '');
     }
 
-    protected function makeApiCall(string $url): Collection
+    protected function makeApiCall(string $url, bool $firstPageOnly = false): Collection
     {
         if (Cache::has('rebrickable_timeout')) {
             time_sleep_until(Cache::get('rebrickable_timeout'));
@@ -38,7 +38,7 @@ class Rebrickable
                 return collect([]);
             }
 
-            if (!is_null($response->json('next')) && !is_null($response->json('results'))) {
+            if (!is_null($response->json('next')) && !is_null($response->json('results')) && !$firstPageOnly) {
                 $result = collect($response->json('results'))->merge($this->makeApiCall($response->json('next')));
                 return $result;
             } elseif (!is_null($response->json('results'))) {
@@ -66,7 +66,7 @@ class Rebrickable
         return $this->makeApiCall("{$this->api_url}/parts/{$partnumber}/");
     }
 
-    public function getParts(array $parameters): Collection
+    public function getParts(array $parameters, bool $firstPageOnly = false): Collection
     {
         foreach ($parameters as &$parameter) {
             if (is_array($parameter)) {
@@ -74,6 +74,17 @@ class Rebrickable
             }
         }
         $parameters = http_build_query($parameters);
-        return $this->makeApiCall("{$this->api_url}/parts/?{$parameters}");
+        return $this->makeApiCall("{$this->api_url}/parts/?{$parameters}", $firstPageOnly);
     }
+
+    public function getPartColor(string $partnumber, bool $firstPageOnly = false): Collection
+    {
+        return $this->makeApiCall("{$this->api_url}/parts/{$partnumber}/colors/", $firstPageOnly);
+    }
+
+    public function getPartColorSets(string $partnumber, string $color_id, bool $firstPageOnly = false): Collection
+    {
+        return $this->makeApiCall("{$this->api_url}/parts/{$partnumber}/colors/{$color_id}/sets", $firstPageOnly);
+    }
+
 }
