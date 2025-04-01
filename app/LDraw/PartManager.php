@@ -273,7 +273,7 @@ class PartManager
     {
         if (
             $oldPart->isUnofficial() ||
-            !$newPart->isUnofficial() ||
+            $newPart->isOfficial() ||
             !is_null($oldPart->unofficial_part) ||
             !$oldPart->type->inPartsFolder()
         ) {
@@ -311,7 +311,7 @@ class PartManager
         }
         $newName = "{$newType->folder()}/{$newName}";
         $upart = Part::unofficial()->where('filename', $newName)->first();
-        if (!$part->isUnofficial() || !is_null($upart)) {
+        if ($part->isOfficial() || !is_null($upart)) {
             return false;
         }
         if (!$part->type->inPartsFolder() && $newType->inPartsFolder()) {
@@ -369,7 +369,7 @@ class PartManager
         $can_release = $pc->checkCanRelease($part);
         $messages['errors'] = $pc->getErrorStorageArray();
 
-        if (!$part->isUnofficial()) {
+        if ($part->isOfficial()) {
             $part->can_release = true;
             $messages['warnings'] = [];
         } else {

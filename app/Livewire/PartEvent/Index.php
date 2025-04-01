@@ -133,7 +133,7 @@ class Index extends Component implements HasForms, HasTable
                 fn (PartEvent $e): string =>
                     !is_null($e->part) ? route('parts.show', ['part' => $e->part]) : ''
             )
-            ->recordClasses(fn (PartEvent $e) => !is_null($e->part) && !$e->part->isUnofficial() ? '!bg-green-300' : '');
+            ->recordClasses(fn (PartEvent $e) => $e->part?->isOfficial() ? '!bg-green-300' : '');
     }
 
     public function updatedPaginators($page, $pageName)

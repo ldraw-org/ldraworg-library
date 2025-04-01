@@ -5,9 +5,9 @@
     @endif
             <div @class([
                 'flex flex-col rounded border h-full',
-                'bg-red-100' => stripos($part->description, "obsolete") !== false,
-                'bg-green-100' => !$part->isUnofficial() && (stripos($part->description, "obsolete") === false),
-                'bg-yellow-100' => $part->isUnofficial() && (stripos($part->description, "obsolete") === false)
+                'bg-red-100' => $part->isObsolete(),
+                'bg-green-100' => $part->isOfficial() && !$part->isObsolete(),
+                'bg-yellow-100' => $part->isUnofficial() && !$part->isObsolete()
             ])>
                 <div class="bg-gray-200 font-bold p-2">
                     {{basename($part->filename, '.dat')}}

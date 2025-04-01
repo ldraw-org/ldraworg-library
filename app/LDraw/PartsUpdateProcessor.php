@@ -228,7 +228,7 @@ class PartsUpdateProcessor
 
     protected function releasePart(Part $part): void
     {
-        if (!$part->isUnofficial()) {
+        if ($part->isOfficial()) {
             return;
         }
         // Add history line

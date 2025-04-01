@@ -19,7 +19,7 @@ class VotePolicy
 
     public function voteAny(User $user, Part $part): bool
     {
-        if (!$part->isUnofficial() || $this->settings->tracker_locked) {
+        if ($part->isOfficial() || $this->settings->tracker_locked) {
             return false;
         }
         if ($part->user_id !== $user->id) {
@@ -43,7 +43,7 @@ class VotePolicy
 
     public function vote(?User $user, Part $part, VoteType $vote_type): bool
     {
-        if (is_null($user) || !$part->isUnofficial() || $this->settings->tracker_locked) {
+        if (is_null($user) || $part->isOfficial() || $this->settings->tracker_locked) {
             return false;
         }
         $vote = $user->votes->firstWhere('part_id', $part->id);

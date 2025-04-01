@@ -450,7 +450,7 @@ class Part extends Model
 
     public function updatePartStatus(): void
     {
-        if (!$this->isUnofficial()) {
+        if ($this->isOfficial()) {
             $this->part_status = PartStatus::Official;
             $this->saveQuietly();
         }

@@ -77,7 +77,7 @@
         </div>
         <div @class([
                 'text-3xl font-bold py-2 px-3 w-fit rounded-lg',
-                'bg-green-100' => !$part->isUnofficial(),
+                'bg-green-100' => $part->isOfficial(),
                 'bg-yellow-100' => $part->isUnofficial()
             ])>
                 {{ucfirst($part->libFolder())}} File <span id="filename">{{ $part->filename }}</span>
@@ -208,7 +208,7 @@
         @endif
         <div class="text-lg font-bold">Part Events:</div>
         <div class="flex flex-col space-y-4">
-            @if (!$part->isUnofficial() || !is_null($part->official_part))
+            @if ($part->isOfficial() || !is_null($part->official_part))
                 <x-accordion id="archiveEvents">
                     <x-slot name="header">
                         Archived Part Events:
