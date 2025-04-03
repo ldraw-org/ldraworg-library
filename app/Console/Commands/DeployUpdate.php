@@ -2,12 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\PartError;
-use App\LDraw\Rebrickable;
-use App\Models\Part\Part;
-use App\Models\Part\PartKeyword;
+use App\Models\RebrickablePart;
+use App\Models\StickerSheet;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 
 class DeployUpdate extends Command
 {
@@ -30,21 +27,11 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::with('ancestors','ancestors.keywords')
-            ->hasError(PartError::NoSetKeywordForPattern)
-            ->has('ancestors')
-            ->each(function (Part $part) {
-                $kw = null;
-                foreach($part->ancestors->unique() as $ancestor) {
-                    $kw = $ancestor->keywords?->first(fn (PartKeyword $kw) => Str::of($kw->keyword)->startsWith(['Set ', 'set ']));
-                    if (!is_null($kw)) {
-                        $part->keywords()->syncWithoutDetaching([$kw]);
-                        $part->load('keywords');
-                        unset($part->part_check_messages['errors'][PartError::NoSetKeywordForPattern->value]);
-                        $part->generateHeader();
-                        break;
-                    }
-                }
+        StickerSheet::whereJsonLength('rebrickable', '>', 0)
+            ->each(function (StickerSheet $s) {
+                $rb = RebrickablePart::findOrCreateFromArray($s->rebrickable->getArrayCopy());
+                $s->rebrickable_part()->associate($rb);
+                $s->save();
             });
     }
 }

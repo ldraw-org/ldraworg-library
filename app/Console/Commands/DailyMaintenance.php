@@ -59,7 +59,7 @@ class DailyMaintenance extends Command
                 ->each(fn (Part $part) => UpdateRebrickable::dispatch($part));
 
             $this->info('Removing orphan rebrickable parts');
-            RebrickablePart::doesntHave('parts')->delete();
+            RebrickablePart::doesntHave('parts')->doesntHave('sticker_sheets')->delete();
 
             $this->info('Reloading colors for LDConfig');
             $this->call('lib:update-colours');
