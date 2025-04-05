@@ -29,14 +29,14 @@ class UpdateReleaseRebrickable extends Command
      */
     public function handle()
     {
-        $parts = Part::canHaveRebrickablePart()
-            ->doesntHave('sticker_sheet')
-            ->where(
+        $parts = Part::where(
                     fn ($q) => $q->orWhere('marked_for_release', true)->orWhere('has_minor_edit', true)
             )
+            ->canHaveRebrickablePart()
             ->get();
         $rb_part_nums = $parts
             ->pluck('rebrickable_part.number')
+            ->merge($parts->pluck('sticker_rebrickable_part.number'))
             ->filter()
             ->unique();
         $rb_nums = new Collection();
@@ -52,9 +52,13 @@ class UpdateReleaseRebrickable extends Command
         if ($rb_part_nums->diff($rb_nums)->isEmpty()) {
             $this->info("All existing RB information is correct");
         } else {
+            dd($rb_part_nums->diff($rb_nums)->all());
             $parts->whereIn('rebrickable_part.number', $rb_part_nums->diff($rb_nums)->all())
                 ->each(fn (Part $p) => UpdateRebrickable::dispatch($p, true));
+            $parts->whereIn('sticker_rebrickable_part.number', $rb_part_nums->diff($rb_nums)->all())
+                ->each(fn (Part $p) => UpdateRebrickable::dispatch($p, true));
         }
+        dd();
         $reject_list = [
             '973.dat',
             '16000.dat',
@@ -66,7 +70,7 @@ class UpdateReleaseRebrickable extends Command
             '3816.dat',
             '3817.dat',
         ];
-        $parts->whereNull('rebrickable_part_id')
+        $parts->filter(fn (Part $p) => is_null($p->getRebrickablePart()))
             ->reject(fn (Part $p) => in_array(basename($p?->base_part->filename ?? ''), $reject_list))
             ->each(fn (Part $p) => UpdateRebrickable::dispatch($p, true));
     }

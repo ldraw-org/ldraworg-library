@@ -18,7 +18,7 @@ class SupportFiles
     public static function libaryCsv(): string
     {
         $csv = "part_number,part_description,part_url,image_url,image_last_modified\n";
-        foreach (Part::partsFolderOnly()->lazy() as $part) {
+        foreach (Part::query()->partsFolderOnly()->lazy() as $part) {
             if (in_array($part->description[0], ['~','_','|','='])) {
                 continue;
             }

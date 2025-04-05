@@ -28,6 +28,7 @@ use App\Models\User;
 use App\Models\Vote;
 use App\Observers\PartObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -36,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
+use Znck\Eloquent\Relations\BelongsToThrough;
 
 /**
  * @mixin IdeHelperPart
@@ -44,6 +46,7 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 class Part extends Model
 {
     use HasGraphRelationships;
+    use \Znck\Eloquent\Traits\BelongsToThrough;
     use HasPartRelease;
     use HasUser;
     use HasFactory;
@@ -201,15 +204,15 @@ class Part extends Model
         return $this->HasMany(ReviewSummaryItem::class, 'part_id', 'id');
 
     }
-
+    
     public function rebrickable_part(): BelongsTo
     {
-        if (!is_null($this->sticker_sheet_id) && $this->category != PartCategory::StickerShortcut) {
-            return $this->sticker_sheet->rebrickable_part();
-        } elseif ($this->type_qualifier == PartTypeQualifier::Alias) {
-            return $this->subparts->first()->rebrickable_part();
-        }
         return $this->belongsTo(RebrickablePart::class, 'rebrickable_part_id', 'id');
+    }
+    
+    public function sticker_rebrickable_part(): BelongsToThrough
+    {
+        return $this->belongsToThrough(RebrickablePart::class, StickerSheet::class);
     }
 
     protected function errors(): Attribute
@@ -227,7 +230,8 @@ class Part extends Model
             ->get();
     }
 
-    public function scopeName(Builder $query, string $name): void
+    #[Scope]
+    protected function byName(Builder $query, string $name): void
     {
         $name = str_replace('\\', '/', $name);
         if (pathinfo($name, PATHINFO_EXTENSION) == "png") {
@@ -239,7 +243,8 @@ class Part extends Model
         });
     }
 
-    public function scopeSearchHeader(Builder $query, string $search): void
+    #[Scope]
+    protected function searchHeader(Builder $query, string $search): void
     {
         if ($search !== '') {
             //Pull the terms out of the search string
@@ -258,23 +263,27 @@ class Part extends Model
         }
     }
 
-    public function scopePartsFolderOnly(Builder $query): void
+    #[Scope]
+    protected function partsFolderOnly(Builder $query): void
     {
         $query->whereIn('type', PartType::partsFolderTypes());
     }
 
-    public function scopeCanHaveRebrickablePart(Builder $query)
+    #[Scope]
+    protected function canHaveRebrickablePart(Builder $query)
     {
         $query->partsFolderOnly()
-            ->whereDoesntHave('sticker_sheet')
-            ->whereNull('type_qualifier')
+            ->where(fn (Builder $query2) => 
+                $query2->orWhereNull('type_qualifier')->orWhere('type_qualifier', PartTypeQualifier::Alias)
+            )
             ->where('description', 'NOT LIKE', '~%')
             ->where('description', 'NOT LIKE', '|%')
             ->where('description', 'NOT LIKE', '%(Obsolete)')
-            ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete]);
+            ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete, PartCategory::StickerShortcut]);
     }
 
-    public function scopeHasError(Builder $query, string|PartError $error): void
+    #[Scope]
+    protected function hasError(Builder $query, string|PartError $error): void
     {
         if ($error instanceof PartError) {
             $error = $error->value;
@@ -282,7 +291,8 @@ class Part extends Model
         $query->whereJsonContainsKey("part_check_messages->errors->{$error}");
     }
 
-    public function scopeOrHasError(Builder $query, string|PartError $error): void
+    #[Scope]
+    protected function orHasError(Builder $query, string|PartError $error): void
     {
         if ($error instanceof PartError) {
             $error = $error->value;
@@ -290,7 +300,8 @@ class Part extends Model
         $query->orWhereJsonContainsKey("part_check_messages->errors->{$error}");
     }
 
-    public function scopeDoesntHaveError(Builder $query, string|PartError $error): void
+    #[Scope]
+    protected function doesntHaveError(Builder $query, string|PartError $error): void
     {
         if ($error instanceof PartError) {
             $error = $error->value;
@@ -298,12 +309,25 @@ class Part extends Model
         $query->whereJsonDoesntContainKey("part_check_messages->errors->{$error}");
     }
 
-    public function scopeOrDoesntHaveError(Builder $query, string|PartError $error): void
+    #[Scope]
+    protected function orDoesntHaveError(Builder $query, string|PartError $error): void
     {
         if ($error instanceof PartError) {
             $error = $error->value;
         }
         $query->orWhereJsonDoesntContainKey("part_check_messages->errors->{$error}");
+    }
+
+    #[Scope]
+    protected function hasRebrickablePart(Builder $query): void
+    {
+        $query->where(fn (Builder $query2) => $query2->orHas('rebrickable_part')->orHas('sticker_rebrickable_part'));
+    }
+
+    #[Scope]
+    protected function doesntHaveRebrickablePart(Builder $query): void
+    {
+        $query->doesntHave('rebrickable_part')->doesntHave('sticker_rebrickable_part');
     }
 
     public function isTexmap(): bool
@@ -333,25 +357,37 @@ class Part extends Model
         return $this->type->inPartsFolder() &&
             !$this->isObsolete() &&
             $this->category != PartCategory::Moved &&
-            is_null($this->type_qualifier) &&
+            $this->category != PartCategory::StickerShortcut &&
+            $this->type_qualifier !== PartTypeQualifier::FlexibleSection &&
+            $this->type_qualifier !== PartTypeQualifier::PhysicalColour &&
             is_null($this->sticker_sheet_id) &&
             !Str::of($this->description)->startsWith('~') &&
             !Str::of($this->description)->startsWith('|');
     }
 
+    public function getRebrickablePart(): RebrickablePart
+    {
+        if ($this->sticker_sheet && $this->category != PartCategory::StickerShortcut) {
+            return $this->sticker_rebrickable_part;
+        } else {
+            return $this->rebrickable_part;
+        }
+    }
+
     public function getExternalSiteNumber(ExternalSite $external): ?string
     {
-        if (is_null($this->rebrickable_part)) {
+        $rb_part = $this->getRebrickablePart();
+        if (is_null($rb_part)) {
             $kw = $this->keywords
             ->first(fn (PartKeyword $kw) => Str::of($kw->keyword)->lower()->startsWith($external->value))?->keyword ?? '';
             $number = Str::of($kw)->lower()->chopStart("{$external->value} ")->trim();
             return $number == '' ? null : $number;
         }
         if ($external == ExternalSite::Rebrickable) {
-            return $this->rebrickable_part->number;
+            return $rb_part->number;
         }
-        $name = $this?->sticker_sheet->number ?? basename($this->filename, '.dat');
-        $site_data = ($this?->rebrickable_part->{$external->value}) ?? [];
+        $name = $this->sticker_sheet?->number ?? basename($this->filename, '.dat');
+        $site_data = ($rb_part->{$external->value}) ?? [];
         return Arr::first($site_data, fn(string $number, int $key) => $number == $name) ?? Arr::first($site_data);
     }
 
@@ -515,8 +551,8 @@ class Part extends Model
 
     public function setExternalSiteKeywords(bool $updateOfficial = false): void
     {
-        $this->load('rebrickable_part');
-        if (!is_null($this->rebrickable_part) && ($updateOfficial || $this->isUnofficial())) {
+        $rb_part = $this->getRebrickablePart();
+        if (!is_null($rb_part) && ($updateOfficial || $this->isUnofficial())) {
             $part_num = basename($this->filename, '.dat');
             $okws = $this->keywords
                 ->filter(fn (PartKeyword $key) =>
@@ -532,8 +568,8 @@ class Part extends Model
             }
             $kws = $this->keywords->pluck('keyword')->all();
             $kw_set = false;
-            if ($this->rebrickable_part->number != $part_num) {
-                $kws[] = "Rebrickable {$this->rebrickable_part->number}";
+            if ($rb_part->number != $part_num) {
+                $kws[] = "Rebrickable {$rb_part->number}";
                 $kw_set = true;
             }
             $bl = $this->getExternalSiteNumber(ExternalSite::BrickLink);

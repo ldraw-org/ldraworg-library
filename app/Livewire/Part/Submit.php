@@ -67,7 +67,7 @@ class Submit extends Component implements HasForms
                             // Error check based on file type
                             if ($mimeType == 'text/plain') {
                                 $part = app(\App\LDraw\Parse\Parser::class)->parse($value->get());
-                                $pparts = Part::query()->name($part->name ?? '')->get();
+                                $pparts = Part::query()->byName($part->name ?? '')->get();
                                 $unofficial_exists = $pparts->unofficial()->count() > 0;
                                 $official_exists = $pparts->official()->count() > 0;
                                 $pc = app(\App\LDraw\Check\PartChecker::class);

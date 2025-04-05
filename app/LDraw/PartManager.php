@@ -5,6 +5,7 @@ namespace App\LDraw;
 use App\Enums\ExternalSite;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
+use App\Enums\PartTypeQualifier;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateParentParts;
 use App\LDraw\Parse\Parser;
@@ -196,6 +197,7 @@ class PartManager
             $p->updateReadyForAdmin();
             $this->addUnknownNumber($p);
             UpdateParentParts::dispatch($p);
+            
             UpdateRebrickable::dispatch($p);
         });
     }
@@ -402,29 +404,25 @@ class PartManager
 
     public function addStickerSheet(Part $p)
     {
-        $sticker = $p->childrenAndSelf()->where('category', PartCategory::Sticker)->partsFolderOnly()->first();
+        $sticker = $p->category == PartCategory::Sticker ? $p : $p->children()->where('category', PartCategory::Sticker)->first();
         if (is_null($sticker)) {
             return;
         }
         if (!is_null($sticker->sticker_sheet)) {
             $p->parents()->update(['sticker_sheet_id' => $sticker->sticker_sheet->id]);
-            $p->sticker_sheet_id = $sticker->sticker_sheet->id;
-            $p->save();
+            $p->sticker_sheet()->associate($sticker->sticker_sheet);
         } else {
-            $m = preg_match('#^([0-9]+)[a-z]+(?:c[0-9]{2})?\.dat$#iu', $sticker->name(), $s);
-            if ($m === 1) {
-                $sheet = StickerSheet::firstWhere('number', $s[1]);
-                if (is_null($sheet)) {
-                    $sheet = StickerSheet::create([
-                        'number' => $s[1],
-                        'part_colors' => [],
-                        'rebrickable' => [],
-                    ]);
+            $m = preg_match('/^[\d]+/', $sticker->name(), $s);
+            if ($m) {
+                $sheet = StickerSheet::firstOrCreate([
+                    'number' => $s[0]
+                ]);
+                if (!$sheet->rebrickable_part) {
                     app(\App\LDraw\StickerSheetManager::class)->updateRebrickablePart($sheet);
+                    $sheet->load('rebrickable_part');
                 }
                 $p->parents()->update(['sticker_sheet_id' => $sheet->id]);
-                $p->sticker_sheet_id = $sheet->id;
-                $p->save();
+                $p->sticker_sheet()->associate($sheet);
             } else {
                 $p->sticker_sheet_id = null;
             }
@@ -439,10 +437,14 @@ class PartManager
 
     public function updateRebrickable(Part $part, bool $updateOfficial = false): void
     {
-        if (!$part->canSetRebrickablePart()) {
-            return;
+        if ($part->canSetRebrickablePart()) {
+            RebrickablePart::findOrCreateFromPart($part);
         }
-        RebrickablePart::findOrCreateFromPart($part);
+        if (is_null($part->sticker_sheet_id) && $part->type_qualifier == PartTypeQualifier::Alias && is_null($part->getRebrickablePart())) {
+            $part->rebrickable_part()->associate($part->subparts->first()->rebrickable_part); 
+            $part->save();
+        }
+        $part->load('rebrickable_part', 'sticker_rebrickable_part');
         $part->setExternalSiteKeywords($updateOfficial);
     }
 

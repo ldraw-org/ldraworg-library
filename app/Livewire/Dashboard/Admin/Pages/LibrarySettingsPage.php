@@ -153,8 +153,8 @@ class LibrarySettingsPage extends Component implements HasForms
         $settings->default_part_license = $form_data['default_part_license'];
         $settings->save();
         foreach ($view_changes as $part) {
-            Part::partsFolderOnly()
-                ->where('filename', 'LIKE', "%{$part}%")
+            Part::where('filename', 'LIKE', "%{$part}%")
+                ->partsFolderOnly()
                 ->each(fn (Part $p) => UpdateImage::dispatch($p));
         }
 

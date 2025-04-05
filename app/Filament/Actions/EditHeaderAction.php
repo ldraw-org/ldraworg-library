@@ -41,7 +41,7 @@ class EditHeaderAction
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
-                if (is_null($part->rebrickable_part)) {
+                if (is_null($part->getRebrickablePart())) {
                     $kws = $part->keywords;
                 } else {
                     $kws = $part->keywords
@@ -253,7 +253,7 @@ class EditHeaderAction
         } else {
             $new_kws = collect(explode(',', Str::of($data['keywords'])->trim()->squish()->replace(["\n", ', ',' ,'], ',')->toString()))->filter();
         }
-        if (!is_null($part->rebrickable_part)) {
+        if (!is_null($part->getRebrickablePart())) {
             $extKeywords = collect($part->keywords
                 ->filter(function (PartKeyword $kw) {
                     return Str::of($kw->keyword)->lower()->startsWith('rebrickable') ||

@@ -138,7 +138,7 @@
                     <div class="font-bold text-lg">
                         External Sites:
                     </div>
-                    @if (!is_null($part->rebrickable_part))
+                    @if (!is_null($part->getRebrickablePart()))
                         <x-fas-link class="w-5 h-5 fill-gray-400" title="External site data provided by Rebrickable.com" />
                     @else
                         <x-fas-link-slash class="w-5 h-5 fill-gray-400" title="External site data provided by part keywords" />

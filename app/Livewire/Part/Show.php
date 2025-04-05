@@ -405,8 +405,8 @@ class Show extends Component implements HasForms, HasActions
                 Select::make('base_part_id')
                     ->searchable()
                     ->options(
-                        Part::partsFolderOnly()
-                            ->doesntHave('official_part')
+                        Part::doesntHave('official_part')
+                            ->partsFolderOnly()
                             ->where('is_pattern', false)
                             ->where('category', '!=', PartCategory::Moved)
                             ->where('description', 'NOT LIKE', '%Obsolete%')
