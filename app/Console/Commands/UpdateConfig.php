@@ -40,5 +40,23 @@ class UpdateConfig extends Command
             Storage::disk('images')->makeDirectory('library/updates');
         }
 
+        if (!Storage::disk('library')->exists('official')) {
+            Storage::disk('library')->makeDirectory('official');
+        }
+
+        if (!Storage::disk('library')->exists('official/models')) {
+            Storage::disk('library')->makeDirectory('official/models');
+        }
+
+        if (!Storage::disk('library')->exists('unofficial')) {
+            Storage::disk('library')->makeDirectory('unofficial');
+        }
+
+        if (!Storage::disk('library')->exists('updates')) {
+            Storage::disk('library')->makeDirectory('updates');
+        }
+
+        $this->call('lib:refresh-zip');
+
     }
 }
