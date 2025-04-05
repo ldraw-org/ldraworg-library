@@ -365,7 +365,7 @@ class Part extends Model
             !Str::of($this->description)->startsWith('|');
     }
 
-    public function getRebrickablePart(): RebrickablePart
+    public function getRebrickablePart(): ?RebrickablePart
     {
         if ($this->sticker_sheet && $this->category != PartCategory::StickerShortcut) {
             return $this->sticker_rebrickable_part;
