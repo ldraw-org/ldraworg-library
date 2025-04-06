@@ -21,6 +21,30 @@ trait HasErrorScopes
     }
 
     #[Scope]
+    protected function hasWarnings(Builder $query): void
+    {
+        $query->whereJsonLength('part_check->warnings', '>', 0);
+    }
+
+    #[Scope]
+    protected function doesntHaveWarnings(Builder $query): void
+    {
+        $query->whereJsonLength('part_check->warnings', '=', 0);
+    }
+
+    #[Scope]
+    protected function hasTracker(Builder $query): void
+    {
+        $query->whereJsonLength('part_check->tracker', '>', 0);
+    }
+
+    #[Scope]
+    protected function doesntHaveTracker(Builder $query): void
+    {
+        $query->whereJsonLength('part_check->tracker', '=', 0);
+    }
+
+    #[Scope]
     protected function hasError(Builder $query, string|PartError $error): void
     {
         if ($error instanceof PartError) {

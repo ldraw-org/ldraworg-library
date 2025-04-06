@@ -78,5 +78,9 @@ return [
         'nocertparents' => 'No path of certified files to a certified or official parent in the parts folder',
         'missing' => 'Has missing subfiles',
         'adminhold' => 'On admimistrative hold'
+    ],
+
+    'warning' => [
+        'minifigcategory' => 'Ensure correct Minifig category',
     ]
 ];

@@ -56,4 +56,5 @@ enum PartError: string
     case HasMissingSubfiles = 'tracker.missing';
     case AdminHold = 'tracker.adminhold';
 
+    case WarningMinifigCategory = 'warning.minifigcategory';
 }
