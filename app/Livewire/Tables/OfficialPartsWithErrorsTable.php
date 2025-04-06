@@ -3,7 +3,6 @@
 namespace App\Livewire\Tables;
 
 use App\Enums\PartError;
-use App\LDraw\Check\ErrorCheckBag;
 use App\Models\Part\Part;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
@@ -19,7 +18,7 @@ class OfficialPartsWithErrorsTable extends BasicTable
     {
         return $table
             ->query(
-                Part::whereJsonLength('part_check_messages->errors', '>', 0)->official()->whereDoesntHave('unofficial_part')
+                Part::whereJsonLength('part_check->errors', '>', 0)->official()->whereDoesntHave('unofficial_part')
             )
             ->heading('Official Parts With Errors')
             ->columns([
@@ -33,8 +32,10 @@ class OfficialPartsWithErrorsTable extends BasicTable
                     ->sortable(),
                 TextColumn::make('description')
                     ->sortable(),
-                TextColumn::make('part_check_messages')
-                    ->state(fn (Part $part) => implode(", ", ErrorCheckBag::errorsFromArray($part->errors)))
+                TextColumn::make('part_check')
+                    ->state(fn (Part $part) => $part->errors->getErrors())
+                    ->listWithLineBreaks()
+                    ->bulleted()
                     ->wrap()
             ])
             ->actions([

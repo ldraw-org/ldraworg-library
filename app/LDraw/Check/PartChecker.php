@@ -16,16 +16,16 @@ use Closure;
 
 class PartChecker
 {
-    protected ErrorCheckBag $errors;
+    protected PartCheckBag $errors;
 
     public function __construct(
         protected LibrarySettings $settings
     ) {
-        $this->errors = new ErrorCheckBag();
+        $this->errors = new PartCheckBag();
     }
 
     public function runChecks(Part|ParsedPart $part, array $checks = [], ?string $filename = null): bool {
-        $this->errors = new ErrorCheckBag();
+        $this->errors = new PartCheckBag();
         foreach ($checks as $check) {
             if (!$check instanceof Check) {
                 continue;
@@ -66,12 +66,17 @@ class PartChecker
 
     public function checkCanRelease(Part $part): bool
     {
-        $errors = [];
-
         if (!$part->isTexmap()) {
             $this->standardChecks($part);
         }
 
+        $this->trackerChecks($part);
+
+        return $this->hasErrors();
+    }
+
+    public function trackerChecks(Part $part): bool
+    {
         if ($part->isUnofficial()) {
             $hascertparents = !is_null($part->official_part) ||
                 $part->type->inPartsFolder() || $part->type == PartType::Helper ||
@@ -92,8 +97,7 @@ class PartChecker
                 $this->addError(PartError::LicenseNotLibraryApproved, ['license' => $part->license->value]);
             }
         }
-        $errors = $this->getErrors();
-        return count($errors) == 0;
+        return $this->hasErrors();
     }
 
     public function hasCertifiedParentInParts(Part $part): bool

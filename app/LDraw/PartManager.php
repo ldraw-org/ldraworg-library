@@ -366,7 +366,7 @@ class PartManager
 
     public function checkPart(Part $part): void
     {
-        $messages = $part->part_check_messages ?? [];
+        $messages = $part->part_check ?? [];
         $pc = app(\App\LDraw\Check\PartChecker::class);
         $can_release = $pc->checkCanRelease($part);
         $messages['errors'] = $pc->getErrorStorageArray();
@@ -381,7 +381,7 @@ class PartManager
             }
             $part->can_release = $can_release;
         }
-        $part->part_check_messages = $messages;
+        $part->part_check = $messages;
         $part->updateReadyForAdmin();
         $part->save();
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models\Part;
 
+use App\Casts\AsPartCheckBag;
 use App\Enums\EventType;
 use App\Enums\ExternalSite;
 use App\Enums\License;
@@ -11,6 +12,7 @@ use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
+use App\LDraw\Check\PartCheckBag;
 use App\Models\RebrickablePart;
 use App\Models\ReviewSummary\ReviewSummaryItem;
 use App\Models\StickerSheet;
@@ -69,7 +71,7 @@ class Part extends Model
     *     is_pattern: 'boolean',
     *     is_composite: 'boolean',
     *     is_dual_mould: 'boolean',
-    *     part_check_messages: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
+    *     part_check: 'array',
     *     ready_for_admin: 'boolean'
     *     rebrickable: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
     * }
@@ -91,7 +93,7 @@ class Part extends Model
             'is_pattern' => 'boolean',
             'is_composite' => 'boolean',
             'is_dual_mould' => 'boolean',
-            'part_check_messages' => AsArrayObject::class,
+            'part_check' => 'array',
             'ready_for_admin' => 'boolean',
             'rebrickable' => AsArrayObject::class,
         ];
@@ -218,7 +220,10 @@ class Part extends Model
     protected function errors(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value, array $attributes) => Arr::get(json_decode($attributes['part_check_messages'], true), 'errors', []),
+            get: fn (?string $value, array $attributes) => new PartCheckBag(Arr::get(json_decode($attributes['part_check'], true), 'errors', [])),
+            set: fn (PartCheckBag $value) => [
+                'part_check' => json_encode(['warnings' => [], 'errors' => $value->toArray()])
+            ]
         );
     }
 
@@ -288,7 +293,7 @@ class Part extends Model
         if ($error instanceof PartError) {
             $error = $error->value;
         }
-        $query->whereJsonContainsKey("part_check_messages->errors->{$error}");
+        $query->whereJsonContainsKey("part_check->errors->{$error}");
     }
 
     #[Scope]
@@ -297,7 +302,7 @@ class Part extends Model
         if ($error instanceof PartError) {
             $error = $error->value;
         }
-        $query->orWhereJsonContainsKey("part_check_messages->errors->{$error}");
+        $query->orWhereJsonContainsKey("part_check->errors->{$error}");
     }
 
     #[Scope]
@@ -306,7 +311,7 @@ class Part extends Model
         if ($error instanceof PartError) {
             $error = $error->value;
         }
-        $query->whereJsonDoesntContainKey("part_check_messages->errors->{$error}");
+        $query->whereJsonDoesntContainKey("part_check->errors->{$error}");
     }
 
     #[Scope]
@@ -315,7 +320,7 @@ class Part extends Model
         if ($error instanceof PartError) {
             $error = $error->value;
         }
-        $query->orWhereJsonDoesntContainKey("part_check_messages->errors->{$error}");
+        $query->orWhereJsonDoesntContainKey("part_check->errors->{$error}");
     }
 
     #[Scope]
