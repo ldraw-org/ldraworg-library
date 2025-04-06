@@ -13,6 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 use App\Models\Traits\HasParts;
 use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -107,7 +108,8 @@ class User extends Authenticatable
         );
     }
 
-    public function scopeFromAuthor(Builder $query, string $username, ?string $realname = null): void
+    #[Scope]
+    protected function fromAuthor(Builder $query, string $username, ?string $realname = null): void
     {
         $query->where(function (Builder $q) use ($username, $realname) {
             $q->orWhere('realname', $realname)->orWhere('name', $username);

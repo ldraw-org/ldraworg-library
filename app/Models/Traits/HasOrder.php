@@ -2,11 +2,13 @@
 
 namespace App\Models\Traits;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 
 trait HasOrder
 {
-    public function scopeOrdered(Builder $query): void
+    #[Scope]
+    protected function ordered(Builder $query): void
     {
         $query->orderBy('order', 'asc');
     }

@@ -2,12 +2,10 @@
 
 namespace App\Models\Part;
 
-use App\Casts\AsPartCheckBag;
 use App\Enums\EventType;
 use App\Enums\ExternalSite;
 use App\Enums\License;
 use App\Enums\PartCategory;
-use App\Enums\PartError;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -16,6 +14,7 @@ use App\LDraw\Check\PartCheckBag;
 use App\Models\RebrickablePart;
 use App\Models\ReviewSummary\ReviewSummaryItem;
 use App\Models\StickerSheet;
+use App\Models\Traits\HasErrorScopes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -40,6 +39,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 use Znck\Eloquent\Relations\BelongsToThrough;
+use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
 
 /**
  * @mixin IdeHelperPart
@@ -48,10 +48,11 @@ use Znck\Eloquent\Relations\BelongsToThrough;
 class Part extends Model
 {
     use HasGraphRelationships;
-    use \Znck\Eloquent\Traits\BelongsToThrough;
+    use BelongsToThroughTrait;
     use HasPartRelease;
     use HasUser;
     use HasFactory;
+    use HasErrorScopes;
 
     protected $guarded = [];
 
@@ -217,24 +218,6 @@ class Part extends Model
         return $this->belongsToThrough(RebrickablePart::class, StickerSheet::class);
     }
 
-    protected function errors(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value, array $attributes) => new PartCheckBag(Arr::get(json_decode($attributes['part_check'], true), 'errors', [])),
-            set: fn (PartCheckBag $value) => [
-                'part_check' => json_encode(['warnings' => [], 'errors' => $value->toArray()])
-            ]
-        );
-    }
-
-    public function uncertified_subparts(): Collection
-    {
-        return $this
-            ->descendants()
-            ->whereIn('part_status', [\App\Enums\PartStatus::AwaitingAdminReview, \App\Enums\PartStatus::NeedsMoreVotes, \App\Enums\PartStatus::ErrorsFound])
-            ->get();
-    }
-
     #[Scope]
     protected function byName(Builder $query, string $name): void
     {
@@ -275,7 +258,7 @@ class Part extends Model
     }
 
     #[Scope]
-    protected function canHaveRebrickablePart(Builder $query)
+    protected function canHaveRebrickablePart(Builder $query): void
     {
         $query->partsFolderOnly()
             ->where(fn (Builder $query2) => 
@@ -288,42 +271,6 @@ class Part extends Model
     }
 
     #[Scope]
-    protected function hasError(Builder $query, string|PartError $error): void
-    {
-        if ($error instanceof PartError) {
-            $error = $error->value;
-        }
-        $query->whereJsonContainsKey("part_check->errors->{$error}");
-    }
-
-    #[Scope]
-    protected function orHasError(Builder $query, string|PartError $error): void
-    {
-        if ($error instanceof PartError) {
-            $error = $error->value;
-        }
-        $query->orWhereJsonContainsKey("part_check->errors->{$error}");
-    }
-
-    #[Scope]
-    protected function doesntHaveError(Builder $query, string|PartError $error): void
-    {
-        if ($error instanceof PartError) {
-            $error = $error->value;
-        }
-        $query->whereJsonDoesntContainKey("part_check->errors->{$error}");
-    }
-
-    #[Scope]
-    protected function orDoesntHaveError(Builder $query, string|PartError $error): void
-    {
-        if ($error instanceof PartError) {
-            $error = $error->value;
-        }
-        $query->orWhereJsonDoesntContainKey("part_check->errors->{$error}");
-    }
-
-    #[Scope]
     protected function hasRebrickablePart(Builder $query): void
     {
         $query->where(fn (Builder $query2) => $query2->orHas('rebrickable_part')->orHas('sticker_rebrickable_part'));
@@ -333,6 +280,24 @@ class Part extends Model
     protected function doesntHaveRebrickablePart(Builder $query): void
     {
         $query->doesntHave('rebrickable_part')->doesntHave('sticker_rebrickable_part');
+    }
+
+    protected function errors(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value, array $attributes) => new PartCheckBag(Arr::get(json_decode($attributes['part_check'], true), 'errors', [])),
+            set: fn (PartCheckBag $value) => [
+                'part_check' => json_encode(['warnings' => [], 'errors' => $value->toArray()])
+            ]
+        );
+    }
+
+    public function uncertified_subparts(): Collection
+    {
+        return $this
+            ->descendants()
+            ->whereIn('part_status', [\App\Enums\PartStatus::AwaitingAdminReview, \App\Enums\PartStatus::NeedsMoreVotes, \App\Enums\PartStatus::ErrorsFound])
+            ->get();
     }
 
     public function isTexmap(): bool

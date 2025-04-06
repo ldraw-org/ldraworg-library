@@ -2,6 +2,7 @@
 
 namespace App\Models\Traits;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,12 +13,14 @@ trait HasPartRelease
         return $this->belongsTo(\App\Models\Part\PartRelease::class, 'part_release_id', 'id');
     }
 
-    public function scopeOfficial(Builder $query): void
+    #[Scope]
+    protected function official(Builder $query): void
     {
         $query->whereNotNull('part_release_id');
     }
 
-    public function scopeUnofficial(Builder $query): void
+    #[Scope]
+    protected function unofficial(Builder $query): void
     {
         $query->whereNull('part_release_id');
     }
