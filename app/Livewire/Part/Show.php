@@ -101,7 +101,7 @@ class Show extends Component implements HasForms, HasActions
             return response('404');
         }
         $this->image =
-            $this->part->isTexmap() ? route("{$this->part->libFolder()}.download", $this->part->filename) : version("images/library/{$part->imagePath()}");
+            $this->part->isTexmap() ? route("{$this->part->libFolder()}.download", $this->part->filename) : version("images/library/{$this->part->imagePath()}");
         $this->form->fill();
     }
 
