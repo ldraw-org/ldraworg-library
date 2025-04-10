@@ -72,7 +72,6 @@ class Part extends Model
     *     is_pattern: 'boolean',
     *     is_composite: 'boolean',
     *     is_dual_mould: 'boolean',
-    *     part_check: 'array',
     *     ready_for_admin: 'boolean'
     *     rebrickable: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
     * }
@@ -94,7 +93,6 @@ class Part extends Model
             'is_pattern' => 'boolean',
             'is_composite' => 'boolean',
             'is_dual_mould' => 'boolean',
-            'part_check' => 'array',
             'ready_for_admin' => 'boolean',
             'rebrickable' => AsArrayObject::class,
         ];
@@ -282,13 +280,11 @@ class Part extends Model
         $query->doesntHave('rebrickable_part')->doesntHave('sticker_rebrickable_part');
     }
 
-    protected function errors(): Attribute
+    protected function partCheck(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value, array $attributes) => new PartCheckBag(Arr::get(json_decode($attributes['part_check'], true), 'errors', [])),
-            set: fn (PartCheckBag $value) => [
-                'part_check' => json_encode(['warnings' => [], 'errors' => $value->toArray()])
-            ]
+            get: fn (?string $value) => new PartCheckBag(json_decode($value ?? [], true)),
+            set: fn (PartCheckBag $value) => json_encode($value->toArray())
         );
     }
 
@@ -296,7 +292,7 @@ class Part extends Model
     {
         return $this
             ->descendants()
-            ->whereIn('part_status', [\App\Enums\PartStatus::AwaitingAdminReview, \App\Enums\PartStatus::NeedsMoreVotes, \App\Enums\PartStatus::ErrorsFound])
+            ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])
             ->get();
     }
 

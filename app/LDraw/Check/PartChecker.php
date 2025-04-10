@@ -2,6 +2,7 @@
 
 namespace App\LDraw\Check;
 
+use App\Enums\CheckType;
 use App\Enums\License;
 use App\Enums\PartError;
 use App\Enums\PartStatus;
@@ -16,16 +17,17 @@ use Closure;
 
 class PartChecker
 {
+    protected LibrarySettings $settings;
     protected PartCheckBag $errors;
 
     public function __construct(
-        protected LibrarySettings $settings
+        protected Part|ParsedPart $part
     ) {
+        $this->settings = new LibrarySettings();
         $this->errors = new PartCheckBag();
     }
 
-    public function runChecks(Part|ParsedPart $part, array $checks = [], ?string $filename = null): bool {
-        $this->errors = new PartCheckBag();
+    public function runChecks(array $checks = [], ?string $filename = null): bool {
         foreach ($checks as $check) {
             if (!$check instanceof Check) {
                 continue;
@@ -36,98 +38,101 @@ class PartChecker
             if ($check instanceof SettingsAwareCheck) {
                 $check->setSettings($this->settings);
             }
-            $check->check($part, Closure::fromCallable([$this, 'addError']));
-            if ($this->hasErrors() && property_exists($check, 'stopOnError') && $check->stopOnError === true) {
+            $check->check($this->part, Closure::fromCallable([$this, 'add']));
+            if ($this->errors->has(CheckType::holdable()) && property_exists($check, 'stopOnError') && $check->stopOnError === true) {
                 break;
             }
         }
-        return $this->hasErrors();
+        return $this->errors->has(CheckType::holdable());
     }
 
-    public function addError(PartError $error, array $context = []): void
+    public function add(PartError $error, array $context = []): void
     {
         $this->errors->add($error, $context);
     }
 
-    public function hasErrors(): bool
+    public function get(CheckType|array|null $types = null, bool $translated = false): array
     {
-        return !$this->errors->isEmpty();
+        return $this->errors->get($types, $translated);
     }
 
-    public function getErrors(): array
+    public function getPartCheckBag(): PartCheckBag
     {
-        return $this->errors->getErrors();
+        return $this->errors;
     }
 
-    public function getErrorStorageArray(): array
+    public function checkCanRelease(bool $checkFileErrors): bool
     {
-        return $this->errors->toArray();
-    }
-
-    public function checkCanRelease(Part $part): bool
-    {
-        if (!$part->isTexmap()) {
-            $this->standardChecks($part);
+        if ($this->part instanceof ParsedPart) {
+            return false;
         }
 
-        $this->trackerChecks($part);
+        $this->errors->load($this->part->part_check->toArray());
+        
+        if (!$this->part?->isTexmap() && $checkFileErrors) {
+            $this->errors->clear(CheckType::Error);
+            $this->standardChecks();
+        }
 
-        return $this->hasErrors();
+        $this->errors->clear(CheckType::TrackerHold);
+        $this->trackerChecks();
+        return $this->errors->doesntHave(CheckType::holdable());
     }
 
-    public function trackerChecks(Part $part): bool
+    public function trackerChecks(): bool
     {
-        if ($part->isUnofficial()) {
-            $hascertparents = !is_null($part->official_part) ||
-                $part->type->inPartsFolder() || $part->type == PartType::Helper ||
-                $this->hasCertifiedParentInParts($part);
+        $this->errors->clear(CheckType::TrackerHold);
+        if ($this->part instanceof Part && $this->part->isUnofficial()) {
+            $hascertparents = !is_null($this->part->official_part) ||
+                $this->part->type->inPartsFolder() || $this->part->type == PartType::Helper ||
+                $this->hasCertifiedParentInParts($this->part);
             if (!$hascertparents) {
-                $this->addError(PartError::NoCertifiedParents);
+                $this->add(PartError::TrackerNoCertifiedParents);
             }
-            if (!$this->hasAllSubpartsCertified($part)) {
-                $this->addError(PartError::HasUncertifiedSubfiles);
+            if (!$this->hasAllSubpartsCertified($this->part)) {
+                $this->add(PartError::TrackerHasUncertifiedSubfiles);
             }
-            if (count($part->missing_parts) > 0) {
-                $this->addError(PartError::HasMissingSubfiles);
+            if (count($this->part->missing_parts) > 0) {
+                $this->add(PartError::TrackerHasMissingSubfiles);
             }
-            if ($part->manual_hold_flag) {
-                $this->addError(PartError::AdminHold);
+            if ($this->part->manual_hold_flag) {
+                $this->add(PartError::TrackerAdminHold);
             }
-            if ($part->license !== License::CC_BY_4) {
-                $this->addError(PartError::LicenseNotLibraryApproved, ['license' => $part->license->value]);
+            if ($this->part->license !== License::CC_BY_4) {
+                $this->singleCheck(new \App\LDraw\Check\Checks\LibraryApprovedLicense());
             }
         }
-        return $this->hasErrors();
+        return $this->errors->has(CheckType::holdable());
     }
 
-    public function hasCertifiedParentInParts(Part $part): bool
+    protected function hasCertifiedParentInParts(): bool
     {
         return Part::withQueryConstraint(
             fn ($query) =>
                 $query->whereIn('parts.part_status', [PartStatus::Certified, PartStatus::Official]),
             fn () =>
-                $part->ancestors()
+                $this->part->ancestors()
         )
         ->whereIn('type', PartType::partsFolderTypes())
         ->exists();
     }
 
-    public function hasAllSubpartsCertified(Part $part): bool
+    protected function hasAllSubpartsCertified(): bool
     {
-        return !$part->descendants()
+        return $this->part->descendants()
             ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])
-            ->exists();
+            ->doesntExist();
     }
 
-    public function singleCheck(Part|ParsedPart $part, Check $check, ?string $filename = null): array
+    public function singleCheck(Check $check, ?string $filename = null): array
     {
-        $this->runChecks($part, [$check], $filename);
-        return $this->getErrors();
+        $this->runChecks([$check], $filename);
+        return $this->errors->get(CheckType::holdable(), true);
     }
 
-    public function standardChecks(Part|ParsedPart $part, ?string $filename = null): bool
+    public function standardChecks(?string $filename = null): bool
     {
-        $this->runChecks($part, [
+        $this->runChecks([
             new \App\LDraw\Check\Checks\HasRequiredHeaderMeta(),
 
             new \App\LDraw\Check\Checks\LibraryApprovedName(),
@@ -159,6 +164,6 @@ class PartChecker
             new \App\LDraw\Check\Checks\PreviewIsValid(),
         ], $filename);
 
-        return $this->hasErrors();
+        return $this->errors->has(CheckType::holdable());
     }
 }

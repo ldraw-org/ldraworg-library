@@ -4,10 +4,12 @@ namespace App\LDraw;
 
 use App\Enums\ExternalSite;
 use App\Enums\PartCategory;
+use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateParentParts;
+use App\LDraw\Check\PartChecker;
 use App\LDraw\Parse\Parser;
 use App\LDraw\Render\LDView;
 use App\Models\Part\Part;
@@ -192,7 +194,7 @@ class PartManager
             };
             $this->updateBasePart($p);
             $this->updateImage($p);
-            $this->checkPart($p);
+            $this->checkPart($p, false);
             $this->addStickerSheet($p);
             $p->updateReadyForAdmin();
             $this->addUnknownNumber($p);
@@ -364,24 +366,18 @@ class PartManager
         }
     }
 
-    public function checkPart(Part $part): void
+    public function checkPart(Part $part, bool $checkFileErrors = true): void
     {
-        $messages = $part->part_check ?? [];
-        $pc = app(\App\LDraw\Check\PartChecker::class);
-        $can_release = $pc->checkCanRelease($part);
-        $messages['errors'] = $pc->getErrorStorageArray();
-
-        if ($part->isOfficial()) {
-            $part->can_release = true;
-            $messages['warnings'] = [];
-        } else {
-            $messages['warnings'] = [];
+        $part->can_release = true;
+        $pc = new PartChecker($part);
+        $can_release = $pc->checkCanRelease($checkFileErrors);
+        $part->part_check = $pc->getPartCheckBag();
+        if ($part->isUnofficial()) {
             if (!is_null($part->category) && $part->category == PartCategory::Minifig) {
-                $messages['warnings'] = "Check Minifig category: {$part->category->value}";
+                $part->part_check->add(PartError::WarningMinifigCategory);
             }
             $part->can_release = $can_release;
         }
-        $part->part_check = $messages;
         $part->updateReadyForAdmin();
         $part->save();
     }

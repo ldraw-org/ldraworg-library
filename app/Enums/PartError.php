@@ -3,6 +3,8 @@
 namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
+use App\Enums\CheckType;
+use Illuminate\Support\Str;
 
 enum PartError: string
 {
@@ -51,10 +53,15 @@ enum PartError: string
     case HistoryInvalid = 'history.invalid';
     case HistoryAuthorNotRegistered = 'history.authorregistered';
 
-    case NoCertifiedParents = 'tracker.nocertparents';
-    case HasUncertifiedSubfiles = 'tracker.uncertsubs';
-    case HasMissingSubfiles = 'tracker.missing';
-    case AdminHold = 'tracker.adminhold';
+    case TrackerNoCertifiedParents = 'tracker_hold.nocertparents';
+    case TrackerHasUncertifiedSubfiles = 'tracker_hold.uncertsubs';
+    case TrackerHasMissingSubfiles = 'tracker_hold.missing';
+    case TrackerAdminHold = 'tracker_hold.adminhold';
 
     case WarningMinifigCategory = 'warning.minifigcategory';
+    
+    public function type(): CheckType
+    {
+        return CheckType::tryFrom(Str::of($this->value)->replace('.', ' ')->words(1, '')->plural()) ?? CheckType::Error;
+    }
 }

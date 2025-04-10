@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
 use App\Models\Part\Part;
 use Filament\Tables\Actions\Action;
@@ -33,7 +34,7 @@ class OfficialPartsWithErrorsTable extends BasicTable
                 TextColumn::make('description')
                     ->sortable(),
                 TextColumn::make('part_check')
-                    ->state(fn (Part $part) => $part->errors->getErrors())
+                    ->state(fn (Part $part) => $part->part_check->get(CheckType::holdable(), true))
                     ->listWithLineBreaks()
                     ->bulleted()
                     ->wrap()

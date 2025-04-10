@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Release;
 
+use App\Enums\CheckType;
 use App\Enums\PartStatus;
 use App\Jobs\MakePartRelease;
 use App\Models\Part\Part;
@@ -65,14 +66,20 @@ class Create extends Component implements HasForms, HasTable
                             ->grow(false)
                             ->label('Status'),
                         TextColumn::make('part_check')
-                            ->state(fn (Part $part) => $part->errors->getErrors())
+                            ->state(fn (Part $part) => $part->part_check->get())
                             ->listWithLineBreaks()
-                            ->bulleted()
                             ->alignment(Alignment::End),
                     ])->alignment(Alignment::End),
                 ])->from('md')
             ])
-            ->recordClasses(fn (Part $p) => count($p->errors) > 0 ? '!bg-red-300' : null)
+            ->recordClasses(function (Part $p) {
+                if ($p->part_check->has([CheckType::Error, CheckType::Warning])) {
+                    return '!bg-red-300';
+                } elseif ($p->part_check->has(CheckType::Warning)) {
+                    return '!bg-orange-300';
+                }
+                return null;
+            })
             ->actions([
                 Action::make('view')
                     ->url(fn (Part $p) => route('parts.show', $p))

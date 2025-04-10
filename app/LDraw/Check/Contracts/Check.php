@@ -8,5 +8,5 @@ use Closure;
 
 interface Check
 {
-    public function check(ParsedPart|Part $part, Closure $message): void;
+    public function check(ParsedPart|Part $part, Closure $fail): void;
 }

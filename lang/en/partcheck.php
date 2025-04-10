@@ -73,7 +73,7 @@ return [
 
     'proxy' => 'You are not authorized to submit parts by proxy',
 
-    'tracker' => [
+    'tracker_hold' => [
         'uncertsubs' => 'Has uncertified subfiles',
         'nocertparents' => 'No path of certified files to a certified or official parent in the parts folder',
         'missing' => 'Has missing subfiles',

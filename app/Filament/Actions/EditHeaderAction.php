@@ -11,6 +11,7 @@ use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Filament\Forms\Components\Preview;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
+use App\LDraw\Check\PartChecker;
 use App\LDraw\Parse\ParsedPart;
 use App\LDraw\PartManager;
 use App\Models\LdrawColour;
@@ -78,13 +79,13 @@ class EditHeaderAction
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
                         $p = ParsedPart::fromPart($part);
                         $p->description = $value;
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\LibraryApprovedDescription());
-                        if (count($errors) > 0) {
+                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\LibraryApprovedDescription());
+                        if ($errors) {
                             $fail($errors[0]);
                             return;
                         }
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\PatternPartDesciption());
-                        if (count($errors) > 0) {
+                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\PatternPartDesciption());
+                        if ($errors) {
                             $fail($errors[0]);
                         }
                     }
@@ -131,8 +132,8 @@ class EditHeaderAction
                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
                         $p = ParsedPart::fromPart($part);
                         $p->keywords = collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all();
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\PatternHasSetKeyword());
-                        if (count($errors) > 0) {
+                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\PatternHasSetKeyword());
+                        if ($errors) {
                             $fail($errors[0]);
                         }
                     }
@@ -156,18 +157,18 @@ class EditHeaderAction
                     Rule::requiredIf($part->history->isNotEmpty()),
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
                         $p = app(\App\LDraw\Parse\Parser::class)->parse($value);
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\ValidLines());
-                        if (count($errors) > 0) {
+                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\ValidLines());
+                        if ($errors) {
                             $fail($errors[0]);
                             return;
                         }
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\HistoryIsValid());
-                        if (count($errors) > 0) {
+                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\HistoryIsValid());
+                        if ($errors) {
                             $fail($errors[0]);
                             return;
                         }
-                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new \App\LDraw\Check\Checks\HistoryUserIsRegistered());
-                        if (count($errors) > 0) {
+                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\HistoryUserIsRegistered());
+                        if ($errors) {
                             $fail($errors[0]);
                             return;
                         }

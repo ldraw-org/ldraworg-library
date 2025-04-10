@@ -176,7 +176,7 @@
         @if($part->isUnofficial())
             <div class="text-lg font-bold">Status:</div>
             <x-part.status :$part show-status />
-            @empty($part->can_release)
+            @empty($part->can_release || $part->check_part->get('warnings'))
                 <x-message.not-releaseable :$part />
             @endempty
             <div class="text-md font-bold">Current Votes:</div>
