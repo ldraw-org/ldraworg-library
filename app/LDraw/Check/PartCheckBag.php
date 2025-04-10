@@ -50,7 +50,7 @@ class PartCheckBag implements Arrayable, JsonSerializable
 
     public function has(CheckType|array|null $types = null): bool
     {
-        $type = $this->checkTypeArray($types);
+        $types = $this->checkTypeArray($types);
         foreach ($types as $type) {
             if ($this->messages[$type->value]) {
                 return true;
