@@ -56,7 +56,7 @@ class VectorMath
         return !$concave && !$bowtie;
     }
 
-    public static function isCoplaner(array $points): bool
+    public static function maxCoplanerAngle(array $points): bool
     {
         $p1 = new Vector($points[0]);
         $p2 = new Vector($points[1]);
@@ -73,6 +73,6 @@ class VectorMath
         $angle1 = rad2deg($t1 >= 1 ? 0 : ($t1 <= -1 ? Pi() : acos($t1)));
         $angle2 = rad2deg($t2 >= 1 ? 0 : ($t2 <= -1 ? Pi() : acos($t2)));
 
-        return max($angle1, $angle2) <= config('ldraw.check.coplaner_angle');
+        return max($angle1, $angle2);
     }
 }

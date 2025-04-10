@@ -54,8 +54,11 @@ class ValidType4Lines implements Check
                 continue;
             }
 
-            if (!VectorMath::isCoplaner($points)) {
+            $angle = VectorMath::maxCoplanerAngle($points);
+            if ($angle >= config('ldraw.check.coplanar_angle_error')) {
                 $fail(PartError::QuadNotCoplanar, ['value' => $lineNumber]);
+            } elseif ($angle >= config('ldraw.check.coplanar_angle_warning')) {
+                $fail(PartError::WarningNotCoplanar, ['value' => $lineNumber]);
             }
 
         }

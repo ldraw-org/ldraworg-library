@@ -15,10 +15,10 @@
 @endif
 @if($stack)
     @if(!is_null($event->comment))
-        <x-dynamic-component :component="\App\Enums\EventType::Comment->icon()" class="absolute bottom-0 left-0 w-1/2 {{\App\Enums\EventType::Comment->iconColor()}}" />
+        <x-dynamic-component :component="\App\Enums\EventType::Comment->icon()" class="absolute bottom-0 left-0 w-1/3 {{\App\Enums\EventType::Comment->iconColor()}}" />
     @endif
     @if($is_fix)
-        <x-mdi-tools class="absolute bottom-0 right-0 w-1/2 fill-green-400" />
+        <x-mdi-tools class="absolute bottom-0 right-0 w-1/3 fill-green-400" />
     @endif
 @endif
 </div>

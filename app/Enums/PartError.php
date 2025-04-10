@@ -59,6 +59,7 @@ enum PartError: string
     case TrackerAdminHold = 'tracker_hold.adminhold';
 
     case WarningMinifigCategory = 'warning.minifigcategory';
+    case WarningNotCoplanar = 'warning.notcoplaner';
     
     public function type(): CheckType
     {

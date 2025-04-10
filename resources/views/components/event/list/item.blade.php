@@ -55,18 +55,20 @@
           {{ $event->created_at }}
         </div>
     </div>
-    <div class="mt-4 event-comment font-mono center max-w-screen-xl w-full break-words overflow-auto">
-        @if($event->event_type == \App\Enums\EventType::Rename)
-            "{{$event->moved_from_filename}}" to "{{$event->moved_to_filename}}"
-        @endif
-        @if($event->event_type == \App\Enums\EventType::HeaderEdit && !is_null($event->header_changes))
-          <x-event.list.edit-accordian :changes="$event->header_changes" />
-          @if(!is_null($event->comment))
-            Comment:<br>
+    @if($event->comment || $event->event_type == \App\Enums\EventType::Rename || $event->event_type == \App\Enums\EventType::HeaderEdit)
+      <div class="mt-4 event-comment font-mono center max-w-screen-xl w-full break-words overflow-auto">
+          @if($event->event_type == \App\Enums\EventType::Rename)
+              "{{$event->moved_from_filename}}" to "{{$event->moved_to_filename}}"
           @endif
-        @endif
-        @if(!is_null($event->comment) && $event->event_type !== \App\Enums\EventType::Rename)
-            {!! $event->processedComment() !!}
-        @endif
-    </div>
+          @if($event->event_type == \App\Enums\EventType::HeaderEdit && !is_null($event->header_changes))
+            <x-event.list.edit-accordian :changes="$event->header_changes" />
+            @if(!is_null($event->comment))
+              Comment:<br>
+            @endif
+          @endif
+          @if(!is_null($event->comment) && $event->event_type !== \App\Enums\EventType::Rename)
+              {!! $event->processedComment() !!}
+          @endif
+      </div>
+    @endif
 </div>
