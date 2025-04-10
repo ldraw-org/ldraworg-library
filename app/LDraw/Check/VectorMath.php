@@ -29,7 +29,7 @@ class VectorMath
             $v412 = $p4->subtractVector($p1)->dotProduct($p2->subtractVector($p1)) / ($p4->subtractVector($p1)->length() * $p2->subtractVector($p1)->length());
             $angles[] = rad2deg($v412 >= 1 ? 0 : ($v412 <= -1 ? Pi() : acos($v412)));
         }
-
+        
         return max($angles) > config('ldraw.check.max_point_angle') || min($angles) < config('ldraw.check.min_point_angle');
     }
 
@@ -56,7 +56,7 @@ class VectorMath
         return !$concave && !$bowtie;
     }
 
-    public static function maxCoplanerAngle(array $points): bool
+    public static function maxCoplanarAngle(array $points): float
     {
         $p1 = new Vector($points[0]);
         $p2 = new Vector($points[1]);
@@ -70,9 +70,8 @@ class VectorMath
 
         $t1 = $tri123_unorm->dotProduct($tri341_unorm);
         $t2 = $tri124_unorm->dotProduct($tri234_unorm);
-        $angle1 = rad2deg($t1 >= 1 ? 0 : ($t1 <= -1 ? Pi() : acos($t1)));
-        $angle2 = rad2deg($t2 >= 1 ? 0 : ($t2 <= -1 ? Pi() : acos($t2)));
-
+        $angle1 = rad2deg($t1 >= 1.0 ? 0.0 : ($t1 <= -1.0 ? Pi() : acos($t1)));
+        $angle2 = rad2deg($t2 >= 1.0 ? 0.0 : ($t2 <= -1.0 ? Pi() : acos($t2)));
         return max($angle1, $angle2);
     }
 }
