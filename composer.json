@@ -11,6 +11,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3.0",
+        "blade-ui-kit/blade-icons": "^1.8",
         "filament/filament": "^3.3.0",
         "http-interop/http-factory-guzzle": ">=1.2",
         "icehouse-ventures/laravel-chartjs": "^4.2",
@@ -24,6 +25,7 @@
         "mcordingley/linearalgebra": "^3.0",
         "owenvoke/blade-fontawesome": "^2.9",
         "panphp/pan": "^0.1.8",
+        "postare/blade-mdi": "^1.1",
         "spatie/image": "^3.8.0",
         "spatie/laravel-backup": "^9.2.7",
         "spatie/laravel-permission": "^6.16",
