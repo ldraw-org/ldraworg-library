@@ -21,7 +21,7 @@
                         </li>
                     @else
                         @if ($context)
-                            @foreach ($context as $replace)
+                            @foreach ($context as $index => $replace)
                                 <li wire:key="part-error-{{$loop->parent->iteration}}-{{$loop->iteration}}">
                                     {{__("partcheck.{$error}", $replace)}}
                                 </li>

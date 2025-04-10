@@ -34,7 +34,14 @@ class PartCheckBag implements Arrayable, JsonSerializable
             foreach ($content as $error => $context) {
                 $error = PartError::tryFrom($error);
                 if (!is_null($error)) {
-                    $this->add($error, $context);
+                    if ($context) {
+                        foreach ($context as $c) {
+                            $this->add($error, $c);
+                        }
+                    } else {
+                        $this->add($error);
+                    }
+                    
                 }    
             }
         }
@@ -101,7 +108,6 @@ class PartCheckBag implements Arrayable, JsonSerializable
         foreach ($types as $type) {
             $m = array_merge($m, $this->messages[$type->value]);
         }
-
         if (!$translated) {
             return $m;
         }

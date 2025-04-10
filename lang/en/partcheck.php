@@ -17,7 +17,7 @@ return [
         'identicalpoints' => 'Line :value, indentical points',
         'colinear' => 'Line :value, points are colinear',
         'notconvex' => 'Line :value, quad is concave or bowtie',
-        'notcoplaner' => 'Line :value, quad is not coplaner',
+        'notcoplaner' => 'Line :value, quad is not coplaner (angle :angle)',
     ],
 
     'name' => [
@@ -82,5 +82,6 @@ return [
 
     'warning' => [
         'minifigcategory' => 'Ensure correct Minifig category',
+        'notcoplaner' => 'Line :value, quad is not coplaner (angle :angle)',
     ]
 ];
