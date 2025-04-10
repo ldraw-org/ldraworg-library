@@ -283,7 +283,7 @@ class Part extends Model
     protected function partCheck(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => new PartCheckBag(json_decode($value ?? [], true)),
+            get: fn (?string $value) => new PartCheckBag(json_decode($value ?? '', true)),
             set: fn (PartCheckBag $value) => json_encode($value->toArray())
         );
     }
