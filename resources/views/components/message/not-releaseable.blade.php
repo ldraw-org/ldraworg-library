@@ -1,5 +1,4 @@
 @props(['part'])
-@if ($part->part_check->has(['errors','tracker_holds']))
 <x-message compact icon type="warning">
     <x-slot:header>
         This part is not releaseable
@@ -35,4 +34,3 @@
         @endforeach
     </ul>
 </x-message>
-@endif

@@ -30,12 +30,12 @@ enum EventType: string
     {
         return match ($this) {
             EventType::Review => null,
-            EventType::Comment => 'fas-comment',
-            EventType::Submit => 'fas-file',
-            EventType::HeaderEdit => 'fas-edit',
-            EventType::Rename => 'fas-file-export',
-            EventType::Delete => 'fas-recycle',
-            EventType::Release => 'fas-graduation-cap',
+            EventType::Comment => 'mdi-comment',
+            EventType::Submit => 'mdi-file',
+            EventType::HeaderEdit => 'mdi-text-box-edit',
+            EventType::Rename => 'mdi-file-export',
+            EventType::Delete => 'mdi-recycle',
+            EventType::Release => 'mdi-school',
         };
     }
 

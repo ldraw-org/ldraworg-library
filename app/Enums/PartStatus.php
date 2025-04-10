@@ -30,8 +30,8 @@ enum PartStatus: int
     public function icon(): string
     {
         return match ($this) {
-            PartStatus::Official => 'fas-award',
-            default => 'fas-square'
+            PartStatus::Official => 'mdi-seal-variant',
+            default => 'mdi-square-rounded'
         };
     }
 

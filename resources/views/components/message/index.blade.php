@@ -10,13 +10,13 @@
     @if($icon)
         @switch($type)
             @case('error')
-                <x-fas-exclamation-circle class="w-14 h-14 text-red-800" />
+                <x-mdi-close-octagon class="w-14 h-14 text-red-800" />
                 @break
             @case('warning')
-                <x-fas-exclamation-triangle class="w-14 h-14 text-yellow-800" />
+                <x-mdi-alert class="w-14 h-14 text-yellow-800" />
                 @break
             @case('info')
-                <x-fas-info class="w-14 h-14 text-blue-800" />
+                <x-mdi-information-slab-circle class="w-14 h-14 text-blue-800" />
                 @break
         @endswitch
     @endif

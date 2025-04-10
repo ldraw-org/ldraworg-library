@@ -30,12 +30,12 @@ enum VoteType: string
     public function icon()
     {
         return match ($this) {
-            VoteType::Comment => 'fas-comment',
-            VoteType::CancelVote => 'fas-undo',
-            VoteType::AdminCertify => 'fas-clipboard-check',
-            VoteType::AdminFastTrack => 'fas-truck-fast',
-            VoteType::Certify => 'fas-check',
-            VoteType::Hold => 'fas-circle-exclamation',
+            VoteType::Comment => 'mdi-comment',
+            VoteType::CancelVote => 'mdi-arrow-u-left-top',
+            VoteType::AdminCertify => 'mdi-clipboard-check',
+            VoteType::AdminFastTrack => 'mdi-truck-fast',
+            VoteType::Certify => 'mdi-check',
+            VoteType::Hold => 'mdi-close-octagon',
         };
     }
 

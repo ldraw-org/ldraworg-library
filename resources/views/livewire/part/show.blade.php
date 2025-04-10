@@ -68,7 +68,7 @@
                         $this->deleteAction
                     ]"
                     label="Admin Tools"
-                    icon="fas-caret-down"
+                    icon="mdi-menu-down"
                     button="true"
                     color="gray"
                     outlined="true"
@@ -89,7 +89,7 @@
                 <x-filament-action action="toggleDeleteFlagAction" />
                 @if($part->delete_flag && !$this->toggleDeleteFlagAction->isVisible())
                     <x-filament::button
-                        icon="fas-flag"
+                        icon="mdi-flag"
                         color="danger"
                     >
                         Flagged for Deletion
@@ -139,9 +139,9 @@
                         External Sites:
                     </div>
                     @if (!is_null($part->getRebrickablePart()))
-                        <x-fas-link class="w-5 h-5 fill-gray-400" title="External site data provided by Rebrickable.com" />
+                        <x-mdi-link-variant class="w-5 h-5 fill-gray-400" title="External site data provided by Rebrickable.com" />
                     @else
-                        <x-fas-link-slash class="w-5 h-5 fill-gray-400" title="External site data provided by part keywords" />
+                        <x-mdi-link-variant-off class="w-5 h-5 fill-gray-400" title="External site data provided by part keywords" />
                     @endif
                     <x-filament-action action="viewRebrickableAction" />
                     <x-filament-action action="viewBrickLinkAction" />
@@ -176,9 +176,9 @@
         @if($part->isUnofficial())
             <div class="text-lg font-bold">Status:</div>
             <x-part.status :$part show-status />
-            @empty($part->can_release || $part->part_check->get(['warnings']))
+            @if(!$part->can_release || $part->part_check->get(['warnings']))
                 <x-message.not-releaseable :$part />
-            @endempty
+            @endif
             <div class="text-md font-bold">Current Votes:</div>
             <x-vote.table :votes="$part->votes" />
             @if (count($part->missing_parts) > 0)
@@ -249,42 +249,42 @@
         <div class="flex flex-col w-full h-full">
             <div class="flex flex-row space-x-2 p-2 mb-2">
                 <x-filament::icon-button
-                    icon="fas-undo"
+                    icon="mdi-refresh"
                     size="lg"
                     label="Normal mode"
                     class="border"
                     wire:click="$dispatch('ldbi-default-mode')"
                 />
                 <x-filament::icon-button
-                    icon="fas-paint-brush"
+                    icon="mdi-brush"
                     size="lg"
                     label="Harlequin (random color) mode"
                     class="border"
                     wire:click="$dispatch('ldbi-harlequin-mode')"
                 />
                 <x-filament::icon-button
-                    icon="fas-leaf"
+                    icon="mdi-flip-to-back"
                     size="lg"
                     label="Back Face Culling (BFC) mode"
                     class="border"
                     wire:click="$dispatch('ldbi-bfc-mode')"
                 />
                 <x-filament::icon-button
-                    icon="fas-dot-circle"
+                    icon="mdi-toy-brick"
                     size="lg"
                     label="Toggle Stud Logos"
                     class="border"
                     wire:click="$dispatch('ldbi-stud-logos')"
                 />
                 <x-filament::icon-button
-                    icon="fas-arrows-alt"
+                    icon="mdi-axis-arrow"
                     size="lg"
                     label="Toggle Show Origin"
                     class="border"
                     wire:click="$dispatch('ldbi-show-origin')"
                 />
                 <x-filament::icon-button
-                    icon="fas-eye"
+                    icon="mdi-camera"
                     size="lg"
                     label="Toggle Photo Mode"
                     class="border"

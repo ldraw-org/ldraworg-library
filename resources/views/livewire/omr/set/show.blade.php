@@ -52,21 +52,21 @@
         <div class="flex flex-col w-full h-full">
             <div class="flex flex-row space-x-2 p-2 mb-2">
                 <x-filament::icon-button
-                    icon="fas-undo"
+                    icon="mdi-refresh"
                     size="lg"
                     label="Normal mode"
                     class="border"
                     wire:click="$dispatch('ldbi-default-mode')"
                 />
                 <x-filament::icon-button
-                    icon="fas-dot-circle"
+                    icon="mdi-record-circle"
                     size="lg"
                     label="Toggle Stud Logos"
                     class="border"
                     wire:click="$dispatch('ldbi-stud-logos')"
                 />
                 <x-filament::icon-button
-                    icon="fas-eye"
+                    icon="mdi-eye"
                     size="lg"
                     label="Toggle Photo Mode"
                     class="border"

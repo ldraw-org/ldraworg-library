@@ -23,7 +23,6 @@
         "mailersend/laravel-driver": "^2.7.0",
         "markrogoyski/math-php": "^2.11",
         "mcordingley/linearalgebra": "^3.0",
-        "owenvoke/blade-fontawesome": "^2.9",
         "panphp/pan": "^0.1.8",
         "postare/blade-mdi": "^1.1",
         "spatie/image": "^3.8.0",

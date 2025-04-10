@@ -321,7 +321,7 @@ class Show extends Component implements HasForms, HasActions
         return Action::make('toggleTracked')
             ->button()
             ->color(Auth::user()?->notification_parts->contains($this->part->id) ? 'yellow' : 'gray')
-            ->icon('fas-bell')
+            ->icon('mdi-bell')
             ->label(Auth::user()?->notification_parts->contains($this->part->id) ? 'Tracking' : 'Track')
             ->action(function () {
                 Auth::user()->notification_parts()->toggle([$this->part->id]);
@@ -334,7 +334,7 @@ class Show extends Component implements HasForms, HasActions
         return Action::make('toggleDeleteFlag')
             ->button()
             ->color($this->part->delete_flag ? 'red' : 'gray')
-            ->icon('fas-flag')
+            ->icon('mdi-flag')
             ->label($this->part->delete_flag ? 'Flagged for Deletion' : 'Flag for Deletion')
             ->action(function () {
                 $this->part->delete_flag = !$this->part->delete_flag;
@@ -348,7 +348,7 @@ class Show extends Component implements HasForms, HasActions
         return Action::make('toggleManualHold')
             ->button()
             ->color($this->part->manual_hold_flag ? 'red' : 'gray')
-            ->icon('fas-flag')
+            ->icon('mdi-flag')
             ->label($this->part->manual_hold_flag ? 'On Administrative Hold' : 'Place on Administrative Hold')
             ->action(function () {
                 $this->part->manual_hold_flag = !$this->part->manual_hold_flag;
@@ -454,7 +454,7 @@ class Show extends Component implements HasForms, HasActions
             ->button()
             ->color('gray')
             ->label("View on {$site->name}")
-            ->icon('fas-external-link-alt')
+            ->icon('mdi-open-in-new')
             ->iconPosition(IconPosition::After)
             ->url($url ?? '', shouldOpenInNewTab: true)
             ->visible(!is_null($url));
@@ -464,7 +464,7 @@ class Show extends Component implements HasForms, HasActions
         return Action::make('viewFix')
             ->button()
             ->color('gray')
-            ->icon('fas-copy')
+            ->icon('mdi-file-multiple')
             ->label('View ' . ($this->part->isUnofficial() ? 'official' : 'unofficial')  . ' version of part')
             ->url(function () {
                 if ($this->part->isUnofficial()) {
@@ -473,22 +473,6 @@ class Show extends Component implements HasForms, HasActions
                 return route('parts.show', $this->part->unofficial_part->id ?? 0);
             })
             ->visible(!is_null($this->part->unofficial_part) || !is_null($this->part->official_part));
-    }
-
-    public function adminErrorAction(): Action
-    {
-        return Action::make('adminError')
-            ->button()
-            ->color('gray')
-            ->icon('fas-copy')
-            ->label(true ? 'Edit/Clear Admin Error' : 'Add Admin Error')
-            ->url(function () {
-                if ($this->part->isUnofficial()) {
-                    return route('parts.show', $this->part->official_part->id ?? 0);
-                }
-                return route('parts.show', $this->part->unofficial_part->id ?? 0);
-            })
-            ->visible(false);
     }
 
     #[Layout('components.layout.tracker')]
