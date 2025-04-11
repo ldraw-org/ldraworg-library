@@ -173,12 +173,12 @@
             </x-accordion>
           </div>
         </div>
-        @if($part->isUnofficial())
             <div class="text-lg font-bold">Status:</div>
             <x-part.status :$part show-status />
-            @if(!$part->can_release || $part->part_check->get(['warnings']))
+            @if($part->part_check->get())
                 <x-message.not-releaseable :$part />
             @endif
+        @if($part->isUnofficial())
             <div class="text-md font-bold">Current Votes:</div>
             <x-vote.table :votes="$part->votes" />
             @if (count($part->missing_parts) > 0)

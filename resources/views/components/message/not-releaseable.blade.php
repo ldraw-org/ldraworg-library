@@ -1,11 +1,33 @@
 @props(['part'])
-@if ($part->part_check->has(['errors','tracker_holds']))
+@if ($part->part_check->has(['tracker_holds']))
     <x-message compact icon type="error">
         <x-slot:header>
-            This part is not releaseable
+            This part has the following automated holds from the Parts Tracker
         </x-slot:header>
         <ul>
-            @foreach($part->part_check->get(['errors','tracker_holds']) as $error => $context)
+            @foreach($part->part_check->get(['tracker_holds']) as $error => $context)
+                @if ($context)
+                    @foreach ($context as $replace)
+                        <li wire:key="part-error-{{$loop->parent->iteration}}-{{$loop->iteration}}">
+                            {{__("partcheck.{$error}", $replace)}}
+                        </li>
+                    @endforeach
+                @else
+                    <li wire:key="part-error-{{$loop->iteration}}">
+                        {{__("partcheck.{$error}")}}
+                    </li>
+                @endif
+            @endforeach
+        </ul>
+    </x-message>
+@endif
+@if ($part->part_check->has(['errors']))
+    <x-message compact icon type="error">
+        <x-slot:header>
+            This part has the following errors
+        </x-slot:header>
+        <ul>
+            @foreach($part->part_check->get(['errors']) as $error => $context)
                     @if ($error == \App\Enums\PartError::TrackerHasUncertifiedSubfiles->value)
                         <li wire:key="part-error-{{$loop->iteration}}">
                             <x-accordion id="showContents">
