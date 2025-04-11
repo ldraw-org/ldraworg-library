@@ -18,6 +18,7 @@ enum LibraryIcon: string
     case MenuDown = 'mdi-menu-down';
     case MenuRight = 'mdi-menu-right';
     case Official = 'mdi-seal-variant';
+    case NotReleaseable = 'mdi-file-document-remove';
     case UnofficialPartStatus = 'mdi-square-rounded';
     case BreadcrumbsSeparater = 'mdi-chevron-double-right';
     case UserNotification = 'mdi-bell';

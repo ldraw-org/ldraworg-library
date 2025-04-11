@@ -5,7 +5,7 @@
 <div>
     @if ($part->isUnofficial())
         @if (!$part->ready_for_admin)
-            <x-library-icon icon="error" title="Not releaseable" class="inline w-7 fill-red-500" />
+            <x-library-icon icon="not-releaseable" title="Not releaseable" color="fill-red-300" class="inline w-7" />
         @endif
         @if ($showMyVote)
             @empty($userVote)
