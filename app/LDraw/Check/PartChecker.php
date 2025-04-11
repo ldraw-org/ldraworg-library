@@ -71,6 +71,7 @@ class PartChecker
         
         if (!$this->part?->isTexmap() && $checkFileErrors) {
             $this->errors->clear(CheckType::Error);
+            $this->errors->clear(CheckType::Warning);
             $this->standardChecks();
         }
 
