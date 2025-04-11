@@ -68,7 +68,7 @@
                         $this->deleteAction
                     ]"
                     label="Admin Tools"
-                    icon="mdi-menu-down"
+                    icon="{{ \App\Enums\LibraryIcon::MenuDown->value }}"
                     button="true"
                     color="gray"
                     outlined="true"
@@ -89,7 +89,7 @@
                 <x-filament-action action="toggleDeleteFlagAction" />
                 @if($part->delete_flag && !$this->toggleDeleteFlagAction->isVisible())
                     <x-filament::button
-                        icon="mdi-flag"
+                        icon="{{ \App\Enums\LibraryIcon::PartFlag->value }}"
                         color="danger"
                     >
                         Flagged for Deletion
@@ -139,9 +139,9 @@
                         External Sites:
                     </div>
                     @if (!is_null($part->getRebrickablePart()))
-                        <x-mdi-link-variant class="w-5 h-5 fill-gray-400" title="External site data provided by Rebrickable.com" />
+                        <x-library-icon icon="link-on" class="w-5" color="fill-gray-400" title="External site data provided by Rebrickable.com" />
                     @else
-                        <x-mdi-link-variant-off class="w-5 h-5 fill-gray-400" title="External site data provided by part keywords" />
+                        <x-library-icon icon="link-off" class="w-5" color="fill-gray-400" title="External site data provided by part keywords" />
                     @endif
                     <x-filament-action action="viewRebrickableAction" />
                     <x-filament-action action="viewBrickLinkAction" />
@@ -248,48 +248,12 @@
         </x-slot>
         <div class="flex flex-col w-full h-full">
             <div class="flex flex-row space-x-2 p-2 mb-2">
-                <x-filament::icon-button
-                    icon="mdi-refresh"
-                    size="lg"
-                    label="Normal mode"
-                    class="border"
-                    wire:click="$dispatch('ldbi-default-mode')"
-                />
-                <x-filament::icon-button
-                    icon="mdi-brush"
-                    size="lg"
-                    label="Harlequin (random color) mode"
-                    class="border"
-                    wire:click="$dispatch('ldbi-harlequin-mode')"
-                />
-                <x-filament::icon-button
-                    icon="mdi-flip-to-back"
-                    size="lg"
-                    label="Back Face Culling (BFC) mode"
-                    class="border"
-                    wire:click="$dispatch('ldbi-bfc-mode')"
-                />
-                <x-filament::icon-button
-                    icon="mdi-toy-brick"
-                    size="lg"
-                    label="Toggle Stud Logos"
-                    class="border"
-                    wire:click="$dispatch('ldbi-stud-logos')"
-                />
-                <x-filament::icon-button
-                    icon="mdi-axis-arrow"
-                    size="lg"
-                    label="Toggle Show Origin"
-                    class="border"
-                    wire:click="$dispatch('ldbi-show-origin')"
-                />
-                <x-filament::icon-button
-                    icon="mdi-camera"
-                    size="lg"
-                    label="Toggle Photo Mode"
-                    class="border"
-                    wire:click="$dispatch('ldbi-physical-mode')"
-                />
+                <x-3d-viewer.button.normal />
+                <x-3d-viewer.button.harlequin />
+                <x-3d-viewer.button.bfc />
+                <x-3d-viewer.button.studlogo />
+                <x-3d-viewer.button.showaxis />
+                <x-3d-viewer.button.photo />
             </div>
             <x-3d-viewer class="border w-full h-[80vh]" partname="{{str_replace('\\', '/', $part->name())}}" modelid="{{$part->id}}"/>
         </div>

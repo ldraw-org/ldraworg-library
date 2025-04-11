@@ -16,38 +16,34 @@
                 @continue
             @endempty
             <div class="flex flex-row space-x-2 pl-4">
-                <x-dynamic-component :component="$et->icon()" class="{{$et->iconColor()}} w-8" />
+                <x-library-icon :icon="$et->icon()" class="{{$et->iconColor()}} w-8" />
                 <div class="font-bold">{{$et->label()}} ({{str_replace('fill-', '',$et->iconColor())}})</div>
             </div>
         @endforeach
         <div class="flex flex-row space-x-2 pl-4">
-            <x-mdi-tools class="w-8 fill-green-400" />
+            <x-library-icon icon="part-fix" class="w-8 fill-green-400" />
             <div class="font-bold">Fix (green-400) (Used as modifier on bottom right) </div>
         </div>
         <div class="text-xl font-bold">Vote Type Icons</div>
         @foreach(\App\Enums\VoteType::cases() as $vt)
             <div class="flex flex-row space-x-2 pl-4">
-                <x-dynamic-component :component="$vt->icon()" class="{{$vt->iconColor()}} w-8" />
-                @if ($vt != \App\Enums\VoteType::Comment && $vt != \App\Enums\VoteType::CancelVote)
-                    <x-mdi-account-circle class="{{$vt->iconColor()}} w-8" />
-                @endif
+                <x-library-icon :icon="$vt->icon()" class="{{$vt->iconColor()}} w-8" />
                 <div class="font-bold">{{$vt->label()}} ({{str_replace('fill-', '',$vt->iconColor())}})</div>
             </div>
         @endforeach
         <div class="flex flex-row space-x-2 pl-4">
-            <x-mdi-square-rounded class="fill-white w-8" />
-            <x-mdi-account-circle class="fill-gray-400 w-8" />
+            <x-library-icon icon="user-vote" class="fill-gray-400 w-8" />
             <div class="font-bold">No Recorded Vote (gray-400)</div>
         </div>
         <div class="text-xl font-bold">Part Status Icons</div>
         @foreach(\App\Enums\PartStatus::cases() as $ps)
             <div class="flex flex-row space-x-2 pl-4">
-                <x-dynamic-component :component="$ps->icon()" class="{{$ps->iconColor()}} w-8" />
+                <x-library-icon :icon="$ps->icon()" class="{{$ps->iconColor()}} w-8" />
                 <div class="font-bold">{{$ps->label()}} ({{str_replace('fill-', '',$ps->iconColor())}})</div>
             </div>
         @endforeach
         <div class="flex flex-row space-x-2 pl-4">
-            <x-mdi-alert title="Not releaseable" class="w-8 text-yellow-800" />
-            <div class="font-bold">Not Releaseable (yellow-800)</div>
+            <x-library-icon icon="error" title="Not releaseable" class="w-8 fill-red-500" />
+            <div class="font-bold">Not Releaseable (red-800)</div>
         </div>
 </x-layout.base>

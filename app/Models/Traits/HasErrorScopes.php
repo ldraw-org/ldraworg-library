@@ -35,13 +35,13 @@ trait HasErrorScopes
     #[Scope]
     protected function hasTracker(Builder $query): void
     {
-        $query->whereJsonLength('part_check->tracker', '>', 0);
+        $query->whereJsonLength('part_check->tracker_holds', '>', 0);
     }
 
     #[Scope]
     protected function doesntHaveTracker(Builder $query): void
     {
-        $query->whereJsonLength('part_check->tracker', '=', 0);
+        $query->whereJsonLength('part_check->tracker_holds', '=', 0);
     }
 
     #[Scope]

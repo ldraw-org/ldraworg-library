@@ -5,9 +5,9 @@
 <li x-data="{ {{$mname}} : false }" @@mouseover="{{$mname}} = true" @@mouseover.away="{{$mname}} = false" class="p-2 hover:bg-gray-300 relative">
     {{$label}}
     @if($level == 0)
-        <x-mdi-menu-down class="inline w-7" />
+        <x-library-icon icon="menu-down" class="inline w-7" />
     @else
-        <x-mdi-menu-right class="inline w-7" />
+        <x-library-icon icon="menu-right" class="inline w-7" />
     @endif
     <ul 
         @class([

@@ -5,21 +5,21 @@
 <div>
     @if ($part->isUnofficial())
         @if (!$part->ready_for_admin)
-            <x-mdi-alert title="Not releaseable" class="inline w-6 fill-yellow-800" />
+            <x-library-icon icon="error" title="Not releaseable" class="inline w-7 fill-red-500" />
         @endif
         @if ($showMyVote)
             @empty($userVote)
-                <x-mdi-account-circle class="inline w-6 fill-gray-400" title="My Vote: None"/>
+                <x-library-icon icon="user-vote" class="inline w-7 fill-gray-400" title="My Vote: None"/>
             @else
-                <x-dynamic-component :component="$userVote->icon()" class="inline w-6 {{$userVote->iconColor()}}" title="My Vote: {{$userVote->label()}}" />
+                <x-library-icon :icon="$userVote->icon()" class="inline w-7 {{$userVote->iconColor()}}" title="My Vote: {{$userVote->label()}}" />
             @endempty
         @endif
-        <x-mdi-square-rounded class="inline w-6 {{$part->part_status->iconColor()}}"
+        <x-library-icon :icon="$part->part_status->icon()" class="inline w-7 {{$part->part_status->iconColor()}}"
             title="{{$part->part_status->label()}} {{$part->statusCode()}}"
         />
             <span>{{$showStatus ? $part->part_status->label() : ''}} {{$part->statusCode()}}</span>
     @else
-        <x-dynamic-component :component="$part->part_status->icon()" class="inline w-6 {{$part->part_status->iconColor()}}" title="{{$part->part_status->label()}}" />
+        <x-library-icon :icon="$part->part_status->icon()" class="inline w-7 {{$part->part_status->iconColor()}}" title="{{$part->part_status->label()}}" />
         <span>{{$part->part_status->label()}}</span>
     @endif
 </div>

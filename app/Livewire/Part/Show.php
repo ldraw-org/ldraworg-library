@@ -3,6 +3,7 @@
 namespace App\Livewire\Part;
 
 use App\Enums\ExternalSite;
+use App\Enums\LibraryIcon;
 use App\Enums\PartCategory;
 use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
@@ -321,7 +322,7 @@ class Show extends Component implements HasForms, HasActions
         return Action::make('toggleTracked')
             ->button()
             ->color(Auth::user()?->notification_parts->contains($this->part->id) ? 'yellow' : 'gray')
-            ->icon('mdi-bell')
+            ->icon(LibraryIcon::UserNotification->value)
             ->label(Auth::user()?->notification_parts->contains($this->part->id) ? 'Tracking' : 'Track')
             ->action(function () {
                 Auth::user()->notification_parts()->toggle([$this->part->id]);
@@ -334,7 +335,7 @@ class Show extends Component implements HasForms, HasActions
         return Action::make('toggleDeleteFlag')
             ->button()
             ->color($this->part->delete_flag ? 'red' : 'gray')
-            ->icon('mdi-flag')
+            ->icon(LibraryIcon::PartFlag->value)
             ->label($this->part->delete_flag ? 'Flagged for Deletion' : 'Flag for Deletion')
             ->action(function () {
                 $this->part->delete_flag = !$this->part->delete_flag;
@@ -348,7 +349,7 @@ class Show extends Component implements HasForms, HasActions
         return Action::make('toggleManualHold')
             ->button()
             ->color($this->part->manual_hold_flag ? 'red' : 'gray')
-            ->icon('mdi-flag')
+            ->icon(LibraryIcon::PartFlag->value)
             ->label($this->part->manual_hold_flag ? 'On Administrative Hold' : 'Place on Administrative Hold')
             ->action(function () {
                 $this->part->manual_hold_flag = !$this->part->manual_hold_flag;
@@ -454,7 +455,7 @@ class Show extends Component implements HasForms, HasActions
             ->button()
             ->color('gray')
             ->label("View on {$site->name}")
-            ->icon('mdi-open-in-new')
+            ->icon(LibraryIcon::ExternalSite->value)
             ->iconPosition(IconPosition::After)
             ->url($url ?? '', shouldOpenInNewTab: true)
             ->visible(!is_null($url));
@@ -464,7 +465,7 @@ class Show extends Component implements HasForms, HasActions
         return Action::make('viewFix')
             ->button()
             ->color('gray')
-            ->icon('mdi-file-multiple')
+            ->icon(LibraryIcon::PartFix->value)
             ->label('View ' . ($this->part->isUnofficial() ? 'official' : 'unofficial')  . ' version of part')
             ->url(function () {
                 if ($this->part->isUnofficial()) {

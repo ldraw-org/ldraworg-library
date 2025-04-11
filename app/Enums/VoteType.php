@@ -27,15 +27,11 @@ enum VoteType: string
 
     }
 
-    public function icon()
+    public function icon(): LibraryIcon
     {
         return match ($this) {
-            VoteType::Comment => 'mdi-comment',
-            VoteType::CancelVote => 'mdi-arrow-u-left-top',
-            VoteType::AdminCertify => 'mdi-clipboard-check',
-            VoteType::AdminFastTrack => 'mdi-truck-fast',
-            VoteType::Certify => 'mdi-check',
-            VoteType::Hold => 'mdi-close-octagon',
+            VoteType::Hold => LibraryIcon::Error,
+            default => LibraryIcon::{$this->name}
         };
     }
 

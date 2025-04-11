@@ -1,0 +1,1 @@
+<x-3d-viewer.button :icon="\App\Enums\LibraryIcon::ViewerRefresh" label="Reset View" onClick="ldbi-default-mode" />

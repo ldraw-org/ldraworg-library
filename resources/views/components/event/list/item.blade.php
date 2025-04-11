@@ -12,15 +12,15 @@
             @endif
             <div class="flex flex-row">
                 @if($event->user->hasRole('Library Admin'))
-                    <x-mdi-crown class="h-5 w-5" title="Part Library Admin"/>
+                    <x-library-icon icon="user-library-admin" class="w-5" title="Part Library Admin"/>
                 @elseif($event->user->hasRole('Senior Reviewer'))
-                    <x-mdi-account-school class="h-5 w-5" title="Senior Part Reviewer"/>
+                    <x-library-icon icon="user-senior-reviewer" class="w-5" title="Senior Part Reviewer"/>
                 @elseif($event->user->hasRole('Part Header Editor'))
-                    <x-mdi-account-plus class="h-5 w-5" title="Part Header Editor"/>
+                    <x-library-icon icon="user-header-editor" class="w-5" title="Part Header Editor"/>
                 @elseif($event->user->hasRole('Part Reviewer'))
-                    <x-mdi-account-check class="h-5 w-5" title="Part Reviewer"/>
+                    <x-library-icon icon="user-part-reviewer" class="w-5" title="Part Reviewer"/>
                 @elseif($event->user->hasRole('Part Author'))
-                    <x-mdi-account-edit class="h-5 w-5" title="Part Author"/>
+                    <x-library-icon icon="user-part-author" class="w-5" title="Part Author"/>
                 @endif
             </div>
             <div>

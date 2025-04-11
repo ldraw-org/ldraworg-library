@@ -51,27 +51,9 @@
         </x-slot>
         <div class="flex flex-col w-full h-full">
             <div class="flex flex-row space-x-2 p-2 mb-2">
-                <x-filament::icon-button
-                    icon="mdi-refresh"
-                    size="lg"
-                    label="Normal mode"
-                    class="border"
-                    wire:click="$dispatch('ldbi-default-mode')"
-                />
-                <x-filament::icon-button
-                    icon="mdi-record-circle"
-                    size="lg"
-                    label="Toggle Stud Logos"
-                    class="border"
-                    wire:click="$dispatch('ldbi-stud-logos')"
-                />
-                <x-filament::icon-button
-                    icon="mdi-eye"
-                    size="lg"
-                    label="Toggle Photo Mode"
-                    class="border"
-                    wire:click="$dispatch('ldbi-physical-mode')"
-                />
+                <x-3d-viewer.button.normal />
+                <x-3d-viewer.button.studlogo />
+                <x-3d-viewer.button.photo />
             </div>
             <x-3d-viewer class="border w-full h-[80vh]" modeltype="omr" />
         </div>

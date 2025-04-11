@@ -26,16 +26,12 @@ enum EventType: string
 
     }
 
-    public function icon(): ?string
+    public function icon(): ?LibraryIcon
     {
         return match ($this) {
             EventType::Review => null,
-            EventType::Comment => 'mdi-comment',
-            EventType::Submit => 'mdi-file',
-            EventType::HeaderEdit => 'mdi-text-box-edit',
-            EventType::Rename => 'mdi-file-export',
-            EventType::Delete => 'mdi-recycle',
-            EventType::Release => 'mdi-school',
+            EventType::Submit => LibraryIcon::File,
+            default => LibraryIcon::{$this->name}
         };
     }
 

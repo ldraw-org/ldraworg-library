@@ -1,0 +1,1 @@
+<x-3d-viewer.button :icon="\App\Enums\LibraryIcon::ViewerShowAxis" label="Toggle Show Origin" onClick="ldbi-show-origin" />

@@ -27,11 +27,11 @@ enum PartStatus: int
         };
     }
 
-    public function icon(): string
+    public function icon(): LibraryIcon
     {
         return match ($this) {
-            PartStatus::Official => 'mdi-seal-variant',
-            default => 'mdi-square-rounded'
+            PartStatus::Official => LibraryIcon::Official,
+            default => LibraryIcon::UnofficialPartStatus
         };
     }
 

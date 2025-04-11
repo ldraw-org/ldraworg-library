@@ -10,7 +10,7 @@
             'flex-col place-items-center' => $small,
             'flex-row space-x-2 items-center justify-items-start' => !$small
         ])>
-            <x-dynamic-component :component="$status->icon()" class="inline w-6 {{$status->iconColor()}}" title="{{$status->label()}}" />
+            <x-library-icon :icon="$status->icon()" class="inline w-8 {{$status->iconColor()}}" title="{{$status->label()}}" />
             <div>{{$summary[$status->value]}}{{$small ? '' : ' ' . $status->label()}}</div>
         </div>
     @endforeach

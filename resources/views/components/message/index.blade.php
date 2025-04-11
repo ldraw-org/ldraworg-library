@@ -10,13 +10,13 @@
     @if($icon)
         @switch($type)
             @case('error')
-                <x-mdi-close-octagon class="w-14 h-14 text-red-800" />
+                <x-library-icon icon="error" class="w-14" color="fill-red-800" />
                 @break
             @case('warning')
-                <x-mdi-alert class="w-14 h-14 text-yellow-800" />
+                <x-library-icon icon="alert" class="w-14" color="fill-yellow-800" />
                 @break
             @case('info')
-                <x-mdi-information-slab-circle class="w-14 h-14 text-blue-800" />
+                <x-library-icon icon="info" class="w-14" color="fill-blue-800" />
                 @break
         @endswitch
     @endif
