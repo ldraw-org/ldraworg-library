@@ -29,7 +29,7 @@ return [
 
     'description' => [
         'invalidchars' => 'Description line may not contain special characters',
-        'patternword' => 'Pattern part description must end with "Pattern"',
+        'patternword' => 'Pattern part description must end with "Pattern" or have a "Colour Combination" keyword',
         'subpartdesc' => 'Subpart descriptions must begin with "~"',
         'aliasdesc' => 'Alias part descriptions must begin with "="',
         'thirdpartydesc' => 'Third party part descriptions must begin with "|"',

@@ -23,15 +23,19 @@ class PatternPartDesciption implements Check
                 return;
             }
             $cat = $part->category;
+            $keywords = $part->keywords->pluck('keyword');
         } else {
             if (!app(Parser::class)->patternName($part->name)) {
                 return;
             }
             $cat = $part->metaCategory ?? $part->descriptionCategory;
+            $keywords = collect($part->keywords);
         }
 
         if (! in_array($cat, [PartCategory::Moved, PartCategory::Sticker, PartCategory::StickerShortcut]) &&
-            ! preg_match('#^.*?\h+Pattern(?:\h+\(.*\))?$#ui', $part->description, $matches)) {
+            ! preg_match('#^.*?\h+Pattern(?:\h+\(.*\))?$#ui', $part->description, $matches) &&
+            ! is_null($keywords->first(fn (string $kw) => Str::of($kw)->lower()->startsWith('colour combination')))
+        ) {
                 $fail(PartError::PatternNotInDescription);
         }
     }
