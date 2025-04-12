@@ -2,9 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Part\Part;
-use App\Models\RebrickablePart;
-use App\Models\StickerSheet;
 use Illuminate\Console\Command;
 
 class DeployUpdate extends Command
@@ -28,11 +25,5 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::hasWarnings()->each(function (Part $p) {
-            $pc = $p->part_check;
-            $pc['warnings'] = ['warning.minifigcategory' => []];
-            $p->part_check = $pc;
-            $p->save();
-        });
     }
 }
