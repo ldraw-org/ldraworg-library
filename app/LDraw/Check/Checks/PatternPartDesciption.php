@@ -32,11 +32,11 @@ class PatternPartDesciption implements Check
             $keywords = collect($part->keywords);
         }
 
-        if (! in_array($cat, [PartCategory::Moved, PartCategory::Sticker, PartCategory::StickerShortcut]) &&
-            ! preg_match('#^.*?\h+Pattern(?:\h+\(.*\))?$#ui', $part->description, $matches) &&
-            ! is_null($keywords->first(fn (string $kw) => Str::of($kw)->lower()->startsWith('colour combination')))
-        ) {
-                $fail(PartError::PatternNotInDescription);
+        $notExcludedCategory = !in_array($cat, [PartCategory::Moved, PartCategory::Sticker, PartCategory::StickerShortcut]);
+        $doesntHavePattern = preg_match('#^.*?\h+Pattern(?:\h+\(.*\))?$#ui', $part->description, $matches) < 1;
+        $doesntHavekeyword = is_null($keywords->first(fn (string $kw) => Str::of($kw)->lower()->startsWith('colour combination')));
+        if ($notExcludedCategory && $doesntHavePattern && $doesntHavekeyword) {
+            $fail(PartError::PatternNotInDescription);
         }
     }
 }
