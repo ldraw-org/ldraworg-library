@@ -76,9 +76,10 @@ class EditHeaderAction
                 ->required()
                 ->string()
                 ->rules([
-                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
+                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part, $get) {
                         $p = ParsedPart::fromPart($part);
                         $p->description = $value;
+                        $p->keywords = collect(explode(',', Str::of($get('keywords'))->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all();
                         $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\LibraryApprovedDescription());
                         if ($errors) {
                             $fail($errors[0]);
