@@ -16,7 +16,7 @@ class LDrawColourManager
     public function importColours(): void
     {
         $ldconfig = Storage::disk('library')->get('official/LDConfig.ldr');
-        $colors = $this->parser->getColours($ldconfig) ?? [];
+        $colors = $this->parser->getColours($this->parser->unixLineEndings($ldconfig)) ?? [];
         foreach ($colors as $color) {
             LdrawColour::updateOrCreate(['code' => $color['code']], $color);
         }
