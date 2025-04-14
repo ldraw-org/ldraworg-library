@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('ldraw_colours', function (Blueprint $table) {
-            $table->boolean('fabric')->defualt(false);
+            $table->boolean('fabric')->defualt(0);
             $table->string('material_fabric_type')->nullable();
         });
     }

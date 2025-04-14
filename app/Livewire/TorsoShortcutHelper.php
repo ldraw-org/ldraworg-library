@@ -7,6 +7,7 @@ use App\Events\PartSubmitted;
 use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Jobs\UpdateZip;
 use App\LDraw\Check\Checks\PatternHasSetKeyword;
+use App\LDraw\Check\PartChecker;
 use App\LDraw\LDrawFile;
 use App\LDraw\Rebrickable;
 use App\Models\Part\Part;
@@ -197,7 +198,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                                 ->rules([
                                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) {
                                         $p = app(\App\LDraw\Parse\Parser::class)->parse($this->makeShortcut());
-                                        $errors = app(\App\LDraw\Check\PartChecker::class)->singleCheck($p, new PatternHasSetKeyword());
+                                        $errors = (new PartChecker($p))->singleCheck(new PatternHasSetKeyword());
                                         if (count($errors) > 0) {
                                             $fail($errors[0]);
                                         }
