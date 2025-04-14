@@ -1,4 +1,4 @@
-<x-3d-viewer class="border rounded-lg w-full h-full overflow-hidden" partname="{{$partname}}" :parts="$parts" />
+<x-3d-viewer class="border rounded-lg w-full h-full overflow-hidden" partname="{{$partname}}" modeltype="user" />
 
 @push('scripts')
     @script
