@@ -14,10 +14,7 @@ class LdrawColour extends Model
 {
     use HasFactory;
 
-    protected $guarded = [
-        'id',
-        'created_at'
-    ];
+    protected $guarded = [];
 
     protected function casts(): array
     {
@@ -29,6 +26,7 @@ class LdrawColour extends Model
             'metal' => 'boolean',
             'glitter' => 'boolean',
             'speckle' => 'boolean',
+            'fabric' => 'boolean',
         ];
     }
 

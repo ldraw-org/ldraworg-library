@@ -322,24 +322,62 @@ class Parser
         if (!is_null($colors)) {
             $colors = collect($colors);
             $colors = $colors->map(function (array $color, int $key) {
-                $color = array_filter($color, fn ($k) => is_string($k), ARRAY_FILTER_USE_KEY);
-                $color = array_map(function ($val) { return $val == '' ? null : $val; }, $color);
-                $color = array_merge(['alpha' => null, 'luminance' => null, 'material' => null], $color);
-                $material = $color['material'];
-                unset($color['material']);
+                $material = Arr::get($color, 'material');
+                $color = [
+                    'name' => $color['name'],
+                    'code' => $color['code'],
+                    'value' => $color['value'],
+                    'edge' => $color['edge'],
+                    'alpha' => Arr::get($color, 'alpha') == '' ? null : $color['alpha'],
+                    'luminance' => Arr::get($color, 'luminance') == '' ? null : $color['luminance'],
+                ];
                 if (!is_null($material)) {
                     $mat = $this->patternMatch('colour_material', $material);
                     if (!is_null($mat)) {
-                        $mat = array_filter($mat, fn ($k) => is_string($k), ARRAY_FILTER_USE_KEY);
-                        $mat = array_map(function ($val) { return $val == '' ? null : $val; }, $mat);
-                        $mat = array_merge(['alpha' => null, 'luminance' => null, 'vfraction' => null, 'size' => null, 'maxsize' => null, 'minsize' => null], $mat);
-                        foreach ($mat as $index => $value) {
-                            if ($index == 'type') {
-                                $color[mb_strtolower($value)] = true;
-                            } else {
-                                $color["material_{$index}"] = $value;
-                            }
+                        $nullArray = [
+                            'fabric' => false,
+                            'speckle' => false,
+                            'glitter' => false,
+                            'material_fabric_type' => null, 
+                            'material_value' => null, 
+                            'material_alpha' => null, 
+                            'material_luminance' => null,
+                            'material_fraction' => null, 
+                            'material_vfraction' => null, 
+                            'material_size' => null, 
+                            'material_maxsize' => null, 
+                            'material_minsize' => null
+                        ];
+                        if ($mat['fabric'] !== '') {
+                            $matArray = [
+                                'fabric' => true,
+                                'material_fabric_type' => Arr::get($mat, 'f_type') == '' ? null : $mat['f_type']
+                            ];
+                        } elseif ($mat['speckle'] !== '') {
+                            $matArray = [
+                                'speckle' => true,
+                                'material_value' => $mat['s_value'], 
+                                'material_alpha' => Arr::get($mat, 's_alpha') == '' ? null : $mat['s_alpha'], 
+                                'material_luminance' => Arr::get($mat, 's_luminance') == '' ? null : $mat['s_luminance'],
+                                'material_fraction' => $mat['s_fraction'], 
+                                'material_size' => Arr::get($mat, 's_size')== '' ? null : $mat['s_size'], 
+                                'material_maxsize' => Arr::get($mat, 's_maxsize') == '' ? null : $mat['s_maxsize'], 
+                                'material_minsize' => Arr::get($mat, 's_minsize') == '' ? null : $mat['s_minsize']
+                            ];
+                        } else {
+                            $matArray = [
+                                'glitter' => true,
+                                'material_value' => $mat['g_value'], 
+                                'material_alpha' => Arr::get($mat, 'g_alpha') == '' ? null : $mat['g_alpha'], 
+                                'material_luminance' => Arr::get($mat, 'g_luminance') == '' ? null : $mat['g_luminance'],
+                                'material_fraction' => $mat['g_fraction'], 
+                                'material_vfraction' => $mat['g_vfraction'], 
+                                'material_size' => Arr::get($mat, 'g_size') == '' ? null : $mat['g_size'], 
+                                'material_maxsize' => Arr::get($mat, 'g_maxsize') == '' ? null : $mat['g_maxsize'], 
+                                'material_minsize' => Arr::get($mat, 'g_minsize') == '' ? null : $mat['g_minsize']
+                            ];
                         }
+                        $color = array_merge(array_merge($nullArray, $matArray), $color);
                     } else {
                         $material = mb_strtolower($material);
                         $color[$material] = true;
