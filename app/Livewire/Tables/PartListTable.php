@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\LibraryIcon;
 use App\Enums\License;
 use App\Enums\PartCategory;
 use App\Enums\PartError;
@@ -100,9 +101,11 @@ class PartListTable extends BasicTable
                     // TODO: Third Party
                     TextConstraint::make('description'),
                     TextConstraint::make('filename')
-                        ->label('Part Name'),
+                        ->label('Part Name')
+                        ->icon(LibraryIcon::File->value),
                     RelationshipConstraint::make('user')
                         ->label('Author')
+                        ->icon(LibraryIcon::AuthorConstraint->value)
                         ->selectable(
                             IsRelatedToOperator::make()
                                 ->titleAttribute('name')
@@ -113,6 +116,7 @@ class PartListTable extends BasicTable
                         ),
                     SelectConstraint::make('hist_user')
                         ->label('History Author')
+                        ->icon(LibraryIcon::AuthorConstraint->value)
                         ->relationship(name: 'history', titleAttribute: 'user_id')
                         ->options(User::whereHas('part_history')->pluck('name', 'id'))
                         ->multiple()
@@ -127,9 +131,11 @@ class PartListTable extends BasicTable
                         ->multiple(),
                     SelectConstraint::make('category')
                         ->options(PartCategory::options())
+                        ->icon(LibraryIcon::CategoryConstraint->value)
                         ->multiple(),
                     SelectConstraint::make('part_errors')
                         ->options(PartError::options())
+                        ->icon(LibraryIcon::Error->value)
                         ->multiple()
                         ->operators([
                             IsOperator::make('error')
@@ -147,9 +153,11 @@ class PartListTable extends BasicTable
                             IsRelatedToOperator::make()
                                 ->titleAttribute('keyword')
                                 ->multiple(),
-                        ),
+                        )
+                        ->icon(LibraryIcon::KeywordsConstraint->value),
                     SelectConstraint::make('bfc')
                         ->label('BFC Status')
+                        ->icon(LibraryIcon::ViewerBfc->value)
                         ->options([
                             'CW' => 'CW',
                             'CCW' => 'CCW',
@@ -157,9 +165,11 @@ class PartListTable extends BasicTable
                         ->multiple(),
                     SelectConstraint::make('license')
                         ->options(License::options())
+                        ->icon(LibraryIcon::License->value)
                         ->multiple(),
                     TextConstraint::make('help')
-                        ->relationship(name: 'help', titleAttribute: 'text'),
+                        ->relationship(name: 'help', titleAttribute: 'text')
+                        ->icon(LibraryIcon::Help->value),
                     DateConstraint::make('history_date')
                         ->relationship(name: 'history', titleAttribute: 'created_at'),
                     TextConstraint::make('history_comment')
@@ -172,7 +182,7 @@ class PartListTable extends BasicTable
                     BooleanConstraint::make('is_dual_mould'),
                     Constraint::make('is_fix')
                         ->label('Is Fix')
-                        ->icon('heroicon-m-check-circle')
+                        ->icon(LibraryIcon::BooleanConstraint->value)
                         ->operators([
                             Operator::make('is_fix')
                                 ->label(fn (bool $isInverse): string => $isInverse ? 'Not a part fix' : 'Is a part fix')
@@ -189,6 +199,7 @@ class PartListTable extends BasicTable
                                 ->searchable()
                                 ->multiple(),
                         )
+                        ->icon(LibraryIcon::ViewerStudLogo->value)
                         ->emptyable(),
                     RelationshipConstraint::make('subparts')
                         ->selectable(
@@ -198,6 +209,7 @@ class PartListTable extends BasicTable
                                 ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->name()} - {$p->description}")
                                 ->multiple(),
                         )
+                        ->icon(LibraryIcon::ViewerStudLogo->value)
                         ->emptyable(),
                     RelationshipConstraint::make('parents')
                         ->selectable(
@@ -207,6 +219,7 @@ class PartListTable extends BasicTable
                                 ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->name()} - {$p->description}")
                                 ->multiple(),
                         )
+                        ->icon(LibraryIcon::ViewerStudLogo->value)
                         ->emptyable(),
                 ]),
         ];

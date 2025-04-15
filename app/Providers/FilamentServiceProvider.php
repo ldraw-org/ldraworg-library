@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Enums\LibraryIcon;
 use Illuminate\Support\ServiceProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Forms\Components\Select;
+use Filament\Support\Facades\FilamentIcon;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -53,5 +55,16 @@ class FilamentServiceProvider extends ServiceProvider
                 ->paginated([10, 25, 50, 100])
                 ->defaultPaginationPageOption(25);
         });
+
+        FilamentIcon::register([
+            'pagination.first-button' => LibraryIcon::PageFirst->value,
+            'pagination.last-button' => LibraryIcon::PageLast->value,
+            'pagination.next-button' => LibraryIcon::PageNext->value,
+            'tables::filters.query-builder.constraints.boolean' => LibraryIcon::BooleanConstraint->value,
+            'tables::filters.query-builder.constraints.date' => LibraryIcon::DateSelect->value,
+            'tables::filters.query-builder.constraints.relationship' => LibraryIcon::RelationshipConstraint->value,
+            'tables::filters.query-builder.constraints.select' => LibraryIcon::Select->value,
+            'tables::filters.query-builder.constraints.text' => LibraryIcon::TextConstraint->value,
+        ]);
     }
 }

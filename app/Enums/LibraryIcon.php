@@ -41,4 +41,19 @@ enum LibraryIcon: string
     case ViewerBfc = 'mdi-flip-to-back';
     case ViewerShowAxis = 'mdi-axis-arrow';
     case ViewerPhoto = 'mdi-camera';
+
+    case PageFirst = 'mdi-page-first';
+    case PageLast = 'mdi-page-last';
+    case PageNext = 'mdi-chevron-right';
+    case PagePrevious = 'mdi-chevron-left';
+    case TextConstraint = 'mdi-text-recognition';
+    case RelationshipConstraint = 'mdi-arrow-expand-all';
+    case BooleanConstraint = 'mdi-help-circle';
+    case AuthorConstraint = 'mdi-account-group';
+    case CategoryConstraint = 'mdi-shape-plus';
+    case KeywordsConstraint = 'mdi-tag-multiple';
+    case License = 'mdi-creative-commons';
+    case Select = 'mdi-unfold-more-horizontal';
+    case Help = 'mdi-help-box';
+    case DateSelect = 'mdi-calendar-range';
 }
