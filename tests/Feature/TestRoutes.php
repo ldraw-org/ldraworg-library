@@ -14,7 +14,7 @@ beforeEach(function () {
     ]);
 });
 
-describe('non bound routes', function (){
+describe('non bound routes', function () {
     test('public route should return ok', function (string $routename) {
         $response = $this->get(route($routename));
 
@@ -40,7 +40,7 @@ describe('non bound routes', function (){
         'categories-txt',
         'library-csv',
         'part.latest',
-        'part.weekly-api',        
+        'part.weekly-api',
     ]);
 
     test('auth routes', function (string $routename, array $permissions) {

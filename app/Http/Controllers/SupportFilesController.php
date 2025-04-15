@@ -8,14 +8,16 @@ use App\Models\Omr\OmrModel;
 
 class SupportFilesController extends Controller
 {
-    public function webglpart(Part $part) {
+    public function webglpart(Part $part)
+    {
         return app(\App\LDraw\LDrawModelMaker::class)->webGl($part);
     }
-    
-    public function webglmodel(OmrModel $omrmodel) {
+
+    public function webglmodel(OmrModel $omrmodel)
+    {
         return app(\App\LDraw\LDrawModelMaker::class)->webGl($omrmodel);
     }
-    
+
     public function categories()
     {
         return response(SupportFiles::categoriesText())->header('Content-Type', 'text/plain');

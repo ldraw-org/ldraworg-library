@@ -17,15 +17,14 @@ class LibraryIcon extends Component
         public string $lowerLeftColor = 'fill-black',
         public ?string $lowerRightIcon = null,
         public string $lowerRightColor = 'fill-black',
-    )
-    {
+    ) {
         $this->icon = $this->getIconValue($this->icon);
         if ($this->lowerLeftIcon) {
             $this->lowerLeftIcon = $this->getIconValue($this->lowerLeftIcon);
         }
         if ($this->lowerRightIcon) {
             $this->lowerRightIcon = $this->getIconValue($this->lowerRightIcon);
-        }    
+        }
     }
 
     protected function getIconValue(string|EnumsLibraryIcon $icon)

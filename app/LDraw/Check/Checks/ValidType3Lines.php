@@ -8,7 +8,6 @@ use App\LDraw\Check\VectorMath;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
 use Closure;
-use MCordingley\LinearAlgebra\Vector;
 
 class ValidType3Lines implements Check
 {

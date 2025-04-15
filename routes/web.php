@@ -143,7 +143,7 @@ Route::middleware(['auth'])->get('/logout', function () {
 });
 
 // permanentRedirects
-Route::name('permanentRedirects.')->group(function() {
+Route::name('permanentRedirects.')->group(function () {
     Route::permanentRedirect('/login', 'https://forums.ldraw.org/member.php?action=login')->name('login');
     Route::permanentRedirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
 

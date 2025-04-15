@@ -41,8 +41,8 @@ class PartCheckBag implements Arrayable, JsonSerializable
                     } else {
                         $this->add($error);
                     }
-                    
-                }    
+
+                }
             }
         }
     }
@@ -71,7 +71,7 @@ class PartCheckBag implements Arrayable, JsonSerializable
         return !$this->has($types);
     }
 
-    public function hasError(PartError $error): bool 
+    public function hasError(PartError $error): bool
     {
         foreach (CheckType::cases() as $type) {
             if (array_key_exists($error->value, $this->messages[$type->value])) {
@@ -81,12 +81,12 @@ class PartCheckBag implements Arrayable, JsonSerializable
         return false;
     }
 
-    public function doesntHaveError(PartError $error): bool 
+    public function doesntHaveError(PartError $error): bool
     {
         return !$this->hasError($error);
     }
 
-    public function add(PartError $error, $context = []) 
+    public function add(PartError $error, $context = [])
     {
         if ($context) {
             $this->messages[$error->type()->value][$error->value][] = $context;
@@ -95,7 +95,7 @@ class PartCheckBag implements Arrayable, JsonSerializable
         }
     }
 
-    public function remove(PartError $error): void 
+    public function remove(PartError $error): void
     {
         unset($this->messages[$error->type()][$error->value]);
     }
@@ -121,9 +121,9 @@ class PartCheckBag implements Arrayable, JsonSerializable
             foreach ($context as $replace) {
                 $errorStrings[] = __("partcheck.{$error}", $replace);
             }
-        }    
+        }
         return $errorStrings;
-        
+
     }
 
     protected function checkTypeArray(CheckType|array|null $types = null): array

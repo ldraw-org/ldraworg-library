@@ -11,8 +11,6 @@ use App\Events\PartRenamed;
 use App\Events\PartReviewed;
 use App\Events\PartSubmitted;
 use App\Events\PartUpdateProcessingComplete;
-use App\LDraw\PartManager;
-use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use Illuminate\Events\Dispatcher;
 

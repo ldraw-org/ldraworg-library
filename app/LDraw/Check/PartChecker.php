@@ -27,7 +27,8 @@ class PartChecker
         $this->errors = new PartCheckBag();
     }
 
-    public function runChecks(array $checks = [], ?string $filename = null): bool {
+    public function runChecks(array $checks = [], ?string $filename = null): bool
+    {
         foreach ($checks as $check) {
             if (!$check instanceof Check) {
                 continue;
@@ -68,7 +69,7 @@ class PartChecker
         }
 
         $this->errors->load($this->part->part_check->toArray());
-        
+
         if (!$this->part?->isTexmap() && $checkFileErrors) {
             $this->errors->clear(CheckType::Error);
             $this->errors->clear(CheckType::Warning);

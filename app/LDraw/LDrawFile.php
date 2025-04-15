@@ -10,7 +10,8 @@ class LDrawFile
         public ?string $mimetype,
         public string $filename,
         public string $contents,
-    ) {}
+    ) {
+    }
 
     public static function fromArray(array $file): self
     {

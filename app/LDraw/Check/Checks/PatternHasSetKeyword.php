@@ -4,7 +4,6 @@ namespace App\LDraw\Check\Checks;
 
 use App\Enums\PartCategory;
 use App\Enums\PartError;
-use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\LDraw\Parse\Parser;

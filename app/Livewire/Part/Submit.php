@@ -24,7 +24,6 @@ use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 

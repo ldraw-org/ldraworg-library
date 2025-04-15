@@ -23,7 +23,7 @@ class LDrawModelMaker
             $sparts = $part->descendants->official()->unique();
         }
         $sparts->load('body');
-        $sparts->each(function (Part $p) use (&$file){
+        $sparts->each(function (Part $p) use (&$file) {
             if ($p->isTexmap()) {
                 $file .= $p->get(true, true);
             } else {
@@ -56,7 +56,7 @@ class LDrawModelMaker
         Part::with('descendantsAndSelf')
             ->doesntHave('unofficial_part')
             ->whereIn('filename', $subs)
-            ->each(function (Part $p) use (&$parts){
+            ->each(function (Part $p) use (&$parts) {
                 $parts = array_merge($parts, $p->descendantsAndSelf->official()->unique()->all());
             });
         collect($parts)
@@ -105,7 +105,7 @@ class LDrawModelMaker
                 $sparts = $model->descendantsAndSelf->official()->unique();
             }
             $sparts->load('body');
-            $sparts->each(function (Part $p) use (&$webgl){
+            $sparts->each(function (Part $p) use (&$webgl) {
                 $text = base64_encode($p->get());
                 $name = Str::chopStart($p->filename, ['parts/', 'p/']);
                 if ($p->isTexmap()) {

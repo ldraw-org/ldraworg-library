@@ -9,7 +9,6 @@ use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
 use App\Models\RebrickablePart;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 
 class DailyMaintenance extends Command
 {
@@ -50,7 +49,8 @@ class DailyMaintenance extends Command
 
             $this->info('Refreshing Rebrickable data');
             Part::canHaveRebrickablePart()
-                ->where(fn ($query) =>
+                ->where(
+                    fn ($query) =>
                     $query
                         ->orwhereBetween('created_at', [now(), now()->subDay()])
                         ->orWhereBetween('created_at', [now()->subWeek()->subDay(), now()->subWeek()])

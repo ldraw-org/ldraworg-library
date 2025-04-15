@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Enums\Permission;
-use App\Models\ReviewSummary\ReviewSummary;
 use App\Models\User;
 
 class ReviewSummaryPolicy

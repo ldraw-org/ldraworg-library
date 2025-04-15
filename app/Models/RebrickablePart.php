@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\ExternalSite;
 use App\LDraw\Rebrickable;
 use App\Models\Part\Part;
-use App\Models\Part\PartKeyword;
 use App\Models\Traits\HasParts;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -79,7 +78,7 @@ class RebrickablePart extends Model
     {
         $rb = new Rebrickable();
         $rb_data = new Collection();
-        
+
         $rb_data = $rb->getPart($sheet->number);
         if ($rb_data->isEmpty()) {
             $rb_num = $sheet->parts?->first(fn (Part $part) => !is_null($part->getExternalSiteNumber(ExternalSite::Rebrickable)))
@@ -95,7 +94,7 @@ class RebrickablePart extends Model
             $search_data = $rb->getParts(['search' => $sheet->number])?->first(fn (array $item) => Str::startsWith($item['name'], 'Sticker Sheet'));
             $rb_data = $search_data ? collect($search_data) : $rb_data;
         }
-            
+
         if ($rb_data->isEmpty()) {
             $sets = new Collection();
             $sheet->parts?->each(function (Part $part) use (&$sets) {
@@ -129,4 +128,3 @@ class RebrickablePart extends Model
     }
 
 }
-

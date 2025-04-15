@@ -12,7 +12,6 @@ use App\Filament\Actions\EditPreviewAction;
 use App\LDraw\PartManager;
 use App\LDraw\VoteManager;
 use App\Models\Part\Part;
-use App\Models\Part\PartKeyword;
 use App\Models\Vote;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -30,8 +29,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 

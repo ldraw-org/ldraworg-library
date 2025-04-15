@@ -7,21 +7,17 @@ use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Events\PartHeaderEdited;
-use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Filament\Forms\Components\Preview;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
 use App\LDraw\Check\PartChecker;
 use App\LDraw\Parse\ParsedPart;
 use App\LDraw\PartManager;
-use App\Models\LdrawColour;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
 use App\Models\Part\PartKeyword;
-use App\Rules\PreviewIsValid;
 use Closure;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -119,7 +115,8 @@ class EditHeaderAction
                 ->selectablePlaceholder(false)
                 ->in(PartCategory::cases()),
             Textarea::make('keywords')
-                ->helperText(fn (Part $p) =>
+                ->helperText(
+                    fn (Part $p) =>
                     'Note: keyword order' .
                     (!is_null($part->rebrickable_part) ? ' and external site keywords' : '') .
                     ' will not be preserved'

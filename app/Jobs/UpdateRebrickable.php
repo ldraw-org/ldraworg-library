@@ -17,8 +17,8 @@ class UpdateRebrickable implements ShouldQueue
     public function __construct(
         protected Part $part,
         protected bool $updateOfficial = false
-    )
-    {}
+    ) {
+    }
 
     /**
      * Execute the job.

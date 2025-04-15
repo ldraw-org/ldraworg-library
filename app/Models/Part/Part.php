@@ -83,7 +83,7 @@ class Part extends Model
             'type_qualifier' => PartTypeQualifier::class,
             'license' => License::class,
             'part_status' => PartStatus::class,
-            'category' => PartCategory:: class,
+            'category' => PartCategory::class,
             'delete_flag' => 'boolean',
             'manual_hold_flag' => 'boolean',
             'has_minor_edit' => 'boolean',
@@ -205,12 +205,12 @@ class Part extends Model
         return $this->HasMany(ReviewSummaryItem::class, 'part_id', 'id');
 
     }
-    
+
     public function rebrickable_part(): BelongsTo
     {
         return $this->belongsTo(RebrickablePart::class, 'rebrickable_part_id', 'id');
     }
-    
+
     public function sticker_rebrickable_part(): BelongsToThrough
     {
         return $this->belongsToThrough(RebrickablePart::class, StickerSheet::class);
@@ -259,7 +259,8 @@ class Part extends Model
     protected function canHaveRebrickablePart(Builder $query): void
     {
         $query->partsFolderOnly()
-            ->where(fn (Builder $query2) => 
+            ->where(
+                fn (Builder $query2) =>
                 $query2->orWhereNull('type_qualifier')->orWhere('type_qualifier', PartTypeQualifier::Alias)
             )
             ->where('description', 'NOT LIKE', '~%')
@@ -354,7 +355,7 @@ class Part extends Model
         }
         $name = $this->sticker_sheet?->number ?? basename($this->filename, '.dat');
         $site_data = ($rb_part->{$external->value}) ?? [];
-        return Arr::first($site_data, fn(string $number, int $key) => $number == $name) ?? Arr::first($site_data);
+        return Arr::first($site_data, fn (string $number, int $key) => $number == $name) ?? Arr::first($site_data);
     }
 
     public function lastChange(): Carbon
@@ -461,14 +462,11 @@ class Part extends Model
 
         if ($data[VoteType::Hold->value] != 0) {
             $this->part_status = PartStatus::ErrorsFound;
-        }
-        elseif (($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value] < 2) && $data[VoteType::AdminFastTrack->value] == 0) {
+        } elseif (($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value] < 2) && $data[VoteType::AdminFastTrack->value] == 0) {
             $this->part_status = PartStatus::NeedsMoreVotes;
-        }
-        elseif ($data[VoteType::AdminFastTrack->value] == 0 && $data[VoteType::AdminCertify->value] == 0 && $data[VoteType::Certify->value] >= 2) {
+        } elseif ($data[VoteType::AdminFastTrack->value] == 0 && $data[VoteType::AdminCertify->value] == 0 && $data[VoteType::Certify->value] >= 2) {
             $this->part_status = PartStatus::AwaitingAdminReview;
-        }
-        elseif (($data[VoteType::AdminCertify->value] > 0 && ($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value]) > 2) || $data[VoteType::AdminFastTrack->value] > 0) {
+        } elseif (($data[VoteType::AdminCertify->value] > 0 && ($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value]) > 2) || $data[VoteType::AdminFastTrack->value] > 0) {
             $this->part_status = PartStatus::Certified;
         }
         if (
@@ -507,7 +505,8 @@ class Part extends Model
                 ->filter()
                 ->map(fn (string $kw, int $key): string => Str::of($kw)->trim()->squish()->toString())
                 ->filter()
-                ->map(fn (string $kw, int $key): array =>
+                ->map(
+                    fn (string $kw, int $key): array =>
                     ['id' => PartKeyword::firstOrCreate(['keyword' => $kw])->id]
                 );
         }
@@ -521,7 +520,8 @@ class Part extends Model
         if (!is_null($rb_part) && ($updateOfficial || $this->isUnofficial())) {
             $part_num = basename($this->filename, '.dat');
             $okws = $this->keywords
-                ->filter(fn (PartKeyword $key) =>
+                ->filter(
+                    fn (PartKeyword $key) =>
                     Str::of($key->keyword)->lower()->startsWith('rebrickable') ||
                     Str::of($key->keyword)->lower()->startsWith('bricklink') ||
                     Str::of($key->keyword)->lower()->startsWith('brickset') ||
@@ -558,8 +558,10 @@ class Part extends Model
         if (is_array($help)) {
             $help = collect($help);
         } elseif ($help instanceof Collection) {
-            $help = collect($help
-                ->map(fn (PartHelp $h) =>
+            $help = collect(
+                $help
+                ->map(
+                    fn (PartHelp $h) =>
                     ['order' => $h->order, 'text' => $h->text]
                 )
                 ->all()
@@ -567,7 +569,7 @@ class Part extends Model
         }
         $help
             ->each(function (array|string $h, int $key): void {
-                if (is_string ($h)) {
+                if (is_string($h)) {
                     $help = [
                         'order' => $key,
                         'text' => $h,
@@ -588,8 +590,10 @@ class Part extends Model
         if (is_array($history)) {
             $history = collect($history);
         } elseif ($history instanceof Collection) {
-            $history = collect($history
-                ->map(fn (PartHistory $h) =>
+            $history = collect(
+                $history
+                ->map(
+                    fn (PartHistory $h) =>
                     [
                         'user' => $h->user->name,
                         'date' => $h->created_at,
@@ -600,14 +604,15 @@ class Part extends Model
             );
         }
         $history
-            ->each(fn (array $h, int $key) =>
+            ->each(
+                fn (array $h, int $key) =>
                 $this->history()->create([
                     'user_id' =>
                         $h['user'] instanceof User ? $h['user']->id : User::fromAuthor($h['user'])->first()?->id,
                     'created_at' => $h['date'],
                     'comment' => $h['comment']
                 ])
-        );
+            );
     }
 
     public function setSubparts(array|Collection $subparts): void
@@ -694,10 +699,10 @@ class Part extends Model
         $addBlank = false;
         if (!is_null($this->category) && $this->type->inPartsFolder()) {
             $word = 1;
-            if (Str::of($this->description)->trim()->words(1,'')->replace(['~', '|', '=', '_'], '') == '') {
+            if (Str::of($this->description)->trim()->words(1, '')->replace(['~', '|', '=', '_'], '') == '') {
                 $word = 2;
             }
-            $cat = Str::of($this->description)->trim()->words($word,'')->replace(['~', '|', '=', '_', ' '], '')->toString();
+            $cat = Str::of($this->description)->trim()->words($word, '')->replace(['~', '|', '=', '_', ' '], '')->toString();
             $cat = PartCategory::tryFrom($cat);
             if ($cat != $this->category) {
                 $header[] = $this->category->ldrawString();

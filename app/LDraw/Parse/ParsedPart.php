@@ -59,10 +59,10 @@ class ParsedPart
         }
         if (!is_null($part->category)) {
             $word = 1;
-            if (Str::of($part->description)->trim()->words(1,'')->replace(['~', '|', '=', '_'], '') == '') {
+            if (Str::of($part->description)->trim()->words(1, '')->replace(['~', '|', '=', '_'], '') == '') {
                 $word = 2;
             }
-            $cat = Str::of($part->description)->trim()->words($word,'')->replace(['~', '|', '=', '_', ' '], '')->toString();
+            $cat = Str::of($part->description)->trim()->words($word, '')->replace(['~', '|', '=', '_', ' '], '')->toString();
             $cat = PartCategory::tryFrom($cat);
             if ($cat != $part->category) {
                 $descriptionCategory = null;

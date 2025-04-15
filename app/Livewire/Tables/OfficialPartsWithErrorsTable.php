@@ -11,7 +11,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 
 class OfficialPartsWithErrorsTable extends BasicTable
 {
@@ -61,7 +60,7 @@ class OfficialPartsWithErrorsTable extends BasicTable
                                 }
                             });
                         }
-                   })
+                    })
             ])
             ->recordUrl(fn (Part $p): string => route('parts.show', $p))
             ->queryStringIdentifier('officialErrors');

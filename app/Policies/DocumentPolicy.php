@@ -7,7 +7,8 @@ use App\Models\User;
 
 class DocumentPolicy
 {
-    public function manage(User $user) {
+    public function manage(User $user)
+    {
         return $user->can(Permission::DocumentManage);
     }
 }

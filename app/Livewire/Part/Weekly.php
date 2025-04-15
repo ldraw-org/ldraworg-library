@@ -25,7 +25,8 @@ class Weekly extends Component implements HasForms, HasTable
     {
 
         return $table
-            ->query(Part::with('votes', 'official_part', 'unofficial_part')
+            ->query(
+                Part::with('votes', 'official_part', 'unofficial_part')
                 ->unofficial()
                 ->partsFolderOnly()
                 ->doesntHave('official_part')

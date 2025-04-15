@@ -35,8 +35,8 @@ class RenderParts extends Command
         } else {
             $parts = Part::query()
                 ->when(
-                $this->option('unofficial-only') && !$this->option('official-only'),
-                fn (Builder $query) => $query->unofficial()
+                    $this->option('unofficial-only') && !$this->option('official-only'),
+                    fn (Builder $query) => $query->unofficial()
                 )
                 ->when(
                     $this->option('official-only') && !$this->option('unofficial-only'),

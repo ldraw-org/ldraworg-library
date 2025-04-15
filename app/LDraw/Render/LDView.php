@@ -10,7 +10,6 @@ use GdImage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class LDView

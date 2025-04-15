@@ -20,7 +20,6 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\Constraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\Operators\Operator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
-use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsEmptyOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint\Operators\IsOperator;
@@ -146,7 +145,7 @@ class PartListTable extends BasicTable
                                             $query_inner->{$isInverse ? 'orDoesntHaveError' : 'orHasError'}($value);
                                         }
                                     });
-                               })
+                                })
                         ]),
                     RelationshipConstraint::make('keywords')
                         ->selectable(

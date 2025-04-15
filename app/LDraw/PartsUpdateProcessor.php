@@ -47,7 +47,7 @@ class PartsUpdateProcessor
         Part::canHaveRebrickablePart()
             ->doesntHave('sticker_sheet')
             ->where(
-                    fn ($q) => $q->where('part_release_id', $this->release->id)->orWhere('has_minor_edit', true)
+                fn ($q) => $q->where('part_release_id', $this->release->id)->orWhere('has_minor_edit', true)
             )
             ->each(fn (Part $p) => $p->setExternalSiteKeywords(true));
         $this->settings->tracker_locked = false;
@@ -367,5 +367,5 @@ class PartsUpdateProcessor
             $this->manager->loadSubparts($p);
         });
         CheckPart::dispatch($affectedParts);
-   }
+    }
 }

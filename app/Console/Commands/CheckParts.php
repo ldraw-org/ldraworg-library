@@ -35,7 +35,7 @@ class CheckParts extends Command
             );
             $count = $q->count();
             if ($count > 0) {
-                $q->chunkById(100, fn(Collection $part) => CheckPart::dispatch($part)->onQueue('maintenance'));
+                $q->chunkById(100, fn (Collection $part) => CheckPart::dispatch($part)->onQueue('maintenance'));
             }
         }
         $this->info("{$count} parts queued for error check");

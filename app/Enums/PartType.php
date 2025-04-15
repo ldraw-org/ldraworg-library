@@ -51,7 +51,7 @@ enum PartType: string
             PartType::Part, PartType::Shortcut, PartType::Primitive => '',
             default => Str::of($this->folder())
                 ->chopStart(['p/', 'parts/'])
-                ->replace('/','\\')
+                ->replace('/', '\\')
                 ->toString(),
         };
     }

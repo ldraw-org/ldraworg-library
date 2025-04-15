@@ -237,4 +237,3 @@ test('parse', function () {
     expect($part->rawText)->toBe($text);
 
 });
-

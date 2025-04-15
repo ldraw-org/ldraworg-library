@@ -30,8 +30,8 @@ class UpdateReleaseRebrickable extends Command
     public function handle()
     {
         $parts = Part::where(
-                    fn ($q) => $q->orWhere('marked_for_release', true)->orWhere('has_minor_edit', true)
-            )
+            fn ($q) => $q->orWhere('marked_for_release', true)->orWhere('has_minor_edit', true)
+        )
             ->canHaveRebrickablePart()
             ->get();
         $rb_part_nums = $parts
@@ -42,11 +42,12 @@ class UpdateReleaseRebrickable extends Command
         $rb_nums = new Collection();
         $rb_part_nums->chunk(500)
             ->each(function (Collection $r) use (&$rb_nums) {
-                $rb = (new Rebrickable)->getParts([
+                $rb = (new Rebrickable())->getParts(
+                    [
                     'part_nums' => $r->implode(','),
                     'page_size' => 1000]
                 );
-                $rb_nums = $rb_nums->merge($rb->pluck('part_num'));    
+                $rb_nums = $rb_nums->merge($rb->pluck('part_num'));
             });
         $rb_nums = $rb_nums->filter()->unique();
         if ($rb_part_nums->diff($rb_nums)->isEmpty()) {

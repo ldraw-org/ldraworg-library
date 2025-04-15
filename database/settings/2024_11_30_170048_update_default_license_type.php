@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\License;
-use App\Models\Part\PartLicense;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {

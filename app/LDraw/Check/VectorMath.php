@@ -29,7 +29,7 @@ class VectorMath
             $v412 = $p4->subtractVector($p1)->dotProduct($p2->subtractVector($p1)) / ($p4->subtractVector($p1)->length() * $p2->subtractVector($p1)->length());
             $angles[] = rad2deg($v412 >= 1 ? 0 : ($v412 <= -1 ? Pi() : acos($v412)));
         }
-        
+
         return max($angles) > config('ldraw.check.max_point_angle') || min($angles) < config('ldraw.check.min_point_angle');
     }
 

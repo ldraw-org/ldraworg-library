@@ -2,7 +2,6 @@
 
 namespace App\LDraw;
 
-use App\Enums\ExternalSite;
 use App\Enums\PartCategory;
 use App\Enums\PartError;
 use App\Enums\PartType;
@@ -13,7 +12,6 @@ use App\LDraw\Check\PartChecker;
 use App\LDraw\Parse\Parser;
 use App\LDraw\Render\LDView;
 use App\Models\Part\Part;
-use App\Models\Part\PartKeyword;
 use App\Models\Part\UnknownPartNumber;
 use App\Models\RebrickablePart;
 use App\Models\StickerSheet;
@@ -199,7 +197,7 @@ class PartManager
             $p->updateReadyForAdmin();
             $this->addUnknownNumber($p);
             UpdateParentParts::dispatch($p);
-            
+
             UpdateRebrickable::dispatch($p);
         });
     }
@@ -437,7 +435,7 @@ class PartManager
             RebrickablePart::findOrCreateFromPart($part);
         }
         if (is_null($part->sticker_sheet_id) && $part->type_qualifier == PartTypeQualifier::Alias && is_null($part->getRebrickablePart())) {
-            $part->rebrickable_part()->associate($part->subparts->first()->rebrickable_part); 
+            $part->rebrickable_part()->associate($part->subparts->first()->rebrickable_part);
             $part->save();
         }
         $part->load('rebrickable_part', 'sticker_rebrickable_part');

@@ -16,29 +16,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-/*
-        $ls = app(LibrarySettings::class);
-        $ls->allowed_header_metas = [
-                'Name:',
-                'Author:',
-                '!LDRAW_ORG',
-                '!LICENSE',
-                '!HELP',
-                'BFC',
-                '!CATEGORY',
-                '!KEYWORDS',
-                '!CMDLINE',
-                '!HISTORY'
-            ];
-        $ls->allowed_body_metas = [
-                '!TEXMAP',
-                '!:',
-                'BFC',
-                '//',
-            ];
+        /*
+                $ls = app(LibrarySettings::class);
+                $ls->allowed_header_metas = [
+                        'Name:',
+                        'Author:',
+                        '!LDRAW_ORG',
+                        '!LICENSE',
+                        '!HELP',
+                        'BFC',
+                        '!CATEGORY',
+                        '!KEYWORDS',
+                        '!CMDLINE',
+                        '!HISTORY'
+                    ];
+                $ls->allowed_body_metas = [
+                        '!TEXMAP',
+                        '!:',
+                        'BFC',
+                        '//',
+                    ];
 
-        $ls->save();
-*/
+                $ls->save();
+        */
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         foreach (Permission::cases() as $permission) {
             PermissionModel::create(['name' => $permission->value]);

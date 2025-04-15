@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Omr\Set;
 
-use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -13,7 +12,8 @@ class Show extends Component
     public ?string $model_name = null;
     public ?int $model_id = null;
 
-    public function mount(?Set $set, ?Set $setnumber) {
+    public function mount(?Set $set, ?Set $setnumber)
+    {
         if (!is_null($set) && $set->exists) {
             $this->set = $set;
         } elseif (!is_null($setnumber) && $setnumber->exists) {

@@ -7,7 +7,8 @@ use App\Models\User;
 
 class DocumentCategoryPolicy
 {
-    public function manage(User $user) {
+    public function manage(User $user)
+    {
         return $user->can(Permission::DocumentCategoryManage);
     }
 }

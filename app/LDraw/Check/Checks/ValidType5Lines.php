@@ -8,7 +8,6 @@ use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
 use Closure;
 use MathPHP\LinearAlgebra\MatrixFactory;
-use MathPHP\LinearAlgebra\Vector;
 
 class ValidType5Lines implements Check
 {
@@ -34,7 +33,7 @@ class ValidType5Lines implements Check
                 [$match[11], $match[12], $match[13]],
             ]);
             if ($points[0] == $points[1] ||
-                $points[2] == $points[3]            ) {
+                $points[2] == $points[3]) {
                 $fail(PartError::IndenticalPoints, ['value' => $lineNumber]);
             }
         }

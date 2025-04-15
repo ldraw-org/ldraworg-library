@@ -25,7 +25,7 @@ class Parser
             $author['realname'] ?? null,
             $type['unofficial'] ?? null,
             PartType::tryFrom(Arr::get($type, 'type') ?? ''),
-            PartTypeQualifier::tryFrom(Arr::get($type,'qual') ?? ''),
+            PartTypeQualifier::tryFrom(Arr::get($type, 'qual') ?? ''),
             $type['releasetype'] ?? null,
             $type['release'] ?? null,
             License::tryFromText($this->getLicense($text) ?? ''),
@@ -146,10 +146,10 @@ class Parser
         $d = $this->getSingleValueMeta($text, 'description');
         if (!is_null($d)) {
             $word = 1;
-            if (Str::of($d)->trim()->words(1,'')->replace(['~', '|', '=', '_'], '') == '') {
+            if (Str::of($d)->trim()->words(1, '')->replace(['~', '|', '=', '_'], '') == '') {
                 $word = 2;
             }
-            $cat = Str::of($d)->trim()->words($word,'')->replace(['~', '|', '=', '_', ' '], '')->toString();
+            $cat = Str::of($d)->trim()->words($word, '')->replace(['~', '|', '=', '_', ' '], '')->toString();
             return PartCategory::tryFrom($cat);
         }
         return null;
@@ -338,14 +338,14 @@ class Parser
                             'fabric' => false,
                             'speckle' => false,
                             'glitter' => false,
-                            'material_fabric_type' => null, 
-                            'material_value' => null, 
-                            'material_alpha' => null, 
+                            'material_fabric_type' => null,
+                            'material_value' => null,
+                            'material_alpha' => null,
                             'material_luminance' => null,
-                            'material_fraction' => null, 
-                            'material_vfraction' => null, 
-                            'material_size' => null, 
-                            'material_maxsize' => null, 
+                            'material_fraction' => null,
+                            'material_vfraction' => null,
+                            'material_size' => null,
+                            'material_maxsize' => null,
                             'material_minsize' => null
                         ];
                         if ($mat['fabric'] !== '') {
@@ -356,24 +356,24 @@ class Parser
                         } elseif ($mat['speckle'] !== '') {
                             $matArray = [
                                 'speckle' => true,
-                                'material_value' => $mat['s_value'], 
-                                'material_alpha' => Arr::get($mat, 's_alpha') == '' ? null : $mat['s_alpha'], 
+                                'material_value' => $mat['s_value'],
+                                'material_alpha' => Arr::get($mat, 's_alpha') == '' ? null : $mat['s_alpha'],
                                 'material_luminance' => Arr::get($mat, 's_luminance') == '' ? null : $mat['s_luminance'],
-                                'material_fraction' => $mat['s_fraction'], 
-                                'material_size' => Arr::get($mat, 's_size')== '' ? null : $mat['s_size'], 
-                                'material_maxsize' => Arr::get($mat, 's_maxsize') == '' ? null : $mat['s_maxsize'], 
+                                'material_fraction' => $mat['s_fraction'],
+                                'material_size' => Arr::get($mat, 's_size') == '' ? null : $mat['s_size'],
+                                'material_maxsize' => Arr::get($mat, 's_maxsize') == '' ? null : $mat['s_maxsize'],
                                 'material_minsize' => Arr::get($mat, 's_minsize') == '' ? null : $mat['s_minsize']
                             ];
                         } else {
                             $matArray = [
                                 'glitter' => true,
-                                'material_value' => $mat['g_value'], 
-                                'material_alpha' => Arr::get($mat, 'g_alpha') == '' ? null : $mat['g_alpha'], 
+                                'material_value' => $mat['g_value'],
+                                'material_alpha' => Arr::get($mat, 'g_alpha') == '' ? null : $mat['g_alpha'],
                                 'material_luminance' => Arr::get($mat, 'g_luminance') == '' ? null : $mat['g_luminance'],
-                                'material_fraction' => $mat['g_fraction'], 
-                                'material_vfraction' => $mat['g_vfraction'], 
-                                'material_size' => Arr::get($mat, 'g_size') == '' ? null : $mat['g_size'], 
-                                'material_maxsize' => Arr::get($mat, 'g_maxsize') == '' ? null : $mat['g_maxsize'], 
+                                'material_fraction' => $mat['g_fraction'],
+                                'material_vfraction' => $mat['g_vfraction'],
+                                'material_size' => Arr::get($mat, 'g_size') == '' ? null : $mat['g_size'],
+                                'material_maxsize' => Arr::get($mat, 'g_maxsize') == '' ? null : $mat['g_maxsize'],
                                 'material_minsize' => Arr::get($mat, 'g_minsize') == '' ? null : $mat['g_minsize']
                             ];
                         }
@@ -401,7 +401,7 @@ class Parser
         $basepart = $part['base'];
         if (Arr::has($part, 'suffix3')) {
             $basepart .= $part['suffix1'] . $part['suffix2'];
-        } elseif (Arr::has($part, 'suffix2')){
+        } elseif (Arr::has($part, 'suffix2')) {
             $basepart .= $part['suffix1'];
         }
 
@@ -416,9 +416,9 @@ class Parser
         }
         if (Arr::has($part, 'suffix3')) {
             return Str::startsWith($part['suffix3'], $code);
-        } elseif (Arr::has($part, 'suffix2')){
+        } elseif (Arr::has($part, 'suffix2')) {
             return Str::startsWith($part['suffix2'], $code);
-        } elseif (Arr::has($part, 'suffix1')){
+        } elseif (Arr::has($part, 'suffix1')) {
             return Str::startsWith($part['suffix1'], $code);
         }
         return false;

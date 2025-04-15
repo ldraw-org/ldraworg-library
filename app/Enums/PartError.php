@@ -3,7 +3,6 @@
 namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
-use App\Enums\CheckType;
 use Illuminate\Support\Str;
 
 enum PartError: string
@@ -60,7 +59,7 @@ enum PartError: string
 
     case WarningMinifigCategory = 'warning.minifigcategory';
     case WarningNotCoplanar = 'warning.notcoplaner';
-    
+
     public function type(): CheckType
     {
         return CheckType::tryFrom(Str::of($this->value)->replace('.', ' ')->words(1, '')->plural()) ?? CheckType::Error;
