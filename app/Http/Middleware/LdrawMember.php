@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\Permission;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class LdrawMember
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || Auth::user()->cannot('member.access')) {
+        if (!Auth::check() || Auth::user()->cannot(Permission::LdrawMemberAccess)) {
             return redirect('joinldraw');
         }
         return $next($request);

@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+/*
         $ls = app(LibrarySettings::class);
         $ls->allowed_header_metas = [
                 'Name:',
@@ -37,7 +38,7 @@ class DatabaseSeeder extends Seeder
             ];
 
         $ls->save();
-
+*/
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         foreach (Permission::cases() as $permission) {
             PermissionModel::create(['name' => $permission->value]);

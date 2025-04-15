@@ -65,6 +65,7 @@ class TorsoShortcutHelper extends Component implements HasForms
 
     public function mount(): void
     {
+        $this->authorize('create', Part::class);
         $this->form->fill();
     }
 

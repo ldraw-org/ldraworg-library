@@ -5,6 +5,7 @@ use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\LDraw\Check\Contracts\Check;
+use App\LDraw\Check\PartChecker;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\LdrawColour;
 use App\Models\Part\Part;
@@ -15,7 +16,10 @@ uses(RefreshDatabase::class);
 
 function runSingleCheck(Part|ParsedPart $part, Check $check, ?string $filename = null): bool
 {
-    return count(app(\App\LDraw\Check\PartChecker::class)->singleCheck($part, $check, $filename)) == 0;
+    $pc = new PartChecker($part);
+    $pc->singleCheck($check, $filename);
+
+    return count($pc->singleCheck($check, $filename)) == 0;
 }
 
 beforeEach(function () {

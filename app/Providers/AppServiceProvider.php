@@ -6,6 +6,7 @@ use App\Listeners\PartEventSubscriber;
 use App\Models\Omr\Set;
 use App\Models\Part\Part;
 use App\Models\User;
+use App\Policies\RolePolicy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Pan\PanConfiguration;
+use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -105,6 +107,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function (User $user, string $ability) {
             return !in_array($ability, ['vote', 'allCertify', 'allAdmin']) && $user->hasRole('Super Admin') ? true : null;
         });
+
+        // Manually register Role policy
+        Gate::policy(Role::class, RolePolicy::class);
 
         //Subscriber
         Event::subscribe(PartEventSubscriber::class);

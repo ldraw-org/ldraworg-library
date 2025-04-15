@@ -123,11 +123,11 @@ Route::prefix('documentation')->name('documentation.')->group(function () {
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', AdminIndex::class)->name('index');
-    Route::get('/users', UserManagePage::class)->can('create', App\Models\User::class)->name('users.index');
+    Route::get('/users', UserManagePage::class)->can('add', App\Models\User::class)->name('users.index');
     Route::get('/summaries', ReviewSummaryManagePage::class)->can('manage', App\Models\ReviewSummary\ReviewSummary::class)->name('summaries.index');
     Route::get('/roles', RoleManagePage::class)->can('viewAny', Spatie\Permission\Models\Role::class)->name('roles.index');
     Route::get('/documents', DocumentManagePage::class)->can('manage', App\Models\Document\Document::class)->name('documents.index');
-    Route::get('/document-categories', DocumentCategoryManagePage::class)->can('manage', App\Models\Document\Document::class)->name('document-categories.index');
+    Route::get('/document-categories', DocumentCategoryManagePage::class)->can('manage', App\Models\Document\DocumentCategory::class)->name('document-categories.index');
     Route::get('/part-keywords', PartKeywordManagePage::class)->can('manage', App\Models\Part\PartKeyword::class)->name('part-keywords.index');
     Route::get('/settings', LibrarySettingsPage::class)->can(Permission::SiteSettingsEdit)->name('settings.index');
 })->can(Permission::AdminDashboardView);
