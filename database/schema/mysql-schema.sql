@@ -117,6 +117,8 @@ CREATE TABLE `ldraw_colours` (
   `rebrickable_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `brickset_id` int DEFAULT NULL,
   `brickset_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `fabric` tinyint(1) NOT NULL DEFAULT '0',
+  `material_fabric_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ldraw_colours_name_unique` (`name`),
   UNIQUE KEY `ldraw_colours_code_unique` (`code`)
@@ -201,7 +203,7 @@ CREATE TABLE `part_bodies` (
   `body` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `part_bodies_part_id_foreign` (`part_id`),
-  CONSTRAINT `part_bodies_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`)
+  CONSTRAINT `part_bodies_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `part_events`;
@@ -230,7 +232,7 @@ CREATE TABLE `part_events` (
   KEY `part_events_event_type_index` (`event_type`),
   KEY `part_events_vote_type_index` (`vote_type`),
   KEY `part_events_created_at_index` (`created_at`),
-  CONSTRAINT `part_events_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
+  CONSTRAINT `part_events_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `part_events_part_release_id_foreign` FOREIGN KEY (`part_release_id`) REFERENCES `part_releases` (`id`),
   CONSTRAINT `part_events_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -245,7 +247,7 @@ CREATE TABLE `part_helps` (
   `part_id` bigint unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `part_helps_part_id_foreign` (`part_id`),
-  CONSTRAINT `part_helps_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`)
+  CONSTRAINT `part_helps_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `part_histories`;
@@ -261,7 +263,7 @@ CREATE TABLE `part_histories` (
   PRIMARY KEY (`id`),
   KEY `part_histories_user_id_index` (`user_id`),
   KEY `part_histories_part_id_index` (`part_id`),
-  CONSTRAINT `part_histories_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
+  CONSTRAINT `part_histories_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `part_histories_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -310,7 +312,7 @@ CREATE TABLE `parts` (
   `missing_parts` json DEFAULT NULL,
   `manual_hold_flag` tinyint(1) NOT NULL DEFAULT '0',
   `can_release` tinyint(1) NOT NULL DEFAULT '0',
-  `part_check_messages` json DEFAULT NULL,
+  `part_check` json DEFAULT NULL,
   `week` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (str_to_date(concat(yearweek(`created_at`,2),_utf8mb4' Sunday'),_utf8mb4'%X%V %W')) VIRTUAL,
   `sticker_sheet_id` bigint unsigned DEFAULT NULL,
   `marked_for_release` tinyint(1) NOT NULL DEFAULT '0',
@@ -324,9 +326,10 @@ CREATE TABLE `parts` (
   `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `type_qualifier` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `license` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `external_ids` json DEFAULT NULL,
+  `rebrickable` json DEFAULT NULL,
   `preview` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rebrickable_part_id` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `parts_filename_part_release_id_unique` (`filename`,`part_release_id`),
   KEY `parts_part_release_id_foreign` (`part_release_id`),
@@ -342,11 +345,13 @@ CREATE TABLE `parts` (
   KEY `parts_license_index` (`license`),
   KEY `parts_vote_sort_index` (`part_status`),
   KEY `parts_category_index` (`category`),
-  CONSTRAINT `parts_base_part_id_foreign` FOREIGN KEY (`base_part_id`) REFERENCES `parts` (`id`),
+  KEY `parts_rebrickable_part_id_foreign` (`rebrickable_part_id`),
+  CONSTRAINT `parts_base_part_id_foreign` FOREIGN KEY (`base_part_id`) REFERENCES `parts` (`id`) ON DELETE SET NULL,
   CONSTRAINT `parts_part_release_id_foreign` FOREIGN KEY (`part_release_id`) REFERENCES `part_releases` (`id`),
-  CONSTRAINT `parts_sticker_sheet_id_foreign` FOREIGN KEY (`sticker_sheet_id`) REFERENCES `sticker_sheets` (`id`),
-  CONSTRAINT `parts_unknown_part_number_id_foreign` FOREIGN KEY (`unknown_part_number_id`) REFERENCES `unknown_part_numbers` (`id`),
-  CONSTRAINT `parts_unofficial_part_id_foreign` FOREIGN KEY (`unofficial_part_id`) REFERENCES `parts` (`id`),
+  CONSTRAINT `parts_rebrickable_part_id_foreign` FOREIGN KEY (`rebrickable_part_id`) REFERENCES `rebrickable_parts` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `parts_sticker_sheet_id_foreign` FOREIGN KEY (`sticker_sheet_id`) REFERENCES `sticker_sheets` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `parts_unknown_part_number_id_foreign` FOREIGN KEY (`unknown_part_number_id`) REFERENCES `unknown_part_numbers` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `parts_unofficial_part_id_foreign` FOREIGN KEY (`unofficial_part_id`) REFERENCES `parts` (`id`) ON DELETE SET NULL,
   CONSTRAINT `parts_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -359,8 +364,8 @@ CREATE TABLE `parts_part_keywords` (
   UNIQUE KEY `parts_part_keywords_part_id_part_keyword_id_unique` (`part_id`,`part_keyword_id`),
   KEY `parts_part_keywords_part_id_index` (`part_id`),
   KEY `parts_part_keywords_part_keyword_id_index` (`part_keyword_id`),
-  CONSTRAINT `parts_part_keywords_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
-  CONSTRAINT `parts_part_keywords_part_keyword_id_foreign` FOREIGN KEY (`part_keyword_id`) REFERENCES `part_keywords` (`id`)
+  CONSTRAINT `parts_part_keywords_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `parts_part_keywords_part_keyword_id_foreign` FOREIGN KEY (`part_keyword_id`) REFERENCES `part_keywords` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `password_resets`;
@@ -444,6 +449,25 @@ CREATE TABLE `polls` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `rebrickable_parts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `rebrickable_parts` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bricklink` json DEFAULT NULL,
+  `brickset` json DEFAULT NULL,
+  `brickowl` json DEFAULT NULL,
+  `lego` json DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `rebrickable_parts_number_unique` (`number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `related_parts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -484,8 +508,8 @@ CREATE TABLE `review_summary_items` (
   PRIMARY KEY (`id`),
   KEY `review_summary_items_review_summary_id_foreign` (`review_summary_id`),
   KEY `review_summary_items_part_id_foreign` (`part_id`),
-  CONSTRAINT `review_summary_items_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
-  CONSTRAINT `review_summary_items_review_summary_id_foreign` FOREIGN KEY (`review_summary_id`) REFERENCES `review_summaries` (`id`)
+  CONSTRAINT `review_summary_items_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `review_summary_items_review_summary_id_foreign` FOREIGN KEY (`review_summary_id`) REFERENCES `review_summaries` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `role_has_permissions`;
@@ -557,10 +581,13 @@ CREATE TABLE `sticker_sheets` (
   `rebrickable` json NOT NULL,
   `ldraw_colour_id` bigint unsigned DEFAULT NULL,
   `part_colors` json NOT NULL,
+  `rebrickable_part_id` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sticker_sheets_number_unique` (`number`),
   KEY `sticker_sheets_ldraw_colour_id_foreign` (`ldraw_colour_id`),
-  CONSTRAINT `sticker_sheets_ldraw_colour_id_foreign` FOREIGN KEY (`ldraw_colour_id`) REFERENCES `ldraw_colours` (`id`)
+  KEY `sticker_sheets_rebrickable_part_id_foreign` (`rebrickable_part_id`),
+  CONSTRAINT `sticker_sheets_ldraw_colour_id_foreign` FOREIGN KEY (`ldraw_colour_id`) REFERENCES `ldraw_colours` (`id`),
+  CONSTRAINT `sticker_sheets_rebrickable_part_id_foreign` FOREIGN KEY (`rebrickable_part_id`) REFERENCES `rebrickable_parts` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `telescope_entries`;
@@ -637,7 +664,7 @@ CREATE TABLE `unknown_part_numbers` (
   `notes` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `unknown_part_numbers_user_id_foreign` (`user_id`),
-  CONSTRAINT `unknown_part_numbers_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+  CONSTRAINT `unknown_part_numbers_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `user_part_notifications`;
@@ -650,8 +677,8 @@ CREATE TABLE `user_part_notifications` (
   KEY `user_part_notifications_user_id_index` (`user_id`),
   KEY `user_part_notifications_part_id_index` (`part_id`),
   KEY `user_part_notifications_user_id_part_id_index` (`user_id`,`part_id`),
-  CONSTRAINT `user_part_notifications_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
-  CONSTRAINT `user_part_notifications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+  CONSTRAINT `user_part_notifications_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_part_notifications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `users`;
@@ -695,8 +722,8 @@ CREATE TABLE `votes` (
   KEY `votes_user_id_index` (`user_id`),
   KEY `votes_part_id_index` (`part_id`),
   KEY `votes_vote_type_index` (`vote_type`),
-  CONSTRAINT `votes_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`),
-  CONSTRAINT `votes_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+  CONSTRAINT `votes_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `votes_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -819,3 +846,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (115,'2025_02_26_05
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (116,'2025_03_07_180323_add_category_to_parts_table',38);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (117,'2025_03_08_071837_drop_part_category_table',39);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (118,'2025_03_08_072853_library_database_cleanup',40);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (119,'2025_03_11_060620_update_foreign_key_behavior_in_parts_table',41);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (120,'2025_03_12_191023_rename_external_ids_in_parts_table',42);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (121,'2025_03_27_185715_create_rebrickable_parts_table',43);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (122,'2025_03_28_060708_add_rebrickable_part_id',43);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (123,'2025_04_06_211334_alter_part_check_in_parts_table',44);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (124,'2025_04_13_234802_add_fabric_to_ldraw_colours_table',45);
