@@ -63,7 +63,7 @@ describe('non bound routes', function () {
         ['tracker.torso-helper', [Permission::PartSubmitRegular]],
         ['tracker.release.create', [Permission::PartReleaseCreate]],
         ['dashboard.index', []],
-        ['admin.index', []],
+        ['admin.index', [Permission::AdminDashboardView]],
         ['admin.users.index', [Permission::UserAdd]],
         ['admin.summaries.index', [Permission::ReviewSummaryManage]],
         ['admin.roles.index', [Permission::RoleManage]],
@@ -71,7 +71,5 @@ describe('non bound routes', function () {
         ['admin.document-categories.index', [Permission::DocumentCategoryManage]],
         ['admin.part-keywords.index', [Permission::PartKeywordsManage]],
         ['admin.settings.index', [Permission::SiteSettingsEdit]],
-
     ]);
-
 });

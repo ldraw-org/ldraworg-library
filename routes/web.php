@@ -122,7 +122,7 @@ Route::prefix('documentation')->name('documentation.')->group(function () {
 });
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', AdminIndex::class)->name('index');
+    Route::get('/', AdminIndex::class)->name('index')->can(Permission::AdminDashboardView);
     Route::get('/users', UserManagePage::class)->can('add', App\Models\User::class)->name('users.index');
     Route::get('/summaries', ReviewSummaryManagePage::class)->can('manage', App\Models\ReviewSummary\ReviewSummary::class)->name('summaries.index');
     Route::get('/roles', RoleManagePage::class)->can('viewAny', Spatie\Permission\Models\Role::class)->name('roles.index');
