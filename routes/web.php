@@ -93,7 +93,7 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::middleware(['auth', 'currentlic'])->group(function () {
         Route::get('/submit', Submit::class)->name('submit');
         Route::get('/torso-helper', TorsoShortcutHelper::class)->name('torso-helper');
-    })->can('create', App\Models\Part\Part::class);
+    });
 
     Route::get('/weekly', Weekly::class)->name('weekly');
     Route::get('/history', TrackerHistoryController::class)->name('history');
@@ -104,7 +104,7 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
 
     Route::view('/next-release', 'part.nextrelease')->name('next-release');
 
-    Route::middleware(['auth'])->get('/release/create', Create::class)->can('create', App\Models\Part\PartRelease::class)->name('release.create');
+    Route::middleware(['auth'])->get('/release/create', Create::class)->name('release.create');
 });
 
 Route::prefix('omr')->name('omr.')->group(function () {
@@ -122,15 +122,15 @@ Route::prefix('documentation')->name('documentation.')->group(function () {
 });
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', AdminIndex::class)->name('index')->can(Permission::AdminDashboardView);
-    Route::get('/users', UserManagePage::class)->can('add', App\Models\User::class)->name('users.index');
-    Route::get('/summaries', ReviewSummaryManagePage::class)->can('manage', App\Models\ReviewSummary\ReviewSummary::class)->name('summaries.index');
-    Route::get('/roles', RoleManagePage::class)->can('viewAny', Spatie\Permission\Models\Role::class)->name('roles.index');
-    Route::get('/documents', DocumentManagePage::class)->can('manage', App\Models\Document\Document::class)->name('documents.index');
-    Route::get('/document-categories', DocumentCategoryManagePage::class)->can('manage', App\Models\Document\DocumentCategory::class)->name('document-categories.index');
-    Route::get('/part-keywords', PartKeywordManagePage::class)->can('manage', App\Models\Part\PartKeyword::class)->name('part-keywords.index');
-    Route::get('/settings', LibrarySettingsPage::class)->can(Permission::SiteSettingsEdit)->name('settings.index');
-})->can(Permission::AdminDashboardView);
+    Route::get('/', AdminIndex::class)->name('index');
+    Route::get('/users', UserManagePage::class)->name('users.index');
+    Route::get('/summaries', ReviewSummaryManagePage::class)->name('summaries.index');
+    Route::get('/roles', RoleManagePage::class)->name('roles.index');
+    Route::get('/documents', DocumentManagePage::class)->name('documents.index');
+    Route::get('/document-categories', DocumentCategoryManagePage::class)->name('document-categories.index');
+    Route::get('/part-keywords', PartKeywordManagePage::class)->name('part-keywords.index');
+    Route::get('/settings', LibrarySettingsPage::class)->name('settings.index');
+});
 
 
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {

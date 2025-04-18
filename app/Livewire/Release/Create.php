@@ -32,6 +32,11 @@ class Create extends Component implements HasForms, HasTable
     use InteractsWithForms;
     use InteractsWithTable;
 
+    public function mount(): void
+    {
+        $this->authorize('create', PartRelease::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table

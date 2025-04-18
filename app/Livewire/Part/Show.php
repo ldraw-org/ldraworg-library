@@ -89,6 +89,7 @@ class Show extends Component implements HasForms, HasActions
 
     public function mount(?Part $part, ?Part $partfile, ?Part $upartfile)
     {
+        $this->authorize('create', Part::class);
         if (!is_null($part) && $part->exists) {
             $this->part = $part;
         } elseif (!is_null($partfile) && $partfile->exists) {

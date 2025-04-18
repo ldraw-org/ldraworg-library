@@ -28,6 +28,11 @@ class DocumentManagePage extends BasicResourceManagePage
     public string $title = "Manage Documents";
     protected string $menu = 'admin';
 
+    public function mount(): void
+    {
+        $this->authorize('manage', Document::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table

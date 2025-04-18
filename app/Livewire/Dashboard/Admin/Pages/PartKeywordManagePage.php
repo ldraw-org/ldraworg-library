@@ -23,6 +23,11 @@ class PartKeywordManagePage extends BasicResourceManagePage
     public string $title = "Manage Part Keywords";
     protected string $menu = 'admin';
 
+    public function mount(): void
+    {
+        $this->authorize('manage', PartKeyword::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table

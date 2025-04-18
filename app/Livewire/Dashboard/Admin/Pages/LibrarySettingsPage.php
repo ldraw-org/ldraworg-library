@@ -3,6 +3,7 @@
 namespace App\Livewire\Dashboard\Admin\Pages;
 
 use App\Enums\License;
+use App\Enums\Permission;
 use App\Jobs\UpdateImage;
 use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
@@ -108,6 +109,7 @@ class LibrarySettingsPage extends Component implements HasForms
 
     public function mount(LibrarySettings $settings)
     {
+        $this->authorize(Permission::SiteSettingsEdit);
         $form_data = [
             'tracker_locked' => $settings->tracker_locked,
             'ldview_options' => $settings->ldview_options,

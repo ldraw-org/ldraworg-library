@@ -31,6 +31,11 @@ class UserManagePage extends BasicResourceManagePage
     public string $title = "Manage Users";
     protected string $menu = 'admin';
 
+    public function mount(): void
+    {
+        $this->authorize('add', User::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table

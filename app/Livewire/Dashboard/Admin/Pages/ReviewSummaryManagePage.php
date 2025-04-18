@@ -24,6 +24,11 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
     public string $title = "Manage Review Summaries";
     protected string $menu = 'admin';
 
+    public function mount(): void
+    {
+        $this->authorize('manage', ReviewSummary::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table

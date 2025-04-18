@@ -21,6 +21,11 @@ class DocumentCategoryManagePage extends BasicResourceManagePage
     public string $title = "Manage Document Categories";
     protected string $menu = 'admin';
 
+    public function mount(): void
+    {
+        $this->authorize('manage', DocumentCategory::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table

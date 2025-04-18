@@ -22,6 +22,11 @@ class RoleManagePage extends BasicResourceManagePage
     public string $title = "Manage Roles";
     protected string $menu = 'admin';
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Role::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table
