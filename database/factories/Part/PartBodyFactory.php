@@ -17,7 +17,7 @@ class PartBodyFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'body' => '1 0 0 0 0 1 0 0 0 1 0 0 0 1 empty.dat'
         ];
     }
 }
