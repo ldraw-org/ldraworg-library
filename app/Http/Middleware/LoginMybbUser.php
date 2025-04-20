@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\MybbUser;
+use App\Models\Mybb\MybbUser;
 use App\Models\User;
 
 class LoginMybbUser

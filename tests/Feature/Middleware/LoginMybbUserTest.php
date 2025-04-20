@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\Permission;
-use App\Models\MybbUser;
+use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;

@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Enums\License;
 use App\Enums\Permission;
-use App\Models\MybbUser;
+use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\View;

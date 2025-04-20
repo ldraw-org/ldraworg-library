@@ -20,6 +20,13 @@ return [
         'Registered' => 11,
     ],
 
+    // Mybb OMR info
+    'mybb_omr' => [
+        'omr_forum_id' => 17,
+        'checked_icon_id' => 17,
+        'attachment_path' => '/var/www/ldraw.org/mybb/uploads/',
+    ],
+
     // External Site URL Stubs
     'external_sites' => [
         'bricklink' => 'https://www.bricklink.com/v2/catalog/catalogitem.page?P=',

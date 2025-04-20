@@ -5,7 +5,7 @@ namespace App\Livewire\Dashboard\Admin\Pages;
 use App\Enums\License;
 use App\Enums\Permission;
 use App\Livewire\Dashboard\BasicResourceManagePage;
-use App\Models\MybbUser;
+use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Filament\Forms\Components\Checkbox;

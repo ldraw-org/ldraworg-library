@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\License;
+use App\Models\Mybb\MybbUser;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;

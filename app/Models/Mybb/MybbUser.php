@@ -1,16 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Mybb;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-/**
- * @property string $username
- * @property string $email
- * @property string $loginname
- * @property string $additionalgroups
- * @mixin IdeHelperMybbUser
- */
 class MybbUser extends Model
 {
     protected $table = 'mybb_users';
@@ -23,6 +18,11 @@ class MybbUser extends Model
         'salt',
         'loginkey',
     ];
+
+    public function library_user(): ?User
+    {
+        return User::firstWhere('forum_user_id', $this->uid);
+    }
 
     public static function findFromCookie(): ?self
     {
