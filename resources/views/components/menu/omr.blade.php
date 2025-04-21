@@ -1,7 +1,7 @@
 <x-menu>
     <x-menu.library-dropdown />
     @can('create', App\Models\Omr\OmrModel::class)
-        <x-menu.item label="Submit" link="" />
+        <x-menu.item label="Review" link="{{route('omr.add')}}" />
     @endcan
     <x-menu.item label="Model List" link="{{route('omr.sets.index')}}" />
     <x-menu.item label="Statistics" link="" />
