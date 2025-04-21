@@ -40,6 +40,10 @@ class UpdateConfig extends Command
             Storage::disk('images')->makeDirectory('library/updates');
         }
 
+        if (!Storage::disk('images')->exists('omr/models')) {
+            Storage::disk('images')->makeDirectory('omr/models');
+        }
+
         if (!Storage::disk('library')->exists('official')) {
             Storage::disk('library')->makeDirectory('official');
         }
@@ -54,6 +58,10 @@ class UpdateConfig extends Command
 
         if (!Storage::disk('library')->exists('updates')) {
             Storage::disk('library')->makeDirectory('updates');
+        }
+
+        if (!Storage::disk('library')->exists('omr')) {
+            Storage::disk('library')->makeDirectory('omr');
         }
 
         $this->call('lib:refresh-zip');
