@@ -48,11 +48,14 @@ class Add extends Component implements HasForms, HasTable
     {
         return $table
             ->query(MybbAttachment::with('post', 'user')->omrFiles())
+            ->defaultSort('dateuploaded', 'desc')
             ->columns([
                 TextColumn::make('dateuploaded')
+                    ->sortable()
                     ->label('Date Uploaded')
                     ->dateTime(),
-                TextColumn::make('filename'),
+                TextColumn::make('filename')
+                    ->sortable(),
                 TextColumn::make('post.subject')
                     ->wrap()
                     ->url(fn (MybbAttachment $file): string => $file->post->url()),

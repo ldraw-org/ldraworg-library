@@ -65,6 +65,12 @@ class FilamentServiceProvider extends ServiceProvider
             'tables::filters.query-builder.constraints.relationship' => LibraryIcon::RelationshipConstraint->value,
             'tables::filters.query-builder.constraints.select' => LibraryIcon::Select->value,
             'tables::filters.query-builder.constraints.text' => LibraryIcon::TextConstraint->value,
+            'tables::columns.icon-column.false' => LibraryIcon::TableFalse->value,
+            'tables::columns.icon-column.true' => LibraryIcon::TableTrue->value,
+            'tables::header-cell.sort-asc-button' => LibraryIcon::TableSortAsc->value,
+            'tables::header-cell.sort-button' => LibraryIcon::TableSortDesc->value,
+            'tables::header-cell.sort-desc-button' => LibraryIcon::TableSortDesc->value,
+            'tables::actions.filter' => LibraryIcon::TableFilter->value,
         ]);
     }
 }

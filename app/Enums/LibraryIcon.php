@@ -56,4 +56,9 @@ enum LibraryIcon: string
     case Select = 'mdi-unfold-more-horizontal';
     case Help = 'mdi-help-box';
     case DateSelect = 'mdi-calendar-range';
+    case TableFalse = 'mdi-close-circle-outline';
+    case TableTrue = 'mdi-check-circle-outline';
+    case TableFilter = 'mdi-filter';
+    case TableSortDesc = 'mdi-chevron-down';
+    case TableSortAsc = 'mdi-chevron-up';
 }
