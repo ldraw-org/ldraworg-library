@@ -34,6 +34,12 @@
                                 {{$model->missing_stickers ? 'Yes' : 'No'}}
                             </div>
                         </div>
+                        @if ($model->notes['notes'] != '')
+                            <div class="p-2">
+                                <span class="font-bold pr-2">Notes:</span><br>
+                                {{$model->notes['notes']}}
+                            </div>
+                        @endif
                         <div class="flex flex-row space-x-2">
                             <x-filament::button class="m-2 w-fit" wire:click="openModal({{$model->id}})">
                                 3D View
@@ -63,6 +69,10 @@
         <script>
             $wire.on('open-modal', (modal) => {
                 if (scene == null || modelid != $wire.model_id) {
+                    if (scene) {
+                        scene.clear();
+                        scene = null;
+                    }
                     modelid = $wire.model_id;
                     partname = $wire.model_name;
                     $wire.dispatch('ldbi-render-model');
