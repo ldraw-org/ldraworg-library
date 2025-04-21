@@ -71,5 +71,6 @@ describe('non bound routes', function () {
         ['admin.document-categories.index', [Permission::DocumentCategoryManage]],
         ['admin.part-keywords.index', [Permission::PartKeywordsManage]],
         ['admin.settings.index', [Permission::SiteSettingsEdit]],
+        ['omr.add', [Permission::OmrModelApprove]],
     ]);
 });

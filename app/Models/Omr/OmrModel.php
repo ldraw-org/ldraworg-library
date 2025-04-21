@@ -28,10 +28,10 @@ class OmrModel extends Model
             'missing_parts' => 'boolean',
             'missing_patterns' => 'boolean',
             'missing_stickers' => 'boolean',
+            'alt_model' => 'boolean',
             'approved' => 'boolean',
         ];
     }
-
 
     public function set(): BelongsTo
     {

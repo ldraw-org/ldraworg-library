@@ -9,6 +9,6 @@ class OmrModelPolicy
 {
     public function create(User $user): bool
     {
-        return $user->can(Permission::OmrModelSubmit);
+        return $user->can(Permission::OmrModelApprove);
     }
 }

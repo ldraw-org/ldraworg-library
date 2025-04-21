@@ -24,6 +24,7 @@ use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
 use App\Livewire\Dashboard\User\Index as UserIndex;
 use App\Livewire\JoinLdraw;
 use App\Livewire\LDrawModelViewer;
+use App\Livewire\Omr\OmrModel\Add;
 use App\Livewire\Omr\Set\Index;
 use App\Livewire\Omr\Set\Show as SetShow;
 use App\Livewire\Part\Show;
@@ -112,6 +113,7 @@ Route::prefix('omr')->name('omr.')->group(function () {
     Route::get('/sets', Index::class)->name('sets.index');
     Route::get('sets/{set}', SetShow::class)->name('sets.show');
     Route::get('/set/{setnumber}', SetShow::class)->name('show.setnumber');
+    Route::middleware(['auth'])->get('/add', Add::class)->name('add');
 });
 
 

@@ -25,12 +25,8 @@ class MybbPost extends Model
         return $this->hasMany(MybbAttachment::class, 'pid', 'pid');
     }
 
-    #[Scope]
-    protected function unchecked(Builder $query): void
+    public function url(): string
     {
-        $query->has('attachments')
-            ->where('fid', config('ldraw.mybb_omr.omr_forum_id'))
-            ->where('icon', '!=', config('ldraw.mybb_omr.checked_icon_id'));
+        return "https://forums.ldraw.org/thread-{$this->tid}-post-{$this->pid}.html#pid{$this->pid}";
     }
-
 }
