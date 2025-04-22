@@ -3,6 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Enums\Permission;
+use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
@@ -39,7 +40,11 @@ class UserTable extends BasicTable
                 TextColumn::make('license')
                     ->sortable(),
                 TextColumn::make('part_events_max_created_at')
-                    ->label('Last Action')
+                    ->label('Last Library Action')
+                    ->since()
+                    ->sortable(),
+                TextColumn::make('forum_user.lastactive')
+                    ->label('Last Active on Forum')
                     ->since()
                     ->sortable(),
             ]);
