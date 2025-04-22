@@ -5,6 +5,7 @@ namespace App\Livewire\Tables;
 use App\Enums\Permission;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +31,8 @@ class UserTable extends BasicTable
                     ->label('User Name')
                     ->sortable()
                     ->searchable(),
+                ViewColumn::make('roles')
+                    ->view('tables.columns.user-roles'),
                 TextColumn::make('email')
                     ->searchable()
                     ->visible(Auth::user()?->can(Permission::UserViewEmail) ?? false),
