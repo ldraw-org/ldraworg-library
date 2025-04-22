@@ -18,7 +18,7 @@ class UserTable extends BasicTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(User::query()->where('is_ptadmin', false)->where('is_synthetic', false))
+            ->query(User::query()->withMax('part_events','created_at')->where('is_ptadmin', false)->where('is_synthetic', false))
             ->defaultSort('realname', 'asc')
             ->heading('User List')
             ->columns([
@@ -33,8 +33,10 @@ class UserTable extends BasicTable
                     ->visible(Auth::user()?->can(Permission::UserViewEmail)),
                 TextColumn::make('license.name')
                     ->sortable(),
-                TextColumn::make('last-action')
-                    ->state(fn (User $user) => $user->part_events->isEmpty() ? 'None' : (new Carbon($user->part_events()->latest()->first()->created_at)->longRelativeToNowDiffForHumans())),
+                TextColumn::make('part_events_max_created_at')
+                    ->label('Last Action')
+                    ->since()
+                    ->sortable(),
             ]);
     }
 }
