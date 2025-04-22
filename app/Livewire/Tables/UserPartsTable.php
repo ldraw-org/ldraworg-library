@@ -20,14 +20,12 @@ class UserPartsTable extends BasicTable
             ->query(
                 Part::with('votes', 'official_part')
                     ->unofficial()
-                    ->where(
-                        fn (Builder $query) =>
-                        $query->orWhere(fn (Builder $query2): Builder => $query2->doesntHave('official_part')->where('user_id', Auth::user()->id))
-                            ->orWhereHas('events', fn (Builder $query2): Builder => $query2->whereNull('part_release_id')->where('user_id', Auth::user()->id)->where('event_type', EventType::Submit))
+                    ->whereHas('events', fn (Builder $query) => 
+                        $query->unofficial()->where('event_type', EventType::Submit)->where('user_id', Auth::user()->id)
                     )
             )
             ->defaultSort('created_at', 'desc')
-            ->heading('MySubmits')
+            ->heading('My Submits')
             ->columns(PartTable::columns())
             ->filters([
                 SelectFilter::make('part_status')
