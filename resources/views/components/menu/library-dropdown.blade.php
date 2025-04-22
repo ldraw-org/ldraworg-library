@@ -11,5 +11,6 @@
         <x-menu.item label="Sticker Sheet Lookup" link="{{route('parts.sticker-sheet.index')}}" /> 
         <x-menu.item label="PBG Generator" link="{{route('pbg')}}" />
         <x-menu.item label="LDraw Model Viewer" link="{{route('model-viewer')}}" />
+        <x-menu.item label="User List" link="{{route('users.index')}}" />
     </x-menu.dropdown>    
 </x-menu.dropdown>

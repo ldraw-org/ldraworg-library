@@ -30,7 +30,7 @@ class UserTable extends BasicTable
                     ->searchable(),
                 TextColumn::make('email')
                     ->searchable()
-                    ->visible(Auth::user()?->can(Permission::UserViewEmail)),
+                    ->visible(Auth::user()?->can(Permission::UserViewEmail) ?? false),
                 TextColumn::make('license.name')
                     ->sortable(),
                 TextColumn::make('part_events_max_created_at')
