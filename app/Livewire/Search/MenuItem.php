@@ -40,7 +40,7 @@ class MenuItem extends Component
             $q->orWhere('number', 'LIKE', "%{$this->search}%")
                 ->orWhere('name', 'LIKE', "%{$this->search}%")
                 ->orWhereHas('models', fn (Builder $qu) => $qu->where('alt_model_name', 'LIKE', "%{$this->search}%"))
-                ->orWhereHas('theme', fn (Builder $qu) => $qu->where('theme', 'LIKE', "%{$this->search}%"));
+                ->orWhereHas('theme', fn (Builder $qu) => $qu->where('name', 'LIKE', "%{$this->search}%"));
         })->orderBy('name')->take($limit)->get();
         if ($sets->count() > 0) {
             $this->hasResults = true;
