@@ -23,9 +23,11 @@ class UserTable extends BasicTable
             ->heading('User List')
             ->columns([
                 TextColumn::make('realname')
+                    ->label('Name')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('name')
+                    ->label('User Name')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('email')
