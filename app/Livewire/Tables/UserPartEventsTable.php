@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\EventType;
 use App\Models\Part\PartEvent;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
@@ -23,8 +24,11 @@ class UserPartEventsTable extends BasicTable
                     ->whereHas(
                         'part',
                         fn (Builder $q) =>
-                        $q->doesntHave('official_part')->where('user_id', Auth::user()->id)
+                            $q->whereHas('events', fn (Builder $qu) => 
+                                $qu->where('event_type', EventType::Submit)->where('user_id', Auth::user()->id)
+                            )
                     )
+                    ->where('user_id', '!=', Auth::user()->id)
             )
             ->defaultSort('created_at', 'desc')
             ->heading('Events On My Submits')
