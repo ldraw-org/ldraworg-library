@@ -35,6 +35,7 @@ use App\Livewire\PbgGenerator;
 use App\Livewire\Poll\Show as PollShow;
 use App\Livewire\Release\Create;
 use App\Livewire\Search\Suffix;
+use App\Livewire\Tables\UserTable;
 use App\Livewire\TorsoShortcutHelper;
 use App\Livewire\Tracker\ConfirmCA;
 
@@ -87,6 +88,9 @@ Route::prefix('parts')->name('parts.')->group(function () {
     Route::get('/unofficial/{upartfile}', Show::class)->name('show.ufile');
     Route::get('/{partfile}', Show::class)->name('show.file');
 });
+
+// Users
+Route::view('/users', 'user.index')->name('users.index');
 
 Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::view('/', 'tracker.main')->name('main');
