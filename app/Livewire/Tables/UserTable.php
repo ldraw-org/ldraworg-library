@@ -6,6 +6,7 @@ use App\Enums\Permission;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 
@@ -32,6 +33,8 @@ class UserTable extends BasicTable
                     ->visible(Auth::user()?->can(Permission::UserViewEmail)),
                 TextColumn::make('license.name')
                     ->sortable(),
+                TextColumn::make('last-action')
+                    ->state(fn (User $user) => $user->part_events->isEmpty() ? 'None' : (new Carbon($user->part_events()->latest()->first()->created_at)->longRelativeToNowDiffForHumans())),
             ]);
     }
 }
