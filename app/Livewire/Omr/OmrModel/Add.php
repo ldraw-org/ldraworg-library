@@ -119,18 +119,6 @@ class Add extends Component implements HasForms, HasTable
                                     }
                                 },
                             ]),
-                        Select::make('theme_id')
-                            ->options(Theme::pluck('theme', 'id'))
-                            ->searchable()
-                            ->required()
-                            ->createOptionForm([
-                                TextInput::make('theme')
-                                    ->required()
-                                    ->unique(Theme::class, column: 'theme')
-                            ])
-                            ->createOptionUsing(function (array $data): int {
-                                return Theme::create(['theme' => $data['theme']])->id;
-                            }),
                     ])
                     ->createOptionUsing(function (array $data): int {
                         if (!Str::endsWith($data['number'], ['-1', '-2'])) {
@@ -142,7 +130,7 @@ class Add extends Component implements HasForms, HasTable
                             'name' => Arr::get($rb_set_data, 'name'),
                             'year' => Arr::get($rb_set_data, 'year'),
                             'rb_url' => Arr::get($rb_set_data, 'set_url'),
-                            'theme_id' => $data['theme_id'],
+                            'theme_id' => Arr::get($rb_set_data, 'theme_id'),
                         ])->id;
                     }),
                 Toggle::make('alt_model')

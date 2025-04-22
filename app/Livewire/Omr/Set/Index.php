@@ -42,6 +42,11 @@ class Index extends Component implements HasForms, HasTable
                     ->label('Set Name')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('set.theme.name')
+                    ->label('Theme')
+                    ->state(fn (OmrModel $m) => $m->set->theme->displayString())
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('set.year')
                     ->label('Year')
                     ->searchable()

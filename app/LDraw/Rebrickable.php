@@ -66,6 +66,11 @@ class Rebrickable
         return $this->makeApiCall("{$this->api_url}/themes/{$themeid}/");
     }
 
+    public function getThemes(): Collection
+    {
+        return $this->makeApiCall("{$this->api_url}/themes/");
+    }
+
     public function getPart(string $partnumber): Collection
     {
         return $this->makeApiCall("{$this->api_url}/parts/{$partnumber}/");

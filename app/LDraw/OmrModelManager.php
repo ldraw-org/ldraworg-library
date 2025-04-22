@@ -49,9 +49,13 @@ class OmrModelManager
                 'forum_user_id' => $file->user->uid,
                 'password' => bcrypt(Str::random(40)),
             ]);
+        }
+        
+        if (!$user->hasRole('OMR Author')) {
             $user->assignRole('OMR Author');
             $user->save();
         }
+        
         $model = OmrModel::create([
             'user_id' => $user->id,
             'set_id' => $set->id,
