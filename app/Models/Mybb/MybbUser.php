@@ -19,9 +19,9 @@ class MybbUser extends Model
         'loginkey',
     ];
 
-    public function library_user(): ?User
+    public function library_user(): HasOne
     {
-        return User::firstWhere('forum_user_id', $this->uid);
+        return $this->setConnection('mysql')->hasOne(User::class, 'forum_user_id', 'uid');
     }
 
     public static function findFromCookie(): ?self

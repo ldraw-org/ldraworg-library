@@ -39,7 +39,7 @@ class OmrModelManager
     public function addModelFromMybbAttachment(MybbAttachment $file, Set $set, array $data = []): void
     {
         $modeltext = $file->get();
-        $user = $file->user->library_user();
+        $user = $file->user->library_user;
         if (is_null($user)) {
             $user = User::create([
                 'name' => $file->user->loginname,

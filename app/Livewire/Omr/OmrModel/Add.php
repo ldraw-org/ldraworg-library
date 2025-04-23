@@ -60,7 +60,7 @@ class Add extends Component implements HasForms, HasTable
                     ->wrap()
                     ->url(fn (MybbAttachment $file): string => $file->post->url()),
                 TextColumn::make('user')
-                    ->state(fn (MybbAttachment $file): string => $file->user->library_user()?->author_string ?? "{$file->user->loginname} - {$file->user->username}"),
+                    ->state(fn (MybbAttachment $file): string => $file->user->library_user?->author_string ?? "{$file->user->loginname} - {$file->user->username}"),
                 IconColumn::make('set-in-omr')
                     ->boolean()
                     ->state(fn (MybbAttachment $file): bool  => !is_null($this->getSetFromFilename($file->filename)))
@@ -87,7 +87,7 @@ class Add extends Component implements HasForms, HasTable
                 Filter::make('unchecked-posts')
                     ->query(fn (Builder $query): Builder => $query->where('posthash', '!=', 1))
             ])
-            ->recordClasses(fn (MybbAttachment $file): string => is_null($file->user->library_user()) ? '!bg-yellow-300' : '');
+            ->recordClasses(fn (MybbAttachment $file): string => is_null($file->user->library_user) ? '!bg-yellow-300' : '');
     }
 
     protected function AddAction(): Action
