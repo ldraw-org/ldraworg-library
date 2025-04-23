@@ -4,6 +4,7 @@ namespace App\LDraw;
 
 use App\Models\Omr\OmrModel;
 use App\Models\Part\Part;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -52,15 +53,14 @@ class LDrawModelMaker
             $subs[] = "parts/textures/{$s}";
             $subs[] = "p/textures/{$s}";
         }
-        $parts = [];
+        $parts = new Collection();
         Part::with('descendantsAndSelf')
             ->doesntHave('unofficial_part')
             ->whereIn('filename', $subs)
             ->each(function (Part $p) use (&$parts) {
-                $parts = array_merge($parts, $p->descendantsAndSelf->official()->unique()->all());
+                $parts = $parts->merge($p->descendantsAndSelf()->doesntHave('unofficial_part')->get()->unique('filename')->all())->unique('filename');
             });
-        collect($parts)
-            ->unique()
+        $parts
             ->each(function (Part $p) use (&$file) {
                 if ($p->isTexmap()) {
                     $file .= $p->get(true, true);
