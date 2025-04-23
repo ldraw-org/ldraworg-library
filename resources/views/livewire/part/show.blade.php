@@ -141,7 +141,7 @@
                     @if (!is_null($part->getRebrickablePart()))
                         <x-library-icon icon="link-on" class="w-5" color="fill-gray-400" title="External site data provided by Rebrickable.com" />
                     @else
-                        <x-library-icon icon="link-off" class="w-5" color="fill-gray-400" title="External site data provided by part keywords" />
+                        <x-library-icon icon="link-off" class="w-5" color="fill-red-300" title="External site data provided by part keywords" />
                     @endif
                     <x-filament-action action="viewRebrickableAction" />
                     <x-filament-action action="viewBrickLinkAction" />
