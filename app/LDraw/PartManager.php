@@ -192,7 +192,7 @@ class PartManager
             };
             $this->updateBasePart($p);
             $this->updateImage($p);
-            $this->checkPart($p, false);
+            $this->checkPart($p);
             $this->addStickerSheet($p);
             $p->updateReadyForAdmin();
             $this->addUnknownNumber($p);
