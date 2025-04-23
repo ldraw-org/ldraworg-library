@@ -60,11 +60,11 @@ class ValidLines implements Check
                 continue;
             }
             if ($matches['color'] == '24' && in_array($line[0], ['1','3','4'])) {
-                $fail(PartError::InvalidLineColor, ['value' => $index + $header_length]);
+                $fail(PartError::InvalidColor24, ['value' => $index + $header_length]);
                 continue;
             }
             if ($matches['color'] == '16' && in_array($line[0], ['2','5'])) {
-                $fail(PartError::InvalidLineColor, ['value' => $index + $header_length]);
+                $fail(PartError::InvalidColor16, ['value' => $index + $header_length]);
             }
 
         }

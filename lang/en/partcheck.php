@@ -11,7 +11,9 @@ return [
     'line' => [
         'invalid' => 'Line :value invalid',
         'invalidmeta' => 'Line :value, invalid META command or comment without //',
-        'invalidcolor' => 'Line :value, Color code not in LDConfig.ldr',
+        'invalidcolor' => 'Line :value, color code not in LDConfig.ldr',
+        'invalidcolor16' => 'Line :value, color code 16 not allowed for linetypes 2, 5',
+        'invalidcolor24' => 'Line :value, color code 24 not allowed for linetypes 1, 3, 4',
         'invalidnumbers' => 'Line :value invalid',
         'singular' => 'Line :value, singular rotation matrix',
         'identicalpoints' => 'Line :value, indentical points',

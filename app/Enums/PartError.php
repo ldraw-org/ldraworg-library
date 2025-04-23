@@ -17,6 +17,8 @@ enum PartError: string
     case LineInvalid = 'line.invalid';
     case InvalidLineType0 = 'line.invalidmeta';
     case InvalidLineColor = 'line.invalidcolor';
+    case InvalidColor16 = 'line.invalidcolor16';
+    case InvalidColor24 = 'line.invalidcolor24';
     case InvalidLineNumbers = 'line.invalidnumbers';
     case RotationMatrixIsSigular = 'line.singular';
     case IndenticalPoints = 'line.identicalpoints';
