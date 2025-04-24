@@ -55,13 +55,15 @@
         <x-slot name="heading">
             3D View
         </x-slot>
-        <div class="flex flex-col w-full h-full">
-            <div class="flex flex-row space-x-2 p-2 mb-2">
+        <div class="flex flex-col space-y-2">
+            <div class="flex gap-2">
                 <x-3d-viewer.button.normal />
                 <x-3d-viewer.button.studlogo />
                 <x-3d-viewer.button.photo />
             </div>
-            <x-3d-viewer class="border w-full h-[80vh]" modeltype="omr" />
+            <div class="flex flex-col w-full h-full">
+                <x-3d-viewer class="border w-full h-[80vh]" modeltype="omr" />
+            </div>
         </div>
     </x-filament::modal>
     @push('scripts')

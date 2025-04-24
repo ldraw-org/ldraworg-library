@@ -20,15 +20,16 @@
             Submit
         </x-filament::button>
     </form>
-    <div class="flex flex-col w-full h-full">
-        <div class="flex flex-row space-x-2 p-2 mb-2">
+    <div class="flex flex-col space-y-2">
+        <div class="flex gap-2">
             <x-3d-viewer.button.normal />
             <x-3d-viewer.button.studlogo />
             <x-3d-viewer.button.photo />
         </div>
-        <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" modeltype="user" />
+        <div class="flex flex-col w-full h-full">
+            <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" modeltype="user" />
+        </div>
     </div>
-
     <div class="border rounded p-2">
         <p>
             All parts used in the file submitted to the model viewer must be embedded in the MPD,

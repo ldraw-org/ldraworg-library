@@ -1,9 +1,5 @@
 @props(['icon', 'label', 'onClick'])
 
-<x-filament::icon-button
-    icon="{{ $icon->value }}"
-    size="lg"
-    label="{{ $label }}"
-    class="border"
-    wire:click="$dispatch('{{ $onClick }}')"
-/>
+<div class="border rounded-lg p-1">
+    <x-library-icon :icon="$icon" class="w-8" color="fill-gray-500" wire:click="$dispatch('{{ $onClick }}')" title="{{$label}}"/>
+</div>

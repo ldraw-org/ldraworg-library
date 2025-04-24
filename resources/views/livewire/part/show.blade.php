@@ -99,7 +99,7 @@
             @endif
         </div>
         @if ($this->part->type->inPartsFolder())
-            <div>
+            <div class="flex flex-wrap gap-2">
                 <span class="font-bold text-lg">
                     Part Attributes:
                 </span>
@@ -134,7 +134,7 @@
                 $this->viewBricksetAction->isVisible() ||
                 $this->viewBrickOwlAction->isVisible()
             )
-                <div class="flex space-x-2 place-items-center">
+                <div class="flex flex-wrap gap-2 place-items-center">
                     <div class="font-bold text-lg">
                         External Sites:
                     </div>
@@ -246,8 +246,8 @@
         <x-slot name="heading">
             3D View
         </x-slot>
-        <div class="flex flex-col w-full h-full">
-            <div class="flex flex-row space-x-2 p-2 mb-2">
+        <div class="flex flex-col space-y-2">
+            <div class="flex gap-2">
                 <x-3d-viewer.button.normal />
                 <x-3d-viewer.button.harlequin />
                 <x-3d-viewer.button.bfc />
@@ -255,7 +255,9 @@
                 <x-3d-viewer.button.showaxis />
                 <x-3d-viewer.button.photo />
             </div>
-            <x-3d-viewer class="border w-full h-[80vh]" partname="{{str_replace('\\', '/', $part->name())}}" modelid="{{$part->id}}"/>
+            <div class="flex flex-col w-full h-full">
+                <x-3d-viewer class="border w-full h-[80vh]" partname="{{str_replace('\\', '/', $part->name())}}" modelid="{{$part->id}}"/>
+            </div>
         </div>
     </x-filament::modal>
     <x-filament-actions::modals />
