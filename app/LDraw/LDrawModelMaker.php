@@ -19,9 +19,9 @@ class LDrawModelMaker
         $preview = $part->preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
         $file = "0 FILE {$topModelName}\r\n1 {$preview} {$part->name()}\r\n0 FILE {$part->name()}\r\n{$part->get()}\r\n";
         if ($part->isUnofficial()) {
-            $sparts = $part->descendants()->doesntHave('unofficial_part')->get()->unique();
+            $sparts = $part->descendants()->doesntHave('unofficial_part')->get()->unique('filename');
         } else {
-            $sparts = $part->descendants->official()->unique();
+            $sparts = $part->descendants->official()->unique('filename');
         }
         $sparts->load('body');
         $sparts->each(function (Part $p) use (&$file) {
@@ -100,9 +100,9 @@ class LDrawModelMaker
         $webgl = [];
         if ($model instanceof Part) {
             if ($model->isUnofficial()) {
-                $sparts = $model->descendantsAndSelf()->doesntHave('unofficial_part')->get()->unique();
+                $sparts = $model->descendantsAndSelf()->doesntHave('unofficial_part')->get()->unique('filename');
             } else {
-                $sparts = $model->descendantsAndSelf->official()->unique();
+                $sparts = $model->descendantsAndSelf->official()->unique('filename');
             }
             $sparts->load('body');
             $sparts->each(function (Part $p) use (&$webgl) {

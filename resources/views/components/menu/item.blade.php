@@ -1,8 +1,7 @@
-@props(['label', 'link' => null, 'hidden' => null])
-@isset($link)
-    <a {{$attributes->merge(['class' => 'item'])}} href="{{$link}}">
-@endisset
-    <li {{$attributes->merge(['class'=>'p-2 hover:bg-gray-300'])}}>{{$label}}</li>
-@isset($link)
+@props(['label', 'link'])
+
+<li class="relative">
+    <a href="{{ $link }}" class="px-4 py-2 flex w-full items-start hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100 cursor-pointer">
+        <span class="flex-1">{{ $label }}</span> 
     </a>
-@endisset
+</li>

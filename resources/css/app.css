@@ -15,3 +15,7 @@
     font-family: "Courier New", monospace !important;
     font-size: 10pt !important;
 }
+
+.inset-l-full {
+    left: 100%;
+}
