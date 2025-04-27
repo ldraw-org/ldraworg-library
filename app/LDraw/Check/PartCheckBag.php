@@ -86,7 +86,7 @@ class PartCheckBag implements Arrayable, JsonSerializable
         return !$this->hasError($error);
     }
 
-    public function add(PartError $error, $context = [])
+    public function add(PartError $error, array $context = [])
     {
         if ($context) {
             $this->messages[$error->type()->value][$error->value][] = $context;
