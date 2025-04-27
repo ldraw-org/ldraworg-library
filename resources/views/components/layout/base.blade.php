@@ -23,16 +23,7 @@
                 For the live version go here: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="https://library.ldraw.org">https://library.ldraw.org</a>
             </x-message>
         @endenv
-        @if (Auth::check() && Auth::user()->can('submit', App\Models\Part\Part::class) && Auth::user()->ca_confirm !== true)
-            <x-message centered icon type="warning">
-                <x-slot:header>
-                    You have not confirmed the current Contributor's Agreement. You will not be able to
-                    submit or edit parts.
-                </x-slot:header>
-                Please visits the CA confirm page to agree to the new CA: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('tracker.confirmCA.show')}}">Confirm the new CA</a>
-            </x-message>
-        @endif
-
+        {{ $messages ?? '' }}
         <div class="grid grid-cols-2 justify-stretch items-center">
             <div class="justify-self-start">
                 <a href="https://www.ldraw.org">

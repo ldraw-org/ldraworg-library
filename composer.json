@@ -55,7 +55,7 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/version.php"
+            "app/library_helpers.php"
         ]
     },
     "autoload-dev": {
