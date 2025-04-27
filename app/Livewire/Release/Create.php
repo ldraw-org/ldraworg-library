@@ -79,7 +79,7 @@ class Create extends Component implements HasForms, HasTable
                 ])->from('md')
             ])
             ->recordClasses(function (Part $p) {
-                if ($p->part_check->has([CheckType::Error, CheckType::Warning])) {
+                if ($p->part_check->has([CheckType::Error, CheckType::TrackerHold])) {
                     return '!bg-red-300';
                 } elseif ($p->part_check->has(CheckType::Warning)) {
                     return '!bg-orange-300';

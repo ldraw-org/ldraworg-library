@@ -53,13 +53,11 @@ class UpdateReleaseRebrickable extends Command
         if ($rb_part_nums->diff($rb_nums)->isEmpty()) {
             $this->info("All existing RB information is correct");
         } else {
-            dd($rb_part_nums->diff($rb_nums)->all());
             $parts->whereIn('rebrickable_part.number', $rb_part_nums->diff($rb_nums)->all())
                 ->each(fn (Part $p) => UpdateRebrickable::dispatch($p, true));
             $parts->whereIn('sticker_rebrickable_part.number', $rb_part_nums->diff($rb_nums)->all())
                 ->each(fn (Part $p) => UpdateRebrickable::dispatch($p, true));
         }
-        dd();
         $reject_list = [
             '973.dat',
             '16000.dat',
