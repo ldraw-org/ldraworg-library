@@ -36,7 +36,7 @@ enum PartType: string
             PartType::Primitive => 'p',
             PartType::LowResPrimitive => 'p/8',
             PartType::HighResPrimitive => 'p/48',
-            PartType::Helper => 'parts/helper',
+            PartType::Helper => 'parts/helpers',
             PartType::PartTexmap => 'parts/textures',
             PartType::SubpartTexmap => 'parts/textures/s',
             PartType::PrimitiveTexmap => 'p/textures',
