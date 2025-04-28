@@ -8,6 +8,8 @@ return [
     'bfc' => 'All parts must be BFC CERTIFY CCW',
     'previewinvalid' => 'Invalid PREVIEW line or singluar/negative matrix',
 
+    'obsoleteimproper' => 'An obsolete part must have the category Obsolete and ~Obsolete file or (Obsolete) in the description',
+    
     'line' => [
         'invalid' => 'Line :value invalid',
         'invalidmeta' => 'Line :value, invalid META command or comment without //',

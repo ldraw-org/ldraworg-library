@@ -294,6 +294,22 @@ describe('part check', function () {
         'invalid' => [null, null, false],
     ]);
 
+    test('check part obsoleted properly', function (string $desc, ?PartCategory $meta, PartType $type, bool $expected) {
+        $p = ParsedPart::fromArray([
+            'description' => $desc,
+            'metaCategory' => $meta,
+            'type' => $type,
+        ]);
+        expect(runSingleCheck($p, new \App\LDraw\Check\Checks\ObsoletePartIsValid()))->toBe($expected);
+    })->with([
+        'proper, end of description' => ['Test test test (Obsolete)', PartCategory::Obsolete, PartType::Part, true],
+        'proper, entire description' => ['~Obsolete file', PartCategory::Obsolete, PartType::Part, true],
+        'proper, not in parts folder' => ['Test', PartCategory::Obsolete, PartType::Subpart, true],
+        'improper, no category' => ['Test test test (Obsolete)', null, PartType::Part, false],
+        'improper, wrong category' => ['Test test test (Obsolete)', PartCategory::Animal, PartType::Part, false],
+        'improper, wrong description' => ['Test test test', PartCategory::Obsolete, PartType::Part, false],
+    ]);
+
     test('check pattern for set keyword', function (string $name, array $keywords, bool $expected) {
         $p = ParsedPart::fromArray([
             'name' => $name,

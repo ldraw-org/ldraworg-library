@@ -160,6 +160,7 @@ class PartChecker
             new \App\LDraw\Check\Checks\FlexibleHasCorrectSuffix(),
             new \App\LDraw\Check\Checks\BfcIsCcw(),
             new \App\LDraw\Check\Checks\CategoryIsValid(),
+            new \App\LDraw\Check\Checks\ObsoletePartIsValid(),
             new \App\LDraw\Check\Checks\PatternHasSetKeyword(),
             new \App\LDraw\Check\Checks\HistoryIsValid(),
             new \App\LDraw\Check\Checks\HistoryUserIsRegistered(),

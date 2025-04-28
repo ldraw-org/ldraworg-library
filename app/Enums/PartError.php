@@ -38,6 +38,8 @@ enum PartError: string
     case NoPipeForThirdParty = 'description.thirdpartydesc';
     case NoTildeForMovedObsolete = 'description.movedorobsolete';
 
+    case ImproperObsolete = 'obsoleteimproper';
+
     case NameTypeMismatch = 'type.path';
     case NewPartIsPhysicalColor = 'type.phycolor';
     case AliasNotInParts = 'type.alias';
