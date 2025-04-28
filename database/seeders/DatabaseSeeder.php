@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
         */
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         foreach (Permission::cases() as $permission) {
-            PermissionModel::create(['name' => $permission->value]);
+            PermissionModel::findOrCreate($permission->value);
         }
     }
 }

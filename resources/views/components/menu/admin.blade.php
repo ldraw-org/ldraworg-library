@@ -2,13 +2,17 @@
     <x-menu.library-menu-item />
     @if(
         Auth::user()->can('manage', \App\Models\Part\PartKeyword::class) ||
-        Auth::user()->can(\App\Enums\Permission::SiteSettingsEdit)
+        Auth::user()->can(\App\Enums\Permission::SiteSettingsEdit) ||
+        Auth::user()->can(\App\Enums\Permission::LdconfigEdit)
     )
         <x-menu.top-level-item label="Library Management">
             @can(\App\Enums\Permission::SiteSettingsEdit)
             <x-menu.item label="General Library Settings" link="{{route('admin.settings.index')}}" />
             @endcan
-           @can('manage', \App\Models\Part\PartKeyword::class)
+            @can(\App\Enums\Permission::LdconfigEdit)
+                <x-menu.item label="Edit LDConfig" link="{{route('admin.ldconfig.index')}}" />
+            @endcan
+            @can('manage', \App\Models\Part\PartKeyword::class)
                 <x-menu.item label="View/Edit Part Keywords" link="{{route('admin.part-keywords.index')}}" />
             @endcan
         </x-menu.top-level-item>

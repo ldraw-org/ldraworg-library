@@ -29,6 +29,5 @@ class UpdateColours extends Command
     public function handle()
     {
         app(LDrawColourManager::class)->importColours();
-        Cache::set('ldraw_colour_codes', LdrawColour::pluck('code')->all());
     }
 }

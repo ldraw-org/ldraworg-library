@@ -16,6 +16,7 @@ use App\Http\Controllers\TrackerHistoryController;
 use App\Livewire\Dashboard\Admin\Index as AdminIndex;
 use App\Livewire\Dashboard\Admin\Pages\DocumentCategoryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\DocumentManagePage;
+use App\Livewire\Dashboard\Admin\Pages\LdconfigEdit;
 use App\Livewire\Dashboard\Admin\Pages\ReviewSummaryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\RoleManagePage;
 use App\Livewire\Dashboard\Admin\Pages\UserManagePage;
@@ -136,6 +137,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/document-categories', DocumentCategoryManagePage::class)->name('document-categories.index');
     Route::get('/part-keywords', PartKeywordManagePage::class)->name('part-keywords.index');
     Route::get('/settings', LibrarySettingsPage::class)->name('settings.index');
+    Route::get('/ldconfig', LdconfigEdit::class)->name('ldconfig.index');
 });
 
 

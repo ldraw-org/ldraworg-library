@@ -31,6 +31,8 @@ enum Permission: string
     case PartOwnComment = 'part.own.comment';
     case PartOwnEditHeader = 'part.own.edit.header';
 
+    case LdconfigEdit = 'ldconfig.edit';
+
     case UserViewEmail = 'user.view.email';
 
     case UserAdd = 'user.add';

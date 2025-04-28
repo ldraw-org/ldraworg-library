@@ -4,6 +4,7 @@ namespace App\LDraw;
 
 use App\LDraw\Parse\Parser;
 use App\Models\LdrawColour;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class LDrawColourManager
@@ -20,5 +21,6 @@ class LDrawColourManager
         foreach ($colors as $color) {
             LdrawColour::updateOrCreate(['code' => $color['code']], $color);
         }
+        Cache::set('ldraw_colour_codes', LdrawColour::pluck('code')->all());
     }
 }
