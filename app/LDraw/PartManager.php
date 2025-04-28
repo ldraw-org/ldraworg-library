@@ -134,6 +134,7 @@ class PartManager
         $upart = Part::unofficial()->firstWhere('filename', $values['filename']);
         $opart = Part::official()->firstWhere('filename', $values['filename']);
         if (!is_null($upart)) {
+            store_backup(str_replace('/','-', $upart->filename), $upart->get());
             $upart->votes()->delete();
             $upart->fill($values);
             $upart->save();
