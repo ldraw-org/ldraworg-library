@@ -6,8 +6,10 @@ use App\Enums\PartCategory;
 use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
+use App\Events\PartSubmitted;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateParentParts;
+use App\Jobs\UpdateZip;
 use App\LDraw\Check\PartChecker;
 use App\LDraw\Parse\Parser;
 use App\LDraw\Render\LDView;
@@ -38,7 +40,7 @@ class PartManager
     ) {
     }
 
-    public function submit(LDrawFile|SupportCollection|array $files, User $user): Collection
+    public function submit(LDrawFile|SupportCollection|array $files, User $user, ?string $comments = null): Collection
     {
         if (!$files instanceof SupportCollection) {
             $files = is_array($files) ? $files : [$files];
@@ -54,6 +56,12 @@ class PartManager
             return null;
         })->all());
         $this->finalizePart($parts);
+        $parts->each(function (Part $part) use ($user, $comments) {
+            $user->notification_parts()->syncWithoutDetaching([$part->id]);
+            UpdateZip::dispatch($part);
+            PartSubmitted::dispatch($part, $user, $comments);
+        });
+        
         return $parts;
     }
 

@@ -143,12 +143,9 @@ class Submit extends Component implements HasForms
             $user = Auth::user();
         }
         $files = Arr::map($data['partfiles'], fn ($value, $key) => LDrawFile::fromUploadedFile($value));
-        $parts = $manager->submit($files, $user);
+        $parts = $manager->submit($files, $user, $data['comments']);
 
-        $parts->each(function (Part $p) use ($user, $data) {
-            $user->notification_parts()->syncWithoutDetaching([$p->id]);
-            UpdateZip::dispatch($p);
-            PartSubmitted::dispatch($p, $user, $data['comments']);
+        $parts->each(function (Part $p) {
             $this->submitted_parts[] = [
                 'image' => version("images/library/unofficial/" . substr($p->filename, 0, -4) . '_thumb.png'),
                 'description' => $p->description,

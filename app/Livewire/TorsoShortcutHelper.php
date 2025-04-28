@@ -281,8 +281,6 @@ class TorsoShortcutHelper extends Component implements HasForms
         );
         $p = $pm->submit($file, $u);
         $newpart = $p->first();
-        UpdateZip::dispatch($newpart);
-        PartSubmitted::dispatch($newpart, $u);
         $this->redirectRoute('parts.show', $newpart);
     }
 
