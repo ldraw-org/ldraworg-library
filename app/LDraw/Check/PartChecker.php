@@ -40,11 +40,11 @@ class PartChecker
                 $check->setSettings($this->settings);
             }
             $check->check($this->part, Closure::fromCallable([$this, 'add']));
-            if ($this->errors->has(CheckType::holdable()) && property_exists($check, 'stopOnError') && $check->stopOnError === true) {
+            if ($this->errors->has(CheckType::Error) && property_exists($check, 'stopOnError') && $check->stopOnError === true) {
                 break;
             }
         }
-        return $this->errors->has(CheckType::holdable());
+        return $this->errors->has(CheckType::Error);
     }
 
     public function add(PartError $error, array $context = []): void
@@ -69,6 +69,8 @@ class PartChecker
         }
 
         $this->errors->load($this->part->part_check->toArray());
+
+        $this->errors->clear(CheckType::TrackerHold);
 
         if (!$this->part?->isTexmap() && $checkFileErrors) {
             $this->errors->clear(CheckType::Error);

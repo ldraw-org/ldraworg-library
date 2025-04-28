@@ -4,7 +4,6 @@ namespace App\LDraw\Check\Checks;
 
 use App\Enums\PartCategory;
 use App\Enums\PartError;
-use App\Enums\PartType;
 use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\Part\Part;
@@ -24,9 +23,8 @@ class ObsoletePartIsValid implements Check
 
         if ($part instanceof ParsedPart) {
             $catObsolete = $part->metaCategory == PartCategory::Obsolete;
-        }
-        else {
-            $catObsolete = $part->category ==  PartCategory::Obsolete;
+        } else {
+            $catObsolete = $part->category == PartCategory::Obsolete;
         }
 
         if (($catObsolete && !$descObsolete) || (!$catObsolete && $descObsolete)) {
