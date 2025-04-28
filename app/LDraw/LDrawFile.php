@@ -2,6 +2,7 @@
 
 namespace App\LDraw;
 
+use App\Models\Part\Part;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class LDrawFile
@@ -41,6 +42,15 @@ class LDrawFile
             $mimetype,
             $file->getClientOriginalName(),
             $file->get()
+        );
+    }
+
+    public static function fromPart(Part $part): self
+    {
+        return new self(
+            $part->isTexmap() ? 'image/png' : 'text/plain',
+            basename($part->filename),
+            $part->get()
         );
     }
 }
