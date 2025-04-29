@@ -35,28 +35,6 @@ class MassUpdate extends Command
     public function handle()
     {
         $pm = app(PartManager::class);
-
-        Part::with('body')
-            ->whereRelation('body', 'body', 'LIKE', '%0 // BFC INVERTNEXT%')
-            ->where('has_minor_edit', true)
-            ->each(function (Part $part) {
-                $part->body->body = str_replace('0 // BFC INVERTNEXT', '0 BFC INVERTNEXT', $part->body->body);
-                $part->body->save();
-            });
-        Part::with('body')
-            ->whereRelation('body', 'body', 'LIKE', '%0 // BFC NOCLIP%')
-            ->where('has_minor_edit', true)
-            ->each(function (Part $part) {
-                $part->body->body = str_replace('0 // BFC NOCLIP', '0 BFC NOCLIP', $part->body->body);
-                $part->body->save();
-            });
-        Part::with('body')
-            ->whereRelation('body', 'body', 'LIKE', '%0 // BFC NOCLIP%')
-            ->where('has_minor_edit', true)
-            ->each(function (Part $part) {
-                $part->body->body = str_replace('0 // BFC NOCLIP', '0 BFC NOCLIP', $part->body->body);
-                $part->body->save();
-            });
 /*
         // Fix BFC to CCW
         $vm = app(VoteManager::class);
