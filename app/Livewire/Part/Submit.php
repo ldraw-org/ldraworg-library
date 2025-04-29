@@ -69,8 +69,8 @@ class Submit extends Component implements HasForms
                             if ($mimeType == 'text/plain') {
                                 $part = app(\App\LDraw\Parse\Parser::class)->parse($value->get());
                                 $pparts = Part::query()->byName($part->name ?? '')->get();
-                                $unofficial_exists = $pparts->unofficial()->exists();
-                                $official_exists = $pparts->official()->exists();
+                                $unofficial_exists = $pparts->unofficial()->isNotEmpty();
+                                $official_exists = $pparts->official()->isNotEmpty();
                                 $pc = new PartChecker($part);
                                 $pc->standardChecks($value->getClientOriginalName());
                                 $errors = $pc->get(CheckType::holdable(), true);
