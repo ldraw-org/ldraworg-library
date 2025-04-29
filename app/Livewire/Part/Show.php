@@ -105,11 +105,11 @@ class Show extends Component implements HasForms, HasActions
 
     public function hasSuffixParts(): bool
     {
-        if ($this->part->suffix_parts->count() > 0) {
+        if ($this->part->suffix_parts->isNotEmpty()) {
             return true;
         } elseif (!is_null($this->part->base_part)) {
-            return $this->part->base_part->suffix_parts->count() > 0;
-        } elseif (!is_null($this->part->official_part) && $this->part->official_part->suffix_parts->count() > 0) {
+            return $this->part->base_part->suffix_parts->isNotEmpty();
+        } elseif (!is_null($this->part->official_part) && $this->part->official_part->suffix_parts->isNotEmpty()) {
             return true;
         }
         return false;

@@ -681,7 +681,7 @@ class Part extends Model
         $header[] = $this->license->ldrawString();
         $header[] = '';
 
-        if ($this->help->count() > 0) {
+        if ($this->help->isNotEmpty()) {
             foreach ($this->help as $h) {
                 $header[] = "0 !HELP {$h->text}";
             }
@@ -709,7 +709,7 @@ class Part extends Model
                 $addBlank = true;
             }
         }
-        if ($this->keywords->count() > 0) {
+        if ($this->keywords->isNotEmpty()) {
             $kws = $this->keywords->pluck('keyword')->all();
             $kwline = '';
             foreach ($kws as $index => $kw) {
@@ -744,7 +744,7 @@ class Part extends Model
             $header[] = '';
         }
 
-        if ($this->history->count() > 0) {
+        if ($this->history->isNotEmpty()) {
             foreach ($this->history as $h) {
                 $header[] = $h->toString();
             }

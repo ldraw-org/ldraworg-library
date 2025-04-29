@@ -44,9 +44,9 @@ class StickerSheet extends Model
     {
         return $this->parts->whereNull('unofficial_part')
             ->reject(function (Part $p) {
-                $hasShortcut = $p->parents->where('category', PartCategory::StickerShortcut)->count() > 0;
+                $hasShortcut = $p->parents->where('category', PartCategory::StickerShortcut)->isNotEmpty();
                 $name = basename($p->filename, '.dat');
-                $hasFormed = $this->parts()->where('filename', 'LIKE', "parts/{$name}c__.dat")->where('filename', '<>', $p->filename)->count() > 0;
+                $hasFormed = $this->parts()->where('filename', 'LIKE', "parts/{$name}c__.dat")->where('filename', '<>', $p->filename)->exists();
                 return $hasShortcut || $hasFormed;
             });
     }

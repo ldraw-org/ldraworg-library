@@ -44,7 +44,7 @@ class RoleManagePage extends BasicResourceManagePage
                 EditAction::make()
                     ->form($this->formSchema()),
                 DeleteAction::make()
-                    ->hidden(fn (Role $r) => $r->users->count() == 0)
+                    ->hidden(fn (Role $r) => $r->users->isEmpty())
             ])
             ->headerActions([
                 CreateAction::make()

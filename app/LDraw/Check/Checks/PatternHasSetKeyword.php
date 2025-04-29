@@ -28,7 +28,7 @@ class PatternHasSetKeyword implements Check
             $hasSetKw = $part
                 ->keywords
                 ->filter(fn (PartKeyword $kw) => Str::startsWith(Str::lower($kw->keyword), ['set ', 'cmf', 'build-a-minifigure']))
-                ->count() > 0;
+                ->exists();
         } else {
             if (!app(Parser::class)->patternName($part->name)) {
                 return;

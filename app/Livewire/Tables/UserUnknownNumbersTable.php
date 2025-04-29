@@ -35,9 +35,9 @@ class UserUnknownNumbersTable extends BasicTable
                     ->state(fn (UnknownPartNumber $unk) => "u{$unk->number}")
                     ->sortable(),
                 TextColumn::make('in_use')
-                    ->state(fn (UnknownPartNumber $unk) => $unk->parts->count() > 0 ? 'Yes' : 'No'),
+                    ->state(fn (UnknownPartNumber $unk) => $unk->parts->isNotEmpty() ? 'Yes' : 'No'),
                 TextColumn::make('in_use_desciption')
-                    ->state(fn (UnknownPartNumber $unk) => $unk->parts->count() > 0 ? $unk->parts->first()->description : ''),
+                    ->state(fn (UnknownPartNumber $unk) => $unk->parts->isNotEmpty() ? $unk->parts->first()->description : ''),
                 TextInputColumn::make('notes')
                     ->rules(['required', 'max:255'])
             ])
@@ -45,11 +45,11 @@ class UserUnknownNumbersTable extends BasicTable
             ->actions([
                 Action::make('view')
                     ->url(fn (UnknownPartNumber $unk) => route('parts.list', ['tableSearch' => "u{$unk->number}"]))
-                    ->visible(fn (UnknownPartNumber $unk) => $unk->parts->count() > 0),
+                    ->visible(fn (UnknownPartNumber $unk) => $unk->parts->isNotEmpty()),
                 DeleteAction::make('delete')
                     ->modalHeading(fn (UnknownPartNumber $unk) => "Remove your reservation of u{$unk->number}?")
                     ->modalDescription('Are you sure you\'d like to remove this number from your reservation list? This cannot be undone.')
-                    ->visible(fn (UnknownPartNumber $unk) => $unk->parts->count() == 0)
+                    ->visible(fn (UnknownPartNumber $unk) => $unk->parts->isEmpty())
             ])
             ->headerActions([
                 Action::make('request')

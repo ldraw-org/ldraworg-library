@@ -53,7 +53,7 @@ class PartKeywordManagePage extends BasicResourceManagePage
                     ->using(fn (PartKeyword $keyword, array $data) => $this->mergeKeyword($keyword, $data))
                     ->hidden(fn (PartKeyword $keyword) => $keyword->parts->count() < 1),
                 DeleteAction::make()
-                    ->hidden(fn (PartKeyword $keyword) => $keyword->parts->count() > 0),
+                    ->hidden(fn (PartKeyword $keyword) => $keyword->parts->isNotEmpty()),
             ]);
     }
 

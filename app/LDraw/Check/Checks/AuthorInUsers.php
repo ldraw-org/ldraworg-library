@@ -14,7 +14,7 @@ class AuthorInUsers implements Check
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
         if ($part instanceof ParsedPart &&
-            User::fromAuthor($part->username ?? '', $part->realname ?? '')->count() == 0
+            User::fromAuthor($part->username ?? '', $part->realname ?? '')->doesntExist()
         ) {
             $fail(PartError::AuthorNotRegistered, ['value' => $part->realname ?? $part->username]);
         }

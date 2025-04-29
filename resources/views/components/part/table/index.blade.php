@@ -1,6 +1,6 @@
 @props(['parts', 'title' => '', 'none' => 'None', 'missing' => []])
 <div class="text-lg font-bold">{{$title}}</div>
-@if ($parts->count() > 0 || !empty($missing))
+@if ($parts->isNotEmpty() || !empty($missing))
 <table class="border rounded-lg w-full">
     <thead class="border-b-2 border-b-black">
         <tr class="*:bg-gray-200 *:font-bold *:justify-self-start *:p-2">

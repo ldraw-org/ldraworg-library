@@ -42,7 +42,7 @@ class DocumentCategoryManagePage extends BasicResourceManagePage
                 EditAction::make()
                     ->form($this->formSchema()),
                 DeleteAction::make()
-                    ->visible(fn (DocumentCategory $c) => $c->documents->count() == 0)
+                    ->visible(fn (DocumentCategory $c) => $c->documents->isEmpty())
             ])
             ->headerActions([
                 CreateAction::make()

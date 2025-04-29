@@ -24,13 +24,13 @@ class MenuItem extends Component
         $limit = $settings->quick_search_limit;
         $uparts = Part::select(['id', 'filename', 'description'])->unofficial()->searchHeader($this->search)->orderBy('filename')->take($limit)->get();
         $oparts = Part::select(['id', 'filename', 'description'])->official()->searchHeader($this->search)->orderBy('filename')->take($limit)->get();
-        if ($uparts->count() > 0) {
+        if ($uparts->isNotEmpty()) {
             $this->hasResults = true;
             foreach ($uparts as $part) {
                 $this->results['Unofficial Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
             }
         }
-        if ($oparts->count() > 0) {
+        if ($oparts->isNotEmpty()) {
             $this->hasResults = true;
             foreach ($oparts as $part) {
                 $this->results['Official Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
@@ -42,7 +42,7 @@ class MenuItem extends Component
                 ->orWhereHas('models', fn (Builder $qu) => $qu->where('alt_model_name', 'LIKE', "%{$this->search}%"))
                 ->orWhereHas('theme', fn (Builder $qu) => $qu->where('name', 'LIKE', "%{$this->search}%"));
         })->orderBy('name')->take($limit)->get();
-        if ($sets->count() > 0) {
+        if ($sets->isNotEmpty()) {
             $this->hasResults = true;
             foreach ($sets as $set) {
                 $this->results['OMR Models'][$set->id] = ['name' => $set->name, 'description' => $set->number];

@@ -51,7 +51,7 @@ class SetPbg
 
         $rb_parts = $this->rb->getSetParts($set_number);
         $no_ldraw = $rb_parts->whereNull('part.external_ids.LDraw');
-        if ($no_ldraw->whereNotNull('part.print_of')->count() > 0) {
+        if ($no_ldraw->whereNotNull('part.print_of')->isNotEmpty()) {
             $unpatterned = $this->rb->getParts(['part_nums' => $no_ldraw->whereNotNull('part.print_of')->pluck('part.print_of')->all()]);
         } else {
             $unpatterned = new Collection();

@@ -69,19 +69,19 @@ class Submit extends Component implements HasForms
                             if ($mimeType == 'text/plain') {
                                 $part = app(\App\LDraw\Parse\Parser::class)->parse($value->get());
                                 $pparts = Part::query()->byName($part->name ?? '')->get();
-                                $unofficial_exists = $pparts->unofficial()->count() > 0;
-                                $official_exists = $pparts->official()->count() > 0;
+                                $unofficial_exists = $pparts->unofficial()->exists();
+                                $official_exists = $pparts->official()->exists();
                                 $pc = new PartChecker($part);
                                 $pc->standardChecks($value->getClientOriginalName());
                                 $errors = $pc->get(CheckType::holdable(), true);
 
                                 // A part in the p and parts folder cannot have the same name
                                 if (!is_null($pparts) && !is_null($part->type) && !is_null($part->name) &&
-                                    $pparts->where('filename', "p/{$part->name}")->count() > 0 &&
+                                    $pparts->where('filename', "p/{$part->name}")->isNotEmpty() &&
                                     ($part->type == 'Part' || $part->type == 'Shortcut')) {
                                     $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.duplicate', ['type' => 'Primitive']);
                                 } elseif (!is_null($pparts) && !is_null($part->type) && !is_null($part->name) &&
-                                    $pparts->where('filename', "parts/{$part->name}")->count() > 0 &&
+                                    $pparts->where('filename', "parts/{$part->name}")->isNotEmpty() &&
                                     $part->type == 'Primitive') {
                                     $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.duplicate', ['type' => 'Parts']);
                                 }
