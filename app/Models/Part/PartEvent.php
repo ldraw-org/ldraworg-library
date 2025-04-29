@@ -8,6 +8,7 @@ use App\Models\Traits\HasPart;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasUser;
+use Illuminate\Support\HtmlString;
 
 /**
  * @mixin IdeHelperPartEvent
@@ -53,7 +54,7 @@ class PartEvent extends Model
         ];
     }
 
-    public function processedComment(): ?string
+    public function processedComment(): ?HtmlString
     {
         if (is_null($this->comment)) {
             return null;
@@ -63,7 +64,8 @@ class PartEvent extends Model
         $comment = preg_replace('#\R#us', "\n", $this->comment);
         $comment = preg_replace('#\n{3,}#us', "\n\n", $comment);
         $comment = preg_replace($urlpattern, '<a href="$0">$0</a>', $comment);
-
-        return nl2br($comment);
+        $comment = nl2br($comment);
+        
+        return new HtmlString($comment);
     }
 }

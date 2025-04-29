@@ -67,7 +67,7 @@
             @endif
           @endif
           @if(!is_null($event->comment) && $event->event_type !== \App\Enums\EventType::Rename)
-              {!! $event->processedComment() !!}
+              {{ $event->processedComment() }}
           @endif
       </div>
     @endif
