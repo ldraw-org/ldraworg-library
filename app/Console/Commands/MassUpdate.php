@@ -36,38 +36,26 @@ class MassUpdate extends Command
     {
         $pm = app(PartManager::class);
 
-        $meta = preg_quote(implode("|", app(LibrarySettings::class)->allowed_body_metas));
-        $meta_pattern = "#^\h?(0\h+)(?!{$meta})#ium";
-        
-        // Fix invalid meta
         Part::with('body')
-            ->official()
-            ->doesntHave('unofficial_part')
-            ->hasError(PartError::InvalidLineType0)
-            ->get()
-            ->each(function (Part $part) use ($pm, $meta_pattern) {
-                $part->body->body = preg_replace($meta_pattern, '0 // ', $part->body->body);
-                $pattern = "/^\h?(0\h+\/\/)([^\h])/ium";
-                $part->body->body = preg_replace($pattern, '0 // $2', $part->body->body);
+            ->whereRelation('body', 'body', 'LIKE', '%0 // BFC INVERTNEXT%')
+            ->where('has_minor_edit', true)
+            ->each(function (Part $part) {
+                $part->body->body = str_replace('0 // BFC INVERTNEXT', '0 BFC INVERTNEXT', $part->body->body);
                 $part->body->save();
-                $part->has_minor_edit = true;
-                $part->save();
-                $pm->checkPart($part);
             });
-
-        // Remove scientific notation
         Part::with('body')
-            ->official()
-            ->doesntHave('unofficial_part')
-            ->hasError(PartError::LineInvalid)
-            ->get()
-            ->each(function (Part $part) use ($pm) {
-                $pattern = "/[0-9.-]+e-\d+/iu";
-                $part->body->body = preg_replace($pattern, '0', $part->body->body);
+            ->whereRelation('body', 'body', 'LIKE', '%0 // BFC NOCLIP%')
+            ->where('has_minor_edit', true)
+            ->each(function (Part $part) {
+                $part->body->body = str_replace('0 // BFC NOCLIP', '0 BFC NOCLIP', $part->body->body);
                 $part->body->save();
-                $part->has_minor_edit = true;
-                $part->save();
-                $pm->checkPart($part);
+            });
+        Part::with('body')
+            ->whereRelation('body', 'body', 'LIKE', '%0 // BFC NOCLIP%')
+            ->where('has_minor_edit', true)
+            ->each(function (Part $part) {
+                $part->body->body = str_replace('0 // BFC NOCLIP', '0 BFC NOCLIP', $part->body->body);
+                $part->body->save();
             });
 /*
         // Fix BFC to CCW
