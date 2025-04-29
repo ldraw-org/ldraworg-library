@@ -380,7 +380,7 @@ class PartManager
         $can_release = $pc->checkCanRelease($checkFileErrors);
         $part->part_check = $pc->getPartCheckBag();
         if ($part->isUnofficial()) {
-            if (!is_null($part->category) && $part->category == PartCategory::Minifig) {
+            if ($part->type->inPartsFolder() && $part->category == PartCategory::Minifig) {
                 $part->part_check->add(PartError::WarningMinifigCategory);
             }
             $part->can_release = $can_release;
