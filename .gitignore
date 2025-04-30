@@ -1,6 +1,7 @@
 /node_modules
 /storage/*.key
 /vendor
+/resources/js/buildinginstructions.js
 .env
 .env.backup
 .phpunit.result.cache
