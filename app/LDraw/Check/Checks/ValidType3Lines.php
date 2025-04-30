@@ -35,7 +35,7 @@ class ValidType3Lines implements Check
                 $points[1] == $points[2] ||
                 $points[2] == $points[0]
             ) {
-                $fail(PartError::IndenticalPoints, ['value' => $lineNumber]);
+                $fail(PartError::IdenticalPoints, ['value' => $lineNumber]);
                 continue;
             }
             if (VectorMath::hasColinearPoints($points)) {

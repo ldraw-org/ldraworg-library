@@ -33,7 +33,7 @@ class ValidType1Lines implements Check
                 [0, 0, 0, 1],
             ]);
             if ($matrix->isSingular()) {
-                $fail(PartError::RotationMatrixIsSigular, ['value' => $lineNumber]);
+                $fail(PartError::RotationMatrixIsSingular, ['value' => $lineNumber]);
             }
         }
     }

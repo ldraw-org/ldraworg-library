@@ -40,7 +40,7 @@ class ValidType4Lines implements Check
                 $points[0] == $points[2] ||
                 $points[3] == $points[1]
             ) {
-                $fail(PartError::IndenticalPoints, ['value' => $lineNumber]);
+                $fail(PartError::IdenticalPoints, ['value' => $lineNumber]);
                 continue;
             }
 

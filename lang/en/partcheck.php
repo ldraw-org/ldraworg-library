@@ -6,7 +6,7 @@ return [
     'missing' => 'Invalid/missing :attribute line',
     'circularreference' => 'Has a self referring Type 1 line',
     'bfc' => 'All parts must be BFC CERTIFY CCW',
-    'previewinvalid' => 'Invalid PREVIEW line or singluar/negative matrix',
+    'previewinvalid' => 'Invalid PREVIEW line or singular/negative matrix',
 
     'obsoleteimproper' => 'An obsolete part must have the category Obsolete and ~Obsolete file or (Obsolete) in the description',
     
@@ -18,10 +18,10 @@ return [
         'invalidcolor24' => 'Line :value, color code 24 not allowed for linetypes 1, 3, 4',
         'invalidnumbers' => 'Line :value invalid',
         'singular' => 'Line :value, singular rotation matrix',
-        'identicalpoints' => 'Line :value, indentical points',
+        'identicalpoints' => 'Line :value, identical points',
         'colinear' => 'Line :value, points are colinear',
         'notconvex' => 'Line :value, quad is concave or bowtie',
-        'notcoplaner' => 'Line :value, quad is not coplaner (angle :angle)',
+        'notcoplaner' => 'Line :value, quad is not coplanar (angle :angle)',
     ],
 
     'name' => [
@@ -81,11 +81,11 @@ return [
         'uncertsubs' => 'Has uncertified subfiles',
         'nocertparents' => 'No path of certified files to a certified or official parent in the parts folder',
         'missing' => 'Has missing subfiles',
-        'adminhold' => 'On admimistrative hold'
+        'adminhold' => 'On administrative hold'
     ],
 
     'warning' => [
         'minifigcategory' => 'Ensure correct Minifig category',
-        'notcoplaner' => 'Line :value, quad is not coplaner (angle :angle)',
+        'notcoplaner' => 'Line :value, quad is not coplanar (angle :angle)',
     ]
 ];

@@ -20,8 +20,8 @@ enum PartError: string
     case InvalidColor16 = 'line.invalidcolor16';
     case InvalidColor24 = 'line.invalidcolor24';
     case InvalidLineNumbers = 'line.invalidnumbers';
-    case RotationMatrixIsSigular = 'line.singular';
-    case IndenticalPoints = 'line.identicalpoints';
+    case RotationMatrixIsSingular = 'line.singular';
+    case IdenticalPoints = 'line.identicalpoints';
     case PointsColinear = 'line.colinear';
     case QuadNotConvex = 'line.notconvex';
     case QuadNotCoplanar = 'line.notcoplaner';

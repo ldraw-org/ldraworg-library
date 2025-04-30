@@ -34,7 +34,7 @@ class ValidType5Lines implements Check
             ]);
             if ($points[0] == $points[1] ||
                 $points[2] == $points[3]) {
-                $fail(PartError::IndenticalPoints, ['value' => $lineNumber]);
+                $fail(PartError::IdenticalPoints, ['value' => $lineNumber]);
             }
         }
     }

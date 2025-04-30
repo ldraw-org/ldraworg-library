@@ -31,7 +31,7 @@ class ValidType2Lines implements Check
                 [$match[5], $match[6], $match[7]]
             ]);
             if ($points[0] == $points[1]) {
-                $fail(PartError::IndenticalPoints, ['value' => $lineNumber]);
+                $fail(PartError::IdenticalPoints, ['value' => $lineNumber]);
             }
         }
     }
