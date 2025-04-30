@@ -91,8 +91,8 @@ return [
         public_path('images/library') => storage_path('app/images/library'),
         public_path('images/omr') => storage_path('app/images/omr'),
         public_path('library') => storage_path('app/library'),
-        public_path('assets/ldbi/js') => resource_path('js/buildinginstuctions.js/js'),
-        public_path('assets/ldbi/textures') => resource_path('js/buildinginstuctions.js/textures'),
+        public_path('assets/ldbi/js') => resource_path('js/buildinginstructions.js/js'),
+        public_path('assets/ldbi/textures') => resource_path('js/buildinginstructions.js/textures'),
     ],
 
 ];
