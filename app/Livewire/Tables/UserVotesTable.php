@@ -48,7 +48,7 @@ class UserVotesTable extends BasicTable
             ])
             ->filters([
                 SelectFilter::make('vote_type')
-                    ->options(VoteType::options([VoteType::Certify, VoteType::AdminCertify, VoteType::Hold, VoteType::AdminFastTrack]))
+                    ->options(VoteType::options([VoteType::Certify, VoteType::AdminReview, VoteType::Hold, VoteType::AdminFastTrack]))
                     ->preload()
                     ->multiple()
                     ->label('My Vote'),

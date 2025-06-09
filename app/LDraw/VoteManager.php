@@ -27,8 +27,8 @@ class VoteManager
             return;
         }
 
-        $oldVoteIsAdminCert = $vote?->vote_type == VoteType::AdminCertify || $vote?->vote_type == VoteType::AdminFastTrack;
-        $newVoteIsAdminCert = $vt == VoteType::AdminCertify || $vt == VoteType::AdminFastTrack;
+        $oldVoteIsAdminCert = $vote?->vote_type == VoteType::AdminReview || $vote?->vote_type == VoteType::AdminFastTrack;
+        $newVoteIsAdminCert = $vt == VoteType::AdminReview || $vt == VoteType::AdminFastTrack;
 
         switch ($vt) {
             // Cancel vote
@@ -78,7 +78,7 @@ class VoteManager
             return;
         }
         $parts = $part->descendantsAndSelf()->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->get()->unique();
-        $parts->each(fn (Part $p) => $this->castVote($p, $user, VoteType::AdminCertify));
+        $parts->each(fn (Part $p) => $this->castVote($p, $user, VoteType::AdminReview));
 
         // Have to recheck parts since sometimes, based on processing order, subfiles status is missed
         $parts->each(fn (Part $p) => app(PartManager::class)->checkPart($p));
@@ -93,7 +93,7 @@ class VoteManager
         $part
             ->descendantsAndSelf()
             ->where('part_status', PartStatus::NeedsMoreVotes)
-            ->whereDoesntHave('votes', fn (Builder $q) => $q->where('user_id', $user->id)->whereIn('vote_type', [VoteType::AdminCertify, VoteType::AdminFastTrack]))
+            ->whereDoesntHave('votes', fn (Builder $q) => $q->where('user_id', $user->id)->whereIn('vote_type', [VoteType::AdminReview, VoteType::AdminFastTrack]))
             ->unofficial()
             ->get()
             ->unique()

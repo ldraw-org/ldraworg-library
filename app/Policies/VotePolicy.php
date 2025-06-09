@@ -62,7 +62,7 @@ class VotePolicy
         return match($vote_type) {
             VoteType::Comment => $user->can(Permission::PartComment),
             VoteType::CancelVote => !is_null($vote) && $vote->user_id === $user->id,
-            VoteType::AdminCertify => $user->can(Permission::PartVoteAdminCertify),
+            VoteType::AdminReview => $user->can(Permission::PartVoteAdminCertify),
             VoteType::AdminFastTrack => $user->can(Permission::PartVoteFastTrack),
             VoteType::Certify => $userIsPartAuthor ? $user->can(Permission::PartOwnVoteCertify) : $user->can(Permission::PartVoteCertify),
             VoteType::Hold => $userIsPartAuthor ? $user->canAny([Permission::PartVoteHold, Permission::PartOwnVoteHold]) : $user->can(Permission::PartVoteHold),
@@ -86,7 +86,7 @@ class VotePolicy
             $part->type->inPartsFolder() &&
             $part->descendantsAndSelf->unofficial()->where('ready_for_admin', false)->isEmpty() &&
             !$part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->isEmpty() &&
-            $this->vote($user, $part, VoteType::AdminCertify) &&
+            $this->vote($user, $part, VoteType::AdminReview) &&
             $user->can(Permission::PartVoteAdminCertifyAll) &&
             !$this->settings->tracker_locked;
     }

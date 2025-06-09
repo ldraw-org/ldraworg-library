@@ -446,7 +446,7 @@ class Part extends Model
     protected function voteTypeCount(): array
     {
         return array_merge(
-            [VoteType::AdminCertify->value => 0, VoteType::Certify->value => 0, VoteType::Hold->value => 0, VoteType::AdminFastTrack->value => 0],
+            [VoteType::AdminReview->value => 0, VoteType::Certify->value => 0, VoteType::Hold->value => 0, VoteType::AdminFastTrack->value => 0],
             $this->votes->pluck('vote_type')->countBy(fn (VoteType $vt) => $vt->value)->all()
         );
     }
@@ -462,11 +462,11 @@ class Part extends Model
 
         if ($data[VoteType::Hold->value] != 0) {
             $this->part_status = PartStatus::ErrorsFound;
-        } elseif (($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value] < 2) && $data[VoteType::AdminFastTrack->value] == 0) {
+        } elseif (($data[VoteType::Certify->value] + $data[VoteType::AdminReview->value] < 2) && $data[VoteType::AdminFastTrack->value] == 0) {
             $this->part_status = PartStatus::NeedsMoreVotes;
-        } elseif ($data[VoteType::AdminFastTrack->value] == 0 && $data[VoteType::AdminCertify->value] == 0 && $data[VoteType::Certify->value] >= 2) {
+        } elseif ($data[VoteType::AdminFastTrack->value] == 0 && $data[VoteType::AdminReview->value] == 0 && $data[VoteType::Certify->value] >= 2) {
             $this->part_status = PartStatus::AwaitingAdminReview;
-        } elseif (($data[VoteType::AdminCertify->value] > 0 && ($data[VoteType::Certify->value] + $data[VoteType::AdminCertify->value]) > 2) || $data[VoteType::AdminFastTrack->value] > 0) {
+        } elseif (($data[VoteType::AdminReview->value] > 0 && ($data[VoteType::Certify->value] + $data[VoteType::AdminReview->value]) > 2) || $data[VoteType::AdminFastTrack->value] > 0) {
             $this->part_status = PartStatus::Certified;
         }
         if (
@@ -768,7 +768,7 @@ class Part extends Model
         if ($this->isUnofficial()) {
             $code = '(';
             $codes = $this->voteTypeCount();
-            foreach ([VoteType::AdminFastTrack->value, VoteType::AdminCertify->value, VoteType::Certify->value, VoteType::Hold->value] as $letter) {
+            foreach ([VoteType::AdminFastTrack->value, VoteType::AdminReview->value, VoteType::Certify->value, VoteType::Hold->value] as $letter) {
                 $code .= str_repeat($letter, $codes[$letter]);
             }
             return $code .= is_null($this->official_part) ? 'N)' : 'F)';
