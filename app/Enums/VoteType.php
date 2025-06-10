@@ -31,8 +31,11 @@ enum VoteType: string
     {
         return match ($this) {
             VoteType::Hold => LibraryIcon::Error,
-            default => LibraryIcon::{$this->name}
-        };
+            VoteType::Comment => LibraryIcon::Comment,
+            VoteType::CancelVote => LibraryIcon::CancelVote,
+            VoteType::AdminReview => LibraryIcon::AdminReview,
+            VoteType::AdminFastTrack => LibraryIcon::AdminFastTrack,
+            VoteType::Certify => LibraryIcon::Certify        };
     }
 
 }

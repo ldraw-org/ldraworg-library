@@ -11,7 +11,7 @@ enum LibraryIcon: string
     case Delete = 'mdi-recycle';
     case Release = 'mdi-school';
     case CancelVote = 'mdi-arrow-u-left-top';
-    case AdminCertify = 'mdi-clipboard-check';
+    case AdminReview = 'mdi-clipboard-check';
     case AdminFastTrack = 'mdi-truck-fast';
     case Certify = 'mdi-check';
     case Error = 'mdi-close-octagon';
