@@ -85,7 +85,8 @@ class VotePolicy
         return $part->isUnofficial() &&
             $part->type->inPartsFolder() &&
             $part->descendantsAndSelf->unofficial()->where('ready_for_admin', false)->isEmpty() &&
-            !$part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->isEmpty() &&
+            $part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->isNotEmpty() &&
+            $part->descendantsAndSelf()->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->whereRelation('votes', 'user_id', $user->id)->doesntExist() &&
             $this->vote($user, $part, VoteType::AdminReview) &&
             $user->can(Permission::PartVoteAdminCertifyAll) &&
             !$this->settings->tracker_locked;
