@@ -16,7 +16,7 @@
                   'whitespace-nowrap px-3 py-4 text-sm',
                   'bg-green-100' => $vote->vote_type == \App\Enums\VoteType::Certify,
                   'bg-red-300' => $vote->vote_type == \App\Enums\VoteType::Hold,
-                  'bg-lime-200' => $vote->vote_type == \App\Enums\VoteType::AdminCertify || $vote->vote_type == \App\Enums\VoteType::AdminFastTrack,
+                  'bg-lime-200' => $vote->vote_type == \App\Enums\VoteType::AdminReview || $vote->vote_type == \App\Enums\VoteType::AdminFastTrack,
                   ])>{{ $vote->vote_type->label() }}</td>
           </tr>
       @endforeach
