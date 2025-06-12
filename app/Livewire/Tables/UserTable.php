@@ -7,10 +7,12 @@ use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
+use Spatie\Permission\Models\Role;
 
 /**
  * @property Table $table
@@ -47,6 +49,12 @@ class UserTable extends BasicTable
                     ->label('Last Active on Forum')
                     ->since()
                     ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('roles')
+                    ->relationship('roles', 'name')
+                    ->preload()
+                    ->multiple()
             ]);
     }
 }
