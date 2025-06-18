@@ -61,8 +61,6 @@ enum Permission: string
     case DocumentManage = 'documentation.manage';
     case DocumentCategoryManage = 'document-category.manage';
 
-    case TelescopeView = 'telescope.view';
-
     case AdminDashboardView = 'admin.dashboard.view';
 
     case SiteSettingsEdit = 'site.settings.edit';

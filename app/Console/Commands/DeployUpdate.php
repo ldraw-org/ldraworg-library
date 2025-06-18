@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\Permission;
 use Illuminate\Console\Command;
 use Spatie\Permission\Models\Permission as ModelsPermission;
+use Spatie\Permission\Models\Role;
 
 class DeployUpdate extends Command
 {
@@ -28,8 +29,6 @@ class DeployUpdate extends Command
     public function handle(): void
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        foreach (Permission::cases() as $permission) {
-            ModelsPermission::findOrCreate($permission->value);
-        }
+        ModelsPermission::destroy('telescope.view');
     }
 }
