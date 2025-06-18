@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\Permission;
 use App\Listeners\PartEventSubscriber;
 use App\Models\Omr\Set;
 use App\Models\Part\Part;
@@ -110,6 +111,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Manually register Role policy
         Gate::policy(Role::class, RolePolicy::class);
+
+        Gate::define('viewPulse', function (User $user) {
+            return $user->can(Permission::PulseView);
+        });
 
         //Subscriber
         Event::subscribe(PartEventSubscriber::class);
