@@ -7,7 +7,7 @@ use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Events\PartHeaderEdited;
-use App\Filament\Forms\Components\Preview;
+use App\Filament\Forms\Components\PreviewSelect;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
 use App\LDraw\Check\PartChecker;
@@ -50,10 +50,6 @@ class EditHeaderAction
                         });
                 }
                 $preview = $part->previewValues();
-                $data['preview_color'] = $preview['color'];
-                $data['preview_x'] = $preview['x'];
-                $data['preview_y'] = $preview['y'];
-                $data['preview_z'] = $preview['z'];
                 $data['preview_rotation'] = $preview['rotation'];
                 $data['keywords'] = $kws->sortBy('keyword')->implode('keyword', ', ');
                 $data['history'] = $part->history->sortBy('created_at')->implode(fn (PartHistory $h) => $h->toString(), "\n");
@@ -145,7 +141,7 @@ class EditHeaderAction
                 ->hidden(!$part->type->inPartsFolder())
                 ->disabled(!$part->type->inPartsFolder())
                 ->string(),
-            Preview::component(),
+            PreviewSelect::make(),
             TextArea::make('history')
                 ->helperText('Must include 0 !HISTORY; ALL changes to existing history must be documented with a comment')
                 ->extraAttributes(['class' => 'font-mono'])
@@ -294,17 +290,8 @@ class EditHeaderAction
             $part->cmdline = Arr::get($data, 'cmdline');
         }
 
-        $preview = null;
-        if (Arr::has($data, 'preview_rotation')) {
-            $preview = implode(' ', [
-                Arr::get($data, 'preview_color'),
-                Arr::get($data, 'preview_x'),
-                Arr::get($data, 'preview_y'),
-                Arr::get($data, 'preview_z'),
-                Str::of(Arr::get($data, 'preview_rotation'))->squish()
-            ]);
-            $preview = $preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $preview;
-        }
+        $preview = '16 0 0 0 ' . Str::of(Arr::get($data, 'preview_rotation'))->squish();
+        $preview = $preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $preview;
 
         $preview_changed = false;
         if ($part->preview !== $preview) {

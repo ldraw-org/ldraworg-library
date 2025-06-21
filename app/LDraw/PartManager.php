@@ -120,6 +120,16 @@ class PartManager
             'header' => ''
         ];
         $upart = $this->makePart($values);
+        $preview_vals = $upart->previewValues();
+        if ($preview_vals['color'] != 16 ||
+            $preview_vals['x'] != 0 ||
+            $preview_vals['y'] != 0 ||
+            $preview_vals['z'] != 0
+        ) {
+            $upart->preview = '16 0 0 0 ' . $preview_vals['rotation'];
+            $upart->preview = $upart->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $upart->preview;
+            $upart->save();
+        }
         $upart->setKeywords($part->keywords ?? []);
         $upart->setHelp($part->help ?? []);
         $upart->setHistory($part->history ?? []);

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Actions;
 
-use App\Filament\Forms\Components\Preview;
+use App\Filament\Forms\Components\PreviewSelect;
 use App\LDraw\PartManager;
 use App\Models\Part\Part;
 use Filament\Actions\EditAction;
@@ -17,28 +17,15 @@ class EditPreviewAction
         return EditAction::make($name)
             ->label('Edit Preview')
             ->record($part)
-            ->form([Preview::component()])
+            ->form([PreviewSelect::make()])
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $preview = $part->previewValues();
-                $data['preview_color'] = $preview['color'];
-                $data['preview_x'] = $preview['x'];
-                $data['preview_y'] = $preview['y'];
-                $data['preview_z'] = $preview['z'];
                 $data['preview_rotation'] = $preview['rotation'];
                 return $data;
             })
             ->using(function (Part $part, array $data) {
-                $preview = null;
-                if (Arr::has($data, 'preview_rotation')) {
-                    $preview = implode(' ', [
-                        Arr::get($data, 'preview_color'),
-                        Arr::get($data, 'preview_x'),
-                        Arr::get($data, 'preview_y'),
-                        Arr::get($data, 'preview_z'),
-                        Str::of(Arr::get($data, 'preview_rotation'))->squish()
-                    ]);
-                    $preview = $preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $preview;
-                }
+                $preview = '16 0 0 0 ' . Str::of(Arr::get($data, 'preview_rotation'))->squish();
+                $preview = $preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $preview;
 
                 if ($part->preview !== $preview) {
                     $part->preview = $preview;

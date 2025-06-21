@@ -21,11 +21,7 @@ class PreviewIsValid implements DataAwareRule, ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $line = $attribute == 'mountedActionsData.0.preview_color' ? $value : Arr::get($this->data['mountedActionsData'][0], 'preview_color', '');
-        $line .= ' '. ($attribute == 'mountedActionsData.0.preview_x' ? ' '. $value : Arr::get($this->data['mountedActionsData'][0], 'preview_x', ''));
-        $line .= ' '. ($attribute == 'mountedActionsData.0.preview_y' ? $value : Arr::get($this->data['mountedActionsData'][0], 'preview_y', ''));
-        $line .= ' '. ($attribute == 'mountedActionsData.0.preview_y' ? $value : Arr::get($this->data['mountedActionsData'][0], 'preview_z', ''));
-        $line .= ' '. ($attribute == 'mountedActionsData.0.preview_rotation' ? $value : Arr::get($this->data['mountedActionsData'][0], 'preview_rotation', ''));
+        $line = '16 0 0 0 '. ($attribute == 'mountedActionsData.0.preview_rotation' ? $value : Arr::get($this->data['mountedActionsData'][0], 'preview_rotation', ''));
         $p = ParsedPart::fromArray(['preview' => $line]);
         $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\PreviewIsValid());
         if (count($errors) > 0) {
