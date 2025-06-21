@@ -30,6 +30,7 @@ use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
@@ -76,6 +77,7 @@ class Show extends Component implements HasForms, HasActions
             ]);
     }
 
+    #[On('mass-vote')]
     public function voteOptions(): array
     {
         $options = [];
