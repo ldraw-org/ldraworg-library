@@ -13,19 +13,19 @@
         <x-message compact type="info">
             <x-slot:header>
                 Maintained By: {{$document->maintainer}}<br>
-                Revision History:
             </x-slot:>
-            <p>
-                {!! nl2br(htmlspecialchars($document->revision_history))!!}
-            </p>
+            <div class="documentation">
+                    <strong>Revision History:</strong>
+                    {!! str($document->revision_history)->markdown()->sanitizeHtml() !!}
+            </div>
             <p>
                 This is an ratified, official LDraw.org document. 
                 Non-adminstrative changes can only be made with the approval of the maintainer.
             </p>
         </x-message>     
         <div class="documentation flex flex-col md:flex-row gap-2">
-            <div>{!! Blade::render($document->content) !!}</div>
-            <div class="md:w-3/5 border rounded-lg mx-4 h-fit"><x-table-of-contents :$document /></div>
+            <div>{!! str($document->content)->markdown()->sanitizeHtml() !!}</div>
+            <div class="md:w-3/5 border rounded-lg mx-4 h-fit"></div>
         </div>
     </div>
 </x-layout.documentation>

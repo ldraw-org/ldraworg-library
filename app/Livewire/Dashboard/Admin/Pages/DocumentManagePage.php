@@ -5,6 +5,7 @@ namespace App\Livewire\Dashboard\Admin\Pages;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Document\Document;
 use App\Models\Document\DocumentCategory;
+use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -95,9 +96,9 @@ class DocumentManagePage extends BasicResourceManagePage
             TextInput::make('maintainer')
                 ->string()
                 ->required(),
-            Textarea::make('revision_history')
+            MarkdownEditor::make('revision_history')
                 ->string(),
-            Textarea::make('content')
+            MarkdownEditor::make('content')
                 ->required()
         ];
     }
