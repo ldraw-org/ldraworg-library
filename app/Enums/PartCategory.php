@@ -56,7 +56,9 @@ enum PartCategory: string
     case MinifigHipwear = 'Minifig Hipwear';
     case MinifigNeckwear = 'Minifig Neckwear';
     case Monorail = 'Monorail';
+    case Modulex = 'Modulex';
     case Moved = 'Moved';
+    case Mursten = 'Mursten';
     case Obsolete = 'Obsolete';
     case Panel = 'Panel';
     case Plane = 'Plane';
@@ -65,6 +67,7 @@ enum PartCategory: string
     case Platform = 'Platform';
     case PovRAY = 'Pov-RAY';
     case Propeller = 'Propeller';
+    case Quatro = 'Quatro';
     case Rack = 'Rack';
     case Roadsign = 'Roadsign';
     case Rock = 'Rock';
