@@ -21,9 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'currentlic' => App\Http\Middleware\CurrentLicense::class,
             'ldrawmember' => App\Http\Middleware\LdrawMember::class
         ]);
-        $middleware->web(append: [
-            App\Http\Middleware\LoginMybbUser::class,
-        ]);
+//        $middleware->web(append: [
+//            App\Http\Middleware\LoginMybbUser::class,
+//        ]);
         $middleware->encryptCookies(except: [
             'mybbuser',
         ]);

@@ -5,6 +5,7 @@ namespace App\Models\Mybb;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Http\Request;
 
 class MybbUser extends Model
 {
@@ -24,9 +25,12 @@ class MybbUser extends Model
         return $this->setConnection('mysql')->hasOne(User::class, 'forum_user_id', 'uid');
     }
 
-    public static function findFromCookie(): ?self
+    public static function findFromCookie(?Request $request): ?self
     {
-        $mybb = request()->cookies->get('mybbuser', '');
+        if (is_null($request)) {
+            $request = request();
+        }
+        $mybb = $request->cookies->get('mybbuser', '');
         if ($mybb == '') {
             return null;
         }
