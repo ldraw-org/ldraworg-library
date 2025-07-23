@@ -16,6 +16,7 @@ use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
 use App\Models\User;
 use App\Settings\LibrarySettings;
+use Illuminate\Support\Facades\Bus;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -185,11 +186,36 @@ class PartsUpdateProcessor
 
     protected function releaseParts(): void
     {
-        foreach ($this->parts as $part) {
-            /** @var Part $part */
-            $this->updatePartsList($part);
-            $this->releasePart($part);
-        }
+        // Release marked parts
+        $this->parts
+            ->each(function (Part $part){
+                $this->updatePartsList($part);
+                $this->releasePart($part);
+            });
+        
+        // Release minor edits    
+        Part::official()
+            ->where('has_minor_edit', true)
+            ->whereDoesntHave('unofficial_part')
+            ->each(function (Part $part) {
+                // Add history line
+                PartHistory::create([
+                    'user_id' => $this->user->id,
+                    'part_id' => $part->id,
+                    'comment' => "Minor header edits"
+                ]);
+                PartHistory::create([
+                    'user_id' => $this->user->id,
+                    'part_id' => $part->id,
+                    'comment' => "Official Update {$this->release->name}"
+                ]);
+                $part->part_release_id = $this->release->id;
+                $part->has_minor_edit = false;
+                $part->save();
+                $part->refresh();
+                $part->generateHeader();
+                $part->save();
+            });
 
         if (!is_null($this->release->part_list)) {
             $partslist = $this->release->part_list;
