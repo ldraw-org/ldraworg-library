@@ -16,6 +16,7 @@ use App\LDraw\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
 use App\Models\Part\PartKeyword;
+use App\Rules\PatternHasSet;
 use Closure;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -122,8 +123,10 @@ class EditHeaderAction
                 ->hidden(!$part->type->inPartsFolder())
                 ->disabled(!$part->type->inPartsFolder())
                 ->rules([
-                    Rule::requiredIf($part->is_pattern),
-                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part) {
+                    new PatternHasSet(),
+/*
+                    Rule::requiredIf($part->is_pattern && $get('category') != PartCategory::Modulex),
+                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part, $get) {
                         $p = ParsedPart::fromPart($part);
                         $p->keywords = collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all();
                         $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\PatternHasSetKeyword());
@@ -131,6 +134,7 @@ class EditHeaderAction
                             $fail($errors[0]);
                         }
                     }
+*/
                 ])
                 ->validationMessages([
                     'required_if' => __(PartError::NoSetKeywordForPattern->value),
