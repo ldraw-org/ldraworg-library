@@ -2,3 +2,5 @@
 !assets/
 !images/
 !.gitignore
+!robots.txt
+!index.php
