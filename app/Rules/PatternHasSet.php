@@ -43,10 +43,10 @@ class PatternHasSet implements DataAwareRule, ValidationRule
                 'metaCategory' => PartCategory::tryFrom(Arr::get($this->data, 'mountedActionsData.0.category', '')),
                 'keywords' => collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all()
             ]);
-        }
-        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\PatternHasSetKeyword());
-        if ($errors) {
-            $fail($errors[0]);
+            $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\PatternHasSetKeyword());
+            if ($errors) {
+                $fail($errors[0]);
+            }
         }
 
     }
