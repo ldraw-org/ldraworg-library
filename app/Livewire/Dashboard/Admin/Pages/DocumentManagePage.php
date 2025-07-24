@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
@@ -52,6 +53,9 @@ class DocumentManagePage extends BasicResourceManagePage
                 ToggleColumn::make('restricted')
             ])
             ->actions([
+                Action::make('view')
+                    ->url(fn (Document $d) => route('documentation.show', $d))
+                    ->openUrlInNewTab(),
                 EditAction::make()
                     ->form($this->formSchema())
                     ->mutateFormDataUsing(function (array $data): array {

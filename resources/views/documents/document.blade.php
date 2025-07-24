@@ -14,17 +14,17 @@
             <x-slot:header>
                 Maintained By: {{$document->maintainer}}<br>
             </x-slot:>
-            <div class="documentation">
+            <div>
                     <strong>Revision History:</strong>
-                    {!! str($document->revision_history)->markdown()->sanitizeHtml() !!}
+                    <div class="documentation">{!! str($document->revision_history)->markdown()->sanitizeHtml() !!}</div
             </div>
             <p>
                 This is an ratified, official LDraw.org document. 
                 Non-adminstrative changes can only be made with the approval of the maintainer.
             </p>
         </x-message>     
-        <div class="documentation flex flex-col md:flex-row gap-2">
-            <div>{!! str($document->content)->markdown()->sanitizeHtml() !!}</div>
+        <div class="flex flex-col md:flex-row gap-2">
+            <div class="documentation">{!! str($document->content)->markdown()->sanitizeHtml() !!}</div>
             <div class="md:w-3/5 border rounded-lg mx-4 h-fit"></div>
         </div>
     </div>

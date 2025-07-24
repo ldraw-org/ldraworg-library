@@ -30,6 +30,10 @@
     @apply p-4
 }
 
+.documentation blockquote {
+    @apply m-4 rounded-lg border-l-8 border-gray-600 bg-gray-300
+}
+
 .documentation em {
     @apply italic
 }
