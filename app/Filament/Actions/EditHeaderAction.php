@@ -46,7 +46,7 @@ class EditHeaderAction
             ->record($part)
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
-                $data['help'] = implode("\n", $part->help);
+                $data['help'] = implode("\n", $part->help ?? []);
                 if (is_null($part->getRebrickablePart())) {
                     $kws = $part->keywords;
                 } else {
