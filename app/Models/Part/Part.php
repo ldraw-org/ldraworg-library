@@ -145,11 +145,6 @@ class Part extends Model
         return $this->hasMany(PartHistory::class, 'part_id', 'id')->oldest();
     }
 
-    public function helptext(): HasMany
-    {
-        return $this->hasMany(PartHelp::class, 'part_id', 'id')->ordered();
-    }
-
     public function body(): HasOne
     {
         return $this->hasOne(PartBody::class, 'part_id', 'id');

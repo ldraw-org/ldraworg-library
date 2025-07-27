@@ -2,13 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Events\PartRenamed;
-use App\LDraw\PartManager;
-use App\Models\Part\Part;
-use App\Models\Part\PartHelp;
-use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 
 class DeployUpdate extends Command
 {
@@ -31,10 +25,6 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::has('helptext')
-            ->each(function (Part $part) {
-                $part->help = $part->helptext->map(fn (PartHelp $h) => $h->text)->all();
-                $part->save();
-            });
+//
     }
 }
