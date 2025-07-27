@@ -346,15 +346,17 @@ describe('part check', function () {
         ]);
         expect(runSingleCheck($p, new \App\LDraw\Check\Checks\HistoryUserIsRegistered()))->toBe($expected);
     })->with([
-        'invalid history username, one line' => [[['user' => 'NotAUser']], false],
-        'invalid history username, multi line' => [[['user' => 'TestUser'], ['user' => 'NotAUser']], false],
-        'invalid history realname, one line' => [[['user' => 'Not A User']], false],
-        'invalid history realname, multi line' => [[['user' => 'Test User 2'], ['user' => 'Not A User']], false],
+        'invalid history username, one line' => [[['type' => '[', 'user' => 'NotAUser']], false],
+        'invalid history username, multi line' => [[['type' => '[', 'user' => 'TestUser'], ['type' => '[', 'user' => 'NotAUser']], false],
+        'invalid history realname, one line' => [[['type' => '{', 'user' => 'Not A User']], false],
+        'invalid history realname, multi line' => [[['type' => '{', 'user' => 'Test User 2'], ['type' => '{', 'user' => 'Not A User']], false],
+        'invalid history username in realname format' => [[['type' => '{', 'user' => 'TestUser']], false],
+        'invalid history realname in username format' => [[['type' => '[', 'user' => 'Test User']], false],
         'valid history user, no lines' => [[], true],
-        'valid history username, one line' => [[['user' => 'TestUser']], true],
-        'valid history username, multi line' => [[['user' => 'TestUser'], ['user' => 'TestUser2']], true],
-        'valid history realname, one line' => [[['user' => 'Test User']], true],
-        'valid history realname, multi line' => [[['user' => 'Test User'], ['user' => 'Test User 2']], true],
+        'valid history username, one line' => [[['type' => '[', 'user' => 'TestUser']], true],
+        'valid history username, multi line' => [[['type' => '[', 'user' => 'TestUser'], ['type' => '[', 'user' => 'TestUser2']], true],
+        'valid history realname, one line' => [[['type' => '{', 'user' => 'Test User']], true],
+        'valid history realname, multi line' => [[['type' => '{', 'user' => 'Test User'], ['type' => '{', 'user' => 'Test User 2']], true],
     ]);
 
     test('check preview is valid', function (?string $input, bool $expected) {

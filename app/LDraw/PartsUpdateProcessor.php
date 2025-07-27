@@ -298,6 +298,7 @@ class PartsUpdateProcessor
             'bfc' => $upart->bfc,
             'category' => $upart->category,
             'cmdline' => $upart->cmdline,
+            'help' => $upart->help,
             'header' => $upart->header,
             'rebrickable_part_id' => $upart->rebrickable_part_id,
             'sticker_sheet_id' => $upart->sticker_sheet_id,
@@ -306,7 +307,6 @@ class PartsUpdateProcessor
         $opart->fill($values);
         $opart->setSubparts($upart->subparts);
         $opart->setKeywords($upart->keywords);
-        $opart->setHelp($upart->help);
         $opart->setHistory($upart->history);
         $opart->setBody($upart->body);
         $opart->save();

@@ -103,7 +103,7 @@ class ParsedPart
             $releasetype,
             $part->release?->short,
             $part->license,
-            $part->help->pluck('text')->all(),
+            $part->help,
             $part->bfc,
             $metaCategory ?? null,
             $descriptionCategory ?? null,

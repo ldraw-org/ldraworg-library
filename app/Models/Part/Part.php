@@ -74,6 +74,7 @@ class Part extends Model
     *     is_dual_mould: 'boolean',
     *     ready_for_admin: 'boolean'
     *     rebrickable: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
+    *     help: 'array',
     * }
     */
     protected function casts(): array
@@ -95,6 +96,7 @@ class Part extends Model
             'is_dual_mould' => 'boolean',
             'ready_for_admin' => 'boolean',
             'rebrickable' => AsArrayObject::class,
+            'help' => 'array',
         ];
     }
 
@@ -143,7 +145,7 @@ class Part extends Model
         return $this->hasMany(PartHistory::class, 'part_id', 'id')->oldest();
     }
 
-    public function help(): HasMany
+    public function helptext(): HasMany
     {
         return $this->hasMany(PartHelp::class, 'part_id', 'id')->ordered();
     }
@@ -552,38 +554,6 @@ class Part extends Model
         }
     }
 
-    public function setHelp(array|SupportCollection $help): void
-    {
-        $this->help()->delete();
-        if (is_array($help)) {
-            $help = collect($help);
-        } elseif ($help instanceof Collection) {
-            $help = collect(
-                $help
-                ->map(
-                    fn (PartHelp $h) =>
-                    ['order' => $h->order, 'text' => $h->text]
-                )
-                ->all()
-            );
-        }
-        $help
-            ->each(function (array|string $h, int $key): void {
-                if (is_string($h)) {
-                    $help = [
-                        'order' => $key,
-                        'text' => $h,
-                    ];
-                } else {
-                    $help = [
-                        'order' => Arr::has($h, 'order') ? $h['order'] : $key,
-                        'text' => $h['text']
-                    ] ;
-                }
-                $this->help()->create($help);
-            });
-    }
-
     public function setHistory(array|SupportCollection $history): void
     {
         $this->history()->delete();
@@ -681,9 +651,9 @@ class Part extends Model
         $header[] = $this->license->ldrawString();
         $header[] = '';
 
-        if ($this->help->isNotEmpty()) {
+        if ($this->help) {
             foreach ($this->help as $h) {
-                $header[] = "0 !HELP {$h->text}";
+                $header[] = "0 !HELP {$h}";
             }
             $header[] = '';
         }

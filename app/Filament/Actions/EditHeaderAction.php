@@ -6,7 +6,9 @@ use App\Enums\PartCategory;
 use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
+use App\Enums\Permission;
 use App\Events\PartHeaderEdited;
+use App\Filament\Forms\Components\AuthorSelect;
 use App\Filament\Forms\Components\PreviewSelect;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
@@ -16,14 +18,20 @@ use App\LDraw\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
 use App\Models\Part\PartKeyword;
+use App\Models\User;
+use App\Rules\HistoryEditIsValid;
 use App\Rules\PatternHasSet;
 use Closure;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -38,7 +46,7 @@ class EditHeaderAction
             ->record($part)
             ->form(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
-                $data['help'] = $part->help()->orderBy('order')->get()->implode('text', "\n");
+                $data['help'] = implode("\n", $part->help);
                 if (is_null($part->getRebrickablePart())) {
                     $kws = $part->keywords;
                 } else {
@@ -50,10 +58,10 @@ class EditHeaderAction
                             Str::of($kw->keyword)->lower()->startsWith('bricklink');
                         });
                 }
+                $data['keywords'] = $kws->sortBy('keyword')->implode('keyword', ', ');
                 $preview = $part->previewValues();
                 $data['preview_rotation'] = $preview['rotation'];
-                $data['keywords'] = $kws->sortBy('keyword')->implode('keyword', ', ');
-                $data['history'] = $part->history->sortBy('created_at')->implode(fn (PartHistory $h) => $h->toString(), "\n");
+                $data['history'] = $part->history->sortBy('created_at')->map->only('created_at', 'user_id', 'comment')->all();
                 return $data;
             })
             ->using(fn (Part $p, array $data) => self::updateHeader($p, $data))
@@ -84,6 +92,11 @@ class EditHeaderAction
                         }
                     }
                 ]),
+            AuthorSelect::make()
+                ->required()
+                ->helperText('Changes to author must be documented with a comment')
+                ->hidden(Auth::user()->can(Permission::PartSubmitProxy))
+                ->disabled(Auth::user()->cannot(Permission::PartSubmitProxy)),
             Select::make('type')
                 ->options(PartType::options(PartType::partsFolderTypes()))
                 ->hidden(!$part->type->inPartsFolder())
@@ -97,11 +110,10 @@ class EditHeaderAction
                 ->disabled(!$part->type->inPartsFolder())
                 ->in(PartTypeQualifier::cases()),
             Textarea::make('help')
-                ->helperText('Do not include 0 !HELP; each line will be a separate help line')
                 ->extraAttributes(['class' => 'font-mono'])
-                ->rows(6)
-                ->nullable()
-                ->string(),
+                ->string()
+                ->rows(4)
+                ->nullable(),
             Select::make('category')
                 ->options(PartCategory::options())
                 ->helperText('A !CATEGORY meta will be added only if this differs from the first word in the description')
@@ -119,25 +131,13 @@ class EditHeaderAction
                     ' will not be preserved'
                 )
                 ->extraAttributes(['class' => 'font-mono'])
+                ->nullable()
+                ->string()
                 ->rows(3)
                 ->hidden(!$part->type->inPartsFolder())
                 ->disabled(!$part->type->inPartsFolder())
                 ->rules([
                     new PatternHasSet(),
-/*
-                    Rule::requiredIf($part->is_pattern && $get('category') != PartCategory::Modulex),
-                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part, $get) {
-                        $p = ParsedPart::fromPart($part);
-                        $p->keywords = collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all();
-                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\PatternHasSetKeyword());
-                        if ($errors) {
-                            $fail($errors[0]);
-                        }
-                    }
-*/
-                ])
-                ->validationMessages([
-                    'required_if' => __(PartError::NoSetKeywordForPattern->value),
                 ]),
             TextInput::make('cmdline')
                 ->nullable()
@@ -146,36 +146,36 @@ class EditHeaderAction
                 ->disabled(!$part->type->inPartsFolder())
                 ->string(),
             PreviewSelect::make(),
-            TextArea::make('history')
-                ->helperText('Must include 0 !HISTORY; ALL changes to existing history must be documented with a comment')
+            Repeater::make('history')
+                ->schema([
+                    DatePicker::make('created_at')
+                        ->native(false)
+                        ->extraAttributes(['class' => 'font-mono'])
+                        ->displayFormat('Y-m-d')
+                        ->label('Date')
+                        ->rules([
+                            Rule::date(),
+                        ])
+                        ->required()
+                        ->live(),
+                    AuthorSelect::make('user_id')
+                        ->required()
+                        ->live(),
+                    TextInput::make('comment')
+                        ->extraAttributes(['class' => 'font-mono'])
+                        ->columnSpanFull()
+                        ->required()
+                        ->string()
+                        ->live()
+                ])
+                ->columns(2)
+                ->collapsed()
                 ->extraAttributes(['class' => 'font-mono'])
-                ->rows(6)
-                ->string()
+                ->itemLabel(fn (array $state): ?string => (new Carbon(Arr::get($state, 'created_at')))->toDateString() . ' ' . (User::find(Arr::get($state, 'user_id'))?->historyString() ?? '') .' ' . Arr::get($state, 'comment'))
+                ->helperText('ALL changes to existing history must be documented with a comment')
+                ->reorderable(false)
                 ->rules([
-                    Rule::requiredIf($part->history->isNotEmpty()),
-                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
-                        $p = app(\App\LDraw\Parse\Parser::class)->parse($value);
-                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\ValidLines());
-                        if ($errors) {
-                            $fail($errors[0]);
-                            return;
-                        }
-                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\HistoryIsValid());
-                        if ($errors) {
-                            $fail($errors[0]);
-                            return;
-                        }
-                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\HistoryUserIsRegistered());
-                        if ($errors) {
-                            $fail($errors[0]);
-                            return;
-                        }
-                        $old_hist = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()));
-                        $new_hist = collect(explode("\n", Str::of($value)->trim()->toString()))->filter()->map(fn (string $h) => Str::of($h)->squish()->trim()->toString);
-                        if ($old_hist->diff($new_hist)->all() && is_null($get('editcomment'))) {
-                            $fail('partcheck.history.alter')->translate();
-                        }
-                    }
+                    new HistoryEditIsValid(),
                 ]),
             TextArea::make('editcomment')
                 ->label('Comment')
@@ -233,18 +233,18 @@ class EditHeaderAction
             $changes['new']['qual'] = $pq->value ?? '';
             $part->type_qualifier = $pq;
         }
-        if (Arr::has($data, 'help') && !Str::of($data['help'])->squish()->trim()->isEmpty()) {
+
+        if (Arr::has($data, 'help')) {
             $newHelp = "0 !HELP " . str_replace(["\n","\r"], ["\n0 !HELP ",''], $data['help']);
             $newHelp = $manager->parser->getHelp($newHelp);
         } else {
             $newHelp = [];
         }
 
-        $partHelp = $part->help->pluck('text')->all();
-        if ($partHelp !== $newHelp) {
-            $changes['old']['help'] = "0 !HELP " . implode("\n0 !HELP ", $partHelp);
+        if ($part->help !== $newHelp) {
+            $changes['old']['help'] = "0 !HELP " . implode("\n0 !HELP ", $part->help);
             $changes['new']['help'] = "0 !HELP " . implode("\n0 !HELP ", $newHelp);
-            $part->setHelp($newHelp);
+            $part->help = $newHelp;
         }
 
         if (!Arr::has($data, 'keywords')) {
@@ -280,7 +280,15 @@ class EditHeaderAction
         }
 
         $old_hist = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()));
-        $new_hist = collect(explode("\n", Str::of(Arr::get($data, 'history', ''))->trim()->toString()))->filter()->map(fn (string $h) => Str::of($h)->squish()->trim()->toString);
+        $new_hist = collect($data['history'])
+            ->map(fn (array $state) => 
+                '0 !HISTORY ' . 
+                (new Carbon(Arr::get($state, 'created_at')))->toDateString() . 
+                ' ' . 
+                (User::find(Arr::get($state, 'user_id'))?->historyString() ?? '') . 
+                ' ' . 
+                Str::of(Arr::get($state, 'comment'))->squish()->trim()->toString()
+            );
         if ($new_hist->diff($old_hist)->all()) {
             $changes['old']['history'] = $old_hist->implode("\n");
             $part->setHistory($manager->parser->parse($new_hist->implode("\n"))->history ?? []);

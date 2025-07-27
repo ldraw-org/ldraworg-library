@@ -117,6 +117,7 @@ class PartManager
             'category' => $cat,
             'cmdline' => $part->cmdline,
             'preview' => $part->preview,
+            'help' => $part->help,
             'header' => ''
         ];
         $upart = $this->makePart($values);
@@ -131,7 +132,6 @@ class PartManager
             $upart->save();
         }
         $upart->setKeywords($part->keywords ?? []);
-        $upart->setHelp($part->help ?? []);
         $upart->setHistory($part->history ?? []);
         $upart->setBody($part->body);
         $upart->refresh();
@@ -170,11 +170,11 @@ class PartManager
             'bfc' => $part->bfc,
             'category' => $part->category,
             'cmdline' => $part->cmdline,
+            'help' => $part->help,
             'header' => $part->header,
         ];
         $upart = Part::create($values);
         $upart->setKeywords($part->keywords);
-        $upart->setHelp($part->help);
         $upart->setHistory($part->history);
         $upart->setBody($part->body);
         $upart->save();
@@ -198,7 +198,7 @@ class PartManager
         if ($parts instanceof Part) {
             $parts = (new Collection())->add($parts);
         }
-        $parts->loadMissing('keywords', 'help', 'history', 'body', 'user');
+        $parts->loadMissing('keywords', 'history', 'body', 'user');
         $parts->each(function (Part $p) {
             $this->loadSubparts($p);
             $p->generateHeader();

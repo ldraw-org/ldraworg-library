@@ -15,7 +15,11 @@ class HistoryUserIsRegistered implements Check
     {
         if ($part instanceof ParsedPart) {
             foreach ($part->history ?? [] as $hist) {
-                if (is_null(User::fromAuthor($hist['user'], $hist['user'])->first())) {
+                $user_registered = match ($hist['type']) {
+                    '[' => User::where('name', $hist['user'])->exists(),
+                    '{' => User::where('realname', $hist['user'])->exists(),
+                };
+                if (!$user_registered) {
                     $fail(PartError::HistoryAuthorNotRegistered);
                 }
             }
