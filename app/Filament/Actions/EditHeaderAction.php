@@ -95,8 +95,8 @@ class EditHeaderAction
             AuthorSelect::make()
                 ->required()
                 ->helperText('Changes to author must be documented with a comment')
-                ->hidden(Auth::user()->can(Permission::PartSubmitProxy))
-                ->disabled(Auth::user()->cannot(Permission::PartSubmitProxy)),
+                ->hidden(Auth::user()?->cannot(Permission::PartSubmitProxy) ?? true)
+                ->disabled(Auth::user()?->cannot(Permission::PartSubmitProxy) ?? true),
             Select::make('type')
                 ->options(PartType::options(PartType::partsFolderTypes()))
                 ->hidden(!$part->type->inPartsFolder())
