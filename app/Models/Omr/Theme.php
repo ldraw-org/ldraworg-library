@@ -29,6 +29,6 @@ class Theme extends Model
     {
         $t = $this->ancestorsAndSelf()->depthFirst()->get();
 
-        return $t[$t->count()-1]->theme_path;
+        return $t[$t->count() - 1]->theme_path;
     }
 }

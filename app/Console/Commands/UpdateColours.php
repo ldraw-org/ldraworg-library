@@ -3,9 +3,7 @@
 namespace App\Console\Commands;
 
 use App\LDraw\LDrawColourManager;
-use App\Models\LdrawColour;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
 
 class UpdateColours extends Command
 {

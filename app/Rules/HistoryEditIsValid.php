@@ -38,12 +38,13 @@ class HistoryEditIsValid implements ValidationRule, DataAwareRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $value = collect($value)
-            ->map(fn (array $state) => 
-                '0 !HISTORY ' . 
-                (new Carbon(Arr::get($state, 'created_at')))->toDateString() . 
-                ' ' . 
-                (User::find(Arr::get($state, 'user_id'))?->historyString() ?? '') . 
-                ' ' . 
+            ->map(
+                fn (array $state) =>
+                '0 !HISTORY ' .
+                (new Carbon(Arr::get($state, 'created_at')))->toDateString() .
+                ' ' .
+                (User::find(Arr::get($state, 'user_id'))?->historyString() ?? '') .
+                ' ' .
                 Str::of(Arr::get($state, 'comment'))->squish()->trim()->toString()
             );
         $part = Part::find(Arr::get($this->data, 'mountedActionsData.0.id'));
@@ -67,5 +68,5 @@ class HistoryEditIsValid implements ValidationRule, DataAwareRule
         if ($old_hist->diff($value)->all() && is_null(Arr::get($this->data, 'mountedActionsData.0.editcomment'))) {
             $fail('partcheck.history.alter')->translate();
         }
-     }
+    }
 }

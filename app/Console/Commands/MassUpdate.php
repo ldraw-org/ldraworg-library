@@ -10,7 +10,6 @@ use App\LDraw\PartManager;
 use App\LDraw\VoteManager;
 use App\Models\Part\Part;
 use App\Models\User;
-use App\Settings\LibrarySettings;
 use Illuminate\Console\Command;
 
 class MassUpdate extends Command

@@ -4,8 +4,6 @@ namespace App\Livewire\Part;
 
 use App\Enums\CheckType;
 use App\Enums\Permission;
-use App\Events\PartSubmitted;
-use App\Jobs\UpdateZip;
 use App\LDraw\Check\PartChecker;
 use App\LDraw\LDrawFile;
 use App\LDraw\PartManager;

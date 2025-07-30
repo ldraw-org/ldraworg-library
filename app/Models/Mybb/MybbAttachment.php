@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
 
 class MybbAttachment extends Model
 {
@@ -36,7 +35,8 @@ class MybbAttachment extends Model
     protected function omrFiles(Builder $query)
     {
         $query
-            ->where(fn (Builder $qu) => $qu
+            ->where(
+                fn (Builder $qu) => $qu
                 ->orWhere('filename', 'LIKE', '%.ldr')
                 ->orWhere('filename', 'LIKE', '%.mpd')
             )

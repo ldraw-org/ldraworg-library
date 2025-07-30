@@ -61,7 +61,7 @@ class PartManager
             UpdateZip::dispatch($part);
             PartSubmitted::dispatch($part, $user, $comments);
         });
-        
+
         return $parts;
     }
 
@@ -144,7 +144,7 @@ class PartManager
         $upart = Part::unofficial()->firstWhere('filename', $values['filename']);
         $opart = Part::official()->firstWhere('filename', $values['filename']);
         if (!is_null($upart)) {
-            store_backup(str_replace('/','-', $upart->filename), $upart->get());
+            store_backup(str_replace('/', '-', $upart->filename), $upart->get());
             $upart->votes()->delete();
             $upart->fill($values);
             $upart->save();

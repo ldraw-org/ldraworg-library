@@ -3,7 +3,6 @@
 namespace App\LDraw;
 
 use App\Enums\License;
-use App\Enums\Permission;
 use App\Jobs\UpdateImage;
 use App\LDraw\Render\LDView;
 use App\Models\Mybb\MybbAttachment;
@@ -50,12 +49,12 @@ class OmrModelManager
                 'password' => bcrypt(Str::random(40)),
             ]);
         }
-        
+
         if (!$user->hasRole('OMR Author')) {
             $user->assignRole('OMR Author');
             $user->save();
         }
-        
+
         $model = OmrModel::create([
             'user_id' => $user->id,
             'set_id' => $set->id,

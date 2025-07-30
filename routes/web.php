@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\Permission;
 use App\Http\Controllers\DocumentShowController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SupportFilesController;
@@ -36,7 +35,6 @@ use App\Livewire\PbgGenerator;
 use App\Livewire\Poll\Show as PollShow;
 use App\Livewire\Release\Create;
 use App\Livewire\Search\Suffix;
-use App\Livewire\Tables\UserTable;
 use App\Livewire\TorsoShortcutHelper;
 use App\Livewire\Tracker\ConfirmCA;
 

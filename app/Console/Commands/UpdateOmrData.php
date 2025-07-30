@@ -33,13 +33,15 @@ class UpdateOmrData extends Command
         $themes = $rb->getThemes();
 
         $themes->each(function (array $theme) {
-            Theme::updateOrCreate([
+            Theme::updateOrCreate(
+                [
                 'id' => $theme['id']
             ],
-            [
+                [
                 'parent_id' => $theme['parent_id'],
                 'name' => $theme['name']
-            ]);
+            ]
+            );
         });
 
         Set::all()->each(function (Set $set) use ($rb) {
@@ -49,8 +51,8 @@ class UpdateOmrData extends Command
             }
             if ($set->theme_id != $rb_set['theme_id']) {
                 $set->theme_id = $rb_set['theme_id'];
-                $set->save();    
+                $set->save();
             }
-        });      
+        });
     }
 }

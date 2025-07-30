@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use App\Enums\PartType;
 use App\Models\Mybb\MybbUser;
-use App\Models\User;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;

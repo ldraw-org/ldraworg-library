@@ -65,7 +65,7 @@ class PartEvent extends Model
         $comment = preg_replace('#\n{3,}#us', "\n\n", $comment);
         $comment = preg_replace($urlpattern, '<a href="$0">$0</a>', $comment);
         $comment = nl2br($comment);
-        
+
         return new HtmlString($comment);
     }
 }

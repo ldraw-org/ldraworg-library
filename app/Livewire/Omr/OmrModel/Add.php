@@ -8,7 +8,6 @@ use App\LDraw\Rebrickable;
 use App\Models\Mybb\MybbAttachment;
 use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
-use App\Models\Omr\Theme;
 use Closure;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -63,7 +62,7 @@ class Add extends Component implements HasForms, HasTable
                     ->state(fn (MybbAttachment $file): string => $file->user->library_user?->author_string ?? "{$file->user->loginname} - {$file->user->username}"),
                 IconColumn::make('set-in-omr')
                     ->boolean()
-                    ->state(fn (MybbAttachment $file): bool  => !is_null($this->getSetFromFilename($file->filename)))
+                    ->state(fn (MybbAttachment $file): bool => !is_null($this->getSetFromFilename($file->filename)))
                     ->url(function (MybbAttachment $file): ?string {
                         $set = $this->getSetFromFilename($file->filename);
                         if (!is_null($set)) {
@@ -78,10 +77,10 @@ class Add extends Component implements HasForms, HasTable
                 Action::make('view')
                     ->action(function (MybbAttachment $file) {
                         $this->parts = app(LDrawModelMaker::class)->webGl($file->get());
-                        $this->dispatch('open-modal', id: 'ldbi');                
+                        $this->dispatch('open-modal', id: 'ldbi');
                     }),
                 $this->AddAction(),
-                
+
             ])
             ->filters([
                 Filter::make('unchecked-posts')
@@ -168,7 +167,7 @@ class Add extends Component implements HasForms, HasTable
     {
         $m = preg_match('/\d{3,6}/iu', $filename, $num);
         if ($m) {
-           return  Set::where(fn (Builder $query) => $query->orWhere('number', $num[0])->orWhere('number', "{$num[0]}-1"))->first();
+            return  Set::where(fn (Builder $query) => $query->orWhere('number', $num[0])->orWhere('number', "{$num[0]}-1"))->first();
         }
         return null;
     }

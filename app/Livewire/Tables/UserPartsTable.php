@@ -20,7 +20,9 @@ class UserPartsTable extends BasicTable
             ->query(
                 Part::with('votes', 'official_part')
                     ->unofficial()
-                    ->whereHas('events', fn (Builder $query) => 
+                    ->whereHas(
+                        'events',
+                        fn (Builder $query) =>
                         $query->unofficial()->where('event_type', EventType::Submit)->where('user_id', Auth::user()->id)
                     )
             )

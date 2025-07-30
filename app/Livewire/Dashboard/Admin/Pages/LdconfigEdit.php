@@ -17,7 +17,7 @@ use Livewire\Component;
 class LdconfigEdit extends Component implements HasForms
 {
     use InteractsWithForms;
-    
+
     public ?array $data = [];
 
     public function mount(): void

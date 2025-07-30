@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PartBody extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'body',
         'part_id',

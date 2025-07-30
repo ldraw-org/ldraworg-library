@@ -24,7 +24,9 @@ class UserPartEventsTable extends BasicTable
                     ->whereHas(
                         'part',
                         fn (Builder $q) =>
-                            $q->whereHas('events', fn (Builder $qu) => 
+                            $q->whereHas(
+                                'events',
+                                fn (Builder $qu) =>
                                 $qu->where('event_type', EventType::Submit)->where('user_id', Auth::user()->id)
                             )
                     )

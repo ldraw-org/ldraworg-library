@@ -70,7 +70,7 @@ class Create extends Component implements HasForms, HasTable
                             ->sortable()
                             ->grow(false)
                             ->label('Status'),
-                            
+
                         TextColumn::make('part_check')
                             ->state(fn (Part $part) => $part->part_check->get(translated: true))
                             ->listWithLineBreaks()

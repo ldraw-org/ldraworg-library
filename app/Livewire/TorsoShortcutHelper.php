@@ -3,9 +3,7 @@
 namespace App\Livewire;
 
 use App\Enums\PartCategory;
-use App\Events\PartSubmitted;
 use App\Filament\Forms\Components\LDrawColourSelect;
-use App\Jobs\UpdateZip;
 use App\LDraw\Check\Checks\PatternHasSetKeyword;
 use App\LDraw\Check\PartChecker;
 use App\LDraw\LDrawFile;

@@ -6,7 +6,6 @@ use App\Jobs\CheckPart;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 
 class CheckParts extends Command
 {

@@ -3,16 +3,12 @@
 namespace App\Livewire\Tables;
 
 use App\Enums\Permission;
-use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Layout;
-use Spatie\Permission\Models\Role;
 
 /**
  * @property Table $table
@@ -22,7 +18,7 @@ class UserTable extends BasicTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(User::query()->withMax('part_events','created_at')->where('is_ptadmin', false)->where('is_synthetic', false))
+            ->query(User::query()->withMax('part_events', 'created_at')->where('is_ptadmin', false)->where('is_synthetic', false))
             ->defaultSort('realname', 'asc')
             ->heading('User List')
             ->columns([

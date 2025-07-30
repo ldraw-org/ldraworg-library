@@ -35,7 +35,8 @@ enum VoteType: string
             VoteType::CancelVote => LibraryIcon::CancelVote,
             VoteType::AdminReview => LibraryIcon::AdminReview,
             VoteType::AdminFastTrack => LibraryIcon::AdminFastTrack,
-            VoteType::Certify => LibraryIcon::Certify        };
+            VoteType::Certify => LibraryIcon::Certify
+        };
     }
 
 }

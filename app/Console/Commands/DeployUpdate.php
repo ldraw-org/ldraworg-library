@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Part\Part;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 
 class DeployUpdate extends Command
 {
@@ -27,15 +25,6 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        Part::where('description', 'LIKE', '~Stickerback %')
-            ->each(function (Part $part) {
-                $d = Str::of($part->description);
-                $d = $d->replace('Stickerback', 'Sticker Back');
-                if ($d->contains('Formed') && !$d->contains('(Formed)')) {
-                    $d = $d->replace('Formed', '(Formed)');
-                }
-                $part->description = $d->toString();
-                $part->save();
-            });
+        //
     }
 }

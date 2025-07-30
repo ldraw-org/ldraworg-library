@@ -3,7 +3,6 @@
 namespace App\Filament\Actions;
 
 use App\Enums\PartCategory;
-use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\Permission;
@@ -24,7 +23,6 @@ use App\Rules\PatternHasSet;
 use Closure;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -281,12 +279,13 @@ class EditHeaderAction
 
         $old_hist = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()));
         $new_hist = collect($data['history'])
-            ->map(fn (array $state) => 
-                '0 !HISTORY ' . 
-                (new Carbon(Arr::get($state, 'created_at')))->toDateString() . 
-                ' ' . 
-                (User::find(Arr::get($state, 'user_id'))?->historyString() ?? '') . 
-                ' ' . 
+            ->map(
+                fn (array $state) =>
+                '0 !HISTORY ' .
+                (new Carbon(Arr::get($state, 'created_at')))->toDateString() .
+                ' ' .
+                (User::find(Arr::get($state, 'user_id'))?->historyString() ?? '') .
+                ' ' .
                 Str::of(Arr::get($state, 'comment'))->squish()->trim()->toString()
             );
         if ($new_hist->diff($old_hist)->all()) {

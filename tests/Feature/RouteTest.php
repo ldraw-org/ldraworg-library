@@ -1,13 +1,10 @@
 <?php
 
 use App\Enums\Permission;
-use App\Livewire\Part\Show;
 use App\Models\Part\Part;
-use App\Models\Part\PartBody;
 use App\Models\Part\PartRelease;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
@@ -88,7 +85,7 @@ describe('part bound routes', function () {
         $release = PartRelease::factory()->create();
 
         $response = $this->get("/parts/{$part->id}");
-        $response->assertOk();        
+        $response->assertOk();
 
         $response = $this->get("/parts/unofficial/{$part->filename}");
         $response->assertOk();

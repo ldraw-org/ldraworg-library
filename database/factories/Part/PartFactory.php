@@ -5,7 +5,6 @@ namespace Database\Factories\Part;
 use App\Enums\License;
 use App\Enums\PartType;
 use App\Models\Part\Part;
-use App\Models\Part\PartBody;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;

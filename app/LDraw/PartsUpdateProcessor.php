@@ -16,7 +16,6 @@ use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
 use App\Models\User;
 use App\Settings\LibrarySettings;
-use Illuminate\Support\Facades\Bus;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -188,12 +187,12 @@ class PartsUpdateProcessor
     {
         // Release marked parts
         $this->parts
-            ->each(function (Part $part){
+            ->each(function (Part $part) {
                 $this->updatePartsList($part);
                 $this->releasePart($part);
             });
-        
-        // Release minor edits    
+
+        // Release minor edits
         Part::official()
             ->where('has_minor_edit', true)
             ->whereDoesntHave('unofficial_part')
