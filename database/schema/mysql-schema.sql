@@ -118,7 +118,7 @@ CREATE TABLE `ldraw_colours` (
   `brickset_id` int DEFAULT NULL,
   `brickset_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `fabric` tinyint(1) NOT NULL DEFAULT '0',
-  `material_fabric_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `material_fabric_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ldraw_colours_name_unique` (`name`),
   UNIQUE KEY `ldraw_colours_code_unique` (`code`)
@@ -237,19 +237,6 @@ CREATE TABLE `part_events` (
   CONSTRAINT `part_events_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `part_helps`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `part_helps` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `order` int NOT NULL,
-  `text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `part_id` bigint unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `part_helps_part_id_foreign` (`part_id`),
-  CONSTRAINT `part_helps_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `part_histories`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -330,6 +317,7 @@ CREATE TABLE `parts` (
   `preview` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `rebrickable_part_id` bigint unsigned DEFAULT NULL,
+  `help` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `parts_filename_part_release_id_unique` (`filename`,`part_release_id`),
   KEY `parts_part_release_id_foreign` (`part_release_id`),
@@ -447,6 +435,59 @@ CREATE TABLE `polls` (
   `enabled` tinyint(1) NOT NULL DEFAULT '0',
   `has_been_enabled` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `pulse_aggregates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `pulse_aggregates` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `bucket` int unsigned NOT NULL,
+  `period` mediumint unsigned NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key_hash` binary(16) GENERATED ALWAYS AS (unhex(md5(`key`))) VIRTUAL,
+  `aggregate` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` decimal(20,2) NOT NULL,
+  `count` int unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pulse_aggregates_bucket_period_type_aggregate_key_hash_unique` (`bucket`,`period`,`type`,`aggregate`,`key_hash`),
+  KEY `pulse_aggregates_period_bucket_index` (`period`,`bucket`),
+  KEY `pulse_aggregates_type_index` (`type`),
+  KEY `pulse_aggregates_period_type_aggregate_bucket_index` (`period`,`type`,`aggregate`,`bucket`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `pulse_entries`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `pulse_entries` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `timestamp` int unsigned NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key_hash` binary(16) GENERATED ALWAYS AS (unhex(md5(`key`))) VIRTUAL,
+  `value` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `pulse_entries_timestamp_index` (`timestamp`),
+  KEY `pulse_entries_type_index` (`type`),
+  KEY `pulse_entries_key_hash_index` (`key_hash`),
+  KEY `pulse_entries_timestamp_type_key_hash_value_index` (`timestamp`,`type`,`key_hash`,`value`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `pulse_values`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `pulse_values` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `timestamp` int unsigned NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key_hash` binary(16) GENERATED ALWAYS AS (unhex(md5(`key`))) VIRTUAL,
+  `value` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pulse_values_type_key_hash_unique` (`type`,`key_hash`),
+  KEY `pulse_values_timestamp_index` (`timestamp`),
+  KEY `pulse_values_type_index` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `rebrickable_parts`;
@@ -578,9 +619,9 @@ CREATE TABLE `sticker_sheets` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `rebrickable` json NOT NULL,
+  `rebrickable` json DEFAULT NULL,
   `ldraw_colour_id` bigint unsigned DEFAULT NULL,
-  `part_colors` json NOT NULL,
+  `part_colors` json DEFAULT NULL,
   `rebrickable_part_id` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sticker_sheets_number_unique` (`number`),
@@ -590,45 +631,6 @@ CREATE TABLE `sticker_sheets` (
   CONSTRAINT `sticker_sheets_rebrickable_part_id_foreign` FOREIGN KEY (`rebrickable_part_id`) REFERENCES `rebrickable_parts` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `telescope_entries`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `telescope_entries` (
-  `sequence` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `uuid` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `batch_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `family_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `should_display_on_index` tinyint(1) NOT NULL DEFAULT '1',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`sequence`),
-  UNIQUE KEY `telescope_entries_uuid_unique` (`uuid`),
-  KEY `telescope_entries_batch_id_index` (`batch_id`),
-  KEY `telescope_entries_family_hash_index` (`family_hash`),
-  KEY `telescope_entries_created_at_index` (`created_at`),
-  KEY `telescope_entries_type_should_display_on_index_index` (`type`,`should_display_on_index`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `telescope_entries_tags`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `telescope_entries_tags` (
-  `entry_uuid` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tag` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`entry_uuid`,`tag`),
-  KEY `telescope_entries_tags_tag_index` (`tag`),
-  CONSTRAINT `telescope_entries_tags_entry_uuid_foreign` FOREIGN KEY (`entry_uuid`) REFERENCES `telescope_entries` (`uuid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `telescope_monitoring`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `telescope_monitoring` (
-  `tag` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`tag`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `themes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -636,9 +638,9 @@ CREATE TABLE `themes` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `theme` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `themes_theme_unique` (`theme`)
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `parent_id` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tracker_histories`;
@@ -852,3 +854,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (121,'2025_03_27_18
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (122,'2025_03_28_060708_add_rebrickable_part_id',43);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (123,'2025_04_06_211334_alter_part_check_in_parts_table',44);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (124,'2025_04_13_234802_add_fabric_to_ldraw_colours_table',45);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (125,'2025_04_22_055504_sync_columns_with_rb_in_themes_table',46);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (126,'2025_04_24_150403_alter_rebrickable_column_to_nullable_in_sticker_sheets_table',47);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (127,'2025_06_18_022605_remove_telescope',48);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (128,'2025_06_18_023912_create_pulse_tables',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (129,'2025_07_27_012549_add_help_to_parts_table',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (130,'2025_07_27_044921_drop_parthelps_table',51);
