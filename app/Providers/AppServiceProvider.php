@@ -123,8 +123,9 @@ class AppServiceProvider extends ServiceProvider
 
         //Nightwatch
         Nightwatch::rejectQueries(function (Query $query) {
-            return $query->sql = 'select * from "users" where "users"."id" = ? limit 1' ||
-                $query->sql = 'select * from "parts" where "parts"."id" = ? limit 1' ||
+            return $query->sql == 'select * from "users" where "users"."id" = ? limit 1' ||
+                $query->sql == 'select * from "parts" where "parts"."id" = ? limit 1' ||
+                str_contains($query->sql, 'where "users"."forum_user_id"') ||
                 str_contains($query->sql, 'from "roles"') ||
                 str_contains($query->sql, 'into "jobs"') ||
                 str_contains($query->sql, 'from "jobs"') ||
