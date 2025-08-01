@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Laravel\Nightwatch\Facades\Nightwatch;
+use Laravel\Nightwatch\Records\Query;
 use Pan\PanConfiguration;
 use Spatie\Permission\Models\Role;
 
@@ -118,5 +120,10 @@ class AppServiceProvider extends ServiceProvider
 
         //Subscriber
         Event::subscribe(PartEventSubscriber::class);
+
+        //Nightwatch
+        Nightwatch::rejectQueries(function (Query $query) {
+            return str_contains($query->sql, 'into "jobs"');
+        });
     }
 }
