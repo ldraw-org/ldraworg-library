@@ -130,6 +130,8 @@ class AppServiceProvider extends ServiceProvider
                 str_contains($query->sql, '`jobs`') ||
                 str_contains($query->sql, '`part_bodies`') ||
                 str_contains($query->sql, '`mybb_users`') ||
+                str_contains($query->sql, '`themes`') ||
+                str_contains($query->sql, '`pan_analytics`') ||
                 str_contains($query->sql, '`pulse_aggregates`');
         });
     }
