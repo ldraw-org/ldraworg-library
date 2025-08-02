@@ -16,7 +16,7 @@
             </x-slot:>
             <div>
                     <strong>Revision History:</strong>
-                    <div class="documentation">{!! str($document->revision_history)->markdown()->sanitizeHtml() !!}</div
+                    <div class="documentation">{!! str($document->revision_history)->markdown()->sanitizeHtml() !!}</div>
             </div>
             <p>
                 This is an ratified, official LDraw.org document. 
