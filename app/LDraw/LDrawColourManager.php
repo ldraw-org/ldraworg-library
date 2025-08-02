@@ -19,6 +19,10 @@ class LDrawColourManager
         $ldconfig = Storage::disk('library')->get('official/LDConfig.ldr');
         $colors = $this->parser->getColours($this->parser->unixLineEndings($ldconfig)) ?? [];
         foreach ($colors as $color) {
+            $c = LdrawColour::where('name', $color['name'])->where('code', '!=', $color['code'])->first();
+            if (!is_null($c)) {
+                $c->delete();
+            }
             LdrawColour::updateOrCreate(['code' => $color['code']], $color);
         }
         Cache::set('ldraw_colour_codes', LdrawColour::pluck('code')->all());
