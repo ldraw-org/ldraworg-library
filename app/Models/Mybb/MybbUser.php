@@ -25,7 +25,7 @@ class MybbUser extends Model
         return $this->setConnection('mysql')->hasOne(User::class, 'forum_user_id', 'uid');
     }
 
-    public static function findFromCookie(?Request $request): ?self
+    public static function findFromCookie(?Request $request = null): ?self
     {
         if (is_null($request)) {
             $request = request();
