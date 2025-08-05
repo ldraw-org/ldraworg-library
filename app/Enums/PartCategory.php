@@ -37,6 +37,7 @@ enum PartCategory: string
     case Figure = 'Figure';
     case FigureAccessory = 'Figure Accessory';
     case Flag = 'Flag';
+    case Flexible = 'Flexible';
     case Forklift = 'Forklift';
     case Freestyle = 'Freestyle';
     case Garage = 'Garage';
