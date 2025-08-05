@@ -32,7 +32,7 @@ class CheckPart implements ShouldQueue
      */
     public function handle(): void
     {
-        Nightwatch::sample(rate: 0.2);
+        Nightwatch::sample(rate: 0.1);
         
         $pm = app(PartManager::class);
 
