@@ -24,7 +24,7 @@
             </p>
         </x-message>     
         <div class="flex flex-col md:flex-row gap-2">
-            <div class="documentation">{!! str($document->content)->markdown()->sanitizeHtml() !!}</div>
+            <div class="documentation">{!! $doc_content !!}</div>
             <div class="md:w-3/5 border rounded-lg mx-4 h-fit"></div>
         </div>
     </div>
