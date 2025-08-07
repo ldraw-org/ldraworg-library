@@ -18,7 +18,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Laravel\Nightwatch\Facades\Nightwatch;
-use Laravel\Nightwatch\Records\Query;
+use Laravel\Nightwatch\Records\QueuedJob;
 use Pan\PanConfiguration;
 use Spatie\Permission\Models\Role;
 
@@ -120,5 +120,9 @@ class AppServiceProvider extends ServiceProvider
 
         //Subscriber
         Event::subscribe(PartEventSubscriber::class);
+        
+        Nightwatch::rejectQueuedJobs(function (QueuedJob $queuedjob) {
+            return str_contains($queuedjob->name, 'CheckPart');
+        });
     }
 }
