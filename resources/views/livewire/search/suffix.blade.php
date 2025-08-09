@@ -13,7 +13,7 @@
         </x-filament::button>
     </form>
     @if(is_null($part) && !is_null($basepart))
-        <div class="rounded border p-2">
+        <div class="rounded border border-gray-200 p-2">
             Part Not Found
         </div>
     @elseif(!is_null($part))
@@ -53,7 +53,7 @@
 
         </x-filament::tabs>
 
-        <div class="rounded border p-2">
+        <div class="rounded border-gray-200 p-2">
             @switch($activeTab)
                 @case('patterns')
                     <x-part.grid :parts="$part->patterns->load('votes', 'official_part')->whereNull('unofficial_part')->sortBy('filename')" />

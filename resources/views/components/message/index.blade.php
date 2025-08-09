@@ -1,5 +1,5 @@
 <div @class([
-    'p-4 border rounded-md flex items-center',
+    'p-4 border border-gray-200 rounded-md flex items-center',
     'justify-center text-center' => $centered,
     'w-full' => !$compact,
     'w-fit' => $compact,

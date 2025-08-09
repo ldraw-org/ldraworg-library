@@ -6,7 +6,7 @@
         <x-menu.library />
     </x-slot>
     <div class="space-y-2">
-        <div class="border rounded p-2">
+        <div class="border border-gray-200 rounded p-2">
             Welcome to the LDraw.org library. Here you will find the Parts Tracker, parts updates, 
             documentation for the LDraw file format and library, and the Official Model Repository
         </div>

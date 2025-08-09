@@ -17,7 +17,7 @@
                 <x-3d-viewer.button.photo />
             </div>
             <div class="flex flex-col w-full h-full">
-                <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" modeltype="user" />
+                <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" partname="model.ldr" modeltype="user" />
             </div>
         </div>
     </x-filament::modal>

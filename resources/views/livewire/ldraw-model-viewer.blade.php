@@ -27,10 +27,10 @@
             <x-3d-viewer.button.photo />
         </div>
         <div class="flex flex-col w-full h-full">
-            <x-3d-viewer class="border w-full h-[80vh]" partname="model.ldr" modeltype="user" />
+            <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" partname="model.ldr" modeltype="user" />
         </div>
     </div>
-    <div class="border rounded p-2">
+    <div class="border border-gray-200 rounded p-2">
         <p>
             All parts used in the file submitted to the model viewer must be embedded in the MPD,
             be present in the Official Library, or listed on the Parts Tracker. Official parts

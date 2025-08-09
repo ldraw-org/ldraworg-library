@@ -28,7 +28,7 @@
             <x-filament::button wire:click="pbgDownload" class="w-fit">
                 Download
             </x-filament::button>
-            <div class="border rounded p-2">
+            <div class="border border-gray-200 rounded p-2">
                 {!! nl2br($pbg) !!}
             </div>
         </div>
@@ -66,7 +66,7 @@
             </div>
         @endif
     </div>
-    <div class="border rounded p-2">
+    <div class="border border-gray-200 rounded p-2">
         The data used by this generator is provided by <a class="underline decoration-dotted hover:decoration-solid" target="_blank" href="https://www.rebrickable.com">Rebrickable</a>.
         The Rebrickable API limits calls to 1 request/sec. Therefore, large or pattern heavy sets may take some time 
         (2-20 sec) to process. Any errors should be submitted as change requests to Rebrickable.

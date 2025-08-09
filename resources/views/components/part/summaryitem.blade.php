@@ -2,7 +2,7 @@
 <div>
     <a href="{{route(('parts.show'), $part)}}">
         <div @class([
-            'flex flex-col rounded border h-full',
+            'flex flex-col rounded border border-gray-200 h-full',
             'bg-green-200' => $part->isOfficial(),
             'bg-yellow-200' => $part->isUnofficial()
         ])>

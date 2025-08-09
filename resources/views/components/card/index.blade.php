@@ -1,6 +1,6 @@
 @props(['title', 'image', 'link' => null])
 
-<div {{$attributes->merge(['class' => 'flex flex-col border rounded p-2'])}}>
+<div {{$attributes->merge(['class' => 'flex flex-col border border-gray-200 rounded p-2'])}}>
     @isset($link)
         <a href="{{$link}}">
     @endisset

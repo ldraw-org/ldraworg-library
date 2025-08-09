@@ -1,5 +1,5 @@
 @props(['release'])
-<div class="flex flex-col rounded border divide-y w-fit">
+<div class="flex flex-col rounded border border-gray-200 divide-y w-fit">
     <div class="flex flex-row items-center">
         <div class="font-bold justify-self-start p-2">
             LDraw.org Parts Update {{$release->name}}

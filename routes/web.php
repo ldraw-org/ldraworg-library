@@ -75,6 +75,7 @@ Route::get('/updates/view{release:short}', [PartUpdateController::class, 'view']
 
 Route::prefix('parts')->name('parts.')->group(function () {
     Route::view('/list', 'part.index')->name('list');
+    Route::view('/category-status', 'part.category')->name('category');
 
     // Stickers
     Route::view('/sticker-sheets', 'sticker-sheet.index')->name('sticker-sheet.index');

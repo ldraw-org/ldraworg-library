@@ -150,7 +150,7 @@
                 </div>
             @endif
         @endif
-        <div class="w-full p-4 border rounded-md">
+        <div class="w-full p-4 border border-gray-200 rounded-md">
           <div class="flex flex-col md:flex-row-reverse w-full">
             <div class="flex w-full justify-center items-center md:w-1/3">
               <img class = 'w-80 h-80 object-contain'
@@ -256,7 +256,7 @@
                 <x-3d-viewer.button.photo />
             </div>
             <div class="flex flex-col w-full h-full">
-                <x-3d-viewer class="border w-full h-[80vh]" partname="{{str_replace('\\', '/', $part->name())}}" modelid="{{$part->id}}"/>
+                <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" partname="{{str_replace('\\', '/', $part->name())}}" modelid="{{$part->id}}"/>
             </div>
         </div>
     </x-filament::modal>

@@ -13,7 +13,7 @@
     <div class="text-lg font-bold">
         The Contributor Agreement Dated 2024-06-06
     </div>
-    <div class="border rounded p-2 space-y-2">
+    <div class="border border-gray-200 rounded p-2 space-y-2">
         <p>
             By submitting work ("the Work") to The LDraw Organization ("LDraw.org"), the submitter ("the Author"), 
             agrees to release the Work under the Creative Commons Attribution License 4.0 International License ("CC BY 4.0")
@@ -35,7 +35,7 @@
     <div class="text-lg font-bold">
         Changes from the previous CA
     </div>
-    <div class="border rounded p-2 space-y-2">
+    <div class="border border-gray-200 rounded p-2 space-y-2">
         <p>
             Added the option for the Author to release their parts to the public domain via CC0.
         </p>
