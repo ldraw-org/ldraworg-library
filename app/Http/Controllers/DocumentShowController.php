@@ -12,7 +12,7 @@ class DocumentShowController extends Controller
 {
     public function __invoke(Request $request, Document $document)
     {
-        $doc_content = str($document->content)
+        $doc_content = str($document->content . "\n[TOC]")
             ->markdown(
                 [
                     'external_link' => [
@@ -29,7 +29,10 @@ class DocumentShowController extends Controller
                         'symbol' => '',
                         'title' => "Permalink",
                     ],
-
+                    'table_of_contents' => [
+                        'position' => 'placeholder',
+                        'placeholder' => '[TOC]'
+                    ],
                 ],
                 [
                     new ExternalLinkExtension(),
@@ -38,6 +41,8 @@ class DocumentShowController extends Controller
                 ]
             )
             ->sanitizeHtml();
-        return view('documents.document', compact('document', 'doc_content'));
+        $toc = substr($doc_content, strpos($doc_content, '<ul class="table-of-contents">'));
+        $doc_content = str_replace($toc, '', $doc_content);
+        return view('documents.document', compact('document', 'doc_content', 'toc'));
     }
 }
