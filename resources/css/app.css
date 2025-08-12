@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 .event-comment a {
     @apply underline decoration-dotted hover:decoration-solid
