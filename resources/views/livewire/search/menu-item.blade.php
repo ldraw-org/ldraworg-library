@@ -1,8 +1,8 @@
 <div class="w-full relative">
     <form class="grid grid-col-1 h-full" id="pt_search_comp" action="{{route('parts.list', ['tableSearch' => $search])}}" method="get" name="pt_search_comp">
-        <input class="border-inherit border-t border-b-0 border-r-0 md:border-t-0 md:border-l w-full h-full lg:w-fit lg:justify-self-end" name="tableSearch" type="text" wire:model.live="search" wire:input="doSearch" placeholder="Quick Search">
+        <input class="border-gray-200 border-t border-b-0 border-r-0 pl-2 md:border-t-0 md:border-l w-full h-full lg:w-fit lg:justify-self-end" name="tableSearch" type="text" wire:model.live="search" wire:input="doSearch" placeholder="Quick Search">
         <div 
-            class="flex flex-col border border-gray-200 rounded bg-white absolute top-full right-0 w-96 h-72 overflow-scroll z-50 divide-y divide-black"
+            class="flex flex-col border border-gray-200 rounded bg-white absolute top-full right-0 w-96 h-72 overflow-scroll z-50 divide-y"
             x-show="$wire.hasResults"
             x-transition:enter="transition ease-out duration-100" 
             x-transition:enter-start="transform opacity-0"
