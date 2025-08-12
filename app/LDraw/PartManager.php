@@ -431,7 +431,7 @@ class PartManager
                     'number' => $s[0]
                 ]);
                 if (!$sheet->rebrickable_part) {
-                    app(\App\LDraw\StickerSheetManager::class)->updateRebrickablePart($sheet);
+                    app(StickerSheetManager::class)->updateRebrickablePart($sheet);
                     $sheet->load('rebrickable_part');
                 }
                 $p->parents()->update(['sticker_sheet_id' => $sheet->id]);

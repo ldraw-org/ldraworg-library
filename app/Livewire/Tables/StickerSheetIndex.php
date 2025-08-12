@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\Permission;
@@ -15,8 +17,9 @@ use Illuminate\Support\Facades\Auth;
 /**
  * @property Table $table
  */
-class StickerSheetIndex extends BasicTable
+class StickerSheetIndex extends BasicTable implements HasActions
 {
+    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table

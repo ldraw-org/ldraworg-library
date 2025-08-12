@@ -2,6 +2,11 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\CreateAction;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Part\Part;
 use App\Models\ReviewSummary\ReviewSummary;
@@ -9,15 +14,13 @@ use App\Models\ReviewSummary\ReviewSummaryItem;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 
-class ReviewSummaryManagePage extends BasicResourceManagePage
+class ReviewSummaryManagePage extends BasicResourceManagePage implements HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 
@@ -39,9 +42,9 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
             ->columns([
                 TextColumn::make('header')
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
-                    ->form($this->formSchema())
+                    ->schema($this->formSchema())
                     ->mutateRecordDataUsing(function (ReviewSummary $summary, array $data): array {
                         $data['manualEntry'] = $summary->toString();
                         return $data;
@@ -53,7 +56,7 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->form($this->formSchema())
+                    ->schema($this->formSchema())
                     ->using(fn (ReviewSummary $summary, array $data) => $this->saveEditData($summary, $data)),
             ]);
     }

@@ -2,6 +2,10 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Fieldset;
 use App\Enums\License;
 use App\Enums\Permission;
 use App\Jobs\UpdateImage;
@@ -9,19 +13,16 @@ use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 class LibrarySettingsPage extends Component implements HasForms
 {
@@ -30,13 +31,13 @@ class LibrarySettingsPage extends Component implements HasForms
     public ?array $data = [];
     public string $title = "Manage Library Settings";
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Tabs::make('tabs')
                     ->tabs([
-                        Tabs\Tab::make('General Settings')
+                        Tab::make('General Settings')
                             ->schema([
                                 Toggle::make('tracker_locked'),
                                 Select::make('default_part_license')
@@ -48,7 +49,7 @@ class LibrarySettingsPage extends Component implements HasForms
                                     ->required()
                                     ->integer(),
                            ]),
-                        Tabs\Tab::make('Parser Settings')
+                        Tab::make('Parser Settings')
                             ->schema([
                                 Repeater::make('allowed_header_metas')
                                     ->simple(
@@ -61,14 +62,14 @@ class LibrarySettingsPage extends Component implements HasForms
                                             ->string()
                                     ),
                             ]),
-                        Tabs\Tab::make('Pattern Codes')
+                        Tab::make('Pattern Codes')
                             ->schema([
                                 KeyValue::make('pattern_codes')
                                     ->label('Pattern Codes')
                                     ->keyLabel('Code')
                                     ->valueLabel('Pattern Description'),
                            ]),
-                        Tabs\Tab::make('LDView Settings')
+                        Tab::make('LDView Settings')
                             ->schema([
                                 KeyValue::make('ldview_options')
                                     ->label('LDView Options')
@@ -77,7 +78,7 @@ class LibrarySettingsPage extends Component implements HasForms
                                     ->label('Default Render Matrix')
                                     ->keyLabel('Part')
                                     ->valueLabel('Matrix'),
-                                FieldSet::make('Image Size')
+                                Fieldset::make('Image Size')
                                     ->schema([
                                         TextInput::make('max_part_render_height')
                                             ->required()

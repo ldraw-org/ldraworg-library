@@ -2,6 +2,10 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Jobs\MassHeaderGenerate;
 use App\Models\Part\Part;
@@ -9,14 +13,13 @@ use App\Models\Part\PartKeyword;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 
-class PartKeywordManagePage extends BasicResourceManagePage
+class PartKeywordManagePage extends BasicResourceManagePage implements HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 
@@ -43,13 +46,13 @@ class PartKeywordManagePage extends BasicResourceManagePage
                     ->label('Number of Parts')
                     ->sortable()
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
-                    ->form($this->editFormSchema())
+                    ->schema($this->editFormSchema())
                     ->using(fn (PartKeyword $keyword, array $data) => $this->editKeyword($keyword, $data)),
                 EditAction::make('merge')
                     ->label('Merge')
-                    ->form($this->mergeFormSchema())
+                    ->schema($this->mergeFormSchema())
                     ->using(fn (PartKeyword $keyword, array $data) => $this->mergeKeyword($keyword, $data))
                     ->hidden(fn (PartKeyword $keyword) => $keyword->parts->count() < 1),
                 DeleteAction::make()

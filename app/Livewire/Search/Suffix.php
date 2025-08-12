@@ -2,18 +2,18 @@
 
 namespace App\Livewire\Search;
 
+use Filament\Schemas\Schema;
 use App\Models\Part\Part;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  * @property Collection $baseparts
  */
 class Suffix extends Component implements HasForms
@@ -34,10 +34,10 @@ class Suffix extends Component implements HasForms
         }
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('basepart')
                     ->label('Base Part Number')
                     ->required()

@@ -2,14 +2,17 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\Part\Part;
 use Filament\Tables\Table;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
 
 #[Lazy]
-class PartDependenciesTable extends BasicTable
+class PartDependenciesTable extends BasicTable implements HasActions
 {
+    use InteractsWithActions;
     public bool $official = false;
     public bool $parents = false;
     public Part $part;
@@ -40,7 +43,7 @@ class PartDependenciesTable extends BasicTable
             ->heading(($this->official ? "Official" : "Unofficial") . ($this->parents ? " parent parts" : " subparts"))
             ->emptyState(view('tables.empty', ['none' => 'None']))
             ->columns(PartTable::columns())
-            ->actions(PartTable::actions())
+            ->recordActions(PartTable::actions())
             ->recordUrl(
                 fn (Part $p): string =>
                     route('parts.show', ['part' => $p])

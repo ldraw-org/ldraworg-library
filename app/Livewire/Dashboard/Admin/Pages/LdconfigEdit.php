@@ -2,13 +2,14 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use App\Enums\Permission;
 use App\LDraw\LDrawColourManager;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
@@ -29,13 +30,13 @@ class LdconfigEdit extends Component implements HasForms
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Tabs::make('LDConfig_Files')
                     ->tabs([
-                        Tabs\Tab::make('LDConfig')
+                        Tab::make('LDConfig')
                             ->schema([
                                 Textarea::make('ldconfig-text')
                                     ->label('Last Edited: ' . (new Carbon(Storage::disk('library')->lastModified('official/LDConfig.ldr')))->format('Y-m-d'))
@@ -43,7 +44,7 @@ class LdconfigEdit extends Component implements HasForms
                                     ->extraAttributes(['class' => 'font-mono'])
                                     ->required()
                             ]),
-                            Tabs\Tab::make('LDCfgalt')
+                            Tab::make('LDCfgalt')
                             ->schema([
                                 Textarea::make('ldcfgalt-text')
                                     ->label('Last Edited: ' . (new Carbon(Storage::disk('library')->lastModified('official/LDCfgalt.ldr')))->format('Y-m-d'))

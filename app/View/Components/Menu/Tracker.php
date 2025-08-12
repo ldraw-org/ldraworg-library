@@ -2,6 +2,7 @@
 
 namespace App\View\Components\Menu;
 
+use App\Models\ReviewSummary\ReviewSummary;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -21,7 +22,7 @@ class Tracker extends Component
      */
     public function render(): View|Closure|string
     {
-        $summaries = \App\Models\ReviewSummary\ReviewSummary::ordered()->get();
+        $summaries = ReviewSummary::ordered()->get();
         return view('components.menu.tracker', compact('summaries'));
     }
 }

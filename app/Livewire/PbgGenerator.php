@@ -2,17 +2,17 @@
 
 namespace App\Livewire;
 
+use Filament\Schemas\Schema;
 use App\LDraw\SetPbg;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 class PbgGenerator extends Component implements HasForms
 {
@@ -34,10 +34,10 @@ class PbgGenerator extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('set-number')
                     ->required()
                     ->string()

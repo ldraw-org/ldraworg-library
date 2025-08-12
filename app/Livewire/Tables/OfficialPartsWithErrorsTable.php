@@ -2,18 +2,21 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Action;
 use App\Enums\CheckType;
 use App\Enums\PartError;
 use App\Models\Part\Part;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class OfficialPartsWithErrorsTable extends BasicTable
+class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
 {
+    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table
@@ -38,7 +41,7 @@ class OfficialPartsWithErrorsTable extends BasicTable
                     ->bulleted()
                     ->wrap()
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('download')
                 ->url(fn (Part $part) => route($part->isUnofficial() ? 'unofficial.download' : 'official.download', $part->filename))
                 ->button()

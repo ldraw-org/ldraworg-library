@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use App\Mail\DailyDigest;
 use App\Mail\TestEmail;
 use Illuminate\Console\Command;
@@ -29,7 +30,7 @@ class SendEmail extends Command
     public function handle(): void
     {
         $rn = $this->argument('user');
-        $user = \App\Models\User::firstWhere('name', $rn);
+        $user = User::firstWhere('name', $rn);
         if ($this->option('daily')) {
             Mail::to($user)->send(new DailyDigest($user));
         } else {

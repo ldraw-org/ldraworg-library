@@ -2,6 +2,8 @@
 
 namespace App\Rules;
 
+use App\LDraw\Check\Checks\PatternHasSetKeyword;
+use Illuminate\Translation\PotentiallyTranslatedString;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\LDraw\Check\PartChecker;
@@ -32,7 +34,7 @@ class PatternHasSet implements DataAwareRule, ValidationRule
     /**
      * Run the validation rule.
      *
-     * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param Closure(string, ?string=):PotentiallyTranslatedString $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -43,7 +45,7 @@ class PatternHasSet implements DataAwareRule, ValidationRule
                 'metaCategory' => PartCategory::tryFrom(Arr::get($this->data, 'mountedActionsData.0.category', '')),
                 'keywords' => collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all()
             ]);
-            $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\PatternHasSetKeyword());
+            $errors = (new PartChecker($p))->singleCheck(new PatternHasSetKeyword());
             if ($errors) {
                 $fail($errors[0]);
             }

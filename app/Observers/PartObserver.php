@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\LDraw\PartManager;
 use App\Events\PartDeleted;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Part\Part;
@@ -17,7 +18,7 @@ class PartObserver
 
     public function deleted(Part $part)
     {
-        $pm = app(\App\LDraw\PartManager::class);
+        $pm = app(PartManager::class);
         $part->parents->each(function (Part $p) use ($pm) {
             $pm->loadSubparts($p);
             $pm->checkPart($p);

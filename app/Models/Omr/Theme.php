@@ -2,6 +2,7 @@
 
 namespace App\Models\Omr;
 
+use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Theme extends Model
 {
-    use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
+    use HasRecursiveRelationships;
 
     protected $guarded = [];
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Part;
 
+use Carbon\CarbonInterface;
+use App\Http\Resources\PartsResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Part\Part;
@@ -17,9 +19,9 @@ class WeeklyPartsController extends Controller
             $date = now();
         }
         $date->setTime(0, 0, 0);
-        $date->setDaysFromStartOfWeek(0, \Carbon\CarbonInterface::SUNDAY);
+        $date->setDaysFromStartOfWeek(0, CarbonInterface::SUNDAY);
         $parts = Part::doesntHave('official_part')->partsFolderOnly()->where('week', $date->format('Y-m-d'))->get();
-        return \App\Http\Resources\PartsResource::collection($parts);
+        return PartsResource::collection($parts);
     }
 
 }

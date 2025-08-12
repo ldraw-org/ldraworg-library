@@ -2,16 +2,17 @@
 
 namespace App\Livewire;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Components\View;
 use App\Enums\License;
 use App\Enums\Permission;
 use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\View;
-use Filament\Forms\Components\Wizard;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -49,16 +50,16 @@ class JoinLdraw extends Component implements HasForms
             || $user->inGroup(config('ldraw.mybb-groups')['Administrators']);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Wizard::make([
-                    Wizard\Step::make('Read Bylaws')
+                    Step::make('Read Bylaws')
                         ->schema([
                             View::make('documents.bylaws'),
                         ]),
-                    Wizard\Step::make('Acknowledge and Join')
+                    Step::make('Acknowledge and Join')
                         ->schema([
                             Checkbox::make('age-check')
                                 ->label("I affirm that I am at the age of majority for my country (typically 18 but local laws may vary)")

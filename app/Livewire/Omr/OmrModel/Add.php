@@ -2,6 +2,10 @@
 
 namespace App\Livewire\Omr\OmrModel;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Utilities\Get;
 use App\LDraw\LDrawModelMaker;
 use App\LDraw\OmrModelManager;
 use App\LDraw\Rebrickable;
@@ -15,8 +19,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Get;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -30,8 +32,9 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-class Add extends Component implements HasForms, HasTable
+class Add extends Component implements HasForms, HasTable, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 
@@ -73,7 +76,7 @@ class Add extends Component implements HasForms, HasTable
                 ToggleColumn::make('posthash')
                     ->label('File Reviewed'),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('view')
                     ->action(function (MybbAttachment $file) {
                         $this->parts = app(LDrawModelMaker::class)->webGl($file->get());
@@ -95,7 +98,7 @@ class Add extends Component implements HasForms, HasTable
             ->fillForm(fn (MybbAttachment $file): array => [
                 'set_id' => $this->getSetFromFilename($file->filename)?->id
             ])
-            ->form([
+            ->schema([
                 Select::make('set_id')
                     ->options(Set::pluck('number', 'id'))
                     ->searchable()

@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Part;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Livewire\Tables\PartTable;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -13,8 +15,9 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 
-class Index extends Component implements HasForms, HasTable
+class Index extends Component implements HasForms, HasTable, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 

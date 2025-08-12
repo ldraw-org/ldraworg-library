@@ -4,8 +4,6 @@ namespace App\Livewire\Tables;
 
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Action;
-use Filament\Support\Enums\Width;
 use App\Enums\LibraryIcon;
 use App\Enums\License;
 use App\Enums\PartCategory;
@@ -15,7 +13,15 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
 use App\Models\User;
+use Filament\Support\Colors\Color;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\Constraint;
@@ -28,38 +34,51 @@ use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint\Operators\
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
 
-class PartListTable extends BasicTable implements HasActions
+class CategoryStatus extends BasicTable implements HasActions
 {
     use InteractsWithActions;
     #[Url]
     public $tableSearch = '';
 
-//    #[Url]
-//    public ?array $tableFilters = null;
-
     public function table(Table $table): Table
     {
         return $table
-            ->query(Part::with('votes', 'official_part', 'unofficial_part'))
+            ->query(Part::unofficial()->partsFolderOnly())
+            ->defaultGroup('category')
+            ->groupingSettingsHidden()
+            ->groups([
+                Group::make('category')
+                    ->getTitleFromRecordUsing(fn (Part $part) => $part->category->value ?? ''),
+            ])
             ->emptyState(view('tables.empty', ['none' => 'None']))
-            ->columns(PartTable::columns())
-            ->recordActions(PartTable::actions())
-            ->persistFiltersInSession()
-            ->filters($this->filters(), layout: FiltersLayout::Modal)
-            ->searchable()
-            ->filtersTriggerAction(
-                fn (Action $action) => $action
-                    ->button()
-                    ->label('Filters')
-                    ->labeledFrom('md')
-                    ->slideOver()
+            ->columns([
+                IconColumn::make('part_status')
+                    ->icon('mdi-square-rounded')
+                    ->color(fn (Part $part) => match ($part->part_status){
+                        PartStatus::Certified => 'green',
+                        PartStatus::AwaitingAdminReview => 'blue',
+                        PartStatus::NeedsMoreVotes => 'gray',
+                        PartStatus::ErrorsFound => 'red',
+                        default => ''
+                    })
+                    ->grow(false)
+                    ->summarize([
+                        Count::make()->label('Certified')->query(fn ($query) => $query->where('part_status', PartStatus::Certified))->icons(),
+                        Count::make()->label('Awaiting Admin Review')->query(fn ($query) => $query->where('part_status', PartStatus::AwaitingAdminReview))->icons(),
+                        Count::make()->label('Needs More Votes')->query(fn ($query) => $query->where('part_status', PartStatus::NeedsMoreVotes))->icons(),
+                        Count::make()->label('ErrorsFound')->query(fn ($query) => $query->where('part_status', PartStatus::ErrorsFound))->icons()
+                    ]),                
+            ])
+            ->groupsOnly()
+            ->recordUrl(
+                null//fn (Part $p): string => dd($p)//tableFilters[category][values][0]=Brick route('posts.edit', ['record' => $record]),
             )
-            ->filtersFormWidth(Width::FourExtraLarge)
-            ->recordUrl(fn (Part $p) => route('parts.show', ['part' => $p]));
+            ->openRecordUrlInNewTab();
     }
 
     protected function applySearchToTableQuery(Builder $query): Builder
@@ -134,12 +153,6 @@ class PartListTable extends BasicTable implements HasActions
                         ->label('Alias/Physical Colour/Flex Section')
                         ->options(PartTypeQualifier::options())
                         ->multiple(),
-                    RelationshipConstraint::make('release')
-                        ->selectable(
-                            IsRelatedToOperator::make()
-                                ->titleAttribute('name')
-                                ->multiple(),
-                        ),
                     SelectConstraint::make('category')
                         ->options(PartCategory::options())
                         ->icon(LibraryIcon::CategoryConstraint->value)

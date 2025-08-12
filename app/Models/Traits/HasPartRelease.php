@@ -2,6 +2,7 @@
 
 namespace App\Models\Traits;
 
+use App\Models\Part\PartRelease;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ trait HasPartRelease
 {
     public function release(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Part\PartRelease::class, 'part_release_id', 'id');
+        return $this->belongsTo(PartRelease::class, 'part_release_id', 'id');
     }
 
     #[Scope]

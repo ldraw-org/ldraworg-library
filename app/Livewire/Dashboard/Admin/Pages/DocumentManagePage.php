@@ -2,27 +2,30 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
+use Filament\Support\Enums\Width;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\CreateAction;
+use Filament\Schemas\Components\Section;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Document\Document;
 use App\Models\Document\DocumentCategory;
 use Filament\Forms\Components\MarkdownEditor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table as Table;
 
-class DocumentManagePage extends BasicResourceManagePage
+class DocumentManagePage extends BasicResourceManagePage implements HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 
@@ -51,28 +54,28 @@ class DocumentManagePage extends BasicResourceManagePage
                 ToggleColumn::make('published'),
                 ToggleColumn::make('restricted')
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('view')
                     ->url(fn (Document $d) => route('documentation.show', $d))
                     ->openUrlInNewTab(),
                 EditAction::make()
-                    ->form($this->formSchema())
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->schema($this->formSchema())
+                    ->mutateDataUsing(function (array $data): array {
                         $data['nav_title'] = rawurlencode(str_replace(' ', '-', strtolower($data['title'])));
                         return $data;
                     })
-                    ->modalWidth(MaxWidth::SevenExtraLarge),
+                    ->modalWidth(Width::SevenExtraLarge),
                 DeleteAction::make()
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->form($this->formSchema())
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->schema($this->formSchema())
+                    ->mutateDataUsing(function (array $data): array {
                         $data['nav_title'] = rawurlencode(str_replace(' ', '-', strtolower($data['title'])));
                         $data['order'] = Document::nextOrder();
                         return $data;
                     })
-                    ->modalWidth(MaxWidth::SevenExtraLarge)
+                    ->modalWidth(Width::SevenExtraLarge)
             ]);
     }
 

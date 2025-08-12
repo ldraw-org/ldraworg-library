@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Part;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use App\Livewire\Tables\PartTable;
@@ -15,8 +17,9 @@ use Filament\Tables\Table as Table;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-class Weekly extends Component implements HasForms, HasTable
+class Weekly extends Component implements HasForms, HasTable, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 
@@ -44,7 +47,7 @@ class Weekly extends Component implements HasForms, HasTable
                 ->multiple()
                 ->options(PartStatus::trackerStatusOptions()),
             ])
-            ->actions(PartTable::actions())
+            ->recordActions(PartTable::actions())
             ->defaultGroup('week')
             ->recordUrl(
                 fn (Part $p): string =>

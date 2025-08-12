@@ -2,17 +2,19 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\View;
 use App\Models\Poll\Poll;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\View;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -23,8 +25,9 @@ use LaraZeus\Quantity\Components\Quantity;
 /**
  * @property Table $table
  */
-class PollIndex extends BasicTable
+class PollIndex extends BasicTable implements HasActions
 {
+    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table
@@ -46,18 +49,18 @@ class PollIndex extends BasicTable
             ->heading('Current Polls')
             ->headerActions([
                 CreateAction::make()
-                    ->form($this->pollForm())
+                    ->schema($this->pollForm())
                     ->visible(Auth::user()->can('manage', Poll::class))
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
-                    ->form($this->pollForm())
+                    ->schema($this->pollForm())
                     ->visible(fn (Poll $p) => !$p->enabled && Auth::user()->can('manage', Poll::class)),
                 DeleteAction::make()
                     ->visible(fn (Poll $p) => ($p->ends_on < now() || !$p->enabled) && Auth::user()->can('manage', Poll::class)),
                 Action::make('view_results')
                     ->visible(fn (Poll $p) => $p->ends_on < now() && Auth::user()->can('manage', Poll::class))
-                    ->form([
+                    ->schema([
                         View::make('poll.results')
                     ]),
 

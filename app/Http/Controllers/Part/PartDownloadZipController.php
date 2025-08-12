@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Part;
 
+use ZipArchive;
 use App\Http\Controllers\Controller;
 use App\Models\Part\Part;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -14,9 +15,9 @@ class PartDownloadZipController extends Controller
             return response()->redirectToRoute('unofficial.download', $part->filename);
         }
         $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
         $name = basename($part->filename, '.dat') . '.zip';
-        $zip->open($dir->path($name), \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $zip->open($dir->path($name), ZipArchive::CREATE | ZipArchive::OVERWRITE);
         if ($part->isUnofficial()) {
             $zipparts = $part->descendantsAndSelf()->doesntHave('unofficial_part')->get()->unique();
         } else {

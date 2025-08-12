@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\VoteType;
 use App\Models\Vote;
 use Filament\Tables\Columns\ImageColumn;
@@ -13,8 +15,9 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
-class UserVotesTable extends BasicTable
+class UserVotesTable extends BasicTable implements HasActions
 {
+    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table

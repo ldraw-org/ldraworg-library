@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Part\PartEvent;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Part\PartEvent
+ * @mixin PartEvent
  */
 class PartsResource extends JsonResource
 {

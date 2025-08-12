@@ -2,6 +2,8 @@
 
 namespace App\View\Components\Part;
 
+use Illuminate\Contracts\View\View;
+use Closure;
 use App\Enums\PartStatus;
 use Illuminate\View\Component;
 use App\Models\Part\Part;
@@ -25,7 +27,7 @@ class UnofficialPartCount extends Component
     /**
      * Get the view / contents that represent the component.
      *
-     * @return \Illuminate\Contracts\View\View|\Closure|string
+     * @return View|Closure|string
      */
     public function render()
     {

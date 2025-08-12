@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Release;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Action;
 use App\Enums\CheckType;
 use App\Enums\PartStatus;
 use App\Jobs\MakePartRelease;
@@ -13,7 +16,6 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
@@ -27,8 +29,9 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-class Create extends Component implements HasForms, HasTable
+class Create extends Component implements HasForms, HasTable, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 
@@ -86,14 +89,14 @@ class Create extends Component implements HasForms, HasTable
                 }
                 return null;
             })
-            ->actions([
+            ->recordActions([
                 Action::make('view')
                     ->url(fn (Part $p) => route('parts.show', $p))
                     ->button()
             ])
             ->headerActions([
                 Action::make('create-release')
-                    ->form([
+                    ->schema([
                         Toggle::make('include-ldconfig'),
                         FileUpload::make('additional-files')
                     ])

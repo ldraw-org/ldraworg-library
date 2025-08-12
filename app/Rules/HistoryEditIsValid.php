@@ -2,6 +2,11 @@
 
 namespace App\Rules;
 
+use App\LDraw\Parse\Parser;
+use App\LDraw\Check\Checks\ValidLines;
+use App\LDraw\Check\Checks\HistoryIsValid;
+use App\LDraw\Check\Checks\HistoryUserIsRegistered;
+use Illuminate\Translation\PotentiallyTranslatedString;
 use App\LDraw\Check\PartChecker;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
@@ -33,7 +38,7 @@ class HistoryEditIsValid implements ValidationRule, DataAwareRule
     /**
      * Run the validation rule.
      *
-     * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param Closure(string, ?string=):PotentiallyTranslatedString $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -48,18 +53,18 @@ class HistoryEditIsValid implements ValidationRule, DataAwareRule
                 Str::of(Arr::get($state, 'comment'))->squish()->trim()->toString()
             );
         $part = Part::find(Arr::get($this->data, 'mountedActionsData.0.id'));
-        $p = app(\App\LDraw\Parse\Parser::class)->parse($value->implode("\n"));
-        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\ValidLines());
+        $p = app(Parser::class)->parse($value->implode("\n"));
+        $errors = (new PartChecker($p))->singleCheck(new ValidLines());
         if ($errors) {
             $fail($errors[0]);
             return;
         }
-        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\HistoryIsValid());
+        $errors = (new PartChecker($p))->singleCheck(new HistoryIsValid());
         if ($errors) {
             $fail($errors[0]);
             return;
         }
-        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\HistoryUserIsRegistered());
+        $errors = (new PartChecker($p))->singleCheck(new HistoryUserIsRegistered());
         if ($errors) {
             $fail($errors[0]);
             return;

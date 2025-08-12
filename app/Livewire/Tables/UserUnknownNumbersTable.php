@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use App\Models\Part\UnknownPartNumber;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
@@ -12,8 +14,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use LaraZeus\Quantity\Components\Quantity;
 
-class UserUnknownNumbersTable extends BasicTable
+class UserUnknownNumbersTable extends BasicTable implements HasActions
 {
+    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table
@@ -42,7 +45,7 @@ class UserUnknownNumbersTable extends BasicTable
                     ->rules(['required', 'max:255'])
             ])
             ->defaultSort('number', 'asc')
-            ->actions([
+            ->recordActions([
                 Action::make('view')
                     ->url(fn (UnknownPartNumber $unk) => route('parts.list', ['tableSearch' => "u{$unk->number}"]))
                     ->visible(fn (UnknownPartNumber $unk) => $unk->parts->isNotEmpty()),
@@ -54,7 +57,7 @@ class UserUnknownNumbersTable extends BasicTable
             ->headerActions([
                 Action::make('request')
                     ->label('Request Numbers')
-                    ->form([
+                    ->schema([
                         Quantity::make('request_number')
                             ->label('How many numbers are you requesting?')
                             ->default(1)

@@ -2,6 +2,7 @@
 
 namespace App\View\Components\OmrModel;
 
+use App\Models\Omr\OmrModel;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -21,7 +22,7 @@ class Latest extends Component
      */
     public function render(): View|Closure|string
     {
-        $models = \App\Models\Omr\OmrModel::latest()->limit($this->limit)->get();
+        $models = OmrModel::latest()->limit($this->limit)->get();
         return view('components.omr-model.latest', compact('models'));
     }
 }

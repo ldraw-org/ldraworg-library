@@ -2,6 +2,17 @@
 
 namespace App\Livewire;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Grid;
+use App\LDraw\Parse\Parser;
+use Filament\Schemas\Components\View;
+use App\LDraw\PartManager;
+use Filament\Schemas\Components\Fieldset;
+use App\LDraw\LDrawModelMaker;
 use App\Enums\PartCategory;
 use App\Filament\Forms\Components\LDrawColourSelect;
 use App\LDraw\Check\Checks\PatternHasSetKeyword;
@@ -10,19 +21,12 @@ use App\LDraw\LDrawFile;
 use App\LDraw\Rebrickable;
 use App\Models\Part\Part;
 use Closure;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\View;
-use Filament\Forms\Components\Wizard;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +39,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 class TorsoShortcutHelper extends Component implements HasForms
 {
@@ -67,12 +71,12 @@ class TorsoShortcutHelper extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Wizard::make([
-                    Wizard\Step::make('Torso and Template')
+                    Step::make('Torso and Template')
                         ->schema([
                             Toggle::make('all-torsos')
                                 ->label('Show all torsos'),
@@ -151,7 +155,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                                 $set("part_{$index}_id", $this->selectParts[$tpart]['default']);
                             }
                         }),
-                    Wizard\Step::make('New Shortcut Details')
+                    Step::make('New Shortcut Details')
                         ->schema([
                             TextInput::make('description')
                                 ->required()
@@ -196,7 +200,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                                 ->extraAttributes(['class' => 'font-mono'])
                                 ->rules([
                                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) {
-                                        $p = app(\App\LDraw\Parse\Parser::class)->parse($this->makeShortcut());
+                                        $p = app(Parser::class)->parse($this->makeShortcut());
                                         $errors = (new PartChecker($p))->singleCheck(new PatternHasSetKeyword());
                                         if (count($errors) > 0) {
                                             $fail($errors[0]);
@@ -211,7 +215,7 @@ class TorsoShortcutHelper extends Component implements HasForms
                         ->afterValidation(function (Set $set) {
                             $set('new_part', $this->makeShortcut());
                         }),
-                    Wizard\Step::make('Review and Submit')
+                    Step::make('Review and Submit')
                         ->schema([
                             Grid::make(2)
                                 ->schema([
@@ -269,7 +273,7 @@ class TorsoShortcutHelper extends Component implements HasForms
         if ($u->cannot('create', Part::class)) {
             return;
         }
-        $pm = app(\App\LDraw\PartManager::class);
+        $pm = app(PartManager::class);
         $file = LDrawFile::fromArray(
             [
                 'mimetype' => 'text/plain',
@@ -415,7 +419,7 @@ class TorsoShortcutHelper extends Component implements HasForms
             $p = Part::find($this->data["part_{$index}_id"]);
             $text .= '1 ' . $this->data["part_{$index}_color"] . ' ' . $matrix[$index - 1] . $p->name() . "\n";
         }
-        $this->parts = app(\App\LDraw\LDrawModelMaker::class)->webGl($text);
+        $this->parts = app(LDrawModelMaker::class)->webGl($text);
         $this->dispatch('render-model');
         return $text;
     }

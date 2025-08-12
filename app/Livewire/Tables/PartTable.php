@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Action;
 use App\Enums\License;
 use App\Enums\PartCategory;
 use App\Enums\PartStatus;
@@ -11,7 +12,6 @@ use App\Models\Part\Part;
 use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
@@ -38,7 +38,7 @@ class PartTable
             ->defaultSort(fn (Builder $q) => $q->orderBy('part_status', 'asc')->orderBy('part_type_id', 'asc')->orderBy('description', 'asc'))
             ->columns(self::columns())
             ->filters(self::filters($official), layout: FiltersLayout::AboveContent)
-            ->actions(self::actions())
+            ->recordActions(self::actions())
             ->recordUrl(
                 fn (Part $p): string =>
                     route('parts.show', ['part' => $p])

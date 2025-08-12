@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Part;
 
+use App\Http\Resources\PartsResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Part\PartEvent;
@@ -21,7 +22,7 @@ class LatestPartsController extends Controller
             ->take(8)
             ->get()
             ->pluck('part');
-        return \App\Http\Resources\PartsResource::collection($parts);
+        return PartsResource::collection($parts);
     }
 
 }

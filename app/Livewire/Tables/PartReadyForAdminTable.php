@@ -2,12 +2,15 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use Filament\Tables\Table;
 
-class PartReadyForAdminTable extends BasicTable
+class PartReadyForAdminTable extends BasicTable implements HasActions
 {
+    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table

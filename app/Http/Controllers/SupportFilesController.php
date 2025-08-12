@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\LDraw\LDrawModelMaker;
 use App\LDraw\SupportFiles;
 use App\Models\Part\Part;
 use App\Models\Omr\OmrModel;
@@ -10,12 +11,12 @@ class SupportFilesController extends Controller
 {
     public function webglpart(Part $part)
     {
-        return app(\App\LDraw\LDrawModelMaker::class)->webGl($part);
+        return app(LDrawModelMaker::class)->webGl($part);
     }
 
     public function webglmodel(OmrModel $omrmodel)
     {
-        return app(\App\LDraw\LDrawModelMaker::class)->webGl($omrmodel);
+        return app(LDrawModelMaker::class)->webGl($omrmodel);
     }
 
     public function categories()

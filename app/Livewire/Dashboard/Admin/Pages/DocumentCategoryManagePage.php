@@ -2,19 +2,22 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\CreateAction;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Document\DocumentCategory;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table as Table;
 
-class DocumentCategoryManagePage extends BasicResourceManagePage
+class DocumentCategoryManagePage extends BasicResourceManagePage implements HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 
@@ -38,16 +41,16 @@ class DocumentCategoryManagePage extends BasicResourceManagePage
                     ->sortable()
                     ->searchable(),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
-                    ->form($this->formSchema()),
+                    ->schema($this->formSchema()),
                 DeleteAction::make()
                     ->visible(fn (DocumentCategory $c) => $c->documents->isEmpty())
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->form($this->formSchema())
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->schema($this->formSchema())
+                    ->mutateDataUsing(function (array $data): array {
                         $data['order'] = DocumentCategory::nextOrder();
                         return $data;
                     })

@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Part;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Utilities\Get;
+use App\LDraw\Parse\Parser;
 use App\Enums\CheckType;
 use App\Enums\Permission;
 use App\LDraw\Check\PartChecker;
@@ -16,8 +19,6 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
@@ -26,7 +27,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 class Submit extends Component implements HasForms
 {
@@ -42,10 +43,10 @@ class Submit extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 FileUpload::make('partfiles')
                     ->multiple()
                     ->maxFiles(15)
@@ -65,7 +66,7 @@ class Submit extends Component implements HasForms
 
                             // Error check based on file type
                             if ($mimeType == 'text/plain') {
-                                $part = app(\App\LDraw\Parse\Parser::class)->parse($value->get());
+                                $part = app(Parser::class)->parse($value->get());
                                 $pparts = Part::query()->byName($part->name ?? '')->get();
                                 $unofficial_exists = $pparts->unofficial()->isNotEmpty();
                                 $official_exists = $pparts->official()->isNotEmpty();

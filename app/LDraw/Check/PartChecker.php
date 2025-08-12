@@ -2,6 +2,35 @@
 
 namespace App\LDraw\Check;
 
+use App\LDraw\Check\Checks\LibraryApprovedLicense;
+use App\LDraw\Check\Checks\HasRequiredHeaderMeta;
+use App\LDraw\Check\Checks\LibraryApprovedName;
+use App\LDraw\Check\Checks\NameFileNameMatch;
+use App\LDraw\Check\Checks\UnknownPartNumber;
+use App\LDraw\Check\Checks\ValidBodyMeta;
+use App\LDraw\Check\Checks\ValidLines;
+use App\LDraw\Check\Checks\ValidType1Lines;
+use App\LDraw\Check\Checks\NoSelfReference;
+use App\LDraw\Check\Checks\ValidType2Lines;
+use App\LDraw\Check\Checks\ValidType3Lines;
+use App\LDraw\Check\Checks\ValidType4Lines;
+use App\LDraw\Check\Checks\ValidType5Lines;
+use App\LDraw\Check\Checks\LibraryApprovedDescription;
+use App\LDraw\Check\Checks\PatternPartDesciption;
+use App\LDraw\Check\Checks\AuthorInUsers;
+use App\LDraw\Check\Checks\NameAndPartType;
+use App\LDraw\Check\Checks\DescriptionModifier;
+use App\LDraw\Check\Checks\NewPartNotPhysicalColor;
+use App\LDraw\Check\Checks\AliasInParts;
+use App\LDraw\Check\Checks\FlexibleSectionIsPart;
+use App\LDraw\Check\Checks\FlexibleHasCorrectSuffix;
+use App\LDraw\Check\Checks\BfcIsCcw;
+use App\LDraw\Check\Checks\CategoryIsValid;
+use App\LDraw\Check\Checks\ObsoletePartIsValid;
+use App\LDraw\Check\Checks\PatternHasSetKeyword;
+use App\LDraw\Check\Checks\HistoryIsValid;
+use App\LDraw\Check\Checks\HistoryUserIsRegistered;
+use App\LDraw\Check\Checks\PreviewIsValid;
 use App\Enums\CheckType;
 use App\Enums\License;
 use App\Enums\PartError;
@@ -103,7 +132,7 @@ class PartChecker
                 $this->add(PartError::TrackerAdminHold);
             }
             if ($this->part->license !== License::CC_BY_4) {
-                $this->singleCheck(new \App\LDraw\Check\Checks\LibraryApprovedLicense());
+                $this->singleCheck(new LibraryApprovedLicense());
             }
         }
         return $this->errors->has(CheckType::holdable());
@@ -137,36 +166,36 @@ class PartChecker
     public function standardChecks(?string $filename = null): bool
     {
         $this->runChecks([
-            new \App\LDraw\Check\Checks\HasRequiredHeaderMeta(),
+            new HasRequiredHeaderMeta(),
 
-            new \App\LDraw\Check\Checks\LibraryApprovedName(),
-            new \App\LDraw\Check\Checks\NameFileNameMatch(),
-            new \App\LDraw\Check\Checks\UnknownPartNumber(),
-            new \App\LDraw\Check\Checks\ValidBodyMeta(),
-            new \App\LDraw\Check\Checks\ValidLines(),
-            new \App\LDraw\Check\Checks\ValidType1Lines(),
-            new \App\LDraw\Check\Checks\NoSelfReference(),
-            new \App\LDraw\Check\Checks\ValidType2Lines(),
-            new \App\LDraw\Check\Checks\ValidType3Lines(),
-            new \App\LDraw\Check\Checks\ValidType4Lines(),
-            new \App\LDraw\Check\Checks\ValidType5Lines(),
+            new LibraryApprovedName(),
+            new NameFileNameMatch(),
+            new UnknownPartNumber(),
+            new ValidBodyMeta(),
+            new ValidLines(),
+            new ValidType1Lines(),
+            new NoSelfReference(),
+            new ValidType2Lines(),
+            new ValidType3Lines(),
+            new ValidType4Lines(),
+            new ValidType5Lines(),
 
-            new \App\LDraw\Check\Checks\LibraryApprovedDescription(),
-            new \App\LDraw\Check\Checks\PatternPartDesciption(),
-            new \App\LDraw\Check\Checks\AuthorInUsers(),
-            new \App\LDraw\Check\Checks\NameAndPartType(),
-            new \App\LDraw\Check\Checks\DescriptionModifier(),
-            new \App\LDraw\Check\Checks\NewPartNotPhysicalColor(),
-            new \App\LDraw\Check\Checks\AliasInParts(),
-            new \App\LDraw\Check\Checks\FlexibleSectionIsPart(),
-            new \App\LDraw\Check\Checks\FlexibleHasCorrectSuffix(),
-            new \App\LDraw\Check\Checks\BfcIsCcw(),
-            new \App\LDraw\Check\Checks\CategoryIsValid(),
-            new \App\LDraw\Check\Checks\ObsoletePartIsValid(),
-            new \App\LDraw\Check\Checks\PatternHasSetKeyword(),
-            new \App\LDraw\Check\Checks\HistoryIsValid(),
-            new \App\LDraw\Check\Checks\HistoryUserIsRegistered(),
-            new \App\LDraw\Check\Checks\PreviewIsValid(),
+            new LibraryApprovedDescription(),
+            new PatternPartDesciption(),
+            new AuthorInUsers(),
+            new NameAndPartType(),
+            new DescriptionModifier(),
+            new NewPartNotPhysicalColor(),
+            new AliasInParts(),
+            new FlexibleSectionIsPart(),
+            new FlexibleHasCorrectSuffix(),
+            new BfcIsCcw(),
+            new CategoryIsValid(),
+            new ObsoletePartIsValid(),
+            new PatternHasSetKeyword(),
+            new HistoryIsValid(),
+            new HistoryUserIsRegistered(),
+            new PreviewIsValid(),
         ], $filename);
 
         return $this->errors->has(CheckType::holdable());

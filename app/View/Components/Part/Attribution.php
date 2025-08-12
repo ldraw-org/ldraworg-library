@@ -2,6 +2,8 @@
 
 namespace App\View\Components\Part;
 
+use Illuminate\Contracts\View\View;
+use Closure;
 use Illuminate\View\Component;
 use App\Models\Part\Part;
 use App\Models\User;
@@ -22,7 +24,7 @@ class Attribution extends Component
     /**
      * Get the view / contents that represent the component.
      *
-     * @return \Illuminate\Contracts\View\View|\Closure|string
+     * @return View|Closure|string
      */
     public function render()
     {

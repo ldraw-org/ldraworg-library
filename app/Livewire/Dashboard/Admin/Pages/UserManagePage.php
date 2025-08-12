@@ -2,6 +2,12 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Fieldset;
 use App\Enums\License;
 use App\Enums\Permission;
 use App\Livewire\Dashboard\BasicResourceManagePage;
@@ -9,13 +15,9 @@ use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Set;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Filters\SelectFilter;
@@ -23,8 +25,9 @@ use Filament\Tables\Table as Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class UserManagePage extends BasicResourceManagePage
+class UserManagePage extends BasicResourceManagePage implements HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 
@@ -77,16 +80,16 @@ class UserManagePage extends BasicResourceManagePage
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->form($this->formSchema())
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->schema($this->formSchema())
+                    ->mutateDataUsing(function (array $data): array {
                         $data['password'] = bcrypt(Str::random(40));
                         return $data;
                     })
                     ->visible(fn () => Auth::user()?->can('create', User::class))
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
-                    ->form($this->formSchema())
+                    ->schema($this->formSchema())
                     ->visible(fn (User $u) => Auth::user()?->can('update', $u))
             ]);
     }

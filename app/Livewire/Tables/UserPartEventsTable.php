@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\EventType;
 use App\Models\Part\PartEvent;
 use Filament\Tables\Columns\ImageColumn;
@@ -13,8 +15,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
-class UserPartEventsTable extends BasicTable
+class UserPartEventsTable extends BasicTable implements HasActions
 {
+    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table

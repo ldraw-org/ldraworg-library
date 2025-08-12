@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Part;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use App\Enums\ExternalSite;
 use App\Enums\LibraryIcon;
 use App\Enums\PartCategory;
@@ -20,11 +22,9 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
@@ -34,7 +34,7 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  * @property Collection $baseparts
  * @property bool $hasSuffixParts
  */
@@ -48,10 +48,10 @@ class Show extends Component implements HasForms, HasActions
     public ?string $vote_type_code = null;
     public string $image;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Comment / Vote')
                     ->schema([
                         Radio::make('vote_type_code')
@@ -401,7 +401,7 @@ class Show extends Component implements HasForms, HasActions
         return EditAction::make('editBasePart')
             ->label('Edit Base Part')
             ->record($this->part)
-            ->form([
+            ->schema([
                 Select::make('base_part_id')
                     ->searchable()
                     ->options(

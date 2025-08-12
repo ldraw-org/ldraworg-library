@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Dashboard;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Contracts\HasTable;
@@ -10,8 +12,9 @@ use Filament\Tables\Table;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-abstract class BasicResourceManagePage extends Component implements HasForms, HasTable
+abstract class BasicResourceManagePage extends Component implements HasForms, HasTable, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 

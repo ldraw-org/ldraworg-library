@@ -2,6 +2,7 @@
 
 namespace App\LDraw;
 
+use App\LDraw\Parse\Parser;
 use App\Models\Omr\OmrModel;
 use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Collection;
@@ -37,11 +38,11 @@ class LDrawModelMaker
     public function modelMpd(string|OmrModel $model): string
     {
         if ($model instanceof OmrModel) {
-            $file = app(\App\LDraw\Parse\Parser::class)->dosLineEndings(Storage::disk('library')->get("omr/{$model->filename()}") . "\r\n");
+            $file = app(Parser::class)->dosLineEndings(Storage::disk('library')->get("omr/{$model->filename()}") . "\r\n");
         } else {
             $file = $model;
         }
-        $parts = app(\App\LDraw\Parse\Parser::class)->getSubparts($file);
+        $parts = app(Parser::class)->getSubparts($file);
         $subs = [];
         foreach ($parts['subparts'] ?? [] as $s) {
             $s = str_replace('\\', '/', $s);

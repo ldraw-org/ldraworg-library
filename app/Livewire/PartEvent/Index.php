@@ -2,6 +2,8 @@
 
 namespace App\Livewire\PartEvent;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\EventType;
 use App\Enums\PartCategory;
 use App\Models\Part\PartEvent;
@@ -26,8 +28,9 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\Attributes\Url;
 
-class Index extends Component implements HasForms, HasTable
+class Index extends Component implements HasForms, HasTable, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithTable;
     use InteractsWithForms;
 
@@ -101,7 +104,7 @@ class Index extends Component implements HasForms, HasTable
                     ->label('Event Type'),
                 AuthorFilter::make('user_id'),
                 Filter::make('created_at')
-                    ->form([
+                    ->schema([
                         DatePicker::make('created_until')
                         ->native(false)
                         ->displayFormat('Y-m-d')

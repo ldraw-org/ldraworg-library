@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use Filament\Schemas\Components\Utilities\Get;
 use App\Enums\PartType;
 use App\Events\PartRenamed;
 use App\Events\PartSubmitted;
@@ -12,7 +13,6 @@ use Closure;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Get;
 use Illuminate\Support\Facades\Auth;
 
 class EditNumberAction
@@ -23,7 +23,7 @@ class EditNumberAction
             ->label('Renumber/Move')
             ->modalHeading('Move/Renumber Part')
             ->record($part)
-            ->form(self::formSchema($part))
+            ->schema(self::formSchema($part))
             ->successNotificationTitle('Renumber/Move Successful')
             ->using(fn (Part $p, array $data) => self::updateMove($p, $data))
             ->visible(Auth::user()?->can('move', $part) ?? false);

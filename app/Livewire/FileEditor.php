@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
+use Filament\Schemas\Schema;
 use App\Enums\Permission;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -16,7 +16,7 @@ use RecursiveRegexIterator;
 use RegexIterator;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 class FileEditor extends Component implements HasForms
 {
@@ -52,10 +52,10 @@ class FileEditor extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('file')
                     ->options($this->fileList())
                     ->searchable()

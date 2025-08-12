@@ -2,20 +2,23 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\CreateAction;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 use Spatie\Permission\Models\Role;
 
-class RoleManagePage extends BasicResourceManagePage
+class RoleManagePage extends BasicResourceManagePage implements HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
     use InteractsWithTable;
 
@@ -40,15 +43,15 @@ class RoleManagePage extends BasicResourceManagePage
                     ->counts('users')
                     ->sortable()
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
-                    ->form($this->formSchema()),
+                    ->schema($this->formSchema()),
                 DeleteAction::make()
                     ->hidden(fn (Role $r) => $r->users->isEmpty())
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->form($this->formSchema())
+                    ->schema($this->formSchema())
             ]);
     }
 

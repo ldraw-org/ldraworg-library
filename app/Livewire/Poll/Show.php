@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Poll;
 
+use Filament\Schemas\Schema;
+use Closure;
 use App\Models\Poll\Poll;
 use App\Models\Poll\PollVote;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -26,17 +27,17 @@ class Show extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 CheckboxList::make('votes')
                     ->label("Choose up to {$this->poll->choices_limit} option(s)")
                     ->options($this->poll->items->pluck('item', 'id')->all())
                     ->allowHtml()
                     ->required()
                     ->rules([
-                       fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
+                       fn (): Closure => function (string $attribute, $value, Closure $fail) {
                            if (count($value) > $this->poll->choices_limit) {
                                $fail("You can only choose up to {$this->poll->choices_limit} option(s)");
                            }

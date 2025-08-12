@@ -2,16 +2,16 @@
 
 namespace App\Livewire;
 
+use Filament\Schemas\Schema;
 use App\LDraw\LDrawModelMaker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 class LDrawModelViewer extends Component implements HasForms
 {
@@ -27,10 +27,10 @@ class LDrawModelViewer extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 FileUpload::make('ldraw-model')
                     ->storeFiles(false)
                     ->minFiles(1)

@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Tables;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\Permission;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
@@ -13,8 +15,9 @@ use Illuminate\Support\Facades\Auth;
 /**
  * @property Table $table
  */
-class UserTable extends BasicTable
+class UserTable extends BasicTable implements HasActions
 {
+    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table

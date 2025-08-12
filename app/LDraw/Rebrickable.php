@@ -2,6 +2,7 @@
 
 namespace App\LDraw;
 
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -45,7 +46,7 @@ class Rebrickable
                 return collect($response->json('results'));
             }
             return collect($response->json());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return collect([]);
         }
 

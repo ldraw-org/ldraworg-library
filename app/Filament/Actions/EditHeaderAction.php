@@ -2,6 +2,9 @@
 
 namespace App\Filament\Actions;
 
+use Filament\Schemas\Components\Utilities\Get;
+use App\LDraw\Check\Checks\LibraryApprovedDescription;
+use App\LDraw\Check\Checks\PatternPartDesciption;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -27,7 +30,6 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Get;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -42,7 +44,7 @@ class EditHeaderAction
         return EditAction::make($name)
             ->label('Edit Header')
             ->record($part)
-            ->form(self::formSchema($part))
+            ->schema(self::formSchema($part))
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $data['help'] = implode("\n", $part->help ?? []);
                 if (is_null($part->getRebrickablePart())) {
@@ -79,12 +81,12 @@ class EditHeaderAction
                         $p = ParsedPart::fromPart($part);
                         $p->description = $value;
                         $p->keywords = collect(explode(',', Str::of($get('keywords'))->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all();
-                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\LibraryApprovedDescription());
+                        $errors = (new PartChecker($p))->singleCheck(new LibraryApprovedDescription());
                         if ($errors) {
                             $fail($errors[0]);
                             return;
                         }
-                        $errors = (new PartChecker($p))->singleCheck(new \App\LDraw\Check\Checks\PatternPartDesciption());
+                        $errors = (new PartChecker($p))->singleCheck(new PatternPartDesciption());
                         if ($errors) {
                             $fail($errors[0]);
                         }

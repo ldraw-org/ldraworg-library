@@ -17,7 +17,7 @@ class EditPreviewAction
         return EditAction::make($name)
             ->label('Edit Preview')
             ->record($part)
-            ->form([PreviewSelect::make()])
+            ->schema([PreviewSelect::make()])
             ->mutateRecordDataUsing(function (array $data) use ($part): array {
                 $preview = $part->previewValues();
                 $data['preview_rotation'] = $preview['rotation'];
