@@ -129,6 +129,7 @@ class Index extends Component implements HasForms, HasTable, HasActions
                     ->toggle()
                     ->label('Hide sticker shortcuts'),
             ], layout: FiltersLayout::AboveContent)
+            ->deferFilters(false)
             ->persistFiltersInSession()
             ->persistSortInSession()
             ->extremePaginationLinks()
