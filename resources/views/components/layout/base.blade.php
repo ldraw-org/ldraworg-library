@@ -87,7 +87,9 @@
       </div>
     </div>
 
-    @livewire('notifications')
+    <div>
+        @livewire('notifications')
+    </div>
     @filamentScripts
     @vite('resources/js/app.js')
     @stack('scripts')
