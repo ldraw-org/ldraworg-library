@@ -10,11 +10,9 @@ class AuthorFilter
     public static function make(?string $name = null): SelectFilter
     {
         return SelectFilter::make($name)
-            ->relationship(name: 'user', titleAttribute: 'name')
-            ->getOptionLabelFromRecordUsing(fn (User $u) => $u->authorString)
-            ->native(false)
+            ->options(User::all()->sortBy('authorString')->pluck('authorString', 'id'))
+            ->selectablePlaceholder(false)
             ->searchable()
-            ->preload()
             ->label('Author');
     }
 }

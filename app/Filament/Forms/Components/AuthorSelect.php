@@ -10,12 +10,10 @@ class AuthorSelect
     public static function make(): Select
     {
         return Select::make('user_id')
-            ->relationship(name: 'user', titleAttribute: 'name')
-            ->getOptionLabelFromRecordUsing(fn (User $u) => $u->authorString)
+            ->options(User::all()->sortBy('authorString')->pluck('authorString', 'id'))
             ->selectablePlaceholder(false)
             ->searchable()
-            ->preload()
             ->label('Author')
-            ->exists(table: User::class, column: 'id');
+            ->rules(['exists:App\Models\User,id']);
     }
 }

@@ -151,12 +151,7 @@ class EditHeaderAction
                         ])
                         ->required()
                         ->live(),
-                    Select::make('user_id')
-                        ->options(User::all()->pluck('authorString', 'id'))
-                        ->selectablePlaceholder(false)
-                        ->searchable()
-                        ->label('Author')
-                        ->rules(['exists:App\Models\User,id'])
+                    AuthorSelect::make()
                         ->required()
                         ->live(),
                     TextInput::make('comment')
