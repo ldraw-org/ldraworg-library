@@ -11,8 +11,8 @@ use App\Enums\Permission;
 use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -22,9 +22,9 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-class JoinLdraw extends Component implements HasForms
+class JoinLdraw extends Component implements HasSchemas
 {
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     public bool $meetsId = false;
     public ?array $data = [];

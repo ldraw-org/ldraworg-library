@@ -10,7 +10,7 @@ use Filament\Actions\CreateAction;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Document\DocumentCategory;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table as Table;
@@ -18,7 +18,7 @@ use Filament\Tables\Table as Table;
 class DocumentCategoryManagePage extends BasicResourceManagePage implements HasActions
 {
     use InteractsWithActions;
-    use InteractsWithForms;
+    use InteractsWithSchemas;
     use InteractsWithTable;
 
     public string $title = "Manage Document Categories";

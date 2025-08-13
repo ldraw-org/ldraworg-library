@@ -5,8 +5,8 @@ namespace App\Livewire;
 use Filament\Schemas\Schema;
 use App\LDraw\SetPbg;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -14,9 +14,9 @@ use Livewire\Component;
 /**
  * @property \Filament\Schemas\Schema $form
  */
-class PbgGenerator extends Component implements HasForms
+class PbgGenerator extends Component implements HasSchemas
 {
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     public ?array $data = [];
     public ?string $pbg = null;

@@ -11,8 +11,8 @@ use App\Enums\Permission;
 use App\Jobs\UpdateImage;
 use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -24,9 +24,9 @@ use Livewire\Component;
 /**
  * @property \Filament\Schemas\Schema $form
  */
-class LibrarySettingsPage extends Component implements HasForms
+class LibrarySettingsPage extends Component implements HasSchemas
 {
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     public ?array $data = [];
     public string $title = "Manage Library Settings";

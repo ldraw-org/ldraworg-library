@@ -5,17 +5,17 @@ namespace App\Livewire;
 use Filament\Schemas\Schema;
 use App\LDraw\LDrawModelMaker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
  * @property \Filament\Schemas\Schema $form
  */
-class LDrawModelViewer extends Component implements HasForms
+class LDrawModelViewer extends Component implements HasSchemas
 {
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     public ?array $data = [];
 

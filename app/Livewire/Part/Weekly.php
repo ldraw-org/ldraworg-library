@@ -7,8 +7,8 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use App\Livewire\Tables\PartTable;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\SelectFilter;
@@ -17,10 +17,10 @@ use Filament\Tables\Table as Table;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-class Weekly extends Component implements HasForms, HasTable, HasActions
+class Weekly extends Component implements HasSchemas, HasTable, HasActions
 {
     use InteractsWithActions;
-    use InteractsWithForms;
+    use InteractsWithSchemas;
     use InteractsWithTable;
 
 

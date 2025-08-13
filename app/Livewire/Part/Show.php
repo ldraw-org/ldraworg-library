@@ -23,8 +23,8 @@ use Filament\Actions\EditAction;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
@@ -38,9 +38,9 @@ use Livewire\Component;
  * @property Collection $baseparts
  * @property bool $hasSuffixParts
  */
-class Show extends Component implements HasForms, HasActions
+class Show extends Component implements HasSchemas, HasActions
 {
-    use InteractsWithForms;
+    use InteractsWithSchemas;
     use InteractsWithActions;
 
     public Part $part;

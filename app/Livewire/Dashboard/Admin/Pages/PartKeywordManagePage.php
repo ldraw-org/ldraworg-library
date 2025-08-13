@@ -12,7 +12,7 @@ use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
@@ -20,7 +20,7 @@ use Filament\Tables\Table;
 class PartKeywordManagePage extends BasicResourceManagePage implements HasActions
 {
     use InteractsWithActions;
-    use InteractsWithForms;
+    use InteractsWithSchemas;
     use InteractsWithTable;
 
     public string $title = "Manage Part Keywords";

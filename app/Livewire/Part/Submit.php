@@ -13,8 +13,8 @@ use App\LDraw\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
 use Closure;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -29,9 +29,9 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 /**
  * @property \Filament\Schemas\Schema $form
  */
-class Submit extends Component implements HasForms
+class Submit extends Component implements HasSchemas
 {
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     public ?array $data = [];
     public array $part_errors = [];

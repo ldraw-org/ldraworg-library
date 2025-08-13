@@ -5,8 +5,8 @@ namespace App\Livewire;
 use Filament\Schemas\Schema;
 use App\Enums\Permission;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -18,9 +18,9 @@ use RegexIterator;
 /**
  * @property \Filament\Schemas\Schema $form
  */
-class FileEditor extends Component implements HasForms
+class FileEditor extends Component implements HasSchemas
 {
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     public ?string $filepath = null;
     public ?string $file = null;

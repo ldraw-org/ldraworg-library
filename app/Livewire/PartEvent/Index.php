@@ -8,8 +8,8 @@ use App\Enums\EventType;
 use App\Enums\PartCategory;
 use App\Models\Part\PartEvent;
 use App\Filament\Tables\Filters\AuthorFilter;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -28,11 +28,11 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\Attributes\Url;
 
-class Index extends Component implements HasForms, HasTable, HasActions
+class Index extends Component implements HasSchemas, HasTable, HasActions
 {
     use InteractsWithActions;
     use InteractsWithTable;
-    use InteractsWithForms;
+    use InteractsWithSchemas;
 
     #[Url]
     public $tableRecordsPerPage = null;

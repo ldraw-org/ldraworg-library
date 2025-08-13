@@ -13,7 +13,7 @@ use App\Models\ReviewSummary\ReviewSummary;
 use App\Models\ReviewSummary\ReviewSummaryItem;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
@@ -21,7 +21,7 @@ use Filament\Tables\Table;
 class ReviewSummaryManagePage extends BasicResourceManagePage implements HasActions
 {
     use InteractsWithActions;
-    use InteractsWithForms;
+    use InteractsWithSchemas;
     use InteractsWithTable;
 
     public string $title = "Manage Review Summaries";
