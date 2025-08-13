@@ -30,7 +30,7 @@ class FilamentServiceProvider extends ServiceProvider
             'red' => Color::Red,
             'yellow' => Color::Yellow,
             'blue' => Color::Blue,
-            'green' => Color::generateV3Palette('rgb(' . Color::Green[400] . ')'),
+            'green' => Color::Green,
         ]);
 
         Select::configureUsing(function (Select $select): void {
