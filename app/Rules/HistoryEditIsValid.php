@@ -52,7 +52,7 @@ class HistoryEditIsValid implements ValidationRule, DataAwareRule
                 ' ' .
                 Str::of(Arr::get($state, 'comment'))->squish()->trim()->toString()
             );
-        $part = Part::find(Arr::get($this->data, 'mountedActionsData.0.id'));
+        $part = Part::find(Arr::get($this->data, 'mountedActions.0.data.id'));
         $p = app(Parser::class)->parse($value->implode("\n"));
         $errors = (new PartChecker($p))->singleCheck(new ValidLines());
         if ($errors) {
@@ -70,7 +70,7 @@ class HistoryEditIsValid implements ValidationRule, DataAwareRule
             return;
         }
         $old_hist = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()));
-        if ($old_hist->diff($value)->all() && is_null(Arr::get($this->data, 'mountedActionsData.0.editcomment'))) {
+        if ($old_hist->diff($value)->all() && is_null(Arr::get($this->data, 'mountedActions.0.data.editcomment'))) {
             $fail('partcheck.history.alter')->translate();
         }
     }

@@ -38,11 +38,11 @@ class PatternHasSet implements DataAwareRule, ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (Arr::get($this->data, 'mountedActionsData.0.is_pattern', false)) {
+        if (Arr::get($this->data, $attribute, false)) {
             $p = ParsedPart::fromArray([
-                'name' => str_replace(['parts/','p/'], '', Arr::get($this->data, 'mountedActionsData.0.filename', '')),
-                'type' => PartType::tryFrom(Arr::get($this->data, 'mountedActionsData.0.type', '')),
-                'metaCategory' => PartCategory::tryFrom(Arr::get($this->data, 'mountedActionsData.0.category', '')),
+                'name' => str_replace(['parts/','p/'], '', Arr::get($this->data, 'mountedActions.0.data.filename', '')),
+                'type' => PartType::tryFrom(Arr::get($this->data, 'mountedActions.0.data.type', '')),
+                'metaCategory' => PartCategory::tryFrom(Arr::get($this->data, 'mountedActions.0.data.category', '')),
                 'keywords' => collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all()
             ]);
             $errors = (new PartChecker($p))->singleCheck(new PatternHasSetKeyword());
