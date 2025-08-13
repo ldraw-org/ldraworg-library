@@ -8,7 +8,6 @@ use App\LDraw\Check\Checks\PatternPartDesciption;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
-use App\Enums\Permission;
 use App\Events\PartHeaderEdited;
 use App\Filament\Forms\Components\AuthorSelect;
 use App\Filament\Forms\Components\PreviewSelect;
@@ -35,7 +34,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class EditHeaderAction
 {
@@ -64,7 +62,7 @@ class EditHeaderAction
                 $data['history'] = $part->history->sortBy('created_at')->map->only('created_at', 'user_id', 'comment')->all();
                 return $data;
             })
-            ->using(fn (Part $p, array $data) => self::updateHeader($p, $data))
+            ->using(fn (Part $p, array $data): Part => self::updateHeader($p, $data))
             ->successNotificationTitle('Header updated')
             ->visible($part->isUnofficial() && Auth::user()?->can('update', $part) ?? false);
     }
@@ -92,13 +90,6 @@ class EditHeaderAction
                         }
                     }
                 ]),
-/*
-            AuthorSelect::make()
-                ->required()
-                ->helperText('Changes to author must be documented with a comment')
-                ->hidden(Auth::user()?->cannot(Permission::PartSubmitProxy) ?? true)
-                ->disabled(Auth::user()?->cannot(Permission::PartSubmitProxy) ?? true),
-*/
             Select::make('type')
                 ->options(PartType::options(PartType::partsFolderTypes()))
                 ->hidden(!$part->type->inPartsFolder())
@@ -125,7 +116,7 @@ class EditHeaderAction
                 ->preload()
                 ->selectablePlaceholder(false)
                 ->in(PartCategory::cases()),
-            Textarea::make('keywords')
+                Textarea::make('keywords')
                 ->helperText(
                     fn (Part $p) =>
                     'Note: keyword order' .
@@ -156,11 +147,16 @@ class EditHeaderAction
                         ->displayFormat('Y-m-d')
                         ->label('Date')
                         ->rules([
-                            Rule::date(),
+                           Rule::date(),
                         ])
                         ->required()
                         ->live(),
-                    AuthorSelect::make('user_id')
+                    Select::make('user_id')
+                        ->options(User::all()->pluck('authorString', 'id'))
+                        ->selectablePlaceholder(false)
+                        ->searchable()
+                        ->label('Author')
+                        ->rules(['exists:App\Models\User,id'])
                         ->required()
                         ->live(),
                     TextInput::make('comment')
@@ -186,11 +182,6 @@ class EditHeaderAction
                 ->nullable()
                 ->string()
             ];
-    }
-
-    protected function onValidationError(ValidationException $exception): void
-    {
-        dd($exception);
     }
 
     protected static function updateHeader(Part $part, array $data): Part
