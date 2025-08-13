@@ -130,8 +130,8 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
                     ->label('Hide sticker shortcuts'),
             ], layout: FiltersLayout::AboveContent)
             ->deferFilters(false)
-            ->persistFiltersInSession()
-            ->persistSortInSession()
+ //           ->persistFiltersInSession()
+ //           ->persistSortInSession()
             ->extremePaginationLinks()
             ->recordUrl(
                 fn (PartEvent $e): string =>
