@@ -11,7 +11,6 @@ class AuthorFilter
     {
         return SelectFilter::make($name)
             ->options(User::all()->sortBy('authorString')->pluck('authorString', 'id'))
-            ->selectablePlaceholder(false)
             ->searchable()
             ->label('Author');
     }
