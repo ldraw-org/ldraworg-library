@@ -1,6 +1,6 @@
 <x-slot:title>File Editor</x-slot>
 <x-slot:menu><x-menu.library /></x-slot>
-<div>
+<div class="flex flex-col space-y-4">
     <form wire:submit="getFile">
         {{ $this->form }}
 
@@ -13,8 +13,8 @@
             Save
         </x-filament::button>
     </form>
-    <div class="relative w-100 h-[40vh]">
-        <div id="editor" wire:ignore class="absolute top-0 bottom-0 left-0 right-0"></div>
+    <div class="h-100 bg-green-500">
+        <div id="aceeditor" wire:ignore class="absolute top-0 bottom-0 left-0 right-0 size-full"></div>
     </div>
 </div>
 
@@ -25,7 +25,7 @@
 @script
 <script>
 // Initial Editor Setup
-edit = window.ace.edit("editor");
+edit = window.ace.edit("aceeditor");
 
 if (edit) {
     edit.session.setTabSize(4);
@@ -36,7 +36,6 @@ if (edit) {
     });
     edit.setTheme("ace/theme/monokai");
     edit.session.setMode("ace/mode/php");
-//    window.editor = editor;
 }
 
 $wire.on('file-loaded', (contents) => {
