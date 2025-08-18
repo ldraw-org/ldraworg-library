@@ -1,6 +1,6 @@
 @props(['votes'])
 @if ($votes->count() ?? false)
-  <div class="w-fit overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+  <div class="w-fit overflow-hidden shadow ring-1 ring-gray-300 ring-opacity-5 sm:rounded-lg">
     <table class="divide-y divide-gray-300">
       <thead class="bg-gray-50">
         <tr>
