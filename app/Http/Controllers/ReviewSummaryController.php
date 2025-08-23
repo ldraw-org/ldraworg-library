@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ReviewSummary\ReviewSummary;
+use App\Models\ReviewSummary;
 use Illuminate\View\View;
 
 class ReviewSummaryController extends Controller

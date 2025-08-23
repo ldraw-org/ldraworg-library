@@ -36,7 +36,7 @@
             <x-menu.item label="Add/Edit Documentation Categories" link="{{route('admin.document-categories.index')}}" />
         </x-menu.top-level-item>
     @endcan
-    @can('manage', \App\Models\ReviewSummary\ReviewSummary::class)
+    @can('manage', \App\Models\ReviewSummary::class)
         <x-menu.top-level-item label="Add/Edit Part Review Summaries" link="{{route('admin.summaries.index')}}" />
     @endcan
 </x-menu>

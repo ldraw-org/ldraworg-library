@@ -12,7 +12,6 @@ use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
 use App\LDraw\Check\PartCheckBag;
 use App\Models\RebrickablePart;
-use App\Models\ReviewSummary\ReviewSummaryItem;
 use App\Models\StickerSheet;
 use App\Models\Traits\HasErrorScopes;
 use Illuminate\Database\Eloquent\Model;
@@ -194,12 +193,6 @@ class Part extends Model
     public function unknown_part_number(): BelongsTo
     {
         return $this->BelongsTo(UnknownPartNumber::class, 'unknown_part_number_id', 'id');
-
-    }
-
-    public function review_summary_items(): HasMany
-    {
-        return $this->HasMany(ReviewSummaryItem::class, 'part_id', 'id');
 
     }
 

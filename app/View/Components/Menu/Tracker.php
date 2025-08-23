@@ -2,7 +2,7 @@
 
 namespace App\View\Components\Menu;
 
-use App\Models\ReviewSummary\ReviewSummary;
+use App\Models\ReviewSummary;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;

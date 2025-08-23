@@ -8,9 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\CreateAction;
 use App\Livewire\Dashboard\BasicResourceManagePage;
-use App\Models\Part\Part;
-use App\Models\ReviewSummary\ReviewSummary;
-use App\Models\ReviewSummary\ReviewSummaryItem;
+use App\Models\ReviewSummary;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -51,6 +49,10 @@ class ReviewSummaryManagePage extends BasicResourceManagePage implements HasActi
             ->headerActions([
                 CreateAction::make()
                     ->schema($this->formSchema())
+                    ->mutateDataUsing(function (array $data): array {
+                        $data['order'] = ReviewSummary::nextOrder();
+                        return $data;
+                    })
             ]);
     }
 

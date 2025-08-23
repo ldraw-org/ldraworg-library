@@ -9,7 +9,7 @@ class PartFileDownloadAction
 { 
     public static function make(?string $name = null): Action
     {
-        return Action::make($name)
+        return Action::make($name ?? 'download')
             ->url(fn (Part $part) => route($part->isUnofficial() ? 'unofficial.download' : 'official.download', $part->filename))
             ->button()
             ->outlined()
