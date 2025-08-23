@@ -31,6 +31,7 @@ CREATE TABLE `documents` (
   `restricted` tinyint(1) NOT NULL DEFAULT '0',
   `order` int NOT NULL,
   `document_category_id` bigint unsigned NOT NULL,
+  `rev_history` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `documents_document_category_id_foreign` (`document_category_id`),
   CONSTRAINT `documents_document_category_id_foreign` FOREIGN KEY (`document_category_id`) REFERENCES `document_categories` (`id`)
@@ -532,25 +533,8 @@ CREATE TABLE `review_summaries` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `header` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `order` int NOT NULL,
+  `list` mediumtext COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `review_summary_items`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `review_summary_items` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `order` int NOT NULL,
-  `review_summary_id` bigint unsigned NOT NULL,
-  `part_id` bigint unsigned DEFAULT NULL,
-  `heading` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `review_summary_items_review_summary_id_foreign` (`review_summary_id`),
-  KEY `review_summary_items_part_id_foreign` (`part_id`),
-  CONSTRAINT `review_summary_items_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `review_summary_items_review_summary_id_foreign` FOREIGN KEY (`review_summary_id`) REFERENCES `review_summaries` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `role_has_permissions`;
@@ -860,3 +844,6 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (127,'2025_06_18_02
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (128,'2025_06_18_023912_create_pulse_tables',49);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (129,'2025_07_27_012549_add_help_to_parts_table',50);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (130,'2025_07_27_044921_drop_parthelps_table',51);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (131,'2025_08_05_020802_alter_revision_history_in_documents_table',52);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (133,'2025_08_23_065321_add_list_to_review_summaries_table',53);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (134,'2025_08_23_213916_drop_review_summary_items_table',54);
