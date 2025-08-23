@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\ReviewSummary\ReviewSummary;
 
 class DeployUpdate extends Command
 {
@@ -25,6 +26,9 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
-        //
+        ReviewSummary::each(function (ReviewSummary $summary) {
+           $summary->list = $summary->toString();
+           $summary->save();
+        });
     }
 }

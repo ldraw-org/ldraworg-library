@@ -44,20 +44,13 @@ class ReviewSummaryManagePage extends BasicResourceManagePage implements HasActi
             ])
             ->recordActions([
                 EditAction::make()
-                    ->schema($this->formSchema())
-                    ->mutateRecordDataUsing(function (ReviewSummary $summary, array $data): array {
-                        $data['manualEntry'] = $summary->toString();
-                        return $data;
-                    })
-                    ->using(fn (ReviewSummary $summary, array $data) => $this->saveEditData($summary, $data)),
+                    ->schema($this->formSchema()),
                 DeleteAction::make()
                     ->before(fn (ReviewSummary $summary) => $summary->items()->delete())
-
             ])
             ->headerActions([
                 CreateAction::make()
                     ->schema($this->formSchema())
-                    ->using(fn (ReviewSummary $summary, array $data) => $this->saveEditData($summary, $data)),
             ]);
     }
 
@@ -67,52 +60,11 @@ class ReviewSummaryManagePage extends BasicResourceManagePage implements HasActi
             TextInput::make('header')
                 ->required()
                 ->string(),
-            Textarea::make('manualEntry')
+            Textarea::make('list')
                 ->rows(30)
                 ->string()
                 ->required()
         ];
     }
 
-    protected function saveEditData(ReviewSummary $summary, array $data)
-    {
-        if ($summary->exists === false) {
-            $summary->header = $data['header'];
-            $summary->order = ReviewSummary::nextOrder();
-            $summary->save();
-        }
-        $summary->header = $data['header'];
-        $summary->save();
-        if (isset($data['manualEntry'])) {
-            $summary->items()->delete();
-            $lines = explode("\n", $data['manualEntry']);
-            $order = 1;
-            foreach ($lines as $line) {
-                $line = trim($line);
-                if (empty($line)) {
-                    continue;
-                }
-                if ($line[0] == '/') {
-                    $heading = explode(" ", $line, 2)[1] ?? '';
-                    ReviewSummaryItem::create([
-                        'heading' => empty($heading) ? '' : $heading,
-                        'order' => $order + 1,
-                        'review_summary_id' => $summary->id
-                    ]);
-                } else {
-                    $part = Part::unofficial()->firstWhere('filename', $line) ?? Part::official()->firstWhere('filename', $line);
-                    if (!empty($part)) {
-                        ReviewSummaryItem::create([
-                            'part_id' => $part->id,
-                            'order' => $order + 1,
-                            'review_summary_id' => $summary->id
-                        ]);
-                    }
-                }
-                $order++;
-            }
-            $summary->refresh();
-        }
-        return $summary;
-    }
 }

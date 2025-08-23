@@ -9,6 +9,8 @@ class ReviewSummaryController extends Controller
 {
     public function __invoke(ReviewSummary $summary): View
     {
-        return view('tracker.review-summary-show', compact('summary'));
+        $list = explode("\n", $summary->list);
+        $parts = $summary->parts();
+        return view('tracker.review-summary-show', compact('summary', 'list', 'parts'));
     }
 }
