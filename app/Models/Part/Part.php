@@ -271,6 +271,12 @@ class Part extends Model
         $query->doesntHave('rebrickable_part')->doesntHave('sticker_rebrickable_part');
     }
 
+    #[Scope]
+    protected function activeParts(Builder $query): void
+    {
+        $query->partsFolderOnly()->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved]);
+    }
+    
     protected function partCheck(): Attribute
     {
         return Attribute::make(
