@@ -5,6 +5,7 @@ namespace App\Livewire\Omr\Set;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\Omr\OmrModel;
+use App\Models\Omr\Set;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Tables\Columns\ImageColumn;
@@ -27,45 +28,41 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
 
         return $table
             ->heading('OMR Model List')
-            ->query(OmrModel::query())
-            ->defaultSort('set.number')
+            ->query(Set::query())
+            ->defaultSort('number')
             ->emptyState(view('tables.empty', ['none' => 'None']))
             ->columns([
                 ImageColumn::make('image')
                     ->state(
-                        fn (OmrModel $m): string => version("images/omr/models/" . substr($m->filename(), 0, -4) . '_thumb.png')
+                        fn (Set $s): string => version("images/omr/models/" . substr($s->mainModel()->filename(), 0, -4) . '_thumb.png')
                     )
                     ->grow(false)
                     ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]']),
-                TextColumn::make('set.number')
-                    ->label('Set Number')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('set.name')
-                    ->label('Set Name')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('set.theme.name')
-                    ->label('Theme')
-                    ->state(fn (OmrModel $m) => $m->set->theme->displayString())
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('set.year')
-                    ->label('Year')
+                TextColumn::make('number')
+                    ->label('Number')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('name')
-                    ->state(fn (OmrModel $m) => $m->alt_model_name ?? 'Main Model'),
-                TextColumn::make('user.author_string')
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query
-                            ->whereRelation('user', 'name', 'like', "%{$search}%")
-                            ->orWhereRelation('user', 'realname', 'like', "%{$search}%");
-                    })
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('theme.name')
+                    ->label('Theme')
+                    ->state(fn (Set $s) => $s->theme->displayString())
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('year')
+                    ->label('Year')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('models_count')
+                    ->label('Models')
+                    ->sortable()
+                    ->counts('models as models_count'),
             ])
             ->recordUrl(
-                fn (OmrModel $m): string =>
-                    route('omr.sets.show', $m->set)
+                fn (Set $s): string =>
+                    route('omr.sets.show', $s)
             )
             ->striped();
     }
