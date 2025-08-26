@@ -13,7 +13,7 @@
                         <hr>
                     @else
                         <div class="text-lg font-bold">{{str($item)->trim()->replaceStart('/', '')->trim()}}</div>
-                    @endempty
+                    @endif
                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 items-stretch">
                 @elseif(!is_null($parts->firstWhere('filename', trim($item))))   
                     <x-part.grid.item :part="$parts->firstWhere('filename', trim($item))" show_obsolete />
