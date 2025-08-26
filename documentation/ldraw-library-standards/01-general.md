@@ -5,7 +5,7 @@ The purpose of this document is to describe the requirements for files to be inc
 
 All requirements will be listed in block quotes:
 
-> This is a requirement
+> This is a requirement 
 
 Text not in a block quote box is intended explain or otherwise provide context to the requirement.
 
@@ -31,6 +31,7 @@ LDraw files are case-insensitive. However, all official parts will be issued wit
 > Text files will be encoded per the [LDraw File Format](https://www.ldraw.org/article/218.html#encoding) and have a `.dat’ extension.
 
 > Image files will have a valid PNG encoding and a `.png’ extension.
+
 
 ## Numbers
 
@@ -76,7 +77,7 @@ This is especially true for large quads where the "warp" can be seen at normal v
 
 Complementary conditional lines are placed at the end of curved primitives where those curved primitives may join with either a continuation of the curve, or with other geometry. In this case, the control points that are off of the edge of the curved primitive are placed so they are tangent to the curve.
 
-If two such curves are placed next to each other (for example to turn a quarter cylinder into a half cylinder), the conditional lines on the edge of each primitive will overlap exactly, and their control points will complement each other such that at most one will be rendered at any given time, and one of the two will always be rendered when appropriate. When other geometry is placed against such a curved primitive, nothing needs to be done.
+If two such curves are placed next to each other (for example to turn a quarter cylinder into a half cylinder), the conditional lines on the edge of each primitive will overlap exactly, and their control points will complement each other such that at most one will be rendered at any given time, and one of the two will always be rendered when appropriate. When other geometry is placed against such a curved primitive, nothing needs to be done. 
 
 > If the geometry is tangent to the curve. If it is sloped further, then a complementary conditional line shall be placed on the edge of that geometry, with the control points past the edge of the geometry configured to be tangent to the curve, and the two end points of the conditional placed to exactly overlap the complementary conditional line on the edge of the curved primitive.
 
@@ -153,13 +154,12 @@ Colours are defined in the LDConfig.ldr file
 
 ### Body Meta Commands
 
-> Only the following meta commands are permitted in the body of official parts:
->
+> Only the following meta commands are permitted in the body of official parts:   
 > * 0 // style comments
 > * All meta commands specified in [Language Extension for Back Face Culling (BFC)](https://www.ldraw.org/article/415.html)
 > * All meta commands specified in [Texture Mapping (!TEXMAP) Language Extension](https://www.ldraw.org/texmap-spec.html)
 
-### Back Face Culling (BFC)
+### Back Face Culling (BFC
 
 > All official parts will contain `0 BFC CERTIFY CCW` and have valid corresponing winding on all quads and triangles
   
@@ -168,7 +168,7 @@ See [Language Extension for Back Face Culling (BFC)](https://www.ldraw.org/artic
 ### !TEXMAP
 
 > Sufficient !TEXMAP \<geometry2\> and/or \<geometry3\> lines (as outlined in the [Texture Mapping (!TEXMAP) Language Extension](https://www.ldraw.org/texmap-spec.html)) must be included such that the part renders correctly in non-!TEXMAP supporting programs.
-
+ 
 > A fallback pattern, if defined, must represent the pattern created by the TEXMAP image.
 
 It is highly encouraged, but not required, that a fallback pattern be defined even if it is reduced in resolution or colors.
