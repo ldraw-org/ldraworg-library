@@ -230,7 +230,7 @@ class EditHeaderAction
         }
 
         if ($part->help !== $newHelp) {
-            $changes['old']['help'] = "0 !HELP " . implode("\n0 !HELP ", $part->help);
+            $changes['old']['help'] = "0 !HELP " . implode("\n0 !HELP ", $part->help ?? []);
             $changes['new']['help'] = "0 !HELP " . implode("\n0 !HELP ", $newHelp);
             $part->help = $newHelp;
         }
