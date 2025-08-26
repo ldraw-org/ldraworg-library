@@ -29,6 +29,7 @@ class FileEditor extends Component implements HasSchemas
     protected array $dir_whitelist = [
         '/config',
         '/app',
+        '/documentation',
         '/resources',
         '/database',
         '/routes',
@@ -45,6 +46,7 @@ class FileEditor extends Component implements HasSchemas
         'log',
         'txt',
         'json',
+        'md',
     ];
 
     public function mount(): void
@@ -73,6 +75,9 @@ class FileEditor extends Component implements HasSchemas
             $mode = 'php_laravel_blade';
         } else {
             switch ($path['extension']) {
+                case 'md':
+                    $mode = 'markdown';
+                    break;
                 case 'js':
                     $mode = 'javascript';
                     break;

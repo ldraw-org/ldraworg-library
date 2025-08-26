@@ -34,6 +34,10 @@ ace.config.setModuleUrl('ace/mode/json', modeJsonUrl);
 import workerJsonUrl from 'ace-builds/src-noconflict/worker-json?url';
 ace.config.setModuleUrl('ace/mode/json_worker', workerJsonUrl);
 
+// Markdown Mode
+import modeMarkdownUrl from 'ace-builds/src-noconflict/mode-markdown?url';
+ace.config.setModuleUrl('ace/mode/markdown', modeMarkdownUrl);
+
 // Text Mode
 import modeTextUrl from 'ace-builds/src-noconflict/mode-text?url';
 ace.config.setModuleUrl('ace/mode/text', modeTextUrl);

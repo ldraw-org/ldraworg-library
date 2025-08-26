@@ -41,6 +41,11 @@ if (edit) {
 $wire.on('file-loaded', (contents) => {
     edit.session.setValue(contents.contents);
     edit.session.setMode('ace/mode/' + contents.mode);
+    if (contents.mode == 'markdown') {
+        editor.session.setUseWrapMode(true);
+    } else {
+        editor.session.setUseWrapMode(false);
+    }
 });
 </script>
 @endscript
