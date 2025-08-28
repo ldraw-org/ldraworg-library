@@ -7,6 +7,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use App\Enums\CheckType;
 use App\Enums\PartError;
+use App\Filament\Actions\Part\Download\PartFileDownloadAction;
 use App\Models\Part\Part;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -42,11 +43,8 @@ class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
                     ->wrap()
             ])
             ->recordActions([
-                Action::make('download')
-                ->url(fn (Part $part) => route($part->isUnofficial() ? 'unofficial.download' : 'official.download', $part->filename))
-                ->button()
-                ->outlined()
-                ->color('info'),
+                PartFileDownloadAction::make()
+                    ->color('info'),
             ])
             ->filters([
                 SelectFilter::make('errors')

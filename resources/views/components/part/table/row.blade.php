@@ -14,11 +14,7 @@
     </a>
   </td>
   <td>
-    @if($part->isUnofficial())
-    <a class="hover:underline" href="{{route('unofficial.download', $part->filename)}}">[DAT]</a>
-    @else
-    <a class="hover:underline" href="{{route('official.download', $part->filename)}}">[DAT]</a>
-    @endif
+    <a class="hover:underline" href="{{route('part.download', ['library' => $part->libFolder(), 'filename' => $part->filename])}}">[DAT]</a>
   </td>
   <td>
     @if($part->isUnofficial())

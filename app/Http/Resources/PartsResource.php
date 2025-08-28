@@ -19,7 +19,7 @@ class PartsResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'image' => $this->isTexmap() ? route("{$this->libFolder()}.download", $this->filename) : version("images/library/{$this->imagePath()}"),
+            'image' => $this->isTexmap() ? route('part.download', ['library' => $this->libFolder(), 'filename' => $this->filename]) : version("images/library/{$this->imagePath()}"),
             'url' => route('parts.show', $this),
             'description' => $this->description,
             'filename' => $this->filename,

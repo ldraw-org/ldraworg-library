@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 enum PartType: string
@@ -43,6 +44,11 @@ enum PartType: string
             PartType::LowResPrimitiveTexmap => 'p/textures/8',
             PartType::HighResPrimitiveTexmap => 'p/textures/48'
         };
+    }
+
+    public static function folders(): array
+    {
+        return array_unique(Arr::map(self::cases(), fn (self $type): string => $type->folder()));
     }
 
     public function nameFolder(): string

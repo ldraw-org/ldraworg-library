@@ -7,10 +7,13 @@ use Filament\Schemas\Components\Section;
 use App\Enums\ExternalSite;
 use App\Enums\LibraryIcon;
 use App\Enums\PartCategory;
+use App\Enums\PartType;
 use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
 use App\Filament\Actions\EditNumberAction;
 use App\Filament\Actions\EditPreviewAction;
+use App\Filament\Actions\Part\Download\PartFileDownloadAction;
+use App\Filament\Actions\Part\Download\PartZipFileDownloadAction;
 use App\LDraw\PartManager;
 use App\LDraw\VoteManager;
 use App\Models\Part\Part;
@@ -28,7 +31,9 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -89,19 +94,20 @@ class Show extends Component implements HasSchemas, HasActions
         return $options;
     }
 
-    public function mount(?Part $part, ?Part $partfile, ?Part $upartfile)
+    public function mount(Part $part, ?string $filename = null)
     {
-        if (!is_null($part) && $part->exists) {
+        if ($part->exists) {
             $this->part = $part;
-        } elseif (!is_null($partfile) && $partfile->exists) {
-            $this->part = $partfile;
-        } elseif (!is_null($upartfile) && $upartfile->exists) {
-            $this->part = $upartfile;
         } else {
-            return response('404');
+            $this->part = Part::when(Str::startsWith($filename, 'unofficial/'),
+                    fn (Builder $query) => $query->unofficial()
+                )
+                ->where('filename', Str::chopStart($filename, 'unofficial/'))
+                ->orderBy('part_release_id', 'desc')
+                ->firstOrFail();
         }
         $this->image =
-            $this->part->isTexmap() ? route("{$this->part->libFolder()}.download", $this->part->filename) : version("images/library/{$this->part->imagePath()}");
+            $this->part->isTexmap() ? route('part.download', ['library' => $this->part->libFolder(), 'filename' => $this->part->filename]) : version("images/library/{$this->part->imagePath()}");
         $this->form->fill();
     }
 
@@ -251,17 +257,15 @@ class Show extends Component implements HasSchemas, HasActions
 
     public function downloadAction(): Action
     {
-        return Action::make('download')
-                ->url(fn () => route($this->part->isUnofficial() ? 'unofficial.download' : 'official.download', $this->part->filename))
+        return PartFileDownloadAction::make('download', $this->part)
                 ->color('gray')
                 ->outlined();
     }
 
     public function downloadZipAction(): Action
     {
-        return Action::make('zipdownload')
+        return PartZipFileDownloadAction::make('zipdownload', $this->part)
                 ->label('Download zip file')
-                ->url(fn () => route($this->part->isUnofficial() ? 'unofficial.download.zip' : 'official.download.zip', str_replace('.dat', '.zip', $this->part->filename)))
                 ->visible($this->part->type->inPartsFolder())
                 ->color('gray')
                 ->outlined();

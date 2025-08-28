@@ -26,7 +26,7 @@ class SupportFiles
             $vals = [
                 basename($part->filename),
                 '"' . str_replace('"', '""', $part->description) . '"',
-                route("{$part->libFolder()}.download", $part->filename),
+                route('part.download', ['library' => $part->libFolder(), 'filename' => $part->filename]),
                 asset("images/library/{$image}"),
                 Carbon::createFromTimestamp(Storage::disk('images')->lastModified("library/{$image}"))->format('Y-m-d')
             ];

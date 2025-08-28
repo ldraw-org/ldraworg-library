@@ -8,6 +8,8 @@ use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
+use App\Filament\Actions\Part\Download\PartFileDownloadAction;
+use App\Filament\Actions\Part\Download\PartZipFileDownloadAction;
 use App\Models\Part\Part;
 use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Support\Enums\Alignment;
@@ -22,6 +24,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class PartTable
 {
@@ -74,17 +77,14 @@ class PartTable
     public static function actions(): array
     {
         return [
-            Action::make('download')
-                ->url(fn (Part $part) => route($part->isUnofficial() ? 'unofficial.download' : 'official.download', $part->filename))
-                ->button()
-                ->outlined()
-                ->color('info'),
-            Action::make('download')
-                ->label('Download zip')
-                ->url(fn (Part $part) => route('unofficial.download.zip', str_replace('.dat', '.zip', $part->filename)))
-                ->button()
-                ->outlined()
+            PartFileDownloadAction::make()
                 ->color('info')
+                ->button()
+                ->outlined(),
+            PartZipFileDownloadAction::make()
+                ->color('info')
+                ->button()
+                ->outlined()
                 ->visible(fn (Part $part) => $part->isUnofficial() && $part->type->inPartsFolder()),
             Action::make('updated')
                 ->url(fn (Part $part) => route('parts.show', $part->unofficial_part->id))

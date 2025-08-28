@@ -11,6 +11,28 @@ use ZipArchive;
 
 class ZipFiles
 {
+    public static function partZip(Part $part): ?string
+    {
+        if (!$part->type->inPartsFolder()) {
+            return null;
+        }
+        $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
+        $zip = new ZipArchive();
+        $name = basename($part->filename, '.dat') . '.zip';
+        $zip->open($dir->path($name), ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        if ($part->isUnofficial()) {
+            $zipparts = $part->descendantsAndSelf()->doesntHave('unofficial_part')->get()->unique();
+        } else {
+            $zipparts = $part->descendantsAndSelf->official()->unique();
+        }
+        $zipparts->each(function (Part $part) use ($zip) {
+            $zip->addFromString($part->filename, $part->get());
+        });
+        $zip->close();
+        $file = file_get_contents($dir->path($name));
+        return $file ?: '';
+    }
+
     public static function unofficialZip(?Part $part = null, ?string $oldfilename = null): void
     {
         $tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();

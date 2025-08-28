@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\PartType;
 use App\Http\Controllers\DocumentShowController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SupportFilesController;
@@ -7,7 +8,6 @@ use App\Http\Controllers\Part\LastDayDownloadZipController;
 use App\Http\Controllers\Part\LatestPartsController;
 use App\Http\Controllers\Part\PartUpdateController;
 use App\Http\Controllers\Part\PartDownloadController;
-use App\Http\Controllers\Part\PartDownloadZipController;
 use App\Http\Controllers\Part\WeeklyPartsController;
 use App\Http\Controllers\ReviewSummaryController;
 use App\Http\Controllers\StickerSheetShowController;
@@ -50,10 +50,10 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/tracker/latest-parts', LatestPartsController::class)->name('part.latest');
     Route::get('/tracker/weekly-parts', WeeklyPartsController::class)->name('part.weekly-api');
     Route::get('/tracker/ldrawunf-last-day.zip', LastDayDownloadZipController::class)->name('tracker.last-day');
-    Route::get('/library/official/{opartfile}', PartDownloadController::class)->name('official.download');
-    Route::get('/library/official/{officialpartzip}', PartDownloadZipController::class)->name('official.download.zip');
-    Route::get('/library/unofficial/{upartfile}', PartDownloadController::class)->name('unofficial.download');
-    Route::get('/library/unofficial/{unofficialpartzip}', PartDownloadZipController::class)->name('unofficial.download.zip');
+    Route::get('/library/{library}/{filename}', PartDownloadController::class)
+        ->whereIn('library', ['official', 'unofficial'])
+        ->where('filename', '(' . implode('|', PartType::folders()) . ')/[a-z0-9_-]+\.(dat|png|zip)')
+        ->name('part.download');
 });
 
 // Tools
@@ -84,9 +84,12 @@ Route::prefix('parts')->name('parts.')->group(function () {
     // Search
     Route::get('/search/suffix', Suffix::class)->name('search.suffix');
 
-    Route::get('/{part:id}', Show::class)->name('show');
-    Route::get('/unofficial/{upartfile}', Show::class)->name('show.ufile');
-    Route::get('/{partfile}', Show::class)->name('show.file');
+    Route::get('/{part}', Show::class)->name('show');
+
+    Route::get('/{filename}', Show::class)
+        ->where('filename', '(unofficial/)?(' . implode('|', PartType::folders()) . ')/([a-z0-9_-]+\.(dat|png))')
+        ->name('show.file');
+
 });
 
 // Users

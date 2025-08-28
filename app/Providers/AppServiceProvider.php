@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\PartType;
 use App\Enums\Permission;
 use App\Listeners\PartEventSubscriber;
 use App\Models\Omr\Set;
@@ -45,48 +46,8 @@ class AppServiceProvider extends ServiceProvider
         // Model::preventLazyLoading(! $this->app->isProduction());
 
         // Route bindings
-        $namePattern = '[a-z0-9_/-]+';
-        $filenamePattern = "{$namePattern}\.(dat|png)";
-        $zipPattern = "{$namePattern}\.(zip)";
-        Route::pattern('partfile', $filenamePattern);
-        Route::pattern('upartfile', $filenamePattern);
-        Route::pattern('opartfile', $filenamePattern);
-        Route::pattern('officialpartzip', $zipPattern);
-        Route::pattern('unofficialpartzip', $zipPattern);
         Route::pattern('setnumber', '[a-z0-9]+(-\d+)?');
-        Route::bind(
-            'partfile',
-            function (string $value): Part {
-                if (Part::where('filename', $value)->count() > 1) {
-                    return Part::official()->where('filename', $value)->firstOrFail();
-                }
-                return Part::where('filename', $value)->firstOrFail();
-            }
-        );
-        Route::bind(
-            'upartfile',
-            fn (string $value): Part =>
-                Part::unofficial()->where('filename', $value)->firstOrFail()
-        );
-        Route::bind(
-            'opartfile',
-            fn (string $value): Part =>
-                Part::official()->where('filename', $value)->firstOrFail()
-        );
-        Route::bind(
-            'officialpartzip',
-            fn (string $value): Part =>
-            Part::official()
-                ->where('filename', str_replace('.zip', '.dat', $value))
-                ->firstOrFail()
-        );
-        Route::bind(
-            'unofficialpartzip',
-            fn (string $value): Part =>
-            Part::unofficial()
-                ->where('filename', str_replace('.zip', '.dat', $value))
-                ->firstOrFail()
-        );
+
         Route::bind(
             'setnumber',
             fn (string $value): Set =>
