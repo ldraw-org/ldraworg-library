@@ -7,6 +7,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use App\Enums\CheckType;
 use App\Enums\PartStatus;
+use App\Filament\Tables\Columns\PartStatusColumn;
 use App\Jobs\MakePartRelease;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
@@ -21,7 +22,6 @@ use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -68,12 +68,9 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                             ->sortable(),
                     ])->alignment(Alignment::Start),
                     Stack::make([
-                        ViewColumn::make('part_status')
-                            ->view('tables.columns.part-status')
-                            ->sortable()
+                        PartStatusColumn::make('part_status')
                             ->grow(false)
                             ->label('Status'),
-
                         TextColumn::make('part_check')
                             ->state(fn (Part $part) => $part->part_check->get(translated: true))
                             ->listWithLineBreaks()

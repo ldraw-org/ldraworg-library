@@ -6,6 +6,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\EventType;
 use App\Enums\PartCategory;
+use App\Filament\Tables\Columns\PartStatusColumn;
 use App\Models\Part\PartEvent;
 use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -89,8 +90,8 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
                             ->description(fn (PartEvent $e): string => !is_null($e->part) ? $e->part->description : $e->deleted_description)
                             ->label('Part'),
                     ])->hiddenFrom('sm'),
-                    ViewColumn::make('status')
-                        ->view('tables.columns.part-status')
+                    PartStatusColumn::make('status')
+                        //->view('tables.columns.part-status')
                         ->label('Status')
                         ->grow(false),
                 ])

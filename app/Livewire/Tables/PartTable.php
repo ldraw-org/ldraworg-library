@@ -10,6 +10,7 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Filament\Actions\Part\Download\PartFileDownloadAction;
 use App\Filament\Actions\Part\Download\PartZipFileDownloadAction;
+use App\Filament\Tables\Columns\PartStatusColumn;
 use App\Models\Part\Part;
 use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Support\Enums\Alignment;
@@ -18,13 +19,11 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 
 class PartTable
 {
@@ -65,8 +64,7 @@ class PartTable
                 TextColumn::make('description')
                     ->sortable(),
                 ])->alignment(Alignment::Start),
-                ViewColumn::make('part_status')
-                    ->view('tables.columns.part-status')
+                PartStatusColumn::make('part_status')
                     ->sortable()
                     ->grow(false)
                     ->label('Status')
