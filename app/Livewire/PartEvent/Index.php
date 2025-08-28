@@ -6,6 +6,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\EventType;
 use App\Enums\PartCategory;
+use App\Filament\Tables\Columns\EventIconColumn;
 use App\Filament\Tables\Columns\PartStatusColumn;
 use App\Models\Part\PartEvent;
 use App\Filament\Tables\Filters\AuthorFilter;
@@ -19,7 +20,6 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -45,8 +45,7 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Split::make([
-                    ViewColumn::make('event_type')
-                        ->view('components.event.icon.filament-table-icon')
+                    EventIconColumn::make('event_type')
                         ->grow(false),
                     TextColumn::make('created_at')
                         ->since()
@@ -91,7 +90,6 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
                             ->label('Part'),
                     ])->hiddenFrom('sm'),
                     PartStatusColumn::make('status')
-                        //->view('tables.columns.part-status')
                         ->label('Status')
                         ->grow(false),
                 ])
