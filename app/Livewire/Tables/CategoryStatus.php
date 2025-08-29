@@ -55,7 +55,7 @@ class CategoryStatus extends BasicTable implements HasActions
                 Group::make('category')
                     ->getTitleFromRecordUsing(fn (Part $part) => $part->category->value ?? ''),
             ])
-            ->emptyState(view('tables.empty', ['none' => 'None']))
+            ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns([
                 IconColumn::make('part_status')
                     ->icon('mdi-square-rounded')

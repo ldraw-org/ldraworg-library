@@ -41,7 +41,7 @@ class PartDependenciesTable extends BasicTable implements HasActions
                 return $q;
             })
             ->heading(($this->official ? "Official" : "Unofficial") . ($this->parents ? " parent parts" : " subparts"))
-            ->emptyState(view('tables.empty', ['none' => 'None']))
+            ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns(PartTable::columns())
             ->recordActions(PartTable::actions())
             ->recordUrl(

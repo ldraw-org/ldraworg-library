@@ -47,7 +47,7 @@ class FilamentServiceProvider extends ServiceProvider
 
         Table::configureUsing(function (Table $table): void {
             $table
-                ->emptyState(view('tables.empty', ['none' => 'None']))
+                ->emptyState(view('filament.tables.empty', ['none' => 'None']))
 //                ->persistFiltersInSession()
 //                ->persistSearchInSession()
 //                ->persistSortInSession()

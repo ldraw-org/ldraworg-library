@@ -49,7 +49,7 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                 ->orderBy('type')
                 ->orderBy('filename')
             )
-            ->emptyState(view('tables.empty', ['none' => 'None']))
+            ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns([
                 Split::make([
                     ToggleColumn::make('marked_for_release')

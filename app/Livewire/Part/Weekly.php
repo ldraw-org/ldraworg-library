@@ -35,7 +35,7 @@ class Weekly extends Component implements HasSchemas, HasTable, HasActions
                 ->doesntHave('official_part')
             )
             ->defaultSort('created_at', 'asc')
-            ->emptyState(view('tables.empty', ['none' => 'None']))
+            ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns(PartTable::columns())
             ->groups([
                 Group::make('week')

@@ -30,7 +30,7 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
             ->heading('OMR Model List')
             ->query(Set::query())
             ->defaultSort('number')
-            ->emptyState(view('tables.empty', ['none' => 'None']))
+            ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns([
                 ImageColumn::make('image')
                     ->state(
