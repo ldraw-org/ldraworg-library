@@ -5,12 +5,12 @@ namespace App\Livewire\Tables;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\VoteType;
+use App\Filament\Tables\Columns\VoteIconColumn;
 use App\Models\Vote;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
@@ -42,11 +42,9 @@ class UserVotesTable extends BasicTable implements HasActions
                             ->label('Description')
                             ->sortable(),
                     ]),
-                    ViewColumn::make('part.vote_status')
-                        ->view('tables.columns.part-status')
-                        ->grow(false)
-                        ->sortable()
-                        ->label('Status'),
+                    VoteIconColumn::make('vote_type')
+                        ->label('My Vote')
+                        ->grow(false),
                 ])
             ])
             ->filters([

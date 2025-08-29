@@ -5,9 +5,9 @@ namespace App\Livewire\Tables;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\Permission;
+use App\Filament\Tables\Columns\UserRoleIconColumn;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +33,7 @@ class UserTable extends BasicTable implements HasActions
                     ->label('User Name')
                     ->sortable()
                     ->searchable(),
-                ViewColumn::make('roles')
+                UserRoleIconColumn::make('roles')
                     ->view('tables.columns.user-roles'),
                 TextColumn::make('email')
                     ->searchable()

@@ -1,4 +1,4 @@
-<div class="flex">
+<div class="flex" {{ $getExtraAttributeBag() }}>
     @if($getRecord()->hasRole('Library Admin'))
         <x-library-icon icon="user-library-admin" class="w-7" title="Part Library Admin"/>
     @elseif($getRecord()->hasRole('Senior Reviewer'))
