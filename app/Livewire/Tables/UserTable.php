@@ -33,8 +33,7 @@ class UserTable extends BasicTable implements HasActions
                     ->label('User Name')
                     ->sortable()
                     ->searchable(),
-                UserRoleIconColumn::make('roles')
-                    ->view('tables.columns.user-roles'),
+                UserRoleIconColumn::make('roles'),
                 TextColumn::make('email')
                     ->searchable()
                     ->visible(Auth::user()?->can(Permission::UserViewEmail) ?? false),
