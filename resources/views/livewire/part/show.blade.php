@@ -187,23 +187,23 @@
                     <div class="text-red-500">{{ $missing }}</div>
                 @endforeach
             @endif
-            <livewire:tables.part-dependencies-table :$part parents />
-            <livewire:tables.part-dependencies-table :$part />
+            <livewire:tables.part-dependencies-table :$part :dependency="\App\Enums\PartDependency::Parents" :lib="\App\Enums\PartLibrary::Unofficial" />
+            <livewire:tables.part-dependencies-table :$part :dependency="\App\Enums\PartDependency::Subparts" :lib="\App\Enums\PartLibrary::Unofficial" />
             <x-accordion id="officialParts">
                 <x-slot name="header" class="text-md font-bold">
                     Official parents and subparts
                 </x-slot>
-                <livewire:tables.part-dependencies-table :$part official parents />
-                <livewire:tables.part-dependencies-table :$part official />
+                <livewire:tables.part-dependencies-table :$part :dependency="\App\Enums\PartDependency::Parents" :lib="\App\Enums\PartLibrary::Official" />
+                <livewire:tables.part-dependencies-table :$part :dependency="\App\Enums\PartDependency::Subparts" :lib="\App\Enums\PartLibrary::Official" />
             </x-accordion>
         @else
-            <livewire:tables.part-dependencies-table :$part official parents />
-            <livewire:tables.part-dependencies-table :$part official />
+            <livewire:tables.part-dependencies-table :$part :dependency="\App\Enums\PartDependency::Parents" :lib="\App\Enums\PartLibrary::Official" />
+            <livewire:tables.part-dependencies-table :$part :dependency="\App\Enums\PartDependency::Subparts" :lib="\App\Enums\PartLibrary::Official" />
             <x-accordion id="unofficialParents">
                 <x-slot name="header" class="text-md font-bold">
                     Unofficial parents
                 </x-slot>
-                <livewire:tables.part-dependencies-table :$part unofficial parents />
+                <livewire:tables.part-dependencies-table :$part :dependency="\App\Enums\PartDependency::Parents" :lib="\App\Enums\PartLibrary::Unofficial" />
             </x-accordion>
         @endif
         <div class="text-lg font-bold">Part Events:</div>

@@ -2,19 +2,23 @@
 
 namespace App\Livewire\Tables;
 
+use App\Enums\PartDependency;
+use App\Enums\PartLibrary;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\Part\Part;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
+use Illuminate\Support\Str;
 
 #[Lazy]
 class PartDependenciesTable extends BasicTable implements HasActions
 {
     use InteractsWithActions;
-    public bool $official = false;
-    public bool $parents = false;
+    public PartLibrary $lib;
+    public PartDependency $dependency;
     public Part $part;
 
     #[On('mass-vote')]
@@ -32,15 +36,8 @@ class PartDependenciesTable extends BasicTable implements HasActions
     public function table(Table $table): Table
     {
         return $table
-            ->query(function () {
-                if ($this->parents !== false) {
-                    $q = $this->official !== false ? $this->part->parents()->whereNotNull('part_release_id') : $this->part->parents()->whereNull('part_release_id');
-                } else {
-                    $q = $this->official !== false ? $this->part->subparts()->whereNotNull('part_release_id') : $this->part->subparts()->whereNull('part_release_id');
-                }
-                return $q;
-            })
-            ->heading(($this->official ? "Official" : "Unofficial") . ($this->parents ? " parent parts" : " subparts"))
+            ->relationship(fn (): BelongsToMany => $this->part->{$this->dependency->value}()->{$this->lib->value}())
+            ->heading(Str::ucfirst($this->lib->value) . " {$this->dependency->value}")
             ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns(PartTable::columns())
             ->recordActions(PartTable::actions())
@@ -48,6 +45,6 @@ class PartDependenciesTable extends BasicTable implements HasActions
                 fn (Part $p): string =>
                     route('parts.show', ['part' => $p])
             )
-            ->queryStringIdentifier(($this->official ? "official" : "unofficial") . ($this->parents ? "Parents" : "Subparts"));
+            ->queryStringIdentifier("{$this->lib->value}-{$this->dependency->value}");
     }
 }
