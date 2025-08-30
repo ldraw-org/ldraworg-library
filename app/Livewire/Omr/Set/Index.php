@@ -30,7 +30,6 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
             ->heading('OMR Model List')
             ->query(Set::query())
             ->defaultSort('number')
-            ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns([
                 ImageColumn::make('image')
                     ->state(
@@ -63,8 +62,7 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
             ->recordUrl(
                 fn (Set $s): string =>
                     route('omr.sets.show', $s)
-            )
-            ->striped();
+            );
     }
 
     #[Layout('components.layout.omr')]

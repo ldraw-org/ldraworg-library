@@ -98,7 +98,6 @@ class PartTable
         return [
             SelectFilter::make('part_status')
                 ->options(PartStatus::trackerStatusOptions())
-                ->native(false)
                 ->multiple()
                 ->preload()
                 ->label('Unofficial Status')
@@ -106,24 +105,20 @@ class PartTable
             AuthorFilter::make('user_id'),
             SelectFilter::make('type')
                 ->options(PartType::options())
-                ->native(false)
                 ->multiple()
                 ->preload()
                 ->label('Part Type'),
             SelectFilter::make('category')
                 ->options(PartCategory::options())
-                ->native(false)
                 ->multiple()
                 ->preload()
                 ->label('Category'),
             SelectFilter::make('keywords')
                 ->relationship('keywords', 'keyword')
-                ->native(false)
                 ->multiple()
                 ->label('Keywords'),
             SelectFilter::make('license')
                 ->options(License::options())
-                ->native(false)
                 ->searchable()
                 ->preload()
                 ->label('Part License'),

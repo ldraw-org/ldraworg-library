@@ -45,7 +45,6 @@ class PartListTable extends BasicTable implements HasActions
     {
         return $table
             ->query(Part::with('votes', 'official_part', 'unofficial_part'))
-            ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns(PartTable::columns())
             ->recordActions(PartTable::actions())
             ->persistFiltersInSession()

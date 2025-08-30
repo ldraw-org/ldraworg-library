@@ -97,7 +97,6 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
             ->filters([
                 SelectFilter::make('event_type')
                     ->options(EventType::options())
-                    ->native(false)
                     ->multiple()
                     ->preload()
                     ->label('Event Type'),

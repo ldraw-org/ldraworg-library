@@ -34,14 +34,12 @@ class UserPartsTable extends BasicTable implements HasActions
             ->columns(PartTable::columns())
             ->filters([
                 SelectFilter::make('part_status')
-                ->options(PartStatus::trackerStatusOptions())
-                ->native(false)
-                ->multiple()
-                ->preload()
-                ->label('Part Status'),
-                SelectFilter::make('type')
+                    ->options(PartStatus::trackerStatusOptions())
+                    ->multiple()
+                    ->preload()
+                    ->label('Part Status'),
+                    SelectFilter::make('type')
                     ->options(PartType::options())
-                    ->native(false)
                     ->multiple()
                     ->preload()
                     ->label('Part Type'),

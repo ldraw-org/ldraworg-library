@@ -119,7 +119,6 @@ class Submit extends Component implements HasSchemas
                     ->preload()
                     ->default(Auth::user()->id)
                     ->selectablePlaceholder(false)
-                    ->native(false)
                     ->label('Proxy User')
                     ->visible(Auth::user()->can(Permission::PartSubmitProxy)),
                 Textarea::make('comments')

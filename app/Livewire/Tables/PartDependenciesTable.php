@@ -38,7 +38,6 @@ class PartDependenciesTable extends BasicTable implements HasActions
         return $table
             ->relationship(fn (): BelongsToMany => $this->part->{$this->dependency->value}()->{$this->lib->value}())
             ->heading(Str::ucfirst($this->lib->value) . " {$this->dependency->value}")
-            ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns(PartTable::columns())
             ->recordActions(PartTable::actions())
             ->recordUrl(

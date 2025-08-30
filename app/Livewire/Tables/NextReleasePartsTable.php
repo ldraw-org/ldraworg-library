@@ -21,7 +21,6 @@ class NextReleasePartsTable extends BasicTable implements HasActions
                     ->orderBy('type')
                     ->orderBy('filename')
             )
-            ->emptyState(view('filament.tables.empty', ['none' => 'None']))
             ->columns(PartTable::columns())
             ->recordActions(PartTable::actions())
             ->recordUrl(fn (Part $p): string => route('parts.show', $p));

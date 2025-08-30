@@ -70,13 +70,11 @@ class UserManagePage extends BasicResourceManagePage implements HasActions
                 SelectFilter::make('license')
                     ->options(License::options())
                     ->preload()
-                    ->multiple()
-                    ->native(false),
+                    ->multiple(),
                 SelectFilter::make('roles')
                     ->relationship('roles', titleAttribute: 'name')
                     ->preload()
-                    ->multiple()
-                    ->native(false),
+                    ->multiple(),
             ])
             ->headerActions([
                 CreateAction::make()
@@ -130,12 +128,10 @@ class UserManagePage extends BasicResourceManagePage implements HasActions
             Select::make('license')
                 ->options(License::options())
                 ->default(app(LibrarySettings::class)->default_part_license)
-                ->native(false)
                 ->required(),
             Select::make('roles')
                 ->relationship('roles', titleAttribute: 'name')
                 ->multiple()
-                ->native(false)
                 ->preload()
                 ->required(),
             Fieldset::make('Special Account Types')

@@ -12,7 +12,6 @@ class LDrawColourSelect
         return Select::make($name)
             ->searchable()
             ->preload()
-            ->native(false)
             ->extraAlpineAttributes(['x-on:click' => 'select.config.fuseOptions = {location: 87, threshold: 0.2}'])
             ->allowHtml()
             ->options(self::getOptions());
