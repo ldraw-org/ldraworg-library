@@ -17,8 +17,8 @@ use Illuminate\Support\Str;
 class PartDependenciesTable extends BasicTable implements HasActions
 {
     use InteractsWithActions;
-    public PartLibrary $lib;
-    public PartDependency $dependency;
+    public PartLibrary $library = PartLibrary::Official;
+    public PartDependency $dependency = PartDependency::Subparts;
     public Part $part;
 
     #[On('mass-vote')]
@@ -36,14 +36,14 @@ class PartDependenciesTable extends BasicTable implements HasActions
     public function table(Table $table): Table
     {
         return $table
-            ->relationship(fn (): BelongsToMany => $this->part->{$this->dependency->value}()->{$this->lib->value}())
-            ->heading(Str::ucfirst($this->lib->value) . " {$this->dependency->value}")
+            ->relationship(fn (): BelongsToMany => $this->part->{$this->dependency->value}()->{$this->library->value}())
+            ->heading(Str::ucfirst($this->library->value) . " {$this->dependency->value}")
             ->columns(PartTable::columns())
             ->recordActions(PartTable::actions())
             ->recordUrl(
                 fn (Part $p): string =>
                     route('parts.show', ['part' => $p])
             )
-            ->queryStringIdentifier("{$this->lib->value}-{$this->dependency->value}");
+            ->queryStringIdentifier("{$this->library->value}-{$this->dependency->value}");
     }
 }
