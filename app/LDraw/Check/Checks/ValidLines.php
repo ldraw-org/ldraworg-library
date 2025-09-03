@@ -7,9 +7,9 @@ use App\LDraw\Check\Contracts\Check;
 use App\LDraw\Parse\ParsedPart;
 use App\Models\LdrawColour;
 use App\Models\Part\Part;
-use Cache;
 use Closure;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class ValidLines implements Check
@@ -17,7 +17,7 @@ class ValidLines implements Check
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
         if ($part instanceof Part) {
-            $header_length = count(explode("\n", $part->header)) + 2;
+            $header_length = substr_count($part->header, "\n") + 2;
             $body = explode("\n", $part->body->body);
         } else {
             $header_length = $part->header_length;

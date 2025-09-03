@@ -14,7 +14,7 @@ class ValidType2Lines implements Check
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
         if ($part instanceof Part) {
-            $header_length = count(explode("\n", $part->header)) + 2;
+            $header_length = substr_count($part->header, "\n") + 2;
             $body = $part->body->body;
         } else {
             $header_length = $part->header_length;
