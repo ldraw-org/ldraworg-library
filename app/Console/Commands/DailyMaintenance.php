@@ -62,7 +62,7 @@ class DailyMaintenance extends Command
             RebrickablePart::doesntHave('parts')->doesntHave('sticker_sheets')->delete();
 
             $this->info('Reloading colors for LDConfig');
-            $this->call('lib:update-colours');
+            $this->call('lib:lib:update-ldconfig');
 
             $this->info('Regenerate unofficial zip');
             $this->call('lib:refresh-zip');

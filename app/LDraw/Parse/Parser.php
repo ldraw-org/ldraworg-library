@@ -316,6 +316,13 @@ class Parser
         return $index + 1;
     }
 
+    public function getAvatars(string $text): ?array
+    {
+        return collect($this->patternMatchAll('avatar', $text, PREG_SET_ORDER))
+            ->map(fn (array $a) => Arr::only($a, ['category', 'part', 'matrix', 'description']))
+            ->all();
+    }
+    
     public function getColours(string $text): ?array
     {
         $colors = $this->patternMatchAll('colour', $text, PREG_SET_ORDER);

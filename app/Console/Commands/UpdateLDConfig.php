@@ -2,30 +2,31 @@
 
 namespace App\Console\Commands;
 
-use App\LDraw\LDrawColourManager;
+use App\LDraw\LDConfigManager;
 use Illuminate\Console\Command;
 
-class UpdateColours extends Command
+class UpdateLDConfig extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'lib:update-colours';
+    protected $signature = 'lib:update-ldconfig';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Update colour from the current LDConfig';
+    protected $description = 'Update colours and avatars from the current LDConfig';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        app(LDrawColourManager::class)->importColours();
+        app(LDConfigManager::class)->importColours();
+        app(LDConfigManager::class)->importAvatars();
     }
 }
