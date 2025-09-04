@@ -59,7 +59,7 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
                                     return version("images/library/{$event->part->libFolder()}/" . substr($event->part->filename, 0, -4) . '_thumb.png');
                                 } else {
                                     // One pixel transparent png
-                                    return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=';
+                                    return blank_image_url();
                                 }
                             }
                         )
