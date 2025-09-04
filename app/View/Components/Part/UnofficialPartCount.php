@@ -16,12 +16,10 @@ class UnofficialPartCount extends Component
        * @return void
        */
     public function __construct(
-        public array $summary = ['1' => 0, '2' => 0, '3' => 0, '5' => 0],
+        public array $summary = [],
         public bool $small = true
     ) {
-        foreach (PartStatus::trackerStatus() as $status) {
-            $this->summary[$status->value] = Part::where('part_status', $status)->count();
-        }
+        $this->summary = Part::select('part_status', 'id')->unofficial()->get()->countBy('part_status')->all();
     }
 
     /**
@@ -31,6 +29,6 @@ class UnofficialPartCount extends Component
      */
     public function render()
     {
-        return view('components.part.unofficial-part-count');
+       return view('components.part.unofficial-part-count');
     }
 }

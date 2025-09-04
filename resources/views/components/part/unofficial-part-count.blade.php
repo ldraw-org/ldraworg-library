@@ -11,7 +11,7 @@
             'flex-row space-x-2 items-center justify-items-start' => !$small
         ])>
             <x-library-icon :icon="$status->icon()" class="inline w-8 {{$status->iconColor()}}" title="{{$status->label()}}" />
-            <div>{{$summary[$status->value]}}{{$small ? '' : ' ' . $status->label()}}</div>
+            <div>{{Arr::get($summary, $status->value, 0)}}{{$small ? '' : ' ' . $status->label()}}</div>
         </div>
     @endforeach
 </div>
