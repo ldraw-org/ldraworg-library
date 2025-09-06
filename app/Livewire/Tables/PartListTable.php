@@ -35,11 +35,15 @@ use Livewire\Attributes\Url;
 class PartListTable extends BasicTable implements HasActions
 {
     use InteractsWithActions;
+
     #[Url]
     public $tableSearch = '';
 
-//    #[Url]
-//    public ?array $tableFilters = null;
+    /**
+     * @var array<string, mixed> | null
+     */
+    #[Url]
+    public ?array $tableFilters = null;
 
     public function table(Table $table): Table
     {

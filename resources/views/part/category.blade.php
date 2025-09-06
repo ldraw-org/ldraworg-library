@@ -1,10 +1,10 @@
 <x-layout.tracker>
-    <x-slot:title>Parts List</x-slot>
+    <x-slot:title>Category List</x-slot>
     <x-slot:breadcrumbs>
-        <x-breadcrumb-item class="active" item="Parts List" />
+        <x-breadcrumb-item class="active" item="Category List" />
     </x-slot>
     <div class="text-xl font-bold">
-        Parts List
+        Category List
     </div>  
     <livewire:tables.category-status />
 </x-layout.tracker>

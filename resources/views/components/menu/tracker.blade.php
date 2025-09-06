@@ -9,6 +9,7 @@
     <x-menu.top-level-item label="Documentation" link="https://www.ldraw.org/docs-main.html" />
     <x-menu.top-level-item label="Tools">
         <x-menu.item label="Part Search" link="{{route('parts.list')}}" />
+        <x-menu.item label="Category List" link="{{route('parts.category.list')}}" />
         <x-menu.item label="Pattern/Shortcut Part Summary" link="{{route('parts.search.suffix')}}" />
         <x-menu.item label="Sticker Sheet Lookup" link="{{route('parts.sticker-sheet.index')}}" />
         @can('create', \App\Models\Part\Part::class)
