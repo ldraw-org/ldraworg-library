@@ -67,6 +67,7 @@ class LdconfigEdit extends Component implements HasSchemas
             store_backup('LDConfig.ldr', $old_ldconfig);
             Storage::disk('library')->put('official/LDConfig.ldr', $data['ldconfig-text']);
             app(LDConfigManager::class)->importColours();
+            app(LDConfigManager::class)->importAvatars();
         }
         if ($data['ldcfgalt-text'] != $old_ldcfgalt) {
             store_backup('LDCfgalt.ldr', $old_ldcfgalt);
