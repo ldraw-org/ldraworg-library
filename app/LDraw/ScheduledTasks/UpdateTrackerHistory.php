@@ -10,7 +10,7 @@ class UpdateTrackerHistory
     public function __invoke(): void
     {
         TrackerHistory::create([
-            'history_data' => Part::unofficial()->pluck('part_status')->countBy('part_status')->all()
+            'history_data' => Part::select('part_status')->unofficial()->get()->countBy('part_status')->all()
         ]);
     }
 }

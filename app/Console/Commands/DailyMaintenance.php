@@ -35,10 +35,10 @@ class DailyMaintenance extends Command
         // and just soaks up resources.
         if (app()->environment('production')) {
             $this->info('Reloading all subparts');
-            Part::lazy()->each(fn (Part $p) => app(PartManager::class)->loadSubparts($p));
+            $this->call('lib:reload-subparts');
 
             $this->info('Recounting all votes');
-            Part::unofficial()->lazy()->each(fn (Part $p) => $p->updatePartStatus());
+            $this->call('lib:recount-votes');
 
             $this->info('Rechecking all unofficial parts');
             $this->call('lib:check', ['--unofficial-only' => true]);
@@ -62,7 +62,7 @@ class DailyMaintenance extends Command
             RebrickablePart::doesntHave('parts')->doesntHave('sticker_sheets')->delete();
 
             $this->info('Reloading colors for LDConfig');
-            $this->call('lib:lib:update-ldconfig');
+            $this->call('lib:update-ldconfig');
 
             $this->info('Regenerate unofficial zip');
             $this->call('lib:refresh-zip');

@@ -431,9 +431,10 @@ class Part extends Model
 
     protected function voteTypeCount(): array
     {
+       
         return array_merge(
             [VoteType::AdminReview->value => 0, VoteType::Certify->value => 0, VoteType::Hold->value => 0, VoteType::AdminFastTrack->value => 0],
-            $this->votes->pluck('vote_type')->countBy('vote_type')->all()
+            $this->votes->countBy('vote_type')->all()
         );
     }
 
