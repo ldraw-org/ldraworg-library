@@ -278,7 +278,7 @@ class EditHeaderAction
                 ' ' .
                 Str::of(Arr::get($state, 'comment'))->squish()->trim()->toString()
             );
-        if ($new_hist->diff($old_hist)->all()) {
+        if ($new_hist->diff($old_hist)->isNotEmpty() || $old_hist->diff($new_hist)->isNotEmpty()) {
             $changes['old']['history'] = $old_hist->implode("\n");
             $part->setHistory($manager->parser->parse($new_hist->implode("\n"))->history ?? []);
             $part->load('history');
