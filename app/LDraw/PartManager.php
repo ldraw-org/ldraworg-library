@@ -440,7 +440,7 @@ class PartManager
                 $p->sticker_sheet_id = null;
             }
         }
-        if (!is_null($p->sticker_sheet_id) && $p->category != PartCategory::Sticker) {
+        if (!is_null($p->sticker_sheet_id) && !in_array($p->category, [PartCategory::Sticker, PartCategory::Moved, PartCategory::Obsolete])) {
             $p->category = PartCategory::StickerShortcut;
             $p->generateHeader();
         }
