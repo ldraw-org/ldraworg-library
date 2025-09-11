@@ -9,6 +9,8 @@ return [
     // LDView debug writting to logs
     'ldview_debug' => env('LDVIEW_DEBUG', false),
 
+    // Enable Part library debug logging
+    'library_debug' => env('LIBRARY_DEBUG', false),
 
     // These are groups for Part Author/Reviewer tags
     'mybb-groups' => [
