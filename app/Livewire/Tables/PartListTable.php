@@ -145,6 +145,7 @@ class PartListTable extends BasicTable implements HasActions
                         ),
                     SelectConstraint::make('category')
                         ->options(PartCategory::options())
+                        ->searchable()
                         ->icon(LibraryIcon::CategoryConstraint->value)
                         ->multiple(),
                     SelectConstraint::make('part_errors')
