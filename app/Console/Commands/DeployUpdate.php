@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\PartCategory;
+use App\Models\Part\Part;
 use Illuminate\Console\Command;
 
 class DeployUpdate extends Command
@@ -25,5 +27,16 @@ class DeployUpdate extends Command
      */
     public function handle(): void
     {
+        Part::whereNotIn('category', [PartCategory::Sticker, PartCategory::StickerShortcut])
+            ->update(['sticker_sheet_id' => null]);
+        Part::where('category', PartCategory::Moved)
+            ->lazy()
+            ->each(function (Part $part) {
+                $part->keywords()->sync([]);
+                if ($part->isOfficial()) {
+                    $part->has_minor_edit = true;
+                    $part->save();
+                }
+            });
     }
 }

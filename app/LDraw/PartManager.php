@@ -399,7 +399,7 @@ class PartManager
         $part->save();
     }
 
-    protected function addUnknownNumber(Part $p)
+    protected function addUnknownNumber(Part $p): void
     {
         $result = preg_match('/parts\/u([0-9]{4}).*\.dat/', $p->filename, $matches);
         if ($result) {
@@ -415,14 +415,14 @@ class PartManager
         $p->save();
     }
 
-    public function addStickerSheet(Part $p)
+    public function addStickerSheet(Part $p): void
     {
         $sticker = $p->category == PartCategory::Sticker ? $p : $p->children()->where('category', PartCategory::Sticker)->first();
-        if (is_null($sticker)) {
+        if (is_null($sticker) || in_array($p->category, [PartCategory::Moved, PartCategory::Obsolete])) {
             return;
         }
         if (!is_null($sticker->sticker_sheet)) {
-            $p->parents()->update(['sticker_sheet_id' => $sticker->sticker_sheet->id]);
+            $p->parents()->whereIn('category', [PartCategory::Sticker, PartCategory::StickerShortcut])->update(['sticker_sheet_id' => $sticker->sticker_sheet->id]);
             $p->sticker_sheet()->associate($sticker->sticker_sheet);
         } else {
             $m = preg_match('/^[\d]+/', $sticker->name(), $s);
