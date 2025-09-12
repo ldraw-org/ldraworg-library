@@ -33,6 +33,7 @@ class DeployUpdate extends Command
             ->lazy()
             ->each(function (Part $part) {
                 $part->keywords()->sync([]);
+                $part->generateHeader();
                 if ($part->isOfficial()) {
                     $part->has_minor_edit = true;
                     $part->save();
