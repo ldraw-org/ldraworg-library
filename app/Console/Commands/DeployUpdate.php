@@ -30,6 +30,7 @@ class DeployUpdate extends Command
         Part::whereNotIn('category', [PartCategory::Sticker, PartCategory::StickerShortcut])
             ->update(['sticker_sheet_id' => null]);
         Part::where('category', PartCategory::Moved)
+            ->has('keywords')
             ->lazy()
             ->each(function (Part $part) {
                 $part->keywords()->sync([]);
