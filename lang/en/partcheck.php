@@ -87,5 +87,6 @@ return [
     'warning' => [
         'minifigcategory' => 'Ensure correct Minifig category',
         'notcoplaner' => 'Line :value, quad is not coplanar (angle :angle)',
+        'stickercolor' => 'Ensure stickers that are not color 16 are applied to defined transparent surfaces',
     ]
 ];

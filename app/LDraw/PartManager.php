@@ -393,6 +393,14 @@ class PartManager
             if ($part->type->inPartsFolder() && $part->category == PartCategory::Minifig) {
                 $part->part_check->add(PartError::WarningMinifigCategory);
             }
+            if ($part->type->inPartsFolder() && $part->category == PartCategory::StickerShortcut) {
+                foreach (explode("\n", $part->body->body) as $line) {
+                    if (Str::startsWith($line, '1 ') && Str::doesntStartWith($line, '1 16')) {
+                        $part->part_check->add(PartError::WarningStickerColor);
+                        break;
+                    }
+                }  
+            }
             $part->can_release = $can_release;
         }
         $part->updateReadyForAdmin();
