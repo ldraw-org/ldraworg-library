@@ -79,4 +79,41 @@ trait HasErrorScopes
         }
         $query->orWhereJsonDoesntContainKey("part_check->errors->{$error}");
     }
+    
+    #[Scope]
+    protected function hasWarning(Builder $query, string|PartError $warning): void
+    {
+        if ($warning instanceof PartError) {
+            $warning = $warning->value;
+        }
+        $query->whereJsonContainsKey("part_check->warnings->{$warning}");
+    }
+
+    #[Scope]
+    protected function orHasWarning(Builder $query, string|PartError $warning): void
+    {
+        if ($warning instanceof PartError) {
+            $warning = $warning->value;
+        }
+        $query->orWhereJsonContainsKey("part_check->warnings->{$warning}");
+    }
+
+    #[Scope]
+    protected function doesntHaveWarning(Builder $query, string|PartError $warning): void
+    {
+        if ($warning instanceof PartError) {
+            $warning = $warning->value;
+        }
+        $query->whereJsonDoesntContainKey("part_check->warnings->{$warning}");
+    }
+
+    #[Scope]
+    protected function orDoesntHaveWarning(Builder $query, string|PartError $warning): void
+    {
+        if ($warning instanceof PartError) {
+            $warning = $warning->value;
+        }
+        $query->orWhereJsonDoesntContainKey("part_check->warnings->{$warning}");
+    }
+
 }

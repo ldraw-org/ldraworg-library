@@ -158,7 +158,8 @@ class PartListTable extends BasicTable implements HasActions
                                     $values = $operator->getSettings()['values'];
                                     $query->where(function (Builder $query_inner) use ($values, $isInverse) {
                                         foreach ($values as $value) {
-                                            $query_inner->{$isInverse ? 'orDoesntHaveError' : 'orHasError'}($value);
+                                            $query_inner->{$isInverse ? 'orDoesntHaveError' : 'orHasError'}($value)
+                                                ->{$isInverse ? 'orDoesntHaveWarning' : 'orHasWarning'}($value);
                                         }
                                     });
                                 })
