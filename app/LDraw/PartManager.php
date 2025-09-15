@@ -389,20 +389,23 @@ class PartManager
         $pc = new PartChecker($part);
         $can_release = $pc->checkCanRelease($checkFileErrors);
         $part->part_check = $pc->getPartCheckBag();
-        if ($part->isUnofficial()) {
-            if ($part->type->inPartsFolder() && $part->category == PartCategory::Minifig) {
-                $part->part_check->add(PartError::WarningMinifigCategory);
-            }
-            if ($part->type->inPartsFolder() && $part->category == PartCategory::StickerShortcut) {
-                foreach (explode("\n", $part->body->body) as $line) {
-                    if (Str::startsWith($line, '1 ') && Str::doesntStartWith($line, '1 16')) {
-                        $part->part_check->add(PartError::WarningStickerColor);
-                        break;
-                    }
-                }  
-            }
+        
+        // Set Minifig warning but only for unofficial parts
+        if ($part->isUnofficial() && $part->type->inPartsFolder() && $part->category == PartCategory::Minifig) {
+            $part->part_check->add(PartError::WarningMinifigCategory);
             $part->can_release = $can_release;
         }
+        
+        // Set Sticker color warning.
+        if ($part->type->inPartsFolder() && $part->category == PartCategory::StickerShortcut) {
+            foreach (explode("\n", $part->body->body) as $line) {
+                if (Str::startsWith($line, '1 ') && Str::doesntStartWith($line, '1 16')) {
+                    $part->part_check->add(PartError::WarningStickerColor);
+                    break;
+                }
+            }  
+        }
+        
         $part->updateReadyForAdmin();
         $part->save();
     }
