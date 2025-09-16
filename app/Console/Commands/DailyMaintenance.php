@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\PurgeOrphanImages;
 use App\Jobs\UpdateRebrickable;
-use App\LDraw\PartManager;
+use App\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
 use App\Models\RebrickablePart;

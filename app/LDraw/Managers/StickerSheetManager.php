@@ -1,7 +1,8 @@
 <?php
 
-namespace App\LDraw;
+namespace App\LDraw\Managers;
 
+use App\LDraw\Rebrickable;
 use App\Models\Part\Part;
 use App\Models\RebrickablePart;
 use App\Models\StickerSheet;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\LDraw;
+namespace App\LDraw\Managers;
 
 use App\LDraw\Parse\Parser;
 use App\Models\Avatar;

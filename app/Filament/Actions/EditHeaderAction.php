@@ -15,7 +15,7 @@ use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
 use App\LDraw\Check\PartChecker;
 use App\LDraw\Parse\ParsedPart;
-use App\LDraw\PartManager;
+use App\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
 use App\Models\Part\PartKeyword;

@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\LDraw\PartManager;
+use App\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

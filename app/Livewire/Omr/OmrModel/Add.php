@@ -7,7 +7,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use Filament\Schemas\Components\Utilities\Get;
 use App\LDraw\LDrawModelMaker;
-use App\LDraw\OmrModelManager;
+use App\LDraw\Managers\OmrModelManager;
 use App\LDraw\Rebrickable;
 use App\Models\Mybb\MybbAttachment;
 use App\Models\Omr\OmrModel;

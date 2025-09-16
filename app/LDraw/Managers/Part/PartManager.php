@@ -1,6 +1,6 @@
 <?php
 
-namespace App\LDraw;
+namespace App\LDraw\Managers\Part;
 
 use App\Enums\PartCategory;
 use App\Enums\PartError;
@@ -11,6 +11,8 @@ use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateParentParts;
 use App\Jobs\UpdateZip;
 use App\LDraw\Check\PartChecker;
+use App\LDraw\LDrawFile;
+use App\LDraw\Managers\StickerSheetManager;
 use App\LDraw\Parse\Parser;
 use App\LDraw\Render\LDView;
 use App\Models\Part\Part;

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\LDraw;
+namespace App\LDraw\Managers;
 
 use App\Enums\PartStatus;
 use App\Enums\VoteType;
 use App\Events\PartComment;
 use App\Events\PartReviewed;
+use App\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
 use App\Models\Vote;

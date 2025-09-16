@@ -10,7 +10,7 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Grid;
 use App\LDraw\Parse\Parser;
 use Filament\Schemas\Components\View;
-use App\LDraw\PartManager;
+use App\LDraw\Managers\Part\PartManager;
 use Filament\Schemas\Components\Fieldset;
 use App\LDraw\LDrawModelMaker;
 use App\Enums\PartCategory;

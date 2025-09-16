@@ -8,7 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Part\Part;
-use App\LDraw\PartManager;
+use App\LDraw\Managers\Part\PartManager;
 
 class UpdateParentParts implements ShouldQueue
 {

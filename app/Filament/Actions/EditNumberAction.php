@@ -6,7 +6,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use App\Enums\PartType;
 use App\Events\PartRenamed;
 use App\Events\PartSubmitted;
-use App\LDraw\PartManager;
+use App\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
 use Closure;
