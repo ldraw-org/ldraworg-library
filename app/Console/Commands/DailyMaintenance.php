@@ -46,6 +46,8 @@ class DailyMaintenance extends Command
             $this->info('Removing orphan keywords');
             PartKeyword::doesntHave('parts')->delete();
 
+            $this->info('Ensuring initial submit event exists');
+            $this->call('lib:fix-initial-submit');
 
             $this->info('Refreshing Rebrickable data');
             Part::canHaveRebrickablePart()
