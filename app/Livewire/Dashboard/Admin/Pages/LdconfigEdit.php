@@ -6,7 +6,7 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use App\Enums\Permission;
-use App\LDraw\LDConfigManager;
+use App\LDraw\Managers\LDConfigManager;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
