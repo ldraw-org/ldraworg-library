@@ -71,13 +71,6 @@ class LibrarySettingsPage extends Component implements HasSchemas
                            ]),
                         Tab::make('LDView Settings')
                             ->schema([
-                                KeyValue::make('ldview_options')
-                                    ->label('LDView Options')
-                                    ->keyLabel('Setting'),
-                                KeyValue::make('default_render_views')
-                                    ->label('Default Render Matrix')
-                                    ->keyLabel('Part')
-                                    ->valueLabel('Matrix'),
                                 Fieldset::make('Image Size')
                                     ->schema([
                                         TextInput::make('max_part_render_height')
@@ -100,7 +93,10 @@ class LibrarySettingsPage extends Component implements HasSchemas
                                             ->integer(),
 
                                     ])
-                                    ->columns(2)
+                                    ->columns(2),
+                                KeyValue::make('ldview_options')
+                                    ->label('LDView Options')
+                                    ->keyLabel('Setting'),                            
                             ]),
 
                     ])
