@@ -2,4 +2,6 @@
 !public/
 !backup/
 !debug/
+!library/
+!images/
 !.gitignore
