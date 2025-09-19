@@ -29,7 +29,6 @@ return [
     */
 
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
@@ -61,6 +60,14 @@ return [
             'directory_visibility' => 'public',
             'throw' => false,
         ],
+        'library-media' => [
+            'driver' => 'local',
+            'root' => storage_path('app/library-media'),
+            'url' => env('APP_URL').'/media',
+            'visibility' => 'public',
+            'directory_visibility' => 'public',
+            'throw' => false,
+        ],
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -88,9 +95,8 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
-        public_path('images/library') => storage_path('app/images/library'),
-        public_path('images/omr') => storage_path('app/images/omr'),
         public_path('library') => storage_path('app/library'),
+        public_path('media') => storage_path('app/library-media'),
         public_path('assets/ldbi/js') => resource_path('js/buildinginstructions.js/js'),
         public_path('assets/ldbi/textures') => resource_path('js/buildinginstructions.js/textures'),
     ],

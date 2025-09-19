@@ -3,5 +3,6 @@
 !backup/
 !debug/
 !library/
+!library-media/
 !images/
 !.gitignore
