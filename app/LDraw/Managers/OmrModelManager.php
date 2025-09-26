@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Image\Image;
 use Spatie\Image\Enums\Fit;
+use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class OmrModelManager
 {
@@ -27,12 +28,13 @@ class OmrModelManager
     public function updateImage(OmrModel $model): void
     {
         $image = $this->render->render($model);
-        $imageFilename = substr($model->filename(), 0, -4) . '.png';
-        $imagePath = Storage::disk('images')->path("omr/models/{$imageFilename}");
-        $imageThumbPath = substr($imagePath, 0, -4) . '_thumb.png';
+        $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
+        $imagePath = $dir->path(substr($model->filename(), 0, -4) . '.png');
         imagepng($image, $imagePath);
         Image::load($imagePath)->optimize()->save($imagePath);
-        Image::load($imagePath)->fit(Fit::Contain, $this->settings->max_thumb_width, $this->settings->max_thumb_height)->optimize()->save($imageThumbPath);
+        $model->clearMediaCollection('image');
+        $model->addMedia($imagePath)
+            ->toMediaCollection('image');
     }
 
     public function addModelFromMybbAttachment(MybbAttachment $file, Set $set, array $data = []): void
@@ -67,7 +69,9 @@ class OmrModelManager
             'notes' => ['notes' => Arr::get($data, 'notes', '')],
             'license' => $user->license,
         ]);
-        Storage::disk('library')->put("omr/{$model->filename()}", $modeltext);
+        $model->addMediaFromString($modeltext)
+            ->usingFilename($model->filename())
+            ->toMediaCollection('file');
         UpdateImage::dispatch($model);
         $file->posthash = true;
         $file->save();

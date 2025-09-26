@@ -18,6 +18,7 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Enums\FiltersLayout;
@@ -51,10 +52,9 @@ class PartTable
     {
         return [
             Split::make([
-                ImageColumn::make('image')
-                    ->state(
-                        fn (Part $p): string => version("images/library/{$p->imageThumbPath()}")
-                    )
+                SpatieMediaLibraryImageColumn::make('image')
+                    ->collection('image')
+                    ->conversion('thumb')
                     ->grow(false)
                     ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]']),
                 Stack::make([

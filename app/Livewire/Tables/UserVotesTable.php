@@ -30,7 +30,7 @@ class UserVotesTable extends BasicTable implements HasActions
                 Split::make([
                     ImageColumn::make('image')
                         ->state(
-                            fn (Vote $v): string => version("images/library/{$v->part->imageThumbPath()}")
+                            fn (Vote $v): string => $v->part->getFirstMediaUrl('image', 'thumb')
                         )
                         ->grow(false)
                         ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]']),

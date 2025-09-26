@@ -19,6 +19,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -53,16 +54,7 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
                         ->label('Date/Time')
                         ->grow(false),
                     ImageColumn::make('image')
-                        ->state(
-                            function (PartEvent $event) {
-                                if (!is_null($event->part)) {
-                                    return version("images/library/{$event->part->libFolder()}/" . substr($event->part->filename, 0, -4) . '_thumb.png');
-                                } else {
-                                    // One pixel transparent png
-                                    return blank_image_url();
-                                }
-                            }
-                        )
+                        ->state(fn (PartEvent $event) => $event->part?->getFirstMediaUrl('image', 'thumb') ?? blank_image_url())
                         ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]'])
                         ->grow(false),
                     TextColumn::make('user.realname')

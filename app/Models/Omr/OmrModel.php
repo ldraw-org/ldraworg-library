@@ -6,12 +6,17 @@ use App\Enums\License;
 use App\Models\Traits\HasUser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Image\Enums\Fit;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @mixin IdeHelperOmrModel
  */
-class OmrModel extends Model
+class OmrModel extends Model implements HasMedia
 {
+    use InteractsWithMedia;
     use HasUser;
 
     protected $guarded = [];
@@ -31,6 +36,22 @@ class OmrModel extends Model
             'alt_model' => 'boolean',
             'approved' => 'boolean',
         ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('image')
+            ->singleFile()
+            ->registerMediaConversions(function (Media $media) {
+                $this->addMediaConversion('thumb')
+                    ->keepOriginalImageFormat()
+                    ->fit(Fit::Contain, 35, 75);                    
+                $this->addMediaConversion('feed-image')
+                    ->keepOriginalImageFormat()
+                    ->fit(Fit::Contain, 225, 225);                    
+            });
+        $this->addMediaCollection('file')
+            ->singleFile();
     }
 
     public function set(): BelongsTo

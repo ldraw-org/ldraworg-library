@@ -16,13 +16,10 @@ class PartHistory extends Model
     use HasUser;
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'created_at',
-        'comment',
-        'part_id',
-    ];
-
+    protected $guarded = [];
+    
+    protected $touches = ['part'];
+    
     protected $with = ['user'];
 
     public function toString(): string

@@ -38,7 +38,7 @@ class LDrawModelMaker
     public function modelMpd(string|OmrModel $model): string
     {
         if ($model instanceof OmrModel) {
-            $file = app(Parser::class)->dosLineEndings(Storage::disk('library')->get("omr/{$model->filename()}") . "\r\n");
+            $file = app(Parser::class)->dosLineEndings(file_get_contents($model->getFirstMediaPath('file')) . "\r\n");
         } else {
             $file = $model;
         }

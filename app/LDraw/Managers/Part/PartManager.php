@@ -32,6 +32,7 @@ use Spatie\Image\Image;
 use Spatie\Image\Enums\Fit;
 use Spatie\ImageOptimizer\OptimizerChain;
 use Spatie\ImageOptimizer\Optimizers\Optipng;
+use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class PartManager
 {
@@ -185,16 +186,6 @@ class PartManager
         return $upart;
     }
 
-    protected function imageOptimize(string $path, string $newPath = ''): void
-    {
-        $optimizerChain = (new OptimizerChain())->addOptimizer(new Optipng([]));
-        if ($newPath !== '') {
-            $optimizerChain->optimize($path, $newPath);
-        } else {
-            $optimizerChain->optimize($path);
-        }
-    }
-
     public function finalizePart(Part|Collection $parts): void
     {
         if ($parts instanceof Part) {
@@ -223,6 +214,16 @@ class PartManager
         });
     }
 
+    protected function imageOptimize(string $path, string $newPath = ''): void
+    {
+        $optimizerChain = (new OptimizerChain())->addOptimizer(new Optipng([]));
+        if ($newPath !== '') {
+            $optimizerChain->optimize($path, $newPath);
+        } else {
+            $optimizerChain->optimize($path);
+        }
+    }
+
     public function updateImage(Part $part): void
     {
         if ($part->isTexmap()) {
@@ -230,14 +231,13 @@ class PartManager
         } else {
             $image = $this->render->render($part);
         }
-        $lib = $part->isUnofficial() ? 'unofficial' : 'official';
-        $imageFilename = substr($part->filename, 0, -4) . '.png';
-        $imagePath = Storage::disk('images')->path("library/{$lib}/{$imageFilename}");
-        $imageThumbPath = substr($imagePath, 0, -4) . '_thumb.png';
+        $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
+        $imagePath = $dir->path(substr($part->filename, 0, -4) . '.png');
         imagepng($image, $imagePath);
         $this->imageOptimize($imagePath);
-        Image::load($imagePath)->fit(Fit::Contain, $this->settings->max_thumb_width, $this->settings->max_thumb_height)->save($imageThumbPath);
-        $this->imageOptimize($imageThumbPath);
+        $part->clearMediaCollection('image');
+        $part->addMedia($imagePath)
+            ->toMediaCollection('image');
     }
 
     protected function updateMissing(string $name): void

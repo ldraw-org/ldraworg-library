@@ -4,7 +4,6 @@ namespace App\Livewire\Omr\Set;
 
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
-use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -13,7 +12,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table as Table;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -32,9 +30,7 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
             ->defaultSort('number')
             ->columns([
                 ImageColumn::make('image')
-                    ->state(
-                        fn (Set $s): string => version("images/omr/models/" . substr($s->mainModel()->filename(), 0, -4) . '_thumb.png')
-                    )
+                    ->state(fn (Set $set) => $set->mainModel()?->getFirstMediaUrl('image', 'thumb') ?? blank_image_url())
                     ->grow(false)
                     ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]']),
                 TextColumn::make('number')

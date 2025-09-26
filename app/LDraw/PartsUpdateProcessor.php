@@ -8,6 +8,7 @@ use App\Enums\PartType;
 use App\Events\PartReleased;
 use App\Jobs\CheckPart;
 use App\Jobs\UpdateImage;
+use App\LDraw\Managers\Part\PartManager;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\Part\PartRelease;
@@ -187,10 +188,7 @@ class PartsUpdateProcessor
     {
         // Release marked parts
         $this->parts
-            ->each(function (Part $part) {
-                $this->updatePartsList($part);
-                $this->releasePart($part);
-            });
+            ->each(fn (Part $part) => $this->releasePart($part));
 
         // Release minor edits
         Part::official()
@@ -215,40 +213,6 @@ class PartsUpdateProcessor
                 $part->generateHeader();
                 $part->save();
             });
-
-        if (!is_null($this->release->part_list)) {
-            $partslist = $this->release->part_list;
-            usort($partslist, function (array $a, array $b) {
-                return $a[0] <=> $b[0];
-            });
-            $this->release->part_list = $partslist;
-            $this->release->save();
-        }
-    }
-
-    protected function updatePartsList(Part $part): void
-    {
-        if (is_null($part->official_part) && $part->type->inPartsFolder()) {
-            $pl = $this->release->part_list ?? [];
-            $pl[] = [$part->description, $part->filename];
-            $f = substr($part->filename, 0, -4);
-            $this->tempDir->path("view{$this->release->short}");
-            if ($part->isTexmap()) {
-                $tempPath = $this->tempDir->path("view{$this->release->short}/{$part->filename}");
-                $contents = $part->get();
-                file_put_contents($tempPath, $contents);
-            } elseif (Storage::disk('images')->exists("library/unofficial/{$f}.png")) {
-                $tempPath = $this->tempDir->path("view{$this->release->short}/{$f}.png");
-                $contents = Storage::disk('images')->get("library/unofficial/{$f}.png");
-                file_put_contents($tempPath, $contents);
-            }
-            if (Storage::disk('images')->exists("library/unofficial/{$f}_thumb.png")) {
-                $tempPath = $this->tempDir->path("view{$this->release->short}/{$f}_thumb.png");
-                $contents = Storage::disk('images')->get("library/unofficial/{$f}_thumb.png");
-                file_put_contents($tempPath, $contents);
-            }
-            $this->release->part_list = $pl;
-        }
     }
 
     protected function releasePart(Part $part): void
@@ -281,6 +245,17 @@ class PartsUpdateProcessor
             $part->refresh();
             $part->generateHeader();
             $part->save();
+            if ($part->type->inPartsFolder()) {
+                $this->release
+                    ->addMedia($part->getFirstMediaPath(), 'images')
+                    ->preservingOriginal()
+                    ->withCustomProperties([
+                    'description' => $part->description,
+                    'filename' => $part->filename,
+                    'id' => $part->id,
+                ])
+                ->toMediaCollection('view');
+            }
         }
     }
 
@@ -336,16 +311,6 @@ class PartsUpdateProcessor
         // Copy the new non-Part files to the library
         foreach ($this->extraFiles as $filename => $contents) {
             Storage::disk('library')->put("official/ldraw/{$filename}", $contents);
-        }
-
-        // Copy the part preview images to images
-        $dir = new RecursiveDirectoryIterator($this->tempDir->path("view{$this->release->short}"));
-        foreach (new RecursiveIteratorIterator($dir) as $file) {
-            if ($file->isFile()) {
-                $image = file_get_contents($file->getPath() . "/" . $file->getFilename());
-                $fn = str_replace($this->tempDir->path("view{$this->release->short}"), '', $file->getPath() . "/" . $file->getFilename());
-                Storage::disk('images')->put("library/updates/view{$this->release->short}{$fn}", $image);
-            }
         }
 
         $this->release->enabled = true;

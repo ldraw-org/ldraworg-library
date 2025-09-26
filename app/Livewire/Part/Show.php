@@ -51,7 +51,6 @@ class Show extends Component implements HasSchemas, HasActions
     public Part $part;
     public ?string $comment = null;
     public ?string $vote_type_code = null;
-    public string $image;
 
     public function form(Schema $schema): Schema
     {
@@ -106,8 +105,6 @@ class Show extends Component implements HasSchemas, HasActions
                 ->orderBy('part_release_id', 'desc')
                 ->firstOrFail();
         }
-        $this->image =
-            $this->part->isTexmap() ? route('part.download', ['library' => $this->part->libFolder(), 'filename' => $this->part->filename]) : version("images/library/{$this->part->imagePath()}");
         $this->form->fill();
     }
 

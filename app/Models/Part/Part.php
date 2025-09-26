@@ -11,6 +11,7 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
 use App\LDraw\Check\PartCheckBag;
+use App\LDraw\Render\LDView;
 use App\Models\RebrickablePart;
 use App\Models\StickerSheet;
 use App\Models\Traits\HasErrorScopes;
@@ -27,6 +28,7 @@ use App\Models\Traits\HasUser;
 use App\Models\User;
 use App\Models\Vote;
 use App\Observers\PartObserver;
+use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,7 +37,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Spatie\Image\Enums\Fit;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 use Znck\Eloquent\Relations\BelongsToThrough;
 use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
@@ -44,8 +52,10 @@ use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
  * @mixin IdeHelperPart
  */
 #[ObservedBy([PartObserver::class])]
-class Part extends Model
+class Part extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+    use PivotEventTrait;
     use HasGraphRelationships;
     use BelongsToThroughTrait;
     use HasPartRelease;
@@ -97,6 +107,20 @@ class Part extends Model
             'rebrickable' => AsArrayObject::class,
             'help' => 'array',
         ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('image')
+            ->singleFile()
+            ->registerMediaConversions(function (Media $media) {
+                $this->addMediaConversion('thumb')
+                    ->keepOriginalImageFormat()
+                    ->fit(Fit::Contain, 35, 75);                    
+                $this->addMediaConversion('feed-image')
+                    ->keepOriginalImageFormat()
+                    ->fit(Fit::Contain, 85, 85);                    
+            });
     }
 
     public function getPivotTableName(): string
@@ -394,6 +418,14 @@ class Part extends Model
         return str_replace('/', '\\', str_replace(["parts/", "p/"], '', $this->filename));
     }
 
+    public function orderedEvents(): Collection
+    {
+        return $this->events->sortBy([
+            ['created_at', 'asc'],
+            fn (PartEvent $a, PartEvent $b) => ($a->event_type == EventType::Submit ? 0 : 1) <=> ($b->event_type == EventType::Submit ? 0 : 1)
+        ]);
+    }
+
     public function previewValues(): array
     {
         $preview = is_null($this->preview) ? '16 0 0 0 1 0 0 0 1 0 0 0 1' : $this->preview;
@@ -620,6 +652,7 @@ class Part extends Model
 
     public function generateHeader(bool $save = true): void
     {
+        $this->load('user', 'history', 'keywords', 'release');
         $header = [];
         $header[] = "0 {$this->description}" ?? '' ;
         $header[] = "0 Name: {$this->name()}" ?? '';
@@ -708,6 +741,9 @@ class Part extends Model
         $this->header = implode("\n", $header);
         if ($save) {
             $this->saveQuietly();
+        }
+        if (config('ldraw.library_debug')) {
+            Log::debug("Generated header for {$this->id} ({$this->filename})\n{$this->header}");
         }
     }
 

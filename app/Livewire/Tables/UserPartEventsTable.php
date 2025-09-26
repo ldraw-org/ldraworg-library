@@ -51,9 +51,10 @@ class UserPartEventsTable extends BasicTable implements HasActions
                         ->state(
                             function (PartEvent $event) {
                                 if (!is_null($event->part)) {
-                                    return version("images/library/{$event->part->imageThumbPath()}");
+                                    return $event->part->getFirstMediaUrl('image', 'thumb');
                                 } else {
-                                    return asset('images/library/placeholder.png');
+                                    // One pixel transparent png
+                                    return blank_image_url();
                                 }
                             }
                         )

@@ -10,6 +10,8 @@ use GdImage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
+use Spatie\ImageOptimizer\OptimizerChain;
+use Spatie\ImageOptimizer\Optimizers\Optipng;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class LDView
@@ -23,7 +25,7 @@ class LDView
         $this->debug = config('ldraw.ldview_debug', false);
     }
 
-    public function render(Part|OmrModel $part): GDImage
+    public function render(string|Part|OmrModel $part): GDImage
     {
         $tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
         $ldconfigPath = Storage::disk('library')->path('official/LDConfig.ldr');
@@ -73,6 +75,7 @@ class LDView
         if (!file_exists($imagepath)) {
             file_put_contents($imagepath, base64_decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII="));
         }
+        (new OptimizerChain())->addOptimizer(new Optipng([]))->optimize($imagepath);
         $png = imagecreatefrompng($imagepath);
         imagesavealpha($png, true);
 

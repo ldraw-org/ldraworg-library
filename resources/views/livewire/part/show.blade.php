@@ -153,9 +153,9 @@
         <div class="w-full p-4 border border-gray-200 rounded-md">
           <div class="flex flex-col md:flex-row-reverse w-full">
             <div class="flex w-full justify-center items-center md:w-1/3">
-              <img class = 'w-80 h-80 object-contain'
+                <img class = 'w-80 h-80 object-contain'
                 @if(!$part->isTexmap()) wire:click="$dispatch('open-modal', { id: 'ldbi' })" @endif
-                src="{{$image}}" alt="{{ $part->description }}" title="{{ $part->description }}">
+                src="{{$part->getFirstMediaUrl('image')}}" alt="{{ $part->description }}" title="{{ $part->description }}">
             </div>
             <div class="w-full md:w-2/3">
               <div class="justify-self-start w-full">
@@ -213,7 +213,7 @@
                     <x-slot name="header">
                         Archived Part Events:
                     </x-slot>
-                    @forelse ($part->events->official()->sortBy('created_at') as $event)
+                    @forelse ($part->orderedEvents()->official() as $event)
                         <x-event.list.item :$event wire:key="part-event-{{$event->id}}" />
                     @empty
                         <div>None</div>
@@ -221,7 +221,7 @@
                 </x-accordion>
             @endif
             @if ($part->isUnofficial())
-                @forelse ($part->events->unofficial()->sortBy('created_at') as $event)
+                @forelse ($part->orderedEvents()->unofficial() as $event)
                     <x-event.list.item :$event wire:key="part-event-{{$event->id}}" />
                 @empty
                     <div>No Events</div>

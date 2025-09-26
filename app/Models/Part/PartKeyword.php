@@ -2,17 +2,18 @@
 
 namespace App\Models\Part;
 
+use App\Observers\PartKeywordObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @mixin IdeHelperPartKeyword
  */
+#[ObservedBy(PartKeywordObserver::class)]
 class PartKeyword extends Model
 {
-    protected $fillable = [
-        'keyword',
-    ];
+    protected $guarded = [];
 
     public $timestamps = false;
 

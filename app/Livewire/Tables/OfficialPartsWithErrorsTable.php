@@ -10,6 +10,7 @@ use App\Enums\PartError;
 use App\Filament\Actions\Part\Download\PartFileDownloadAction;
 use App\Models\Part\Part;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -26,10 +27,9 @@ class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
             )
             ->heading('Official Parts With Errors')
             ->columns([
-                ImageColumn::make('image')
-                    ->state(
-                        fn (Part $p): string => asset("images/library/{$p->libFolder()}/" . substr($p->filename, 0, -4) . '_thumb.png')
-                    )
+                SpatieMediaLibraryImageColumn::make('image')
+                    ->collection('image')
+                    ->conversion('thumb')
                     ->grow(false)
                     ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]']),
                 TextColumn::make('filename')

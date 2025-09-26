@@ -20,6 +20,7 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -53,10 +54,9 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                 Split::make([
                     ToggleColumn::make('marked_for_release')
                         ->grow(false),
-                    ImageColumn::make('image')
-                        ->state(
-                            fn (Part $p): string => asset("images/library/{$p->libFolder()}/" . substr($p->filename, 0, -4) . '_thumb.png')
-                        )
+                    SpatieMediaLibraryImageColumn::make('image')
+                        ->collection('image')
+                        ->conversion('thumb')
                         ->grow(false)
                         ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]']),
                     Stack::make([

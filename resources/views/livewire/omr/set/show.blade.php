@@ -8,7 +8,7 @@
         <div class="grid grid-cols-12 gap-2">
             <div class="col-span-8">
                 <img class='object-scale-down' wire:click="openModal({{$set->mainModel()->id}})"
-                src="{{version("images/omr/models/" . substr($set->mainModel()->filename(), 0, -4) . '.png')}}" alt="{{$set->number}} - {{$set->name}}" title="{{$set->number}} - {{$set->name}}">
+                src="{{$set->mainModel()->getFirstMediaUrl('image')}}" alt="{{$set->number}} - {{$set->name}}" title="{{$set->number}} - {{$set->name}}">
             </div>
             <div class="flex flex-col col-span-4 space-y-2">
                 <div class="rounded border border-gray-200 text-lg font-bold bg-gray-200 p-2">Models</div>

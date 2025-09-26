@@ -1,7 +1,7 @@
 <x-mail::message>
 # Parts Tracker Daily Summary for {{$date->format('Y-m-d')}}
 @foreach($parts as $part)
-![{{$part->description}}]({{$message->embed(storage_path("app/images/library/{$part->libFolder()}/" . substr($part->filename, 0, -4) . '_thumb.png'))}})
+![{{$part->description}}]({{$message->embed($part->getFirstMediaPath('image'))}})
 ## [{{$part->filename}} - {{$part->description}}]({{route('parts.show', $part)}})
 @foreach ($part->events->whereBetween('created_at', [$date, $next]) as $event)
 ### On {{$event->created_at}}:

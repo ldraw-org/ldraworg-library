@@ -7,12 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Image\Enums\Fit;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @mixin IdeHelperPartRelease
  */
-class PartRelease extends Model
+class PartRelease extends Model implements HasMedia
 {
+    use InteractsWithMedia;
     use HasParts;
     use HasFactory;
 
@@ -39,6 +44,16 @@ class PartRelease extends Model
             'part_data' => AsArrayObject::class,
             'enabled' => 'boolean',
         ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('view')
+            ->registerMediaConversions(function (Media $media) {
+                $this->addMediaConversion('thumb')
+                    ->keepOriginalImageFormat()
+                    ->fit(Fit::Contain, 35, 75);                    
+            });
     }
 
     protected function notes(): Attribute
