@@ -13,7 +13,7 @@
         <meta property="og:type" content="website">
         <meta property="og:title" content="File Detail {{ $part->filename }}">
         <meta property="og:description" content="{{$part->description}}">
-        <meta property="og:image" content="{{$image}}">
+        <meta property="og:image" content="{{$part->getFirstMediaUrl('image')}}">
 
         <!-- Twitter Meta Tags -->
         <meta name="twitter:card" content="summary_large_image">
@@ -21,7 +21,7 @@
         <meta property="twitter:url" content="{{Request::url()}}">
         <meta name="twitter:title" content="File Detail {{ $part->filename }}">
         <meta name="twitter:description" content="{{$part->description}}">
-        <meta name="twitter:image" content="{{$image}}">
+        <meta name="twitter:image" content="{{$part->getFirstMediaUrl('image')}}">
     @endpush
 
     <div class="flex flex-col space-y-4">
