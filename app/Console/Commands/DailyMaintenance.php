@@ -68,14 +68,14 @@ class DailyMaintenance extends Command
 
             $this->info('Regenerate unofficial zip');
             $this->call('lib:refresh-zip');
+
+            $this->info('Queueing missing images');
+            $this->call('lib:render-parts', ['--missing' => true]);
+            $this->call('lib:render-models', ['--missing' => true]);
+        } else {
+            $this->info('Queueing missing images');
+            $this->call('lib:render-parts', ['--unofficial-only', '--missing' => true]);
         }
-
-        $this->info('Removing orphan images');
-        PurgeOrphanImages::dispatch();
-
-        $this->info('Queueing missing images');
-        $this->call('lib:render-parts', ['--unofficial-only' => true, '--missing' => true]);
-        $this->call('lib:render-models', ['--missing' => true]);
 
         $this->info('Pruning failed jobs');
         $this->call('queue:prune-failed');

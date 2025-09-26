@@ -6,7 +6,6 @@ use App\Jobs\UpdateImage;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 
 class RenderParts extends Command
 {
@@ -47,10 +46,7 @@ class RenderParts extends Command
         $parts
             ->lazy()
             ->each(function (Part $p) use (&$count) {
-                $image = str_replace('.dat', '.png', "library/unofficial/{$p->filename}");
-                $thumb = str_replace('.png', '_thumb.png', $image);
-                $image_missing = !Storage::disk('images')->exists($image) && !Storage::disk('images')->exists($thumb);
-                if (!$this->option('missing') || ($this->option('missing') && $image_missing)) {
+                if (!$this->option('missing') || ($this->option('missing') && is_null($p->getFirstMedia('image')))) {
                     UpdateImage::dispatch($p)->onQueue('maintenance');
                     $count++;
                 }

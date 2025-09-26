@@ -46,7 +46,6 @@ class MassUpdate extends Command
             ->get()
             ->each(function (Part $part) use ($pm, $vm, $user) {
                 $upart = $pm->submit(LDrawFile::fromPart($part), $user)->first();
-                PartSubmitted::dispatch($upart, $user);
                 $upart->body->body = preg_replace(config('ldraw.patterns.line_type_3'), '3 $1 $8 $9 $10 $5 $6 $7 $2 $3 $4', $upart->body->body);
                 $upart->body->body = preg_replace(config('ldraw.patterns.line_type_4'), '4 $1 $11 $12 $13 $8 $9 $10 $5 $6 $7 $2 $3 $4', $upart->body->body);
                 $upart->body->save();

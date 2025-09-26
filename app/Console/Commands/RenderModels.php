@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Jobs\UpdateImage;
 use App\Models\Omr\OmrModel;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 
 class RenderModels extends Command
 {
@@ -39,10 +38,7 @@ class RenderModels extends Command
         $models
             ->lazy()
             ->each(function (OmrModel $m) use (&$count) {
-                $image = str_replace(['.dat','.mpd','.ldr'], '.png', "omr/models/{$m->filename()}");
-                $thumb = str_replace('.png', '_thumb.png', $image);
-                $image_missing = !Storage::disk('images')->exists($image) && !Storage::disk('images')->exists($thumb);
-                if (!$this->option('missing') || ($this->option('missing') && $image_missing)) {
+                if (!$this->option('missing') || ($this->option('missing') && is_null($m->getFirstMedia('image')))) {
                     UpdateImage::dispatch($m)->onQueue('maintenance');
                     $count++;
                 }
