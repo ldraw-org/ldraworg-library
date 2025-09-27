@@ -17,21 +17,26 @@ class SupportFiles
 
     public static function libaryCsv(): string
     {
+        set_time_limit(0);
         $csv = "part_number,part_description,part_url,image_url,image_last_modified\n";
-        foreach (Part::query()->partsFolderOnly()->lazy() as $part) {
-            if (in_array($part->description[0], ['~','_','|','='])) {
-                continue;
-            }
-            $image = "{$part->libFolder()}/" . substr($part->filename, 0, -4) . '.png';
-            $vals = [
-                basename($part->filename),
-                '"' . str_replace('"', '""', $part->description) . '"',
-                route('part.download', ['library' => $part->libFolder(), 'filename' => $part->filename]),
-                $part->getFirstMediaUrl('images'),
-                Carbon::createFromTimestamp(Storage::disk('images')->lastModified("library/{$image}"))->format('Y-m-d')
-            ];
-            $csv .= implode(',', $vals) . "\n";
-        }
+        Part::query()
+            ->doesntHave('official_part')
+            ->partsFolderOnly()
+            ->where('description', 'NOT LIKE', '~%')
+            ->where('description', 'NOT LIKE', '\_%')
+            ->where('description', 'NOT LIKE', '|%')
+            ->where('description', 'NOT LIKE', '=%')
+            ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete])
+            ->each(function (Part $part) use (&$csv) {
+                $vals = [
+                    basename($part->filename),
+                    '"' . str_replace('"', '""', $part->description) . '"',
+                    route('part.download', ['library' => $part->libFolder(), 'filename' => $part->filename]),
+                    $part->getFirstMediaUrl('image'),
+                    $part->getFirstMedia('image')->created_at->format('Y-m-d')
+                ];
+                $csv .= implode(',', $vals) . "\n";
+            });
         return $csv;
     }
 
