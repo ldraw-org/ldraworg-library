@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 /**
  * @mixin IdeHelperPartKeyword
  */
-#[ObservedBy(PartKeywordObserver::class)]
 class PartKeyword extends Model
 {
     protected $guarded = [];
