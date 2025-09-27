@@ -52,14 +52,6 @@ return [
             'directory_visibility' => 'public',
             'throw' => false,
         ],
-        'images' => [
-            'driver' => 'local',
-            'root' => storage_path('app/images'),
-            'url' => env('APP_URL').'/images',
-            'visibility' => 'public',
-            'directory_visibility' => 'public',
-            'throw' => false,
-        ],
         'library-media' => [
             'driver' => 'local',
             'root' => storage_path('app/library-media'),

@@ -1,16 +1,16 @@
 @props(['release'])
-<div class="flex flex-col rounded border border-gray-200 divide-y w-fit">
+<div class="flex flex-col rounded border border-gray-200 divide-y divide-gray-200 w-fit">
     <div class="flex flex-row items-center">
         <div class="font-bold justify-self-start p-2">
             LDraw.org Parts Update {{$release->name}}
         </div>
-        @if (\Storage::disk('images')->exists('updates/' . $release->short . '.png'))
+        @if (file_exists(public_path('images/updates/' . $release->short . '.png'))))
             <img class="w-1/3 justify-self-end p-2" src="{{asset('images/updates/' .  $release->short . '.png')}}"/>
         @else
             <img class="w-1/3 justify-self-end p-2" src="{{asset('images/updates/default.png')}}"/>
         @endif
     </div>
-    <div class="flex flex-row divide-x">
+    <div class="flex flex-row divide-x divide-gray-200">
         <div class="flex flex-col justify-items-start">
             <div class="font-bold p-2">
                 Release Notes
