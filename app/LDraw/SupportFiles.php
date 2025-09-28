@@ -19,24 +19,25 @@ class SupportFiles
     {
         set_time_limit(0);
         $csv = "part_number,part_description,part_url,image_url,image_last_modified\n";
-        Part::query()
+        $csv .= Part::select('id', 'filename', 'description', 'part_release_id')
+            ->with('media')
             ->doesntHave('official_part')
             ->partsFolderOnly()
+            ->where('description', 'NOT LIKE', '=%')
+            ->where('description', 'NOT LIKE', '|%')
             ->where('description', 'NOT LIKE', '~%')
             ->where('description', 'NOT LIKE', '\_%')
-            ->where('description', 'NOT LIKE', '|%')
-            ->where('description', 'NOT LIKE', '=%')
             ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete])
-            ->each(function (Part $part) use (&$csv) {
-                $vals = [
-                    basename($part->filename),
-                    '"' . str_replace('"', '""', $part->description) . '"',
-                    route('part.download', ['library' => $part->libFolder(), 'filename' => $part->filename]),
-                    $part->getFirstMediaUrl('image'),
-                    $part->getFirstMedia('image')->created_at->format('Y-m-d')
-                ];
-                $csv .= implode(',', $vals) . "\n";
-            });
+            ->get()
+            ->map(function (Part $part) {
+                $media = $part->getFirstMedia('image');
+                return basename($part->filename)
+                    . ',"' . str_replace('"', '""', $part->description) . '"'
+                    . ',' . route('part.download', ['library' => is_null($part->part_release_id) ? 'unofficial' : 'official', 'filename' => $part->filename])
+                    . ',' . version('media/ldraw/' . $part->libFolder() . '/' . substr($part->filename, 0, -3) . 'png')
+                    . ',' . $media->created_at->format('Y-m-d');
+            })
+            ->implode("\n");
         return $csv;
     }
 
