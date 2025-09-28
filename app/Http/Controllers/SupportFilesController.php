@@ -6,6 +6,7 @@ use App\LDraw\LDrawModelMaker;
 use App\LDraw\SupportFiles;
 use App\Models\Part\Part;
 use App\Models\Omr\OmrModel;
+use Illuminate\Support\Facades\Storage;
 
 class SupportFilesController extends Controller
 {
@@ -26,7 +27,10 @@ class SupportFilesController extends Controller
 
     public function librarycsv()
     {
-        return response(SupportFiles::libaryCsv())->header('Content-Type', 'text/plain; charset=utf-8');
+        if (!Storage::disk('library')->exists('library.csv')) {
+            SupportFiles::setLibraryCsv();
+        }
+        return response(Storage::disk('library')->get('library.csv'))->header('Content-Type', 'text/plain; charset=utf-8');
     }
 
     public function ptreleases(string $output)

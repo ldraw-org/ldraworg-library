@@ -15,9 +15,8 @@ class SupportFiles
         return implode("\n", array_column(PartCategory::cases(), 'value'));
     }
 
-    public static function libaryCsv(): string
+    public static function setLibraryCsv(): void
     {
-        set_time_limit(0);
         $csv = "part_number,part_description,part_url,image_url,image_last_modified\n";
         $csv .= Part::select('id', 'filename', 'description', 'part_release_id')
             ->with('media')
@@ -38,7 +37,7 @@ class SupportFiles
                     . ',' . $media->created_at->format('Y-m-d');
             })
             ->implode("\n");
-        return $csv;
+        Storage::disk('library')->put('library.csv', $csv);
     }
 
     public static function ptReleases(string $output = "xml"): string
