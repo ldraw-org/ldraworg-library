@@ -222,7 +222,7 @@ class EditHeaderAction
             $part->type_qualifier = $pq;
         }
 
-        if (Arr::has($data, 'help')) {
+        if (Arr::has($data, 'help') && Arr::get($data, 'help')) {
             $newHelp = "0 !HELP " . str_replace(["\n","\r"], ["\n0 !HELP ",''], $data['help']);
             $newHelp = $manager->parser->getHelp($newHelp);
         } else {
