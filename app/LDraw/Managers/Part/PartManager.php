@@ -395,7 +395,6 @@ class PartManager
         // Set Minifig warning but only for unofficial parts
         if ($part->isUnofficial() && $part->type->inPartsFolder() && $part->category == PartCategory::Minifig) {
             $part->part_check->add(PartError::WarningMinifigCategory);
-            $part->can_release = $can_release;
         }
         
         // Set Sticker color warning.
@@ -408,6 +407,7 @@ class PartManager
             }  
         }
         
+        $part->can_release = $can_release;
         $part->updateReadyForAdmin();
         $part->save();
     }
