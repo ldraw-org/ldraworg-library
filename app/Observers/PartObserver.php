@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\LDraw\Managers\Part\PartManager;
 use App\Events\PartDeleted;
+use App\Jobs\UpdateLibraryCsv;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Part\Part;
 use App\Models\User;
@@ -28,17 +29,40 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         PartDeleted::dispatch(Auth::user() ?? User::find(1), $part->filename, $part->description);
     }
 
-/*
+
     public function saving(Part $part): void
     {
-        if ($part->isDirty()) {
+        if (config('ldraw.library_debug')) {
+            Log::debug("Saving part {$part->id} ({$part->filename})");
+        }
+        if ($part->isDirty(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
+            UpdateLibraryCsv::dispatch();
+            if (config('ldraw.library_debug')) {
+                Log::debug("Updated library.csv while saving {$part->id} ({$part->filename})");
+            }
+        }
+/*
+        if ($part->isDirty([
+            'description', 
+            'filename',
+            'user_id',
+            'type',
+            'type_qualifier',
+            'part_release_id',
+            'help',
+            'category',
+            'part_release_id',
+            'bfc',
+            'cmdline',
+            'license',
+            'preview'
+        ])) {
             $part->generateHeader(false);
         }
-        if (config('ldraw.library_debug')) {
-            Log::debug("Saved part {$part->id} ({$part->filename})");
-        }
+*/
     }
 
+/*
     public function updating(Part $part): void
     {
         if ($part->isDirty()) {

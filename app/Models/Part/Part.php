@@ -339,6 +339,26 @@ class Part extends Model implements HasMedia
             Str::of($this->description)->startsWith('~Obsolete');
     }
 
+    public function isFix(): bool
+    {
+        return $this->isUnofficial() && !is_null($this->official_part);
+    }
+
+    public function isNotFix(): bool
+    {
+        return is_null($this->official_part);
+    }
+
+    public function hasFix(): bool
+    {
+        return $this->isOfficial() && !is_null($this->unofficial_part);
+    }
+
+    public function doesntHaveFix(): bool
+    {
+        return is_null($this->unofficial_part);
+    }
+
     public function canSetRebrickablePart(): bool
     {
         return $this->type->inPartsFolder() &&
@@ -401,16 +421,6 @@ class Part extends Model implements HasMedia
     public function libFolder(): string
     {
         return $this->isUnofficial() ? 'unofficial' : 'official';
-    }
-
-    public function imagePath(): string
-    {
-        return "{$this->libFolder()}/{$this->type->folder()}/" . basename($this->filename, ".{$this->type->format()}") . '.png';
-    }
-
-    public function imageThumbPath(): string
-    {
-        return "{$this->libFolder()}/{$this->type->folder()}/" . basename($this->filename, ".{$this->type->format()}") . '_thumb.png';
     }
 
     public function name(): string
