@@ -89,7 +89,7 @@ class ZipFiles
         $updateZip->close();
         $completeZip->close();
 
-        Part::official()->chunk(500, function (Collection $parts) use ($updateZip, $completeZip, $updateZipName, $completeZipName, $tempDir, $release) {
+        Part::official()->chunk(100, function (Collection $parts) use ($updateZip, $completeZip, $updateZipName, $completeZipName, $tempDir, $release) {
             $updateZip->open($updateZipName);
             $completeZip->open($completeZipName);
             $parts->each(function (Part $part) use ($updateZip, $completeZip, $tempDir, $release) {

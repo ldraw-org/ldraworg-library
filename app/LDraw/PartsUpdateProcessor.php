@@ -17,6 +17,7 @@ use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
 use App\Models\User;
 use App\Settings\LibrarySettings;
+use Illuminate\Support\Facades\Log;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -43,7 +44,9 @@ class PartsUpdateProcessor
     {
         $this->settings->tracker_locked = true;
         $this->settings->save();
+        Log::debug('Creating Release Parts');
         $this->makeNextRelease();
+        Log::debug('Releasing Parts');
         $this->releaseParts();
         Part::canHaveRebrickablePart()
             ->doesntHave('sticker_sheet')
@@ -54,7 +57,9 @@ class PartsUpdateProcessor
         $this->settings->tracker_locked = false;
         $this->settings->save();
         $this->copyReleaseFiles();
+        Log::debug('Post Release Cleanup');
         $this->postReleaseCleanup();
+        Log::debug('Release Complete');
     }
 
     protected function makeNextRelease(): void
@@ -227,6 +232,8 @@ class PartsUpdateProcessor
             'comment' => "Official Update {$this->release->name}"
         ]);
 
+        $imagePath = $this->tempDir->path(substr($part->filename, 0, -4) . '.png');
+        file_put_contents($imagePath, file_get_contents($part->getFirstMediaPath('image')));
 
         PartEvent::unofficial()->where('part_id', $part->id)->update(['part_release_id' => $this->release->id]);
 
@@ -239,24 +246,30 @@ class PartsUpdateProcessor
                 ->where('part_id', $part->id)
                 ->update(['part_id' => $opart->id]);
             $part->deleteQuietly();
+            $opart->addMedia($imagePath)
+                ->toMediaCollection('image');
         } else {
             $part->part_release_id = $this->release->id;
             $part->save();
             $part->refresh();
             $part->generateHeader();
             $part->save();
+            $part->clearMediaCollection('image');
+            $part->addMedia($imagePath)
+                ->preservingOriginal()
+                ->toMediaCollection('image');
             if ($part->type->inPartsFolder()) {
                 $this->release
-                    ->addMedia($part->getFirstMediaPath(), 'image')
-                    ->preservingOriginal()
+                    ->addMedia($imagePath, 'image')
                     ->withCustomProperties([
-                    'description' => $part->description,
-                    'filename' => $part->filename,
-                    'id' => $part->id,
-                ])
-                ->toMediaCollection('view');
+                        'description' => $part->description,
+                        'filename' => $part->filename,
+                        'id' => $part->id,
+                    ])
+                    ->toMediaCollection('view');
             }
         }
+        
     }
 
     protected function updateOfficialWithUnofficial(Part $upart, Part $opart): Part
@@ -300,6 +313,7 @@ class PartsUpdateProcessor
         Storage::disk('library')->move('updates/LDrawParts.exe', "updates/LDraw{$previousRelease->short}.exe");
 
         // Make and copy the new archives to the library
+        Log::debug('Making Zips');
         ZipFiles::releaseZips($this->release, $this->extraFiles, file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt")), $this->includeLdconfig, $this->tempDir);
         Storage::disk('library')->put("updates/lcad{$this->release->short}.zip", file_get_contents($this->tempDir->path("lcad{$this->release->short}.zip")));
         Storage::disk('library')->put("updates/complete.zip", file_get_contents($this->tempDir->path("complete.zip")));
