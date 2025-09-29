@@ -2,7 +2,7 @@
     <x-slot:title>{{$release->name}} New Parts Preview</x-slot>
     <div class="text-lg font-bold">{{$release->name}} New Parts Preview</div>
     <div class="flex flex-col space-y-2">
-        @forelse($release->getMedia('view') as $part)
+        @forelse($release->getMedia('view')->sortBy('custom_properties.description') as $part)
             <div class="rounded border border-gray-200 w-fit">
                 <div class="flex flex-row space-x-2 items-center font-bold bg-gray-200 p-2">
                     <div>
