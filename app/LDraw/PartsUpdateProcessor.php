@@ -247,7 +247,7 @@ class PartsUpdateProcessor
             $part->save();
             if ($part->type->inPartsFolder()) {
                 $this->release
-                    ->addMedia($part->getFirstMediaPath(), 'images')
+                    ->addMedia($part->getFirstMediaPath(), 'image')
                     ->preservingOriginal()
                     ->withCustomProperties([
                     'description' => $part->description,
