@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\UpdateLibraryCsv;
-use App\LDraw\SupportFiles;
+use App\Services\LDraw\SupportFiles;
 use Illuminate\Console\Command;
 
 class RefreshLibraryCsv extends Command

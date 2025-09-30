@@ -3,8 +3,8 @@
 namespace App\Filament\Actions;
 
 use Filament\Schemas\Components\Utilities\Get;
-use App\LDraw\Check\Checks\LibraryApprovedDescription;
-use App\LDraw\Check\Checks\PatternPartDesciption;
+use App\Services\LDraw\Check\Checks\LibraryApprovedDescription;
+use App\Services\LDraw\Check\Checks\PatternPartDesciption;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -13,9 +13,9 @@ use App\Filament\Forms\Components\AuthorSelect;
 use App\Filament\Forms\Components\PreviewSelect;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
-use App\LDraw\Check\PartChecker;
-use App\LDraw\Parse\ParsedPart;
-use App\LDraw\Managers\Part\PartManager;
+use App\Services\LDraw\Check\PartChecker;
+use App\Services\LDraw\Parse\ParsedPart;
+use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
 use App\Models\Part\PartKeyword;

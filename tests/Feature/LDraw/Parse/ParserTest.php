@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 test('dosLineEndings', function (string $input, string $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->dosLineEndings($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->dosLineEndings($input))->toBe($expected);
 })->with([
     'unix style' => ["a\nb\nc\n", "a\r\nb\r\nc\r\n"],
     'mac style' => ["a\rb\rc\r", "a\r\nb\r\nc\r\n"],
@@ -18,7 +18,7 @@ test('dosLineEndings', function (string $input, string $expected) {
 ]);
 
 test('unixLineEndings', function (string $input, string $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->unixLineEndings($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->unixLineEndings($input))->toBe($expected);
 })->with([
     'unix style' => ["a\nb\nc\n", "a\nb\nc\n"],
     'mac style' => ["a\rb\rc\r", "a\nb\nc\n"],
@@ -27,7 +27,7 @@ test('unixLineEndings', function (string $input, string $expected) {
 ]);
 
 test('get description', function (string $input, ?string $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getDescription($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getDescription($input))->toBe($expected);
 })->with([
     'normal' => ["0 Test", "Test"],
     'multi-word' => ["0 Test Description", "Test Description"],
@@ -40,7 +40,7 @@ test('get description', function (string $input, ?string $expected) {
 ]);
 
 test('get name', function (string $input, ?string $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getName($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getName($input))->toBe($expected);
 })->with([
     'normal' => ["0 Name: 123.dat", "123.dat"],
     'with folder' => ["0 Name: s\\123.dat", "s\\123.dat"],
@@ -53,7 +53,7 @@ test('get name', function (string $input, ?string $expected) {
 ]);
 
 test('get license', function (string $input, ?string $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getLicense($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getLicense($input))->toBe($expected);
 })->with([
     'normal, any text' => ["0 !LICENSE abcde", "abcde"],
     'normal, actual text' => ["0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt", "Licensed under CC BY 4.0 : see CAreadme.txt"],
@@ -64,7 +64,7 @@ test('get license', function (string $input, ?string $expected) {
 ]);
 
 test('get cmd line', function (string $input, ?string $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getCmdLine($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getCmdLine($input))->toBe($expected);
 })->with([
     'normal, any text' => ["0 !CMDLINE abcde", "abcde"],
     'normal, actual text' => ["0 !CMDLINE -c39", '-c39'],
@@ -75,7 +75,7 @@ test('get cmd line', function (string $input, ?string $expected) {
 ]);
 
 test('get meta category', function (string $input, ?PartCategory $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getMetaCategory($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getMetaCategory($input))->toBe($expected);
 })->with([
     'normal, actual one word text' => ["0 !CATEGORY Brick", PartCategory::Brick],
     'normal, actual multi-word text' => ["0 !CATEGORY Minifig Accessory", PartCategory::MinifigAccessory],
@@ -87,7 +87,7 @@ test('get meta category', function (string $input, ?PartCategory $expected) {
 ]);
 
 test('get description category', function (string $input, ?PartCategory $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getDescriptionCategory($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getDescriptionCategory($input))->toBe($expected);
 })->with([
     'normal' => ["0 Brick Description", PartCategory::Brick],
     'with line ending' => ["0 Brick Description\n", PartCategory::Brick],
@@ -99,7 +99,7 @@ test('get description category', function (string $input, ?PartCategory $expecte
 ]);
 
 test('get author', function (string $input, ?array $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getAuthor($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getAuthor($input))->toBe($expected);
 })->with([
     'reaname, no username' => ["0 Author: Test", ['realname' => 'Test', 'user' => '']],
     'multiple word realname, no username' => ["0 Author: Test Test2 von Testington", ['realname' => 'Test Test2 von Testington', 'user' => '']],
@@ -114,7 +114,7 @@ test('get author', function (string $input, ?array $expected) {
 ]);
 
 test('get keywords', function (string $input, ?array $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getKeywords($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getKeywords($input))->toBe($expected);
 })->with([
     ["0 !KEYWORDS Comment", ['Comment']],
     ["0 !KEYWORDS Comment, Comment2", ['Comment', 'Comment2']],
@@ -128,7 +128,7 @@ test('get keywords', function (string $input, ?array $expected) {
 ]);
 
 test('get type', function (string $input, ?array $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getType($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getType($input))->toBe($expected);
 })->with([
     'unofficial, no qualifier' => ["0 !LDRAW_ORG Unofficial_Part", ['unofficial' => true, 'type' => 'Part', 'qual' => null, 'releasetype' => null, 'release' => null]],
     'unofficial with qualifier' => ["0 !LDRAW_ORG Unofficial_Part Flexible_Section", ['unofficial' => true, 'type' => 'Part', 'qual' => 'Flexible_Section', 'releasetype' => null, 'release' => null]],
@@ -147,7 +147,7 @@ test('get type', function (string $input, ?array $expected) {
 ]);
 
 test('get help', function (string $input, ?array $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getHelp($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getHelp($input))->toBe($expected);
 })->with([
     'single statement' => ["0 !HELP Comment", ['Comment']],
     'multiple statement' => ["0 !HELP Comment\n0 !HELP Comment2", ['Comment', 'Comment2']],
@@ -157,7 +157,7 @@ test('get help', function (string $input, ?array $expected) {
 ]);
 
 test('get bfc', function (string $input, ?array $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getBFC($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getBFC($input))->toBe($expected);
 })->with([
     'cert' => ["0 BFC CERTIFY CCW", ['bfc' => 'CERTIFY', 'winding' => 'CCW']],
     'nocert' => ["0 BFC NOCERTIFY", ['bfc' => 'NOCERTIFY', 'winding' => '']],
@@ -167,7 +167,7 @@ test('get bfc', function (string $input, ?array $expected) {
 ]);
 
 test('get history', function (string $input, ?array $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getHistory($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getHistory($input))->toBe($expected);
 })->with([
     'single statement' => ["0 !HISTORY 2023-03-03 [Test] Comment", [['date' => '2023-03-03', 'user' => 'Test', 'comment' => 'Comment']]],
     'multi-line' => ["0 Test\n0 !HISTORY 2023-03-03 [Test] Comment\n0 BFC CCW", [['date' => '2023-03-03', 'user' => 'Test', 'comment' => 'Comment']]],
@@ -188,7 +188,7 @@ test('get history', function (string $input, ?array $expected) {
 ]);
 
 test('get subparts', function (string $input, ?array $expected) {
-    expect(app(\App\LDraw\Parse\Parser::class)->getSubparts($input))->toBe($expected);
+    expect(app(\App\Services\LDraw\Parse\Parser::class)->getSubparts($input))->toBe($expected);
 })->with([
     'single subpart' => ["0 Test\n1 0 0 0 0 1 0 0 0 1 0 0 0 1 test.dat", ['subparts' => ['test.dat'], 'textures' => null]],
     'no type 1 lines' => ["0 Test\n3 0 1 1 1 0 0 0 -1 -1 -1", null],
@@ -208,7 +208,7 @@ test('get subparts', function (string $input, ?array $expected) {
 
 test('parse', function () {
     $text = file_get_contents(__DIR__ . "/testfiles/parsetest.dat");
-    $part = app(\App\LDraw\Parse\Parser::class)->parse($text);
+    $part = app(\App\Services\LDraw\Parse\Parser::class)->parse($text);
     expect($part->description)->toBe('Brick  1 x  2 x  5 with SW Han Solo Carbonite Pattern');
     expect($part->name)->toBe('2454aps5.dat');
     expect($part->realname)->toBe('Thomas Burger');
@@ -233,7 +233,7 @@ test('parse', function () {
         'subparts' => ['s\2454as01.dat'],
         'textures' => ['2454aps5.png']
     ]);
-    expect($part->body . "\n")->toBe(app(\App\LDraw\Parse\Parser::class)->unixLineEndings(file_get_contents(__DIR__ . "/testfiles/getbody.dat")));
+    expect($part->body . "\n")->toBe(app(\App\Services\LDraw\Parse\Parser::class)->unixLineEndings(file_get_contents(__DIR__ . "/testfiles/getbody.dat")));
     expect($part->rawText)->toBe($text);
 
 });

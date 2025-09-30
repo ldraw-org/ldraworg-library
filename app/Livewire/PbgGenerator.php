@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Filament\Schemas\Schema;
-use App\LDraw\SetPbg;
+use App\Services\LDraw\SetPbg;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;

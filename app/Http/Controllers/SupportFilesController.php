@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\LDraw\LDrawModelMaker;
-use App\LDraw\SupportFiles;
+use App\Services\LDraw\LDrawModelMaker;
+use App\Services\LDraw\SupportFiles;
 use App\Models\Part\Part;
 use App\Models\Omr\OmrModel;
 use Illuminate\Support\Facades\Storage;

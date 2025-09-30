@@ -15,8 +15,9 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
+                    base_path('storage/app/backup/files'),
                     base_path('storage/app/library'),
-                    base_path('storage/app/images/library/updates'),
+                    base_path('storage/app/library-media/part_releases'),
                     base_path('storage/app/deleted'),
                     base_path('.env')
                 ],

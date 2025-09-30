@@ -3,7 +3,7 @@
 namespace App\Filament\Actions;
 
 use App\Filament\Forms\Components\PreviewSelect;
-use App\LDraw\Managers\Part\PartManager;
+use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use Filament\Actions\EditAction;
 use Illuminate\Support\Arr;

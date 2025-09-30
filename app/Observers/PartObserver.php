@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\LDraw\Managers\Part\PartManager;
+use App\Services\LDraw\Managers\Part\PartManager;
 use App\Events\PartDeleted;
 use App\Jobs\UpdateLibraryCsv;
 use Illuminate\Support\Facades\Auth;

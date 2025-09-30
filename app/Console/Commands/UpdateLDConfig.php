@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\LDraw\Managers\LDConfigManager;
+use App\Services\LDraw\Managers\LDConfigManager;
 use Illuminate\Console\Command;
 
 class UpdateLDConfig extends Command

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\LDraw\Rebrickable;
+use App\Services\LDraw\Rebrickable;
 use App\Models\Omr\Set;
 use App\Models\Omr\Theme;
 use Illuminate\Console\Command;

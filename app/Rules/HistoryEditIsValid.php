@@ -2,12 +2,12 @@
 
 namespace App\Rules;
 
-use App\LDraw\Parse\Parser;
-use App\LDraw\Check\Checks\ValidLines;
-use App\LDraw\Check\Checks\HistoryIsValid;
-use App\LDraw\Check\Checks\HistoryUserIsRegistered;
+use App\Services\LDraw\Parse\Parser;
+use App\Services\LDraw\Check\Checks\ValidLines;
+use App\Services\LDraw\Check\Checks\HistoryIsValid;
+use App\Services\LDraw\Check\Checks\HistoryUserIsRegistered;
 use Illuminate\Translation\PotentiallyTranslatedString;
-use App\LDraw\Check\PartChecker;
+use App\Services\LDraw\Check\PartChecker;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
 use App\Models\User;

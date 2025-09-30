@@ -10,7 +10,7 @@ use App\Enums\PartStatus;
 use App\Enums\VoteType;
 use App\Models\Part\Part;
 use App\Models\Vote;
-use App\LDraw\Managers\VoteManager;
+use App\Services\LDraw\Managers\VoteManager;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;

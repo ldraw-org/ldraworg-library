@@ -4,12 +4,12 @@ namespace App\Livewire\Part;
 
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Utilities\Get;
-use App\LDraw\Parse\Parser;
+use App\Services\LDraw\Parse\Parser;
 use App\Enums\CheckType;
 use App\Enums\Permission;
-use App\LDraw\Check\PartChecker;
-use App\LDraw\LDrawFile;
-use App\LDraw\Managers\Part\PartManager;
+use App\Services\LDraw\Check\PartChecker;
+use App\Services\LDraw\LDrawFile;
+use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
 use Closure;

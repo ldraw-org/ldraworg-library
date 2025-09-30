@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Part;
 
 use App\Http\Controllers\Controller;
-use App\LDraw\ZipFiles;
+use App\Services\LDraw\ZipFiles;
 use Illuminate\Support\Carbon;
 use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Builder;

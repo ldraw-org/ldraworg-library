@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ExternalSite;
-use App\LDraw\Rebrickable;
+use App\Services\LDraw\Rebrickable;
 use App\Models\Part\Part;
 use App\Models\Traits\HasParts;
 use Illuminate\Database\Eloquent\Model;

@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Services\LDraw\Check\Checks;
+
+use App\Enums\PartError;
+use App\Services\LDraw\Check\Contracts\Check;
+use App\Services\LDraw\Parse\ParsedPart;
+use App\Models\Part\Part;
+use Closure;
+
+class NameAndPartType implements Check
+{
+    public function check(ParsedPart|Part $part, Closure $fail): void
+    {
+        if ($part instanceof ParsedPart &&
+            !is_null($part->type) &&
+            !is_null($part->name) &&
+            !$part->type->isImageFormat() &&
+            str_replace('\\', '/', $part->name) !== str_replace(['p/', 'parts/'], '', $part->type->folder() . '/' . basename(str_replace('\\', '/', $part->name)))
+        ) {
+            $fail(PartError::NameTypeMismatch, ['name' => str_replace('\\', '/', $part->name), 'type' => $part->type->value]);
+        }
+    }
+}

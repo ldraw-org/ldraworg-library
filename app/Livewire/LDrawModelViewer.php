@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Filament\Schemas\Schema;
-use App\LDraw\LDrawModelMaker;
+use App\Services\LDraw\LDrawModelMaker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;

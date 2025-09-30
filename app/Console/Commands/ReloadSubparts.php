@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\LDraw\Managers\Part\PartManager;
+use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;

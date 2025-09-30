@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\LDraw\ZipFiles;
+use App\Services\LDraw\ZipFiles;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;

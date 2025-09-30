@@ -2,8 +2,8 @@
 
 use App\Jobs\UpdateLibraryCsv;
 use Illuminate\Support\Facades\Schedule;
-use App\LDraw\ScheduledTasks\SendDailyDigest;
-use App\LDraw\ScheduledTasks\UpdateTrackerHistory;
+use App\Services\LDraw\ScheduledTasks\SendDailyDigest;
+use App\Services\LDraw\ScheduledTasks\UpdateTrackerHistory;
 
 Schedule::command('queue:prune-batches')->daily();
 Schedule::call(new SendDailyDigest())->dailyAt('01:30')->environments(['production']);

@@ -2,12 +2,12 @@
 
 namespace App\Rules;
 
-use App\LDraw\Check\Checks\PatternHasSetKeyword;
+use App\Services\LDraw\Check\Checks\PatternHasSetKeyword;
 use Illuminate\Translation\PotentiallyTranslatedString;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
-use App\LDraw\Check\PartChecker;
-use App\LDraw\Parse\ParsedPart;
+use App\Services\LDraw\Check\PartChecker;
+use App\Services\LDraw\Parse\ParsedPart;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;

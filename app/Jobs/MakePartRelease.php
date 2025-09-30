@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\LDraw\PartsUpdateProcessor;
+use App\Services\LDraw\PartsUpdateProcessor;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;

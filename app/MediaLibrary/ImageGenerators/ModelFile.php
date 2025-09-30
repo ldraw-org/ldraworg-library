@@ -2,7 +2,7 @@
 
 namespace App\MediaLibrary\ImageGenerators;
 
-use App\LDraw\Parse\Parser;
+use App\Services\LDraw\Parse\Parser;
 use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\Conversions\Conversion;
 use Spatie\MediaLibrary\Conversions\ImageGenerators\ImageGenerator;
@@ -17,7 +17,7 @@ class ModelFile extends ImageGenerator
         $pathToImageFile = pathinfo($file, PATHINFO_DIRNAME).'/'.pathinfo($file, PATHINFO_FILENAME).'.png';
 
         // Here you should convert the file to an image and return generated conversion path.
-        $image = app(\App\LDraw\Render\LDView::class)->render(app(Parser::class)->dosLineEndings(file_get_contents($file)));
+        $image = app(\App\Services\LDraw\Render\LDView::class)->render(app(Parser::class)->dosLineEndings(file_get_contents($file)));
         imagepng($image, $pathToImageFile);
 
         return $pathToImageFile;
