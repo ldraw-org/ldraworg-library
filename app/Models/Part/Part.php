@@ -2,6 +2,7 @@
 
 namespace App\Models\Part;
 
+use App\Collections\PartCollection;
 use App\Enums\EventType;
 use App\Enums\ExternalSite;
 use App\Enums\License;
@@ -11,7 +12,6 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
 use App\Services\LDraw\Check\PartCheckBag;
-use App\Services\LDraw\Render\LDView;
 use App\Models\RebrickablePart;
 use App\Models\StickerSheet;
 use App\Models\Traits\HasErrorScopes;
@@ -29,6 +29,7 @@ use App\Models\User;
 use App\Models\Vote;
 use App\Observers\PartObserver;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -43,7 +44,6 @@ use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 use Znck\Eloquent\Relations\BelongsToThrough;
 use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
@@ -52,6 +52,7 @@ use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
  * @mixin IdeHelperPart
  */
 #[ObservedBy([PartObserver::class])]
+#[CollectedBy(PartCollection::class)]
 class Part extends Model implements HasMedia
 {
     use InteractsWithMedia;
@@ -121,6 +122,11 @@ class Part extends Model implements HasMedia
                     ->keepOriginalImageFormat()
                     ->fit(Fit::Contain, 85, 85);                    
             });
+    }
+
+    public function newCollection(array $models = []): PartCollection
+    {
+        return new PartCollection($models);
     }
 
     public function getPivotTableName(): string
@@ -298,7 +304,7 @@ class Part extends Model implements HasMedia
     #[Scope]
     protected function activeParts(Builder $query): void
     {
-        $query->partsFolderOnly()->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved]);
+        $query->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved]);
     }
     
     protected function partCheck(): Attribute
