@@ -15,4 +15,4 @@ Route::get('/daily-digest', function () {
     return new App\Mail\DailyDigest(auth()->user());
 });
 
-Route::middleware(['can:view-test-table'])->view('/test-table', 'tracker.testtable');
+Route::view('/test-table', 'tracker.testtable');
