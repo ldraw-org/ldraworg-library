@@ -20,7 +20,7 @@ class PartsResource extends JsonResource
     {
         return [
             'image' => $this->getFirstMediaUrl('image'),
-            'feed-image' => $this->getFirstMediaUrl('image', 'feed-image'),
+            'feed_image' => $this->getFirstMediaUrl('image', 'feed-image'),
             'thumb' => $this->getFirstMediaUrl('image', 'thumb'),
             'url' => route('parts.show', $this),
             'description' => $this->description,
