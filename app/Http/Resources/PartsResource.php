@@ -19,9 +19,9 @@ class PartsResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'image' => $this->getFirstMediaUrl('images'),
-            'feed-image' => $this->getFirstMediaUrl('images', 'feed-image'),
-            'thumb' => $this->getFirstMediaUrl('images', 'thumb'),
+            'image' => $this->getFirstMediaUrl('image'),
+            'feed-image' => $this->getFirstMediaUrl('image', 'feed-image'),
+            'thumb' => $this->getFirstMediaUrl('image', 'thumb'),
             'url' => route('parts.show', $this),
             'description' => $this->description,
             'filename' => $this->filename,
