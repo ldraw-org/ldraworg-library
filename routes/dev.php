@@ -14,3 +14,5 @@ Route::middleware(['can:assume-user'])->get('/login-user-{number}', function (in
 Route::get('/daily-digest', function () {
     return new App\Mail\DailyDigest(auth()->user());
 });
+
+Route::middleware(['can:view-test-table'])->view('/test-table', 'tracker.testtable');
