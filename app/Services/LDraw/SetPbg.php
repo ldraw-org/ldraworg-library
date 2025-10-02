@@ -1,6 +1,6 @@
 <?php
 
-namespace App\LDraw;
+namespace App\Services\LDraw;
 
 use App\Enums\PartCategory;
 use App\Enums\PartTypeQualifier;

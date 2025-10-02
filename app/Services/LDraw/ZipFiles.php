@@ -1,6 +1,6 @@
 <?php
 
-namespace App\LDraw;
+namespace App\Services\LDraw;
 
 use Illuminate\Support\Facades\Storage;
 use Spatie\TemporaryDirectory\TemporaryDirectory;

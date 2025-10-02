@@ -1,6 +1,6 @@
 <?php
 
-namespace App\LDraw;
+namespace App\Services\LDraw;
 
 use App\Models\Part\Part;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;

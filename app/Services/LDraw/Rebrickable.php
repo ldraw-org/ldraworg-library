@@ -1,6 +1,6 @@
 <?php
 
-namespace App\LDraw;
+namespace App\Services\LDraw;
 
 use Exception;
 use Illuminate\Support\Collection;

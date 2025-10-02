@@ -1,6 +1,6 @@
 <?php
 
-namespace App\LDraw;
+namespace App\Services\LDraw;
 
 use App\Services\LDraw\Parse\Parser;
 use App\Models\Omr\OmrModel;
