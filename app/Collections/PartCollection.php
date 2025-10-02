@@ -6,19 +6,12 @@ use App\Enums\PartCategory;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\Graph\Collection;
 use App\Enums\PartType;
 use App\Models\Part\Part;
+use App\Collections\Traits\HasRelease;
 
 class PartCollection extends Collection
 {
-    public function official(): self
-    {
-        return $this->whereNotNull('part_release_id');
-    }
-
-    public function unofficial(): self
-    {
-        return $this->whereNull('part_release_id');
-    }
-
+    use HasRelease;
+    
     public function fixes(): self
     {
         return $this->unofficial()->whereNotNull('official_part');

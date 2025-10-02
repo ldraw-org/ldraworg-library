@@ -9,10 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasUser;
 use Illuminate\Support\HtmlString;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
+use App\Collections\PartEventCollection;
 
 /**
  * @mixin IdeHelperPartEvent
  */
+#[CollectedBy(PartEventCollection::class)]
 class PartEvent extends Model
 {
     use HasPartRelease;

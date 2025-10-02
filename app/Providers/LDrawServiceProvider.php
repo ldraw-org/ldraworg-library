@@ -27,10 +27,6 @@ class LDrawServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Collection::macro('unofficial', fn (): Collection => $this->whereNull('part_release_id'));
-        Collection::macro('official', fn (): Collection => $this->whereNotNull('part_release_id'));
-        Collection::macro('partsFolderOnly', fn (): Collection => $this->whereIn('type', PartType::partsFolderTypes()));
-
         Auth::viaRequest('mybb', function (Request $request) {
             return MybbUser::findFromCookie($request)?->library_user;
         });
