@@ -76,6 +76,16 @@ enum PartType: string
         };
     }
 
+    public static function tryFromDescription(string $description): ?self
+    {
+        foreach (self::cases() as $t) {
+            if ($t->description() == $description) {
+                return $t;
+            }
+        }
+        return null;
+    }
+
     public function inPartsFolder(): bool
     {
         return in_array($this, self::partsFolderTypes());

@@ -3,5 +3,5 @@
     link="{{route('part-update.index', ['latest'])}}"
     image="{{asset('/images/cards/updates.png')}}"
 >
-{{$blurb}}
+    {{$update->blurb}}
 </x-card>

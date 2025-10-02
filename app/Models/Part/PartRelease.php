@@ -2,11 +2,13 @@
 
 namespace App\Models\Part;
 
+use App\Enums\PartType;
 use App\Models\Traits\HasParts;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -21,27 +23,26 @@ class PartRelease extends Model implements HasMedia
     use HasParts;
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'short',
-        'created_at',
-        'part_list',
-        'part_data',
-        'enabled'
-    ];
+    protected $guarded = [];
 
     /**
     * @return array{
-    *     part_list: 'array',
-    *     part_data: 'Illuminate\Database\Eloquent\Casts\AsArrayObject'
+    *     part_data: 'array',
+    *     new_of_type: 'array',
+    *     moved: 'array',
+    *     renamed: 'array',
+    *     fixed: 'array',
     *     enabled: 'boolean'
     * }
     */
     protected function casts(): array
     {
-        return  [
-            'part_list' => 'array',
-            'part_data' => AsArrayObject::class,
+        return [
+            'part_data' => 'array',
+            'new_of_type' => 'array',
+            'moved' => 'array',
+            'renamed' => 'array',
+            'fixed' => 'array',
             'enabled' => 'boolean',
         ];
     }
@@ -56,18 +57,40 @@ class PartRelease extends Model implements HasMedia
             });
     }
 
+    protected function blurb(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                $prims = 0;
+                $parts = 'no';
+                foreach (json_decode($attributes['new_of_type'], true) ?? [] as $type => $count) {
+                    $t = PartType::tryFrom($type);
+                    if (Str::startsWith($t->folder(), 'p/') && $t->isDatFormat()) {
+                        $prims += $count;
+                    }
+                    if ($t == PartType::Part) {
+                        $parts = $count;
+                    }
+
+                }
+                $prims = $prims > 0 ? $prims : 'no';
+                return "This update adds {$attributes['new']} new files to the core library, including {$parts} new parts and {$prims} new primitives.";
+            }
+        );
+    }
+
     protected function notes(): Attribute
     {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                if (is_null($attributes['part_data'])) {
-                    return '';
-                }
-                $data = json_decode($attributes['part_data'] ?? "{}", true);
-                $notes = "Total files: {$data['total_files']}\n" .
-                    "New files: {$data['new_files']}\n";
-                foreach ($data['new_types'] as $t) {
-                    $notes .= "New {$t['name']}s: {$t['count']}\n";
+                $notes = "Total files: {$attributes['total']}\n" .
+                    "New files: {$attributes['new']}\n";
+                foreach (json_decode(Arr::get($attributes, 'new_of_type'), true) ?? [] as $type => $count) {
+                    if ($count == 0) {
+                        continue;
+                    }
+                    $type = PartType::tryFrom($type);
+                    $notes .= "New {$type->description()}s: {$count}\n";
                 }
                 return $notes;
             }

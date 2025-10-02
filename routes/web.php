@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SupportFilesController;
 use App\Http\Controllers\Part\LastDayDownloadZipController;
 use App\Http\Controllers\Part\LatestPartsController;
+use App\Http\Controllers\Part\LatestReleaseController;
 use App\Http\Controllers\Part\PartUpdateController;
 use App\Http\Controllers\Part\PartDownloadController;
 use App\Http\Controllers\Part\WeeklyPartsController;
@@ -49,7 +50,8 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/ptreleases/{output}', [SupportFilesController::class, 'ptreleases'])->name('ptreleases');
     Route::get('/tracker/latest-parts', LatestPartsController::class)->name('part.latest');
     Route::get('/tracker/weekly-parts', WeeklyPartsController::class)->name('part.weekly-api');
-    Route::get('/tracker/ldrawunf-last-day.zip', LastDayDownloadZipController::class)->name('tracker.last-day');
+    Route::get('/tracker/weekly-parts', WeeklyPartsController::class)->name('part.weekly-api');
+    Route::get('/update/latest', LatestReleaseController::class)->name('update.latest');
     Route::get('/library/{library}/{filename}', PartDownloadController::class)
         ->whereIn('library', ['official', 'unofficial'])
         ->where('filename', '(' . implode('|', PartType::folders()) . ')/[a-z0-9_-]+\.(dat|png|zip)')
