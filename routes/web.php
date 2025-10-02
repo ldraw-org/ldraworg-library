@@ -50,7 +50,7 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/ptreleases/{output}', [SupportFilesController::class, 'ptreleases'])->name('ptreleases');
     Route::get('/tracker/latest-parts', LatestPartsController::class)->name('part.latest');
     Route::get('/tracker/weekly-parts', WeeklyPartsController::class)->name('part.weekly-api');
-    Route::get('/tracker/weekly-parts', WeeklyPartsController::class)->name('part.weekly-api');
+    Route::get('/tracker/ldrawunf-last-day.zip', LastDayDownloadZipController::class)->name('tracker.last-day');
     Route::get('/update/latest', LatestReleaseController::class)->name('update.latest');
     Route::get('/library/{library}/{filename}', PartDownloadController::class)
         ->whereIn('library', ['official', 'unofficial'])
