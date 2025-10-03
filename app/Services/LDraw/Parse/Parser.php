@@ -61,7 +61,7 @@ class Parser
         return preg_replace('#\R#us', "\n", $text);
     }
 
-    protected function formatText(string $text): string
+    public function formatText(string $text): string
     {
         $text = self::fixEncoding($text);
         $text = trim($text);
@@ -80,7 +80,7 @@ class Parser
         return implode("\n", $lines);
     }
 
-    protected function patternMatch(string $pattern, string $text): ?array
+    public function patternMatch(string $pattern, string $text): ?array
     {
         $text = $this->formatText($text);
         if (!is_null(config("ldraw.patterns.{$pattern}")) && preg_match(config("ldraw.patterns.{$pattern}"), $text, $matches)) {
