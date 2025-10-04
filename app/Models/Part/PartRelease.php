@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
@@ -95,6 +96,16 @@ class PartRelease extends Model implements HasMedia
                 return $notes;
             }
         );
+    }
+
+    public function notes_url(): ?string
+    {
+        if (Storage::disk('library')->exists("official/models/Note{$this->short}CA.txt")) {
+            return asset("library/official/models/Note{$this->short}CA.txt");
+        } elseif (Storage::disk('library')->exists("official/models/note{$this->short}.txt")) {
+            return asset("library/official/models/note{$this->short}.txt");
+        }
+        return null;
     }
 
     public function toString(): string

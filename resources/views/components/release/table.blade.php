@@ -18,14 +18,23 @@
             <div class="p-2">
                 {!! nl2br($release->notes) !!}
             </div>
-            <div class="p-2">
-                <a class="font-bold hover:underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="{{route('part-update.view', $release)}}">
-                    Preview Parts in Update
-                </a>
-                <p>
-                    (graphics-intensive page)
-                </p>
-            </div>
+            @if($release->notes_url())
+                <div class="p-2">
+                    <a class="font-bold hover:underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="{{$release->notes_url()}}">
+                        View full notes file
+                    </a>
+                </div>
+            @endif
+            @if($release->hasMedia('view'))
+                <div class="p-2">
+                    <a class="font-bold hover:underline text-blue-600 hover:text-blue-800 visited:text-purple-600" href="{{route('part-update.view', $release)}}">
+                        Preview Parts in Update
+                    </a>
+                    <p>
+                        (graphics-intensive page)
+                    </p>
+                </div>
+            @endif
         </div>
         <div class="flex flex-col justify-items-start *:p-2">
             <div class="font-bold">

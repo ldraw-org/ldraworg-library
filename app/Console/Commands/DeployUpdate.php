@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\PartCategory;
+use App\Enums\PartType;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
 use App\Services\LDraw\Parse\Parser;
@@ -32,70 +32,41 @@ class DeployUpdate extends Command
     /**
      * Execute the console command.
      */
-    public function handle(Parser $parser): void
+    public function handle(): void
     {
-        PartRelease::each(function (PartRelease $release) use ($parser){
-            if (Storage::disk('local')->exists("upload/view/view{$release->short}")) {
-                $release->clearMediaCollection('view');
-                foreach(Storage::disk('local')->allFiles("upload/view/view{$release->short}") ?? [] as $file) {
-                    if (pathinfo($file, PATHINFO_EXTENSION) != 'png' && pathinfo($file, PATHINFO_EXTENSION) != 'gif') {
+        PartRelease::latest()->each(function (PartRelease $release) {
+            if ($release->total != 0) {
+                return;
+            }
+            if (Storage::disk('library')->exists("official/models/Note{$release->short}CA.txt")) {
+                $this->info("Processing {$release->short}");
+                $data = [];
+                $file = Parser::unixLineEndings(Storage::disk('library')->get("official/models/Note{$release->short}CA.txt"));
+                preg_match('#^(\h+)?Total files:\h+(?<total>[0-9]+)(.*)#um', $file, $matches);
+                $data['total'] = $matches['total'];
+                preg_match('#^(\h+)?New files:\h+(?<new>[0-9]+)(\h+)?$#um', $file, $matches);
+                $data['new'] = $matches['new'];
+                $data['new_of_type'] = [];
+                foreach (PartType::cases() as $t) {
+                    if ($t == PartType::Shortcut) {
                         continue;
                     }
-                    $dat_file = substr($file, 0, -3) . 'dat';
-                    $mpd_file = substr($file, 0, -3) . 'mpd';
-                    if (Storage::disk('local')->exists($mpd_file)) {
-                        $text = $parser->formatText(Storage::disk('local')->get($mpd_file));
-                        $text = explode("\n", $text);
-                        array_shift($text);
-                        $text = implode("\n", $text);
-                    } else {
-                        $text = $parser->formatText(Storage::disk('local')->get($dat_file));
-                    }
-    
-                    $description = $parser->getDescription($text);
-                    preg_match('#^\h*0\h+(File)?[Nn]ame:?\h+(?P<name>.*?)\h*$#um', $text, $matches);
-                    $name = $name = Arr::get($matches, 'name');
-    
-                    if (Str::startsWith($description, '~Moved to')) {
-                        $this->info("Skipped moved to part: {$file}, {$description}");
-                        continue;
-                    }
-    
-                    $part = Part::firstWhere('filename', "parts/{$name}") ?? Part::firstWhere('filename', 'parts/' . substr(basename($file), 0, -3) . 'dat');
-                    
-                    if (is_null($description) || $description == '') {
-                        $description = $part->description;
-                    }
-                    if (is_null($name) || $name == '') {
-                        $name = $part->name();
-                    }
-                    
-                    $tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
-                    $newPath = $tempDir->path(basename($file, '.gif') . '.png'); 
-                    if (pathinfo($file, PATHINFO_EXTENSION) == 'gif') {
-                        try {
-                            $i = imagecreatefromgif(storage_path("app/{$file}"));
-                        } catch (\Exception $e) {
-                            $this->info("Invalid image, skipped: {$file}");
-                            continue;
-                        }
-                        imagepng($i, $newPath);
-                    } else {
-                        copy(storage_path("app/{$file}"), $newPath);
-                    }
-                    
-                    Image::load($newPath)
-                        ->optimize()
-                        ->save($newPath);
-    
-                    $release->addMedia($newPath)
-                        ->withCustomProperties([
-                            'description' => $description,
-                            'filename' => $name,
-                            'id' => $part->id,
-                        ])
-                        ->toMediaCollection('view');
+                    $data['new_of_type'][$t->value] = 0;
                 }
+                preg_match('#^(\h+)?New parts:\h+(?<parts>[0-9]+)(\h+)?$#um', $file, $matches);
+                $data['new_of_type'][PartType::Part->value] = Arr::get($matches, 'parts',  0);
+                preg_match('#^(\h+)?New subparts:\h+(?<subparts>[0-9]+)(\h+)?$#um', $file, $matches);
+                $data['new_of_type'][PartType::Subpart->value] = Arr::get($matches, 'subparts', 0);
+                preg_match('#^(\h+)?New primitives:\h+(?<prim>[0-9]+)(\h+)?$#um', $file, $matches);
+                $data['new_of_type'][PartType::Primitive->value] = Arr::get($matches, 'prim', 0);
+                preg_match('#^(\h+)?New lo-res primitives:\h+(?<loprim>[0-9]+)(\h+)?$#um', $file, $matches);
+                $data['new_of_type'][PartType::LowResPrimitive->value] = Arr::get($matches, 'loprim', 0);
+                preg_match('#^(\h+)?New hi-res primitives:\h+(?<hiprim>[0-9]+)(\h+)?$#um', $file, $matches);
+                $data['new_of_type'][PartType::HighResPrimitive->value] = Arr::get($matches, 'hiprim', 0);
+                preg_match('#^(\h+)?New part texture images:\h+(?<tex>[0-9]+)(\h+)?$#um', $file, $matches);
+                $data['new_of_type'][PartType::PartTexmap->value] = Arr::get($matches, 'tex', 0);
+                $release->fill($data);
+                $release->save();
             }
         });
     }
