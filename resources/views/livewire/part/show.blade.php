@@ -213,12 +213,8 @@
                     <x-slot name="header">
                         Archived Part Events:
                     </x-slot>
-                    @forelse ($part->orderedEvents()->official() as $event)
-                        <x-event.list.item :$event wire:key="part-event-{{$event->id}}" />
-                    @empty
-                        <div>None</div>
-                    @endforelse
-                </x-accordion>
+                    <livewire:tables.part-events-table :$part />
+               </x-accordion>
             @endif
             @if ($part->isUnofficial())
                 @forelse ($part->orderedEvents()->unofficial() as $event)
