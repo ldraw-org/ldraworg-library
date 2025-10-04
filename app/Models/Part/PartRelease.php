@@ -84,8 +84,12 @@ class PartRelease extends Model implements HasMedia
     {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                $notes = "Total files: {$attributes['total']}\n" .
-                    "New files: {$attributes['new']}\n";
+                $notes = "Total files: {$attributes['total']}\n";
+
+                if ($attributes['new'] > 0) {
+                    $notes .= "New files: {$attributes['new']}\n";
+                }
+                    
                 foreach (json_decode(Arr::get($attributes, 'new_of_type'), true) ?? [] as $type => $count) {
                     if ($count == 0) {
                         continue;
