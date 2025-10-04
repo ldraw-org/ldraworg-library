@@ -92,7 +92,7 @@ return [
      * Here you can specify which path generator should be used for the given class.
      */
     'custom_path_generators' => [
-        App\Models\Part\Part::class => App\MediaLibrary\PathGenerators\PartPathGenerator::class,
+        App\Models\Part\Part::class => App\MediaLibrary\PathGenerators\LibraryPathGenerator::class,
         App\Models\Part\PartRelease::class => App\MediaLibrary\PathGenerators\LibraryPathGenerator::class,
         App\Models\Omr\OmrModel::class => App\MediaLibrary\PathGenerators\LibraryPathGenerator::class,
         // Model::class => PathGenerator::class
