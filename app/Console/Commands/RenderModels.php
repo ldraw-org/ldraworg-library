@@ -38,7 +38,7 @@ class RenderModels extends Command
         $models
             ->lazy()
             ->each(function (OmrModel $m) use (&$count) {
-                if (!$this->option('missing') || ($this->option('missing') && is_null($m->getFirstMedia('image')))) {
+                if (!$this->option('missing') || ($this->option('missing') && !file_exists($m->getFirstMediaPath('image')))) {
                     UpdateImage::dispatch($m)->onQueue('maintenance');
                     $count++;
                 }

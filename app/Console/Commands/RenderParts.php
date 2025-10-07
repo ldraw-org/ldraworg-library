@@ -46,7 +46,7 @@ class RenderParts extends Command
         $parts
             ->lazy()
             ->each(function (Part $p) use (&$count) {
-                if (!$this->option('missing') || ($this->option('missing') && is_null($p->getFirstMedia('image')))) {
+                if (!$this->option('missing') || ($this->option('missing') && !file_exists($p->getFirstMediaPath('image')))) {
                     UpdateImage::dispatch($p)->onQueue('maintenance');
                     $count++;
                 }
