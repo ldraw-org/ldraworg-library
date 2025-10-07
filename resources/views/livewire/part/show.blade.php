@@ -213,7 +213,11 @@
                     <x-slot name="header">
                         Archived Part Events:
                     </x-slot>
-                    <livewire:tables.part-events-table :$part />
+                    @if($part->isUnofficial())
+                        <livewire:tables.part-events-table :part="$part->official_part->load('events')" />
+                    @else
+                        <livewire:tables.part-events-table :$part />
+                    @endif
                </x-accordion>
             @endif
             @if ($part->isUnofficial())

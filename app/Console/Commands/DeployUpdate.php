@@ -3,6 +3,9 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Part\PartRelease;
+use Illuminate\Support\Facades\Storage;
+use App\Services\LDraw\LibraryImport;
 
 class DeployUpdate extends Command
 {
@@ -23,7 +26,13 @@ class DeployUpdate extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(LibraryImport $import): void
     {
+        $releases = PartRelease::all();
+        foreach (Storage::allFiles('events') as $file) {
+            if (preg_match('#^events/(?<release>\d\d\d\d-\d\d)/unofficial/(?<filename>.*)\.meta$#u', $file, $matches)) {
+                $import->parseEventFile($releases->firstWhere('name', $matches['release']), $matches['filename']);
+            }
+        }
     }
 }
