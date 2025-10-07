@@ -58,6 +58,7 @@ class PartEventsTable extends BasicTable implements HasActions
                     ]),
                     TextColumn::make('comment')
                         ->state(fn (PartEvent $event) => match($event->event_type) {
+                            EventType::Submit => 'Part submission',
                             EventType::Rename => "{$event->moved_from_filename} to {$event->moved_to_filename}",
                             EventType::HeaderEdit => "Header Edited",
                             EventType::Review => (is_null($event->vote_type) ? 'Vote cancelled' : "Voted {$event->vote_type->label()}") . (!is_null($event->comment) ? " with the following comment:<br><br>{$event->processedComment()}" : ''),
