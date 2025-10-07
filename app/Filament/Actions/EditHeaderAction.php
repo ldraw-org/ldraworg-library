@@ -26,6 +26,7 @@ use Closure;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -140,31 +141,31 @@ class EditHeaderAction
                 ->string(),
             PreviewSelect::make(),
             Repeater::make('history')
+                ->table([
+                    TableColumn::make('Date')
+                        ->width('18%'),
+                    TableColumn::make('Author')
+                        ->width('30%'),
+                    TableColumn::make('Comment'),
+                ])
                 ->schema([
                     DatePicker::make('created_at')
-                        ->native(false)
-                        ->extraAttributes(['class' => 'font-mono'])
                         ->displayFormat('Y-m-d')
                         ->label('Date')
                         ->rules([
                            Rule::date(),
                         ])
-                        ->required()
-                        ->live(),
+                        ->grow(false)
+                        ->required(),
                     AuthorSelect::make()
-                        ->required()
-                        ->live(),
+                        ->required(),
                     TextInput::make('comment')
                         ->extraAttributes(['class' => 'font-mono'])
-                        ->columnSpanFull()
                         ->required()
-                        ->string()
-                        ->live()
+                        ->string(),
                 ])
-                ->columns(2)
-                ->collapsed()
                 ->extraAttributes(['class' => 'font-mono'])
-                ->itemLabel(fn (array $state): ?string => (new Carbon(Arr::get($state, 'created_at')))->toDateString() . ' ' . (User::find(Arr::get($state, 'user_id'))?->historyString() ?? '') .' ' . Arr::get($state, 'comment'))
+                ->compact()
                 ->helperText('ALL changes to existing history must be documented with a comment')
                 ->reorderable(false)
                 ->rules([
