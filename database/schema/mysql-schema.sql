@@ -4,6 +4,21 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+DROP TABLE IF EXISTS `avatars`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `avatars` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `part` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `matrix` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `avatars_category_unique` (`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `document_categories`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -125,6 +140,34 @@ CREATE TABLE `ldraw_colours` (
   UNIQUE KEY `ldraw_colours_code_unique` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `media`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `media` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `model_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint unsigned NOT NULL,
+  `uuid` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `collection_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mime_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `disk` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `conversions_disk` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `size` bigint unsigned NOT NULL,
+  `manipulations` json NOT NULL,
+  `custom_properties` json NOT NULL,
+  `generated_conversions` json NOT NULL,
+  `responsive_images` json NOT NULL,
+  `order_column` int unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `media_uuid_unique` (`uuid`),
+  KEY `media_model_type_model_id_index` (`model_type`,`model_id`),
+  KEY `media_order_column_index` (`order_column`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `migrations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -179,6 +222,7 @@ CREATE TABLE `omr_models` (
   PRIMARY KEY (`id`),
   KEY `omr_models_user_id_foreign` (`user_id`),
   KEY `omr_models_set_id_foreign` (`set_id`),
+  KEY `omr_models_created_at_index` (`created_at`),
   CONSTRAINT `omr_models_set_id_foreign` FOREIGN KEY (`set_id`) REFERENCES `sets` (`id`),
   CONSTRAINT `omr_models_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -218,7 +262,6 @@ CREATE TABLE `part_events` (
   `part_id` bigint unsigned DEFAULT NULL,
   `user_id` bigint unsigned NOT NULL,
   `part_release_id` bigint unsigned DEFAULT NULL,
-  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `deleted_filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `deleted_description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `moved_from_filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -226,6 +269,7 @@ CREATE TABLE `part_events` (
   `header_changes` json DEFAULT NULL,
   `vote_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `event_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `comment` mediumtext COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `part_events_part_release_id_foreign` (`part_release_id`),
   KEY `part_events_user_id_index` (`user_id`),
@@ -251,6 +295,7 @@ CREATE TABLE `part_histories` (
   PRIMARY KEY (`id`),
   KEY `part_histories_user_id_index` (`user_id`),
   KEY `part_histories_part_id_index` (`part_id`),
+  KEY `part_histories_created_at_index` (`created_at`),
   CONSTRAINT `part_histories_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `part_histories_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -274,10 +319,12 @@ CREATE TABLE `part_releases` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `short` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `part_list` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `part_data` json DEFAULT NULL,
   `enabled` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  `total` int NOT NULL DEFAULT '0',
+  `new` int NOT NULL DEFAULT '0',
+  `new_of_type` json NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `part_releases_created_at_index` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `parts`;
@@ -335,6 +382,7 @@ CREATE TABLE `parts` (
   KEY `parts_vote_sort_index` (`part_status`),
   KEY `parts_category_index` (`category`),
   KEY `parts_rebrickable_part_id_foreign` (`rebrickable_part_id`),
+  KEY `parts_created_at_index` (`created_at`),
   CONSTRAINT `parts_base_part_id_foreign` FOREIGN KEY (`base_part_id`) REFERENCES `parts` (`id`) ON DELETE SET NULL,
   CONSTRAINT `parts_part_release_id_foreign` FOREIGN KEY (`part_release_id`) REFERENCES `part_releases` (`id`),
   CONSTRAINT `parts_rebrickable_part_id_foreign` FOREIGN KEY (`rebrickable_part_id`) REFERENCES `rebrickable_parts` (`id`) ON DELETE SET NULL,
@@ -533,7 +581,7 @@ CREATE TABLE `review_summaries` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `header` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `order` int NOT NULL,
-  `list` mediumtext COLLATE utf8mb4_unicode_ci,
+  `list` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -577,6 +625,7 @@ CREATE TABLE `sets` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `sets_number_unique` (`number`),
   KEY `sets_theme_id_foreign` (`theme_id`),
+  KEY `sets_created_at_index` (`created_at`),
   CONSTRAINT `sets_theme_id_foreign` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -635,7 +684,8 @@ CREATE TABLE `tracker_histories` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `history_data` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `tracker_histories_created_at_index` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `unknown_part_numbers`;
@@ -845,5 +895,12 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (128,'2025_06_18_02
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (129,'2025_07_27_012549_add_help_to_parts_table',50);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (130,'2025_07_27_044921_drop_parthelps_table',51);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (131,'2025_08_05_020802_alter_revision_history_in_documents_table',52);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (133,'2025_08_23_065321_add_list_to_review_summaries_table',53);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (134,'2025_08_23_213916_drop_review_summary_items_table',54);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (132,'2025_08_23_065321_add_list_to_review_summaries_table',52);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (133,'2025_08_23_213916_drop_review_summary_items_table',53);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (134,'2025_09_04_171235_create_avatars_table',54);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (135,'2025_09_16_180016_create_media_table',55);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (136,'2025_09_29_173225_drop_part_list_from_part_releases_table',56);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (137,'2025_10_01_034314_add_notes_data_to_part_releases_table',56);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (138,'2025_10_02_193319_add_date_indexes',56);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (139,'2025_10_04_060416_drop_josn_columns_from_part_releases_table',57);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (140,'2025_10_06_185835_change_comment_to_mediumtext_in_part_events_table',58);
