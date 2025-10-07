@@ -24,51 +24,51 @@
                 @endif
             </div>
             <div>
-            @switch($event->event_type)
-              @case(\App\Enums\EventType::Submit)
-                @if(isset($event->initial_submit) && $event->initial_submit == true)
-                  initially submitted the part.
-                @else
-                  submitted a new version of the part.
-                @endisset
-              @break
-              @case(\App\Enums\EventType::HeaderEdit)
-              edited the part header.
-              @break
-              @case(\App\Enums\EventType::Review)
-                @if(is_null($event->vote_type))
-                  cancelled their vote.
-                @else
-                  posted a vote of {{$event->vote_type->label()}}.
-                @endif
-              @break
-              @case(\App\Enums\EventType::Comment)
-              made the following comment.
-              @break
-              @case(\App\Enums\EventType::Rename)
-              renamed the part.
-              @break
-            @endswitch
+                @switch($event->event_type)
+                    @case(\App\Enums\EventType::Submit)
+                        @if(!is_null($event->initial_submit) && $event->initial_submit == true)
+                            initially submitted the part.
+                        @else
+                            submitted a new version of the part.
+                        @endisset
+                        @break
+                    @case(\App\Enums\EventType::HeaderEdit)
+                        edited the part header.
+                        @break
+                    @case(\App\Enums\EventType::Review)
+                        @if(is_null($event->vote_type))
+                            cancelled their vote.
+                        @else
+                            posted a vote of {{$event->vote_type->label()}}.
+                        @endif
+                        @break
+                    @case(\App\Enums\EventType::Comment)
+                        made the following comment.
+                        @break
+                    @case(\App\Enums\EventType::Rename)
+                        renamed the part.
+                        @break
+                @endswitch
             </div>
         </div>
         <div class="text-xs text-gray-500">
-          {{ $event->created_at }}
+            {{ $event->created_at }}
         </div>
     </div>
     @if($event->comment || $event->event_type == \App\Enums\EventType::Rename || $event->event_type == \App\Enums\EventType::HeaderEdit)
-      <div class="mt-4 event-comment font-mono center max-w-screen-xl w-full break-words overflow-auto">
-          @if($event->event_type == \App\Enums\EventType::Rename)
-              "{{$event->moved_from_filename}}" to "{{$event->moved_to_filename}}"
-          @endif
-          @if($event->event_type == \App\Enums\EventType::HeaderEdit && !is_null($event->header_changes))
-            <x-event.list.edit-accordian :changes="$event->header_changes" />
-            @if(!is_null($event->comment))
-              Comment:<br>
+        <div class="mt-4 event-comment font-mono center max-w-screen-xl w-full break-words overflow-auto">
+            @if($event->event_type == \App\Enums\EventType::Rename)
+                "{{$event->moved_from_filename}}" to "{{$event->moved_to_filename}}"
             @endif
-          @endif
-          @if(!is_null($event->comment) && $event->event_type !== \App\Enums\EventType::Rename)
-              {{ $event->processedComment() }}
-          @endif
-      </div>
+            @if($event->event_type == \App\Enums\EventType::HeaderEdit && !is_null($event->header_changes))
+                <x-event.list.edit-accordian :changes="$event->header_changes" />
+                @if(!is_null($event->comment))
+                    Comment:<br>
+                @endif
+            @endif
+            @if(!is_null($event->comment) && $event->event_type !== \App\Enums\EventType::Rename)
+                {{ $event->processedComment() }}
+            @endif
+        </div>
     @endif
 </div>
