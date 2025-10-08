@@ -66,7 +66,7 @@ class DocumentCategoryManagePage extends BasicResourceManagePage implements HasA
     protected function formSchema(): array
     {
         return [
-            TextInput::make('category')
+            TextInput::make('title')
                 ->string()
                 ->required(),
         ];
