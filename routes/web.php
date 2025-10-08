@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\PartType;
+use App\Http\Controllers\DocumentIndexController;
 use App\Http\Controllers\DocumentShowController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SupportFilesController;
@@ -127,7 +128,7 @@ Route::prefix('omr')->name('omr.')->group(function () {
 
 
 Route::prefix('documentation')->name('documentation.')->group(function () {
-    Route::view('/', 'documents.index')->name('index');
+    Route::get('/', DocumentIndexController::class)->name('index');
     Route::get('/{document_category}/{document}', DocumentShowController::class)->name('show');
 });
 

@@ -27,4 +27,9 @@ class DocumentCategory extends Model
         return $this->HasMany(Document::class, 'document_category_id', 'id');
     }
 
+    public function published_documents(): HasMany
+    {
+        return $this->HasMany(Document::class, 'document_category_id', 'id')->where('published', true);
+    }
+
 }

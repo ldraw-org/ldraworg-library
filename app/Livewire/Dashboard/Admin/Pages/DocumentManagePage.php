@@ -21,7 +21,9 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table as Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class DocumentManagePage extends BasicResourceManagePage implements HasActions
@@ -43,19 +45,21 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
         return $table
             ->query(Document::query())
             ->defaultSort('order')
-            ->defaultGroup('category.title')
+            ->defaultGroup(
+                Group::make('category.title')
+                    ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderBy('order', 'desc'))
+                    ->collapsible()
+            )
             ->reorderable('order')
             ->heading('Document Management')
             ->columns([
                 TextColumn::make('title')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('category.title')
-                    ->sortable()
-                    ->searchable(),
                 ToggleColumn::make('published'),
                 ToggleColumn::make('restricted')
             ])
+            ->paginated(false)
             ->recordActions([
                 Action::make('view')
                     ->url(fn (Document $d) => route('documentation.show', [$d->category, $d]))
