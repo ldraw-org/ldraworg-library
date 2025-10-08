@@ -22,6 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table as Table;
+use Illuminate\Support\Str;
 
 class DocumentManagePage extends BasicResourceManagePage implements HasActions
 {
@@ -42,13 +43,14 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
         return $table
             ->query(Document::query())
             ->defaultSort('order')
+            ->defaultGroup('category.title')
             ->reorderable('order')
             ->heading('Document Management')
             ->columns([
                 TextColumn::make('title')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('category.category')
+                TextColumn::make('category.title')
                     ->sortable()
                     ->searchable(),
                 ToggleColumn::make('published'),
@@ -56,12 +58,12 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
             ])
             ->recordActions([
                 Action::make('view')
-                    ->url(fn (Document $d) => route('documentation.show', $d))
+                    ->url(fn (Document $d) => route('documentation.show', [$d->category, $d]))
                     ->openUrlInNewTab(),
                 EditAction::make()
                     ->schema($this->formSchema())
                     ->mutateDataUsing(function (array $data): array {
-                        $data['nav_title'] = rawurlencode(str_replace(' ', '-', strtolower($data['title'])));
+                        $data['slug'] = Str::slug($data['title']);
                         return $data;
                     })
                     ->modalWidth(Width::SevenExtraLarge),
@@ -71,7 +73,7 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
                 CreateAction::make()
                     ->schema($this->formSchema())
                     ->mutateDataUsing(function (array $data): array {
-                        $data['nav_title'] = rawurlencode(str_replace(' ', '-', strtolower($data['title'])));
+                        $data['slug'] = Str::slug($data['title']);
                         $data['order'] = Document::nextOrder();
                         return $data;
                     })
@@ -88,10 +90,11 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
             Select::make('document_category_id')
                 ->relationship(name: 'category', titleAttribute: 'category')
                 ->createOptionForm([
-                    TextInput::make('category')
+                    TextInput::make('title')
                         ->required(),
                 ])
                 ->createOptionUsing(function (array $data): int {
+                    $data['slug'] = Str::slug($data['title']);
                     $data['order'] = DocumentCategory::nextOrder();
                     return DocumentCategory::create($data)->getKey();
                 }),

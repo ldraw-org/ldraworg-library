@@ -13,13 +13,15 @@ class DocumentCategory extends Model
 {
     use HasOrder;
 
-    protected $fillable = [
-        'category',
-        'order'
-    ];
+    protected $guarded = [];
 
     public $timestamps = false;
 
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+    
     public function documents(): HasMany
     {
         return $this->HasMany(Document::class, 'document_category_id', 'id');

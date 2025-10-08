@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Document\Document;
+use App\Models\Document\DocumentCategory;
 use Illuminate\Http\Request;
 use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
+use Illuminate\Support\Str;
 
 class DocumentShowController extends Controller
 {
-    public function __invoke(Request $request, Document $document)
+    public function __invoke(Request $request, DocumentCategory $document_category, Document $document)
     {
         $doc_content = str($document->content . "\n[TOC]")
             ->markdown(

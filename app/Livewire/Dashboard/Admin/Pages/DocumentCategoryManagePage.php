@@ -14,6 +14,7 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table as Table;
+use Illuminate\Support\Str;
 
 class DocumentCategoryManagePage extends BasicResourceManagePage implements HasActions
 {
@@ -35,15 +36,19 @@ class DocumentCategoryManagePage extends BasicResourceManagePage implements HasA
             ->query(DocumentCategory::query())
             ->defaultSort('order')
             ->reorderable('order')
-            ->heading('Document Cateogory Management')
+            ->heading('Document Category Management')
             ->columns([
-                TextColumn::make('category')
+                TextColumn::make('title')
                     ->sortable()
                     ->searchable(),
             ])
             ->recordActions([
                 EditAction::make()
-                    ->schema($this->formSchema()),
+                    ->schema($this->formSchema())
+                    ->mutateDataUsing(function (array $data): array {
+                        $data['slug'] = Str::slug($data['title']);
+                        return $data;
+                    }),
                 DeleteAction::make()
                     ->visible(fn (DocumentCategory $c) => $c->documents->isEmpty())
             ])
@@ -52,6 +57,7 @@ class DocumentCategoryManagePage extends BasicResourceManagePage implements HasA
                     ->schema($this->formSchema())
                     ->mutateDataUsing(function (array $data): array {
                         $data['order'] = DocumentCategory::nextOrder();
+                        $data['slug'] = Str::slug($data['title']);
                         return $data;
                     })
             ]);

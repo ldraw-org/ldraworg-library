@@ -128,8 +128,7 @@ Route::prefix('omr')->name('omr.')->group(function () {
 
 Route::prefix('documentation')->name('documentation.')->group(function () {
     Route::view('/', 'documents.index')->name('index');
-    Route::get('/{document:nav_title}', DocumentShowController::class, 'show')->name('show');
-    Route::get('/{document}', DocumentShowController::class, 'show')->name('show');
+    Route::get('/{document_category}/{document}', DocumentShowController::class)->name('show');
 });
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {

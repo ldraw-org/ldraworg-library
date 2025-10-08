@@ -13,16 +13,10 @@ class Document extends Model
 {
     use HasOrder;
 
-    protected $fillable = [
-        'title',
-        'nav_title',
-        'maintainer',
-        'content',
-        'published',
-        'revision_history',
-        'document_category_id',
-        'restricted',
-        'order',
+    protected $guarded = [];
+
+    protected $with = [
+        'category'
     ];
 
     protected function casts(): array
@@ -34,6 +28,11 @@ class Document extends Model
 
     }
 
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+    
     public function category(): BelongsTo
     {
         return $this->belongsTo(DocumentCategory::class, 'document_category_id', 'id');
