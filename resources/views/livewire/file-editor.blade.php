@@ -5,11 +5,9 @@
         {{ $this->form }}
 
         <x-filament::button type="submit">
-            <x-filament::loading-indicator wire:loading wire:target="getFile" class="h-5 w-5" />
             Load File
         </x-filament::button>
         <x-filament::button wire:click="saveFile">
-            <x-filament::loading-indicator wire:loading wire:target="saveFile" class="h-5 w-5" />
             Save
         </x-filament::button>
     </form>

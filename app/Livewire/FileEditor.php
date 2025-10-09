@@ -92,14 +92,14 @@ class FileEditor extends Component implements HasSchemas
         }
         return false;
     }
-    public function saveFile(string $contents)
+    public function saveFile()
     {
         $file = str_replace('-sep-', '/', $this->file);
         if (file_exists(base_path($file)) &&
             $this->fileInWhitelist($file) === true &&
             Auth::user()->can(Permission::EditFiles)
         ) {
-            file_put_contents(base_path($file), $contents);
+            file_put_contents(base_path($file), $this->text);
         }
     }
 
