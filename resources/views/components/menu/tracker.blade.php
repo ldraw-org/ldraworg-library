@@ -6,7 +6,7 @@
     <x-menu.top-level-item label="Parts List" link="{{route('parts.list')}}" />
     <x-menu.top-level-item label="Activity" link="{{route('tracker.activity')}}" />
     <x-menu.top-level-item label="Parts by Week" link="{{route('tracker.weekly')}}" />
-    <x-menu.top-level-item label="Documentation" link="https://www.ldraw.org/docs-main.html" />
+    <x-menu.top-level-item label="Documentation" link="{{route('documentation.index')}}" />
     <x-menu.top-level-item label="Tools">
         <x-menu.item label="Part Search" link="{{route('parts.list')}}" />
         <x-menu.item label="Category List" link="{{route('parts.category.list')}}" />

@@ -3,7 +3,7 @@
     <x-menu.top-level-item label="Parts List" link="{{route('parts.list')}}" /> 
     <x-menu.top-level-item label="Parts Tracker" link="{{route('tracker.main')}}" />
     <x-menu.top-level-item label="Part Updates" link="{{route('part-update.index')}}" />
-    <x-menu.top-level-item label="Documentation" link="https://www.ldraw.org/docs-main.html" />
+    <x-menu.top-level-item label="Documentation" link="{{route('documentation.index')}}" />
     <x-menu.top-level-item label="OMR" link="{{route('omr.main')}}" />
     <x-menu.top-level-item label="Tools">
         <x-menu.item label="Part Search" link="{{route('parts.list')}}" />
