@@ -67,7 +67,8 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
             ->paginated(false)
             ->filters([
                 SelectFilter::make('type')
-                    ->options(DocumentType::options())
+                    ->relationship('category', 'title')
+                    ->preload()
             ])
             ->recordActions([
                 Action::make('view')

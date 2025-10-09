@@ -10,11 +10,14 @@ use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
 
 class DocumentShowController extends Controller
 {
     public function __invoke(Request $request, DocumentCategory $document_category, Document $document)
     {
+        Gate::authorize('view', $document);
+        
         if ($document->type == DocumentType::Link) {
             return redirect($document->content);
         } elseif ($document->type == DocumentType::Markdown) {
