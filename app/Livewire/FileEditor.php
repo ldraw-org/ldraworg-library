@@ -4,7 +4,10 @@ namespace App\Livewire;
 
 use Filament\Schemas\Schema;
 use App\Enums\Permission;
+use Filament\Forms\Components\CodeEditor;
+use Filament\Forms\Components\CodeEditor\Enums\Language;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Support\Facades\Auth;
@@ -22,14 +25,12 @@ class FileEditor extends Component implements HasSchemas
 {
     use InteractsWithSchemas;
 
-    public ?string $filepath = null;
     public ?string $file = null;
-    public string $text = '';
+    public ?string $text = '';
 
     protected array $dir_whitelist = [
         '/config',
         '/app',
-        '/documentation',
         '/resources',
         '/database',
         '/routes',
@@ -41,12 +42,6 @@ class FileEditor extends Component implements HasSchemas
         'php',
         'js',
         'css',
-        'html',
-        'htm',
-        'log',
-        'txt',
-        'json',
-        'md',
     ];
 
     public function mount(): void
@@ -61,52 +56,34 @@ class FileEditor extends Component implements HasSchemas
                 Select::make('file')
                     ->options($this->fileList())
                     ->searchable()
+                    ->live()
                     ->required(),
+                CodeEditor::make('text')
+                    ->language(fn (Get $get) => match(pathinfo(str_replace('-sep-', '/', $get('file')), PATHINFO_EXTENSION)) {
+                        'php' => Language::Php,
+                        'js' => Language::JavaScript,
+                        'htm' => Language::Html,
+                        default => null,
+                    })
+                    ->live(),
             ]);
     }
 
     public function getFile()
     {
-        $this->form->getState();
-        $files = $this->fileList();
-        $file = $files[$this->file];
-        $path = pathinfo($file);
-        if (str_ends_with($path['filename'], '.blade') && $path['extension'] == 'php') {
-            $mode = 'php_laravel_blade';
-        } else {
-            switch ($path['extension']) {
-                case 'md':
-                    $mode = 'markdown';
-                    break;
-                case 'js':
-                    $mode = 'javascript';
-                    break;
-                case 'htm':
-                    $mode = 'html';
-                    break;
-                case 'txt':
-                case 'log':
-                    $mode = 'text';
-                    break;
-                default:
-                    $mode = $path['extension'];
-            }
-        }
+        $file = str_replace('-sep-', '/', $this->file);
         if (file_exists(base_path($file)) &&
-            $this->fileInWhitelist() === true &&
+            $this->fileInWhitelist($file) === true &&
             Auth::user()->can(Permission::EditFiles)
         ) {
-            $contents = file_get_contents(base_path($file));
-            $this->dispatch('file-loaded', contents: $contents, mode: $mode);
+            $this->text = file_get_contents(base_path($file));
         } else {
-            $this->dispatch('file-loaded', contents: '', mode: 'text');
+            $this->text = '';
         }
     }
 
-    protected function fileInWhitelist(): bool
+    protected function fileInWhitelist(string $file): bool
     {
-        $files = $this->fileList();
-        $file = $files[$this->file];
         $path = pathinfo($file);
         foreach ($this->dir_whitelist as $dir) {
             if (str_starts_with($path['dirname'], $dir) && in_array($path['extension'], $this->ext_whitelist)) {
@@ -117,10 +94,9 @@ class FileEditor extends Component implements HasSchemas
     }
     public function saveFile(string $contents)
     {
-        $files = $this->fileList();
-        $file = $files[$this->file];
+        $file = str_replace('-sep-', '/', $this->file);
         if (file_exists(base_path($file)) &&
-            $this->fileInWhitelist() === true &&
+            $this->fileInWhitelist($file) === true &&
             Auth::user()->can(Permission::EditFiles)
         ) {
             file_put_contents(base_path($file), $contents);
@@ -135,10 +111,11 @@ class FileEditor extends Component implements HasSchemas
             $iterator = new RecursiveIteratorIterator($file_dir);
             $file_list = new RegexIterator($iterator, '/^.+\.('. implode('|', $this->ext_whitelist). ')$/i', RecursiveRegexIterator::GET_MATCH);
             foreach ($file_list as $file => $results) {
-                $files[] = str_replace(base_path(), '', $file);
+                $f = str_replace(base_path(), '', $file);
+                $files[str_replace('/', '-sep-', $f)] = $f;
             }
         }
-        sort($files);
+        $files = collect($files)->sortKeys()->all();
         return $files;
     }
     #[Layout('components.layout.base')]
