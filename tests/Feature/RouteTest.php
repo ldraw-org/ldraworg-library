@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Permission;
+use App\Models\Document\Document;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
 use App\Models\User;
@@ -14,6 +15,7 @@ beforeEach(function () {
         'realname' => 'Test User',
         'ca_confirm' => true,
     ]);
+    Document::factory()->create();
 });
 
 describe('non bound routes', function () {
@@ -96,4 +98,55 @@ describe('part bound routes', function () {
         $response = $this->get("/parts/{$part->filename}");
         $response->assertOk();
     });
+});
+
+describe('document routes', function () {
+
+    test('published, unrestricted document', function () {
+        $user = User::query()->first();
+        $document = Document::query()->first();
+        $document->published = true;
+        $document->save();
+
+        $response = $this->actingAs($user)->get(route('documentation.show', [$document->category, $document]));
+        $response->assertOk();
+    });
+
+    test('published, restricted document', function () {
+        $document = Document::query()->first();
+        $document->restricted = true;
+        $document->published = true;
+        $document->save();
+
+        $user = User::query()->first();
+
+        $user->syncPermissions([]);
+        $user->save();
+        $response = $this->actingAs($user)->get(route('documentation.show', [$document->category, $document]));
+        $response->assertForbidden();
+
+        $user->syncPermissions(Permission::DocumentViewRestricted);
+        $user->save();
+        $response = $this->actingAs($user)->get(route('documentation.show', [$document->category, $document]));
+        $response->assertOk();
+    });
+
+    test('unpublished document', function () {
+        $document = Document::query()->first();
+        $document->published = false;
+        $document->save();
+
+        $user = User::query()->first();
+
+        $user->syncPermissions([]);
+        $user->save();
+        $response = $this->actingAs($user)->get(route('documentation.show', [$document->category, $document]));
+        $response->assertForbidden();
+
+        $user->syncPermissions(Permission::DocumentViewUnpublished);
+        $user->save();
+        $response = $this->actingAs($user)->get(route('documentation.show', [$document->category, $document]));
+        $response->assertOk();
+    });
+
 });
