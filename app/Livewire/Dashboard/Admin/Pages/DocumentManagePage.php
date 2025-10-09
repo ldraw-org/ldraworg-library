@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Enums\DocumentType;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
@@ -15,6 +16,7 @@ use App\Models\Document\Document;
 use App\Models\Document\DocumentCategory;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -25,6 +27,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table as Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Filament\Schemas\Components\Utilities\Get;
 
 class DocumentManagePage extends BasicResourceManagePage implements HasActions
 {
@@ -56,6 +59,7 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
                 TextColumn::make('title')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('type'),
                 ToggleColumn::make('published'),
                 ToggleColumn::make('restricted')
             ])
@@ -91,12 +95,19 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
             TextInput::make('title')
                 ->string()
                 ->required(),
+            Select::make('type')
+                ->options(DocumentType::options())
+                ->selectablePlaceholder(false)
+                ->default('Markdown')
+                ->required()
+                ->live(),
             Select::make('document_category_id')
-                ->relationship(name: 'category', titleAttribute: 'category')
+                ->relationship(name: 'category', titleAttribute: 'title')
                 ->createOptionForm([
                     TextInput::make('title')
                         ->required(),
                 ])
+                ->required()
                 ->createOptionUsing(function (array $data): int {
                     $data['slug'] = Str::slug($data['title']);
                     $data['order'] = DocumentCategory::nextOrder();
@@ -108,11 +119,20 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
             ])->columns(2),
             TextInput::make('maintainer')
                 ->string()
-                ->required(),
-            MarkdownEditor::make('revision_history')
-                ->string(),
-            MarkdownEditor::make('content')
+                ->hidden(fn (Get $get): bool => $get('type') == DocumentType::Link->value)
+                ->required(fn (Get $get): bool => $get('type') != DocumentType::Link->value),
+            Textarea::make('revision_history')
+                ->string()
+                ->hidden(fn (Get $get): bool => $get('type') == DocumentType::Link->value),
+            Textarea::make('content')
+                ->rows(15)
                 ->required()
+                ->hidden(fn (Get $get): bool => $get('type') == DocumentType::Link->value),
+            TextInput::make('content')
+                ->label('Link URL')
+                ->rules(['url:http,https'])
+                ->required()
+                ->hidden(fn (Get $get): bool => $get('type') != DocumentType::Link->value),
         ];
     }
 }

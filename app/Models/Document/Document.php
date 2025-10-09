@@ -2,6 +2,7 @@
 
 namespace App\Models\Document;
 
+use App\Enums\DocumentType;
 use App\Models\Traits\HasOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,7 @@ class Document extends Model
         return [
             'restricted' => 'boolean',
             'published' => 'boolean',
+            'type' => DocumentType::class,
         ];
 
     }
@@ -37,4 +39,5 @@ class Document extends Model
     {
         return $this->belongsTo(DocumentCategory::class, 'document_category_id', 'id');
     }
+
 }

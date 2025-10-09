@@ -7,7 +7,11 @@
                 @foreach ($category->published_documents->sortBy('order') as $doc)
                     @if(!$doc->restricted || Auth::user()->can('documents.restricted.view'))
                         <li>
-                            <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title}}</a>
+                            @if ($doc->type == \App\Enums\DocumentType::Link)
+                                <a href="{{$doc->content}}">{{$doc->title}}</a>
+                            @else
+                                <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title}}</a>
+                            @endif
                         </li>
                     @endif
                 @endforeach
