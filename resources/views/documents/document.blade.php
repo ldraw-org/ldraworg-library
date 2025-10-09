@@ -34,20 +34,34 @@
                     <x-slot:header>
                         Maintained By: {{$document->maintainer}}<br>
                     </x-slot:>
-{{--
-                    <div>
-                            <strong>Revision History:</strong>
-                            <div class="documentation">{!! str($document->revision_history)->markdown()->sanitizeHtml() !!}</div>
-                    </div>
---}}
+                    @if ($document->revision_history != '')
+                        <div>
+                                <strong>Revision History:</strong>
+                                <div class="documentation">
+                                    @if ($document->type == \App\Enums\DocumentType::Markdown)
+                                        {!! str($document->revision_history)->markdown()->sanitizeHtml() !!}
+                                    @else
+                                        {!! str($document->revision_history)->sanitizeHtml() !!}
+                                    @endif
+                                </div>
+                        </div>
+                    @endif
                     <p>
                         This is an ratified, official LDraw.org document. 
                         Non-adminstrative changes can only be made with the approval of the maintainer.
                     </p>
                 </x-message>     
-                <div class="documentation">{!! $doc_content !!}</div>
+                <div class="documentation">
+                    @if ($document->type == \App\Enums\DocumentType::Markdown)
+                        {!! $doc_content !!}
+                    @else
+                        {!! str($doc_content)->sanitizeHtml() !!}
+                    @endif
+                </div>
             </div>
-            <div class="documentation h-screen sticky top-4">{!! $toc !!}</div>
+            @if ($toc != '')
+                <div class="documentation h-screen sticky top-4">{!! $toc !!}</div>
+            @endif
         </div>
      </div>
 </x-layout.documentation>
