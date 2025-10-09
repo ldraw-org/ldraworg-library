@@ -7,11 +7,11 @@
         <x-breadcrumb-item class="active" item="{{$document->title . ($document->draft ? ' (Draft)' : '')}}" />
     </x-slot>
     <div class="p-4 space-y-6">
-        <div class="documentation">
-            <h1>{{$document->title . ($document->draft ? ' (Draft)' : '')}}</h1>
+        <div>
+            <h1 class="py-2 font-bold text-4xl">{{$document->title . ($document->draft ? ' (Draft)' : '')}}</h1>
         </div>
         <div class="flex flex-row space-x-2">
-            <div class="documentation h-screen sticky top-4">
+            <div class="h-screen sticky top-4">
                 <div class="flex flex-col">
                     <div class="font-bold">{{$document->category->title}}</div>
                     <ol class="flex flex-col space-y-2 list-decimal">

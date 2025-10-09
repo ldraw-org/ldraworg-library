@@ -59,10 +59,18 @@
     @apply font-mono
 }
 
+.documentation pre {
+    @apply whitespace-pre-wrap wrap-break-word
+}
+
 .documentation > .table-of-contents ul {
     @apply mx-6 my-0
 }
 
 .documentation > .table-of-contents {
     @apply text-sm mx-4 my-0
+}
+
+.documentation > .table-of-contents a {
+    @apply text-current
 }
