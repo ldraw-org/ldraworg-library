@@ -47,9 +47,9 @@
         "laravel/sail": "^1.41.0",
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.6.1",
-        "pestphp/pest": "^3.7.4",
-        "pestphp/pest-plugin-laravel": "^3.1",
-        "spatie/pest-plugin-route-testing": "^1.1.1"
+        "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "spatie/pest-plugin-route-testing": "^1.1.4"
     },
     "autoload": {
         "psr-4": {
