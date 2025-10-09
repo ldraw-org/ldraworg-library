@@ -25,6 +25,7 @@ class Document extends Model
         return [
             'restricted' => 'boolean',
             'published' => 'boolean',
+            'draft' => 'boolean',
             'type' => DocumentType::class,
         ];
 

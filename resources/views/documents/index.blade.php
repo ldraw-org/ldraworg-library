@@ -12,7 +12,7 @@
                         @if ($doc->type == \App\Enums\DocumentType::Link)
                             <a href="{{$doc->content}}">{{$doc->title}}</a>
                         @else
-                            <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title}}</a>
+                            <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title . ($doc->draft ? ' (Draft)' : '')}}</a>
                         @endif
                     </li>
                 @empty
@@ -25,7 +25,7 @@
                             @if ($doc->type == \App\Enums\DocumentType::Link)
                                 <a href="{{$doc->content}}">{{$doc->title}}</a>
                             @else
-                                <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title}}</a>
+                                <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title . ($doc->draft ? ' (Draft)' : '')}}</a>
                             @endif
                         </li>
                     @endcan

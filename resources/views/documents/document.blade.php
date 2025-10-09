@@ -1,14 +1,14 @@
 <x-layout.documentation>
-    <x-slot:title>{{$document->title}}</x-slot>
+    <x-slot:title>{{$document->title . ($document->draft ? ' (Draft)' : '')}}</x-slot>
     @push('css')
         @vite('resources/css/documentation.css')
     @endpush
     <x-slot:breadcrumbs>
-        <x-breadcrumb-item class="active" item="{{$document->title}}" />
+        <x-breadcrumb-item class="active" item="{{$document->title . ($document->draft ? ' (Draft)' : '')}}" />
     </x-slot>
     <div class="p-4 space-y-6">
         <div class="documentation">
-            <h1>{{$document->title}}</h1>
+            <h1>{{$document->title . ($document->draft ? ' (Draft)' : '')}}</h1>
         </div>
         <div class="flex flex-row space-x-2">
             <div class="documentation h-screen sticky top-4">
@@ -20,7 +20,7 @@
                                 @if ($doc->type == \App\Enums\DocumentType::Link)
                                     <a href="{{$doc->content}}">{{$doc->title}}</a>
                                 @else
-                                    <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title}}</a>
+                                    <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title . ($doc->draft ? ' (Draft)' : '')}}</a>
                                 @endif
                             </li>
                         @empty
@@ -33,7 +33,7 @@
                                     @if ($doc->type == \App\Enums\DocumentType::Link)
                                         <a href="{{$doc->content}}">{{$doc->title}}</a>
                                     @else
-                                        <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title}}</a>
+                                        <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title . ($doc->draft ? ' (Draft)' : '')}}</a>
                                     @endif
                                 </li>
                             @endcan

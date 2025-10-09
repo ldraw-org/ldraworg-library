@@ -14,7 +14,6 @@ use Filament\Schemas\Components\Section;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Document\Document;
 use App\Models\Document\DocumentCategory;
-use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -23,7 +22,6 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table as Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -62,7 +60,8 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
                     ->searchable(),
                 TextColumn::make('type'),
                 ToggleColumn::make('published'),
-                ToggleColumn::make('restricted')
+                ToggleColumn::make('restricted'),
+                ToggleColumn::make('draft'),
             ])
             ->paginated(false)
             ->filters([
@@ -122,7 +121,9 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
             Section::make([
                 Toggle::make('published'),
                 Toggle::make('restricted'),
-            ])->columns(2),
+                Toggle::make('draft')
+                    ->hidden(fn (Get $get): bool => $get('type') == DocumentType::Link->value),
+            ])->columns(fn (Get $get): int => $get('type') == DocumentType::Link->value ? 2 : 3),
             TextInput::make('maintainer')
                 ->string()
                 ->hidden(fn (Get $get): bool => $get('type') == DocumentType::Link->value)
