@@ -10,11 +10,14 @@ class DocumentPolicy
 {
     public function view(?User $user, Document $document)
     {
-        return $document->restricted 
-            ? !is_null($user) && $user->can(Permission::DocumentViewRestricted)
-            : true;   
+        if (!$document->published) {
+            return !is_null($user) && $user->can(Permission::DocumentViewUnpublished);
+        } elseif ($document->restricted) {
+            return !is_null($user) && $user->can(Permission::DocumentViewRestricted); 
+        }
+        return true;  
     }
-    
+
     public function manage(User $user)
     {
         return $user->can(Permission::DocumentManage);
