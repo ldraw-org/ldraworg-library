@@ -1,4 +1,8 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "../../app/Enums/**/*.php";
+@source "../../app/Filament/**/*.php";
+@source "../../app/Livewire/**/*.php";
+@source "../../resources/**/*.blade.php";
 
 /* Required by all components */
 @import '../../vendor/filament/support/resources/css/index.css';
