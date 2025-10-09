@@ -28,6 +28,7 @@ use Filament\Tables\Table as Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Tables\Filters\SelectFilter;
 
 class DocumentManagePage extends BasicResourceManagePage implements HasActions
 {
@@ -47,16 +48,16 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
     {
         return $table
             ->query(Document::query())
-            ->defaultSort('order')
-            ->defaultGroup(
-                Group::make('category.title')
-                    ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderBy('order', 'desc'))
-                    ->collapsible()
-            )
+            ->defaultSort(function (Builder $query): Builder {
+                return $query->orderBy('document_category_id')->orderBy('order');
+            })
             ->reorderable('order')
             ->heading('Document Management')
             ->columns([
                 TextColumn::make('title')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('category.title')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('type'),
@@ -64,6 +65,10 @@ class DocumentManagePage extends BasicResourceManagePage implements HasActions
                 ToggleColumn::make('restricted')
             ])
             ->paginated(false)
+            ->filters([
+                SelectFilter::make('type')
+                    ->options(DocumentType::options())
+            ])
             ->recordActions([
                 Action::make('view')
                     ->url(fn (Document $d) => route('documentation.show', [$d->category, $d]))
