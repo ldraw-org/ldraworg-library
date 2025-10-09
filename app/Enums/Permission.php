@@ -59,7 +59,7 @@ enum Permission: string
     case RoleManageSuperuser = 'role.manage.superuser';
 
     case DocumentViewUnpublished = 'documentation.view.unpublished';
-    case DocumenViewRestricted = 'documentation.view.restricted';
+    case DocumentViewRestricted = 'documentation.view.restricted';
     case DocumentManage = 'documentation.manage';
     case DocumentCategoryManage = 'document-category.manage';
 
