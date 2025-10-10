@@ -65,6 +65,7 @@ class FileEditor extends Component implements HasSchemas
                         'htm' => Language::Html,
                         default => null,
                     })
+                    ->extraFieldWrapperAttributes(['class' => 'code-editor', 'id' => 'fi-code-editor'])
                     ->live(),
             ]);
     }
@@ -111,6 +112,9 @@ class FileEditor extends Component implements HasSchemas
             $iterator = new RecursiveIteratorIterator($file_dir);
             $file_list = new RegexIterator($iterator, '/^.+\.('. implode('|', $this->ext_whitelist). ')$/i', RecursiveRegexIterator::GET_MATCH);
             foreach ($file_list as $file => $results) {
+                if (strpos($file, 'buildinginstructions.js') !== false) {
+                    continue;
+                }
                 $f = str_replace(base_path(), '', $file);
                 $files[str_replace('/', '-sep-', $f)] = $f;
             }

@@ -1,8 +1,5 @@
 <x-layout.documentation>
     <x-slot:title>{{$document->title . ($document->draft ? ' (Draft)' : '')}}</x-slot>
-    @push('css')
-        @vite('resources/css/documentation.css')
-    @endpush
     <x-slot:breadcrumbs>
         <x-breadcrumb-item class="active" item="{{$document->title . ($document->draft ? ' (Draft)' : '')}}" />
     </x-slot>
@@ -44,14 +41,14 @@
                 </div>
             </div>
             <div class="scroll-y-auto border-x px-1 border-gray-200">
-                <x-message compact type="info">
+                <x-message compact type="{{$document->draft ? 'warning' : 'info'}}">
                     <x-slot:header>
                         Maintained By: {{$document->maintainer}}<br>
                     </x-slot:>
-                    @if ($document->revision_history != '')
+                    @if ($document->revision_history != '' && $document->draft == false)
                         <div>
                                 <strong>Revision History:</strong>
-                                <div class="documentation">
+                                <div class="flex flex-col space-y-2">
                                     @if ($document->type == \App\Enums\DocumentType::Markdown)
                                         {!! str($document->revision_history)->markdown()->sanitizeHtml() !!}
                                     @else
@@ -60,12 +57,18 @@
                                 </div>
                         </div>
                     @endif
-                    <p>
-                        This is an ratified, official LDraw.org document. 
-                        Non-adminstrative changes can only be made with the approval of the maintainer.
-                    </p>
+                    @if ($document->draft == false)
+                        <p>
+                            This is an ratified, official LDraw.org document. 
+                            Non-adminstrative changes can only be made with the approval of the maintainer.
+                        </p>
+                    @else
+                        <p>
+                            This document is in a draft status and it not currently ratified for use. 
+                        </p>
+                    @endif
                 </x-message>     
-                <div class="documentation">
+                <div class="flex flex-col space-y-2">
                     @if ($document->type == \App\Enums\DocumentType::Markdown)
                         {!! $doc_content !!}
                     @else
@@ -74,7 +77,7 @@
                 </div>
             </div>
             @if ($toc != '')
-                <div class="documentation h-screen sticky top-4">{!! $toc !!}</div>
+                <div class="flex flex-col h-screen sticky overflow-y-scroll top-4">{!! $toc !!}</div>
             @endif
         </div>
      </div>

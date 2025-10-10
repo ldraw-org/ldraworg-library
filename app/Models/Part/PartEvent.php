@@ -66,7 +66,7 @@ class PartEvent extends Model
         $urlpattern = '#https?:\/\/(?:www\.)?[a-zA-Z0-9@:%._\+~\#=-]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[a-zA-Z0-9()@:%_\+.~\#?&\/=-]*)#u';
         $comment = preg_replace('#\R#us', "\n", $this->comment);
         $comment = preg_replace('#\n{3,}#us', "\n\n", $comment);
-        $comment = preg_replace($urlpattern, '<a href="$0">$0</a>', $comment);
+        $comment = preg_replace($urlpattern, '<a class="underline decoration-dotted hover:decoration-solid" href="$0">$0</a>', $comment);
         $comment = nl2br($comment);
 
         return new HtmlString($comment);

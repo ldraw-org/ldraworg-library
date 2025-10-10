@@ -30,18 +30,14 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-.event-comment a {
-    @apply underline decoration-dotted hover:decoration-solid
-}
-
-#editor *{
+#fi-code-editor *{
     font-family: "Courier New", monospace !important;
-    font-size: 10pt !important;
+    font-size: 11pt !important;
   }
 
-.ace-editor *{
+.code-editor *{
     font-family: "Courier New", monospace !important;
-    font-size: 10pt !important;
+    font-size: 11pt !important;
 }
 
 .inset-l-full {
