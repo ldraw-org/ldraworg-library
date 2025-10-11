@@ -87,13 +87,13 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                         fn (Builder $query2) => $query2->whereDoesntHave(
                                             'parents',
                                             fn (Builder $query): Builder =>
-                                            $query->where('description', 'LIKE', 'Minifig Torso%')
+                                            $query->whereLike('description', 'Minifig Torso%')
                                                 ->where('category', '!=', PartCategory::StickerShortcut)
                                         )
                                     )
                                         ->doesntHave('unofficial_part')
-                                        ->where('filename', 'LIKE', 'parts/973p%.dat')
-                                        ->where('description', 'NOT LIKE', '~%')
+                                        ->whereLike('filename', 'parts/973p%.dat')
+                                        ->whereNotLike('description', '~%')
                                         ->where('category', '!=', PartCategory::StickerShortcut)
                                         ->orderBy('filename')
                                         ->get();

@@ -37,10 +37,10 @@ class MenuItem extends Component
             }
         }
         $sets = Set::select(['id', 'name', 'number'])->where(function (Builder $q) {
-            $q->orWhere('number', 'LIKE', "%{$this->search}%")
-                ->orWhere('name', 'LIKE', "%{$this->search}%")
-                ->orWhereHas('models', fn (Builder $qu) => $qu->where('alt_model_name', 'LIKE', "%{$this->search}%"))
-                ->orWhereHas('theme', fn (Builder $qu) => $qu->where('name', 'LIKE', "%{$this->search}%"));
+            $q->orWhereLike('number', "%{$this->search}%")
+                ->orWhereLike('name', "%{$this->search}%")
+                ->orWhereHas('models', fn (Builder $qu) => $qu->whereLike('alt_model_name', "%{$this->search}%"))
+                ->orWhereHas('theme', fn (Builder $qu) => $qu->whereLike('name', "%{$this->search}%"));
         })->orderBy('name')->take($limit)->get();
         if ($sets->isNotEmpty()) {
             $this->hasResults = true;

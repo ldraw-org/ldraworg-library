@@ -4,7 +4,7 @@
         <a href="{{route('parts.show', $part)}}">
     @endif
             <div @class([
-                'flex flex-col rounded border border-gray-200 h-full',
+                'flex flex-col rounded-lg border border-gray-200 h-full',
                 'bg-red-100' => $part->isObsolete(),
                 'bg-green-100' => $part->isOfficial() && !$part->isObsolete(),
                 'bg-yellow-100' => $part->isUnofficial() && !$part->isObsolete()

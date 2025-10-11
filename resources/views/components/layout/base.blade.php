@@ -13,8 +13,8 @@
         @vite('resources/css/app.css')
         @stack('css')
     </head>
-  <body class="bg-gradient-to-r from-[#D4D4D4] via-[#F4F4F4] via-[#FFFFFF] via-[#F4F4F4] to-[#D4D4D4]">
-    <div class="container mx-auto p-4 space-y-4">
+  <body class="bg-indigo-200">
+    <div class="mx-auto p-4 space-y-2">
         @env('local')
             <x-message centered icon type="warning">
                 <x-slot:header>
@@ -23,7 +23,9 @@
                 For the live version go here: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="https://library.ldraw.org">https://library.ldraw.org</a>
             </x-message>
         @endenv
+      
         {{ $messages ?? '' }}
+      
         <div class="grid grid-cols-2 justify-stretch items-center">
             <div class="justify-self-start">
                 <a href="https://www.ldraw.org">
@@ -36,27 +38,20 @@
                 </div>
             @endisset
         </div>
-        <nav class="flex flex-col md:flex-row bg-white rounded-lg border border-gray-300">
-            {{$menu ?? ''}}
-            <livewire:search.menu-item />
-        </nav>
-        <div class="grid grid-cols-1 md:grid-cols-2 justify-stretch items-center">
-            <div class="justify-self-end">
-                @auth
-                    Welcome {{Auth::user()->realname}}
-                    <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('dashboard.index')}}">User Dashboard</a>
-                    @can(\App\Enums\Permission::AdminDashboardView)
-                        :: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('admin.index')}}">Admin Dashboard</a>
-                    @endcan
-                @endauth
-            </div>
-        </div>
+      
+        <div class="flex flex-col-reverse md:flex-row w-full">
+            <nav class="flex flex-col md:flex-row bg-white rounded-lg border border-gray-300 w-full">
+                {{$menu ?? ''}}
+                <livewire:search.menu-item />
+            </nav>
+            @auth
+                <x-menu.user-icon />
+            @endauth
+        </div>      
 
-
-      <div class="bg-white rounded p-2">
+      <div class="main-content rounded-lg bg-white p-2">
          {{ $slot ?? '' }}
       </div>
-
 
       <div class="flex flex-col text-xs">
         <p>

@@ -90,8 +90,8 @@ class Submit extends Component implements HasSchemas
                                 }
                             } elseif ($mimeType == 'image/png') {
                                 $filename = $value->getClientOriginalName();
-                                $unofficial_exists = !is_null(Part::unofficial()->where('filename', 'LIKE', "%{$filename}")->first());
-                                $official_exists = !is_null(Part::official()->where('filename', 'LIKE', "%{$filename}")->first());
+                                $unofficial_exists = !is_null(Part::unofficial()->whereLike('filename', "%{$filename}")->first());
+                                $official_exists = !is_null(Part::official()->whereLike('filename', "%{$filename}")->first());
                             }
 
                             // Check if the part already exists on the tracker

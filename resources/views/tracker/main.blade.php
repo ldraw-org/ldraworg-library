@@ -2,7 +2,7 @@
   <x-slot:title>
     Parts Tracker Main
   </x-slot>
-  <div class="space-y-2">
+  <div class="space-y-2 bg-white rounded-lg">
         <p class="p-2">
             The Parts Tracker is the system we use to submit files to the LDraw.org Part Library.
             The Parts Tracker allows users to download unofficial parts, submit new files, update existing unofficial files, and review unofficial parts.

@@ -21,7 +21,7 @@
         <meta name="twitter:image" content="{{$part->getFirstMediaUrl('image', 'feed-image')}}">
     @endpush
 
-    <div class="flex flex-col space-y-4">
+    <div class="flex flex-col space-y-4 bg-white p-2 rounded-lg">
         <div class="flex flex-wrap gap-2">
             <x-filament-action action="downloadAction" />
             <x-filament-action action="downloadZipAction" />
@@ -230,7 +230,7 @@
                 <div id="voteForm"></div>
                 <form wire:submit="postVote">
                     {{ $this->form }}
-                    <x-filament::button type="submit">
+                    <x-filament::button type="submit" class="mt-2">
                         <x-filament::loading-indicator wire:loading wire:target="postVote" class="h-5 w-5" />
                         Vote
                     </x-filament::button>

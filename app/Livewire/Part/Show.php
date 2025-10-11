@@ -410,7 +410,7 @@ class Show extends Component implements HasSchemas, HasActions
                             ->partsFolderOnly()
                             ->where('is_pattern', false)
                             ->where('category', '!=', PartCategory::Moved)
-                            ->where('description', 'NOT LIKE', '%Obsolete%')
+                            ->whereNotLike('description', '%Obsolete%')
                             ->pluck('filename', 'id')
                     )
                     ->optionsLimit(50000),

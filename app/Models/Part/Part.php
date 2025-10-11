@@ -264,7 +264,7 @@ class Part extends Model implements HasMedia
                     [$char.$char, $char.'%', $char.'_'],
                     $m[count($m) - 1]
                 );
-                $query->where('header', 'LIKE', "%{$term}%");
+                $query->whereLike('header', "%{$term}%");
             }
         }
     }
@@ -283,9 +283,9 @@ class Part extends Model implements HasMedia
                 fn (Builder $query2) =>
                 $query2->orWhereNull('type_qualifier')->orWhere('type_qualifier', PartTypeQualifier::Alias)
             )
-            ->where('description', 'NOT LIKE', '~%')
-            ->where('description', 'NOT LIKE', '|%')
-            ->where('description', 'NOT LIKE', '%(Obsolete)')
+            ->whereNotLike('description', '~%')
+            ->whereNotLike('description', '|%')
+            ->whereNotLike('description', '%(Obsolete)')
             ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete, PartCategory::StickerShortcut]);
     }
 

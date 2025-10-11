@@ -128,7 +128,7 @@ class PartTable
                 ->trueLabel('Third Party Parts')
                 ->falseLabel('Alias Parts')
                 ->queries(
-                    true: fn (Builder $q) => $q->where('description', 'LIKE', '|%'),
+                    true: fn (Builder $q) => $q->whereLike('description', '|%'),
                     false: fn (Builder $q) => $q->whereRelation('type_qualifier', PartTypeQualifier::Alias),
                     blank: fn (Builder $q) => $q,
                 ),

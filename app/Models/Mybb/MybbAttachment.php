@@ -37,8 +37,8 @@ class MybbAttachment extends Model
         $query
             ->where(
                 fn (Builder $qu) => $qu
-                ->orWhere('filename', 'LIKE', '%.ldr')
-                ->orWhere('filename', 'LIKE', '%.mpd')
+                ->orWhereLike('filename', '%.ldr')
+                ->orWhereLike('filename', '%.mpd')
             )
             ->whereRelation('post', 'fid', config('ldraw.mybb_omr.omr_forum_id'));
     }
