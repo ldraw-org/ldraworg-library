@@ -13,7 +13,7 @@
         @vite('resources/css/app.css')
         @stack('css')
     </head>
-  <body class="bg-indigo-200">
+  <body class="bg-gradient-to-r from-[#D4D4D4] via-[#F4F4F4] via-[#FFFFFF] via-[#F4F4F4] to-[#D4D4D4]">
     <div class="mx-auto p-4 space-y-2">
         @env('local')
             <x-message centered icon type="warning">
