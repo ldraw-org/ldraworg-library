@@ -8,39 +8,10 @@
             <h1 class="py-2 font-bold text-4xl">{{$document->title . ($document->draft ? ' (Draft)' : '')}}</h1>
         </div>
         <div class="flex flex-row space-x-2">
-            <div class="h-screen sticky top-4">
-                <div class="flex flex-col">
-                    <div class="font-bold">{{$document->category->title}}</div>
-                    <ol class="flex flex-col space-y-2 list-decimal">
-                        @forelse ($document->category->published_documents->where('restricted', false)->sortBy('order') as $doc)
-                            <li>
-                                @if ($doc->type == \App\Enums\DocumentType::Link)
-                                    <a href="{{$doc->content}}">{{$doc->title}}</a>
-                                @else
-                                    <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title . ($doc->draft ? ' (Draft)' : '')}}</a>
-                                @endif
-                            </li>
-                        @empty
-                            {{-- Do nothing --}}
-                        @endforelse
-                        
-                        @forelse ($document->category->published_documents->where('restricted', true)->sortBy('order') as $doc)
-                            @can('view', $doc)
-                                <li>
-                                    @if ($doc->type == \App\Enums\DocumentType::Link)
-                                        <a href="{{$doc->content}}">{{$doc->title}}</a>
-                                    @else
-                                        <a href="{{route('documentation.show', [$doc->category, $doc])}}">{{$doc->title . ($doc->draft ? ' (Draft)' : '')}}</a>
-                                    @endif
-                                </li>
-                            @endcan
-                        @empty
-                            {{-- Do nothing --}}
-                        @endforelse
-                    </ol>
-                </div>
+            <div class="hidden md:contents h-screen sticky top-4">
+              <x-document.toc :categories="collect($document->category()->get())" />
             </div>
-            <div class="scroll-y-auto border-x px-1 border-gray-200">
+            <div class="md:scroll-y-auto border-x px-1 border-gray-200 w-full">
                 <x-message compact type="{{$document->draft ? 'warning' : 'info'}}">
                     <x-slot:header>
                         Maintained By: {{$document->maintainer}}<br>
@@ -77,7 +48,7 @@
                 </div>
             </div>
             @if ($toc != '')
-                <div class="flex flex-col h-screen sticky overflow-y-scroll top-4">{!! $toc !!}</div>
+                <div class="hidden md:flex flex-col h-screen sticky overflow-y-scroll top-4">{!! $toc !!}</div>
             @endif
         </div>
      </div>

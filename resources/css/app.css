@@ -30,15 +30,19 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+
 #fi-code-editor *{
     font-family: "Courier New", monospace !important;
     font-size: 11pt !important;
-  }
+    line-height: 1.4 !important;
+}
 
 .code-editor *{
     font-family: "Courier New", monospace !important;
     font-size: 11pt !important;
+    line-height: 1.4 !important;
 }
+
 
 .inset-l-full {
     left: 100%;

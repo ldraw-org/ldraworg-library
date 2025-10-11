@@ -85,5 +85,13 @@ class AppServiceProvider extends ServiceProvider
         Nightwatch::rejectQueuedJobs(function (QueuedJob $queuedjob) {
             return str_contains($queuedjob->name, 'CheckPart');
         });
+
+        Nightwatch::rejectQueuedJobs(function (QueuedJob $queuedjob) {
+            return str_contains($queuedjob->name, 'UpdateImages');
+        });
+
+        Nightwatch::rejectQueuedJobs(function (QueuedJob $queuedjob) {
+            return str_contains($queuedjob->name, 'PerformConversions');
+        });
     }
 }
