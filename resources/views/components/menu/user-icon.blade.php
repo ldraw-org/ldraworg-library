@@ -10,9 +10,9 @@
                 <span class="absolute bottom-2 md:bottom-auto -left-7 md:left-auto md:right-2 w-3 h-3 bg-white border border-gray-200 transform rotate-45 -mt-1 ml-6"></span>
                 <div class="bg-white rounded w-full relative z-10 py-1">
                     <ul class="list-reset">
-                        <x-menu.item link="route('dashboard.index')" label="User Dashboard" />
+                        <x-menu.item link="{{route('dashboard.index')}}" label="User Dashboard" />
                         @can(\App\Enums\Permission::AdminDashboardView)
-                            <x-menu.item link="route('admin.index')" label="Admin Dashboard" />
+                            <x-menu.item link="{{route('admin.index')}}" label="Admin Dashboard" />
                         @endcan
                     </ul>
                 </div>
