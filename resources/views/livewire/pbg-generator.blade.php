@@ -4,9 +4,6 @@
 <x-slot:menu>
     <x-menu.library />
 </x-slot>
-<x-slot:breadcrumbs>
-    <x-breadcrumb-item class="active" item="PBG Generator" />
-</x-slot>    
 
 <div class="flex flex-col space-y-2">
     <div class="text-2xl font-bold">

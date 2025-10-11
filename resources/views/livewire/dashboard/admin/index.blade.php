@@ -2,9 +2,6 @@
 <x-slot:menu>
     <x-menu.admin />
 </x-slot>
-<x-slot:breadcrumbs>
-    <x-breadcrumb-item class="active" item="Admin Dashboard" />
-</x-slot>    
 <div>
     <x-filament::tabs class="p-2">
         <x-filament::tabs.item 

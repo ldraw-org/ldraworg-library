@@ -1,9 +1,6 @@
 <x-slot:title>
     LDraw Member Poll: {{$poll->title}}
 </x-slot>
-<x-slot:breadcrumbs>
-<x-breadcrumb-item class="active" item="LDraw Member Poll: {{$poll->title}}" />
-</x-slot>
 
 <div>
     @if (!$poll->enabled)

@@ -1,8 +1,5 @@
 <x-layout.documentation>
     <x-slot:title>{{$document->title . ($document->draft ? ' (Draft)' : '')}}</x-slot>
-    <x-slot:breadcrumbs>
-        <x-breadcrumb-item class="active" item="{{$document->title . ($document->draft ? ' (Draft)' : '')}}" />
-    </x-slot>
     <div class="p-4 space-y-6">
         <div>
             <h1 class="py-2 font-bold text-4xl">{{$document->title . ($document->draft ? ' (Draft)' : '')}}</h1>

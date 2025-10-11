@@ -1,7 +1,4 @@
 <x-slot:title>Recent Activity</x-slot>
-<x-slot:breadcrumbs>
-    <x-breadcrumb-item class="active" item="Activity" />
-</x-slot>
 <div>
     <div class="flex flex-col space-y-4">
         <div class="grid grid-cols-2 justify-stretch items-center">

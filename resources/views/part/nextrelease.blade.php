@@ -1,8 +1,5 @@
 <x-layout.tracker>
     <x-slot:title>Parts In Next Release</x-slot>
-    <x-slot:breadcrumbs>
-        <x-breadcrumb-item class="active" item="Next Release" />
-    </x-slot>
     <div class="text-xl font-bold">
         Parts In Next Release
     </div>  

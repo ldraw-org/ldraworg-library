@@ -2,9 +2,6 @@
     <x-slot:title>
         File Detail {{ $part->filename }}
     </x-slot>
-    <x-slot:breadcrumbs>
-        <x-breadcrumb-item class="active" item="Part Detail" />
-    </x-slot>
     @push('meta')
         <meta name="description" content="{{$part->description}}">
 

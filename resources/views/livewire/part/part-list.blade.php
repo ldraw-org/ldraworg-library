@@ -1,9 +1,6 @@
 <x-slot:title>
     {{$unofficial ? 'Unofficial' : 'Official'}} Part List
 </x-slot>
-<x-slot:breadcrumbs>
-    <x-breadcrumb-item class="active" item="{{$unofficial ? 'Unofficial' : 'Official'}} Part List" />
-</x-slot>    
 <div>
     <div class="flex flex-col space-y-4">
         <div class="grid grid-cols-2 justify-stretch items-center">

@@ -1,8 +1,5 @@
 <x-layout.base>
     <x-slot:title>User List</x-slot>
-    <x-slot:breadcrumbs>
-        <x-breadcrumb-item class="active" item="User List" />
-    </x-slot>
     <x-slot:menu>
         <x-menu.library />
     </x-slot>

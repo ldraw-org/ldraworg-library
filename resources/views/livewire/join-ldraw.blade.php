@@ -4,9 +4,6 @@
 <x-slot:menu>
     <x-menu.library />
 </x-slot>
-<x-slot:breadcrumbs>
-    <x-breadcrumb-item class="active" item="Join LDraw" />
-</x-slot>
 
 <div>
     @if ($meetsId)

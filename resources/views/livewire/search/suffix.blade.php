@@ -1,9 +1,6 @@
 <x-slot:title>
     Pattern/Composite/Sticker Shortcut Search
 </x-slot>
-<x-slot:breadcrumbs>
-  <x-breadcrumb-item class="active" item="Pattern Search" />
-</x-slot>
 <div>
     <form class="p-2" wire:submit="doSearch">
         {{ $this->form }}

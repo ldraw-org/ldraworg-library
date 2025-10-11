@@ -1,8 +1,5 @@
 <div>
     <x-slot:title>LDraw.org Official Model Repository - Add Model</x-slot>
-    <x-slot:breadcrumbs>
-      <x-breadcrumb-item class="active" item="Add Model" />
-    </x-slot>
 
     {{ $this->table }}
 

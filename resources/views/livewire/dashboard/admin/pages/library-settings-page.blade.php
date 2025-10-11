@@ -1,9 +1,6 @@
 <x-slot:title>
      Parts Tracker File Submit Form
 </x-slot>
-<x-slot:breadcrumbs>
-    <x-breadcrumb-item class="active" item="Library General Settings" />
-</x-slot>    
 <div>
     <div class="text-2xl font-bold">
         Update Library General Settings

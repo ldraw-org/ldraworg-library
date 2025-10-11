@@ -1,9 +1,6 @@
 <x-slot:title>
     Sticker Sheet Search
 </x-slot>
-<x-slot:breadcrumbs>
-  <x-breadcrumb-item class="active" item="Pattern Search" />
-</x-slot> 
 <div> 
     <div class="text-3xl font-bold">
         <span>Sticker Sheet Part Search</span>

@@ -1,8 +1,5 @@
 <div x-data="{ webgl: true }">
     <x-slot:title>LDraw.org Official Model Repository - {{$set->name}}</x-slot>
-    <x-slot:breadcrumbs>
-      <x-breadcrumb-item class="active" item="Set Detail" />
-    </x-slot>
     <div class="flex flex-col space-y-2">
         <div class="rounded border-gray-200 text-xl font-bold bg-gray-200 p-2">{{$set->number}} - {{$set->name}}</div>
         <div class="grid grid-cols-12 gap-2">

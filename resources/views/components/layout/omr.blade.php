@@ -4,14 +4,6 @@
     <x-slot:menu>
       <x-menu.omr />
     </x-slot>
-    <x-slot:breadcrumbs>
-        @isset($breadcrumbs)
-            <x-breadcrumb-item item="OMR" />
-            {{$breadcrumbs}}
-        @else   
-            <x-breadcrumb-item class="active" item="OMR" />
-        @endisset
-    </x-slot>      
     {{ $slot ?? '' }}
 </x-layout.base>    
   

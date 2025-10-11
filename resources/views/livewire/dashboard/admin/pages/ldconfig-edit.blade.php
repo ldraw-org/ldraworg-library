@@ -4,9 +4,6 @@
 <x-slot:menu>
     <x-menu.tracker />
 </x-slot>
-<x-slot:breadcrumbs>
-    <x-breadcrumb-item class="active" item="LDConfig Edit" />
-</x-slot>
 <div>
     <div class="text-2xl font-bold">
         LDConfig Edit

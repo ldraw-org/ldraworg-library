@@ -6,9 +6,6 @@
         <x-menu.library />
     @endif
 </x-slot>
-<x-slot:breadcrumbs>
-    <x-breadcrumb-item class="active" item="{{$title}}" />
-</x-slot>    
 <div>
     {{ $this->table }}
 </div>

@@ -41,17 +41,6 @@
             <livewire:search.menu-item />
         </nav>
         <div class="grid grid-cols-1 md:grid-cols-2 justify-stretch items-center">
-            <div class="invisible md:visible justify-self-start">
-                <div class="flex flex-row items-center">
-                    <a href="https://www.ldraw.org">LDraw.org</a>
-                    @isset($breadcrumbs)
-                        <x-breadcrumb-item item="Library" />
-                        {{$breadcrumbs}}
-                    @else
-                        <x-breadcrumb-item active item="Library" />
-                    @endisset
-                </div>
-            </div>
             <div class="justify-self-end">
                 @auth
                     Welcome {{Auth::user()->realname}}
@@ -69,16 +58,12 @@
       </div>
 
 
-      <div class="flex flex-col p-2">
+      <div class="flex flex-col text-xs">
         <p>
           Website copyright &copy;2003-{{date_format(now(),"Y")}} LDraw.org, see
-          <a href="/legal-info">Legal Info</a> for details.
-        </p>
-        <p>
+          <a href="https://www.ldraw.org/docs-main/licenses/legal-info.html">Legal Info</a> for details.<br>
           LDraw is a completely unofficial, community run free CAD system which
-          represents official parts produced by the LEGO company.
-        </p>
-        <p>
+          represents official parts produced by the LEGO company.<br>
           LDraw&trade; is a trademark owned and licensed by the Estate of James Jessiman<br>
           LEGO&reg; is a registered trademark of the LEGO Group, which does not sponsor,
           endorse, or authorize this site. Visit the official Lego website at

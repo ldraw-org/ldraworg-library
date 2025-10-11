@@ -3,9 +3,6 @@
     <x-slot:menu>
         <x-menu.library />
     </x-slot>
-    <x-slot:breadcrumbs>
-        <x-breadcrumb-item class="active" item="Updates" />
-    </x-slot>    
     <div class="flex flex-col space-y-2">
         @if($latest)
             <x-release.table :release="$releases"/>   
