@@ -1,15 +1,15 @@
 <div>
     <x-filament::modal id="site-search" alignment="center" width="7xl" lazy>
         <x-slot name="trigger">
-            <x-mdi-magnify class="w-8 h-8"/>
+            <x-mdi-magnify class="w-8 h-8" />
         </x-slot>
         <x-slot name="heading">
             Search
         </x-slot>
         <div class="h-[40vh]">
-            <form action="{{ route('parts.list', ['tableSearch' => $search]) }}">
+            <form action="{{ route('parts.list') }}" method="get">
                 <x-filament::input.wrapper>
-                    <x-filament::input type="text" wire:input="doSearch" wire:model.live="search" />
+                    <x-filament::input id="tableSearch" name="tableSearch" type="text" wire:input="doSearch" wire:model.live="tableSearch" />
                 </x-filament::input.wrapper>
             </form>
             <div class="h-7/8 overflow-y-scroll p-2">

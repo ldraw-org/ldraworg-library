@@ -17,7 +17,7 @@ use Livewire\Component;
 class MenuItem extends Component
 {
 
-    public ?string $search = '';
+    public ?string $tableSearch = '';
     public array $results = [];
 
     #[On('doSearch')]
@@ -25,12 +25,12 @@ class MenuItem extends Component
     {
         $settings = app(LibrarySettings::class);
         $this->results = [];
-        if (is_null($this->search) || $this->search == '') {
+        if (is_null($this->tableSearch) || $this->tableSearch == '') {
             return;
         }
         $limit = $settings->quick_search_limit;
-        $uparts = Part::select(['id', 'filename', 'description'])->unofficial()->searchHeader($this->search)->orderBy('filename')->take($limit)->get();
-        $oparts = Part::select(['id', 'filename', 'description'])->official()->searchHeader($this->search)->orderBy('filename')->take($limit)->get();
+        $uparts = Part::select(['id', 'filename', 'description'])->unofficial()->searchHeader($this->tableSearch)->orderBy('filename')->take($limit)->get();
+        $oparts = Part::select(['id', 'filename', 'description'])->official()->searchHeader($this->tableSearch)->orderBy('filename')->take($limit)->get();
         if ($uparts->isNotEmpty()) {
             foreach ($uparts as $part) {
                 $this->results['Unofficial Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
@@ -42,10 +42,10 @@ class MenuItem extends Component
             }
         }
         $sets = Set::select(['id', 'name', 'number'])->where(function (Builder $q) {
-            $q->orWhereLike('number', "%{$this->search}%")
-                ->orWhereLike('name', "%{$this->search}%")
-                ->orWhereHas('models', fn (Builder $qu) => $qu->whereLike('alt_model_name', "%{$this->search}%"))
-                ->orWhereHas('theme', fn (Builder $qu) => $qu->whereLike('name', "%{$this->search}%"));
+            $q->orWhereLike('number', "%{$this->tableSearch}%")
+                ->orWhereLike('name', "%{$this->tableSearch}%")
+                ->orWhereHas('models', fn (Builder $qu) => $qu->whereLike('alt_model_name', "%{$this->tableSearch}%"))
+                ->orWhereHas('theme', fn (Builder $qu) => $qu->whereLike('name', "%{$this->tableSearch}%"));
         })->orderBy('name')->take($limit)->get();
         if ($sets->isNotEmpty()) {
             foreach ($sets as $set) {

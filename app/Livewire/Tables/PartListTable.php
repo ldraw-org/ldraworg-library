@@ -32,18 +32,21 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
 
-class PartListTable extends BasicTable implements HasActions
+class PartListTable extends BasicTable
 {
     use InteractsWithActions;
-
-    #[Url]
-    public $tableSearch = '';
 
     /**
      * @var array<string, mixed> | null
      */
     #[Url]
     public ?array $tableFilters = null;
+
+    /**
+     * @var ?string
+     */
+    #[Url]
+    public $tableSearch = '';
 
     public function table(Table $table): Table
     {
