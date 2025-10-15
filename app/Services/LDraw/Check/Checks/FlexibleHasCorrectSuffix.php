@@ -2,6 +2,7 @@
 
 namespace App\Services\LDraw\Check\Checks;
 
+use App\Enums\PartCategory;
 use App\Enums\PartError;
 use App\Enums\PartTypeQualifier;
 use App\Services\LDraw\Check\Contracts\Check;
@@ -17,12 +18,14 @@ class FlexibleHasCorrectSuffix implements Check
     {
         if ($part instanceof Part) {
             $name = basename($part->filename);
+            $category = $part->category;
         } else {
             $name = str_replace('\\', '/', $part->name);
+            $category = $part->metaCategory ?? $part->descriptionCategory;
         }
 
         $result = preg_match(config('ldraw.patterns.base'), basename($name), $matches);
-        if ($part->type_qualifier == PartTypeQualifier::FlexibleSection &&
+        if ($part->type_qualifier == PartTypeQualifier::FlexibleSection && $category != PartCategory::Moved && $category != PartCategory::Obsolete &&
             (!$result || !Arr::has($matches, 'suffix1') || !Str::startsWith($matches['suffix1'], 'k'))
         ) {
             $fail(PartError::FlexSectionIncorrectSuffix);
