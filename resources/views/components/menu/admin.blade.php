@@ -5,7 +5,7 @@
         Auth::user()->can(\App\Enums\Permission::SiteSettingsEdit) ||
         Auth::user()->can(\App\Enums\Permission::LdconfigEdit)
     )
-        <x-menu.top-level-item label="Library">
+        <x-menu.top-level-item label="Library General">
             @can(\App\Enums\Permission::SiteSettingsEdit)
             <x-menu.item label="General Library Settings" link="{{route('admin.settings.index')}}" />
             @endcan
