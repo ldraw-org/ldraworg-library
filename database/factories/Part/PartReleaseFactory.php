@@ -25,7 +25,7 @@ class PartReleaseFactory extends Factory
             $update = "0{$update}";
         }
         $new_of_type = [];
-        foreach(PartType::cases() as $type) {
+        foreach (PartType::cases() as $type) {
             $new_of_type[$type->value] = mt_rand(0, 3000);
         }
         return [

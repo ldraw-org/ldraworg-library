@@ -12,7 +12,6 @@ use App\Services\LDraw\Parse\Parser;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class LibraryImport
@@ -113,18 +112,18 @@ class LibraryImport
         } else {
             $part = Part::official()->firstWhere('filename', $partFilename);
         }
-        
+
 
         if (is_null($part)) {
             dump($partFilename, pathinfo($partFilename, PATHINFO_DIRNAME) . '/'. substr(basename($partFilename), 1));
             return;
         };
 
-        $unknown_user = User::firstWhere('name','Non-CA User');
+        $unknown_user = User::firstWhere('name', 'Non-CA User');
 
         $admin_users = [
             'cwdee',
-            'sbliss' 
+            'sbliss'
         ];
         $primary_admin_user_id = User::firstWhere('name', 'cwdee')->id;
 
@@ -146,7 +145,7 @@ class LibraryImport
             'DeanEarley' => 'DeannaEarley',
             'millennium359' => 'rhsexton',
         ];
-        
+
         $date_ref = [
             '53401320810142620' => '2002-03-05 21:50:03',
             '46301924510211740' => '2002-07-06 06:06:02',
@@ -169,9 +168,9 @@ class LibraryImport
         $vote_pattern = '#Certification\:\s(.+?)\n#ius';
         $rename_pattern = '#part \'(.*)\' was renamed to \'(.*)\'\.#ius';
         $edit_pattern = '#a Parts Tracker Admin edited the header#ius';
-        
+
         $events = explode(str_repeat('=', 70) . "\n", $metafile);
-        
+
         $event_dates = [];
         foreach ($events as $event) {
             $event = trim($event);
@@ -182,14 +181,14 @@ class LibraryImport
 
             if ($event == '' || Str::startsWith($event, 'Previous reviews and updates')) {
                 continue;
-            } 
-  
+            }
+
             if (preg_match($date_pattern, $event, $matches)) {
                 if (is_numeric($matches[1])) {
                     if (Arr::has($date_ref, $matches[1])) {
-                        $data['created_at'] = new Carbon(Arr::get($date_ref, $matches[1]));    
+                        $data['created_at'] = new Carbon(Arr::get($date_ref, $matches[1]));
                     } elseif (count($event_dates) == 0) {
-                        dump(array_slice(explode("\n", $metafile), 0, 10),$release->name, $partFilename,);
+                        dump(array_slice(explode("\n", $metafile), 0, 10), $release->name, $partFilename, );
                     } else {
                         $data['created_at'] = $event_dates[array_key_last($event_dates)]->toMutable()->addSeconds(1);
                     }
@@ -200,7 +199,7 @@ class LibraryImport
                 }
             } else {
                 dump('Date', $event, $matches, $release->name, $partFilename);
-            } 
+            }
 
             if (preg_match($comment_pattern, $event, $matches)) {
                 $comment = Parser::fixEncoding(trim($matches[1]));
@@ -209,33 +208,32 @@ class LibraryImport
                 }
             }
 
-            if(preg_match($edit_pattern, $event, $matches)) {
+            if (preg_match($edit_pattern, $event, $matches)) {
                 $data['event_type'] = EventType::HeaderEdit;
                 $data['user_id'] = $primary_admin_user_id;
-            } elseif(preg_match($rename_pattern, $event, $matches)) {
+            } elseif (preg_match($rename_pattern, $event, $matches)) {
                 $data['event_type'] = EventType::Rename;
                 $data['user_id'] = $primary_admin_user_id;
                 $data['moved_from_filename'] = $matches[1];
                 $data['moved_to_filename'] = $matches[2];
-            } elseif (mb_strpos($event,'the file was initially submitted.') !== false 
-                || mb_strpos($event,'a new version of the file was submitted.') !== false
+            } elseif (mb_strpos($event, 'the file was initially submitted.') !== false
+                || mb_strpos($event, 'a new version of the file was submitted.') !== false
             ) {
                 $data['event_type'] = EventType::Submit;
-                $data['initial_submit'] = mb_strpos($event,'the file was initially submitted') !== false;
+                $data['initial_submit'] = mb_strpos($event, 'the file was initially submitted') !== false;
                 if (preg_match($submit_user_pattern, $event, $matches)) {
-                    $uname = preg_replace('#.*(\t.*)#iu','', $matches[1]);
+                    $uname = preg_replace('#.*(\t.*)#iu', '', $matches[1]);
                     $uname = Arr::get($known_aliases, $uname) ?? $uname;
                     $user = User::firstWhere('name', $uname) ?? $unknown_user;
                     $data['user_id'] = $user->id;
-                }
-                else {
+                } else {
                     if ($part->category == PartCategory::Moved) {
                         $data['user_id'] = $part->subparts->first()->user->id;
                         //dump('Moved to', $event, $part->subparts->first()->user->name);
                     } else {
                         $data['user_id'] = $part->user->id;
                     }
-                    
+
                 }
             } elseif (preg_match($reviewer_user_pattern, $event, $matches)) {
                 $uname = Arr::get($known_aliases, $matches[1]) ?? $matches[1];
@@ -252,13 +250,12 @@ class LibraryImport
                     };
                     if ($data['vote_type'] == VoteType::Certify && in_array($user->name, $admin_users)) {
                         $data['vote_type'] = VoteType::AdminReview;
-                    }  
-                    elseif (is_null($data['vote_type']) && array_key_exists('comment', $data)) {
+                    } elseif (is_null($data['vote_type']) && array_key_exists('comment', $data)) {
                         $data['event_type'] = EventType::Comment;
                     }
-                }  
-            }  
-            
+                }
+            }
+
             $part->events()->create($data);
         }
         $part->events()->create([

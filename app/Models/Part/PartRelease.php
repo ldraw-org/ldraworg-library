@@ -54,7 +54,7 @@ class PartRelease extends Model implements HasMedia
             ->registerMediaConversions(function (Media $media) {
                 $this->addMediaConversion('thumb')
                     ->keepOriginalImageFormat()
-                    ->fit(Fit::Contain, 35, 75);                    
+                    ->fit(Fit::Contain, 35, 75);
             });
     }
 
@@ -89,7 +89,7 @@ class PartRelease extends Model implements HasMedia
                 if ($attributes['new'] > 0) {
                     $notes .= "New files: {$attributes['new']}\n";
                 }
-                    
+
                 foreach (json_decode(Arr::get($attributes, 'new_of_type'), true) ?? [] as $type => $count) {
                     if ($count == 0) {
                         continue;

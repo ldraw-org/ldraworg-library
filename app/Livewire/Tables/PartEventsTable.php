@@ -14,11 +14,8 @@ use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Livewire\Attributes\Lazy;
-use Livewire\Attributes\On;
-use Illuminate\Support\Str;
 
 #[Lazy]
 class PartEventsTable extends BasicTable implements HasActions
@@ -68,7 +65,7 @@ class PartEventsTable extends BasicTable implements HasActions
                         ->fontFamily(FontFamily::Mono)
                         ->extraAttributes(['class' => 'event-comment break-words'])
                         ->wrap(),
-                ])   
+                ])
             ])
             ->queryStringIdentifier("eventHistory");
     }

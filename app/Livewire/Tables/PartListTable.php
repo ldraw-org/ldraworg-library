@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Tables;
 
-use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use Filament\Support\Enums\Width;

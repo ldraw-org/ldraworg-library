@@ -24,7 +24,8 @@ class CategoryStatus extends BasicTable implements HasActions
     {
         return $table
             ->heading('Categories')
-            ->records( fn (?string $sortColumn, ?string $sortDirection): Collection => 
+            ->records(
+                fn (?string $sortColumn, ?string $sortDirection): Collection =>
                 $this->categoryArray
                     ->when(
                         filled($sortColumn),
@@ -33,7 +34,7 @@ class CategoryStatus extends BasicTable implements HasActions
                             SORT_REGULAR,
                             $sortDirection === 'desc',
                         ),
-                    )   
+                    )
             )
             ->columns([
                 ImageColumn::make('image')
@@ -67,7 +68,7 @@ class CategoryStatus extends BasicTable implements HasActions
     {
         $parts = Cache::get('avatar_parts', []);
         return collect(PartCategory::cases())
-            ->map( 
+            ->map(
                 function (PartCategory $cat) use ($parts): array {
                     $status = Part::select('category', 'part_status')
                         ->where('category', $cat)
@@ -88,7 +89,7 @@ class CategoryStatus extends BasicTable implements HasActions
                         'needs_more_votes' => $status->get(PartStatus::NeedsMoreVotes->value, 0),
                         'held' => $status->get(PartStatus::ErrorsFound->value, 0),
                     ];
-                } 
+                }
             );
     }
 }

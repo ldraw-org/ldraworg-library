@@ -9,7 +9,7 @@ use Spatie\TemporaryDirectory\TemporaryDirectory;
 class DatabaseBackup
 {
     protected TemporaryDirectory $tempDir;
-    
+
     public function __construct()
     {
         $this->tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
@@ -24,7 +24,7 @@ class DatabaseBackup
         $file = "[client]\nhost={$db_host}\nuser={$db_user}\npassword={$db_pw}\nport={$db_port}";
         $path = $this->tempDir->path(".my.cnf");
         file_put_contents($path, $file);
-        
+
         return $path;
     }
 
@@ -35,7 +35,7 @@ class DatabaseBackup
         $dumpcommand = "mysqldump --defaults-extra-file=\"{$this->setConfigFile()}\" --add-drop-table --single-transaction --set-gtid-purged=off --no-tablespaces {$db} > {$dump_path}";
         Process::forever()->run($dumpcommand);
     }
-    
+
     public function restore(): void
     {
         $db = config('database.connections.mysql.database');

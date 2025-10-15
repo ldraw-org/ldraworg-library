@@ -45,10 +45,10 @@ class OmrModel extends Model implements HasMedia
             ->registerMediaConversions(function (Media $media) {
                 $this->addMediaConversion('thumb')
                     ->keepOriginalImageFormat()
-                    ->fit(Fit::Contain, 35, 75);                    
+                    ->fit(Fit::Contain, 35, 75);
                 $this->addMediaConversion('feed-image')
                     ->keepOriginalImageFormat()
-                    ->fit(Fit::Contain, 225, 225);                    
+                    ->fit(Fit::Contain, 225, 225);
             });
         $this->addMediaCollection('file')
             ->singleFile();

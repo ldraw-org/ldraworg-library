@@ -31,7 +31,7 @@ class ModelFile extends ImageGenerator
     public function supportedExtensions(): Collection
     {
         return collect([
-            'mpd', 
+            'mpd',
             'ldr',
         ]);
     }
@@ -39,8 +39,8 @@ class ModelFile extends ImageGenerator
     public function supportedMimeTypes(): Collection
     {
         return collect([
-            'application/x-ldraw', 
-            'text/plain', 
+            'application/x-ldraw',
+            'text/plain',
         ]);
     }
 

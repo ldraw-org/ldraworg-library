@@ -96,7 +96,7 @@ class LibrarySettingsPage extends Component implements HasSchemas
                                     ->columns(2),
                                 KeyValue::make('ldview_options')
                                     ->label('LDView Options')
-                                    ->keyLabel('Setting'),                            
+                                    ->keyLabel('Setting'),
                             ]),
 
                     ])

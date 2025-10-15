@@ -4,7 +4,6 @@ namespace App\View\Components\Part;
 
 use Illuminate\Contracts\View\View;
 use Closure;
-use App\Enums\PartStatus;
 use Illuminate\View\Component;
 use App\Models\Part\Part;
 
@@ -29,6 +28,6 @@ class UnofficialPartCount extends Component
      */
     public function render()
     {
-       return view('components.part.unofficial-part-count');
+        return view('components.part.unofficial-part-count');
     }
 }

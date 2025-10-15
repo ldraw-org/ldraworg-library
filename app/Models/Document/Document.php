@@ -18,7 +18,7 @@ class Document extends Model
 {
     use HasOrder;
     use HasFactory;
-    
+
     protected $guarded = [];
 
     protected $with = [
@@ -40,7 +40,7 @@ class Document extends Model
     {
         return 'slug';
     }
-    
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(DocumentCategory::class, 'document_category_id', 'id');

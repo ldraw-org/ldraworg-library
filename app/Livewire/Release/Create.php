@@ -17,7 +17,6 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;

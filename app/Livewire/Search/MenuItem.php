@@ -5,18 +5,12 @@ namespace App\Livewire\Search;
 use App\Models\Omr\Set;
 use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
-use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class MenuItem extends Component
 {
-
     public ?string $tableSearch = '';
     public array $results = [];
 

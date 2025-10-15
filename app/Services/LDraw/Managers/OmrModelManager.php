@@ -11,10 +11,8 @@ use App\Models\Omr\Set;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Image\Image;
-use Spatie\Image\Enums\Fit;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class OmrModelManager

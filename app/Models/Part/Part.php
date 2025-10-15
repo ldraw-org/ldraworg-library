@@ -117,10 +117,10 @@ class Part extends Model implements HasMedia
             ->registerMediaConversions(function (Media $media) {
                 $this->addMediaConversion('thumb')
                     ->keepOriginalImageFormat()
-                    ->fit(Fit::Contain, 35, 75);                    
+                    ->fit(Fit::Contain, 35, 75);
                 $this->addMediaConversion('feed-image')
                     ->keepOriginalImageFormat()
-                    ->fit(Fit::Contain, 85, 85);                    
+                    ->fit(Fit::Contain, 85, 85);
             });
     }
 
@@ -306,7 +306,7 @@ class Part extends Model implements HasMedia
     {
         $query->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved]);
     }
-    
+
     protected function partCheck(): Attribute
     {
         return Attribute::make(
@@ -479,7 +479,7 @@ class Part extends Model implements HasMedia
 
     protected function voteTypeCount(): array
     {
-       
+
         return array_merge(
             [VoteType::AdminReview->value => 0, VoteType::Certify->value => 0, VoteType::Hold->value => 0, VoteType::AdminFastTrack->value => 0],
             $this->votes->countBy('vote_type')->all()

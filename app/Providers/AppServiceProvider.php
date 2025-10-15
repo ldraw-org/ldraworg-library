@@ -2,11 +2,9 @@
 
 namespace App\Providers;
 
-use App\Enums\PartType;
 use App\Enums\Permission;
 use App\Listeners\PartEventSubscriber;
 use App\Models\Omr\Set;
-use App\Models\Part\Part;
 use App\Models\User;
 use App\Policies\RolePolicy;
 use Illuminate\Database\Eloquent\Builder;
@@ -81,7 +79,7 @@ class AppServiceProvider extends ServiceProvider
 
         //Subscriber
         Event::subscribe(PartEventSubscriber::class);
-        
+
         Nightwatch::rejectQueuedJobs(function (QueuedJob $queuedjob) {
             return true; // Reject all queued job for now
         });

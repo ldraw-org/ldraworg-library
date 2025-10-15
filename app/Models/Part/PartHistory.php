@@ -17,9 +17,9 @@ class PartHistory extends Model
     use HasFactory;
 
     protected $guarded = [];
-    
+
     protected $touches = ['part'];
-    
+
     protected $with = ['user'];
 
     public function toString(): string

@@ -33,7 +33,7 @@ class Tracker extends Command
             $settings->tracker_locked = false;
             $this->info('Tracker is unlocked');
         }
-        
+
         $settings->save();
     }
 }

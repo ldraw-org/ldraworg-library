@@ -27,9 +27,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Spatie\Image\Image;
-use Spatie\Image\Enums\Fit;
 use Spatie\ImageOptimizer\OptimizerChain;
 use Spatie\ImageOptimizer\Optimizers\Optipng;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -391,12 +388,12 @@ class PartManager
         $pc = new PartChecker($part);
         $can_release = $pc->checkCanRelease($checkFileErrors);
         $part->part_check = $pc->getPartCheckBag();
-        
+
         // Set Minifig warning but only for unofficial parts
         if ($part->isUnofficial() && $part->type->inPartsFolder() && $part->category == PartCategory::Minifig) {
             $part->part_check->add(PartError::WarningMinifigCategory);
         }
-        
+
         // Set Sticker color warning.
         if ($part->type->inPartsFolder() && $part->category == PartCategory::StickerShortcut) {
             foreach (explode("\n", $part->body->body) as $line) {
@@ -404,9 +401,9 @@ class PartManager
                     $part->part_check->add(PartError::WarningStickerColor);
                     break;
                 }
-            }  
+            }
         }
-        
+
         $part->can_release = $can_release;
         $part->updateReadyForAdmin();
         $part->save();

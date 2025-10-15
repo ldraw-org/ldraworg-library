@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
 use App\Models\User;
 use Illuminate\Console\Command;

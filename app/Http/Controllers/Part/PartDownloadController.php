@@ -19,8 +19,11 @@ class PartDownloadController extends Controller
             $filename = Str::replaceLast('.zip', '.dat', $filename);
         }
 
-        $part = Part::when($library === 'official', fn (Builder $query) => $query->official(),
-                    fn (Builder $query) => $query->unofficial())
+        $part = Part::when(
+            $library === 'official',
+            fn (Builder $query) => $query->official(),
+            fn (Builder $query) => $query->unofficial()
+        )
                     ->when($is_zip, fn (Builder $query) => $query->partsFolderOnly())
                     ->where('filename', $filename)
                     ->firstOrFail();
@@ -53,5 +56,5 @@ class PartDownloadController extends Controller
                 );
             }
         }
-   }
+    }
 }

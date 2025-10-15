@@ -322,7 +322,7 @@ class Parser
             ->map(fn (array $a) => Arr::only($a, ['category', 'part', 'matrix', 'description']))
             ->all();
     }
-    
+
     public function getColours(string $text): ?array
     {
         $colors = $this->patternMatchAll('colour', $text, PREG_SET_ORDER);

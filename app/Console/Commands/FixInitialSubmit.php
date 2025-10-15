@@ -35,7 +35,7 @@ class FixInitialSubmit extends Command
                 if (!is_null($oldestEvent) && $oldestEvent->event_type === EventType::Submit) {
                     $oldestEvent->initial_submit = true;
                     $oldestEvent->save();
-                } elseif(!is_null($oldestEvent)) {
+                } elseif (!is_null($oldestEvent)) {
                     $part->events()->create([
                         'event_type' => EventType::Submit,
                         'user_id' => $part->user_id,

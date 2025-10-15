@@ -79,7 +79,7 @@ trait HasErrorScopes
         }
         $query->orWhereJsonDoesntContainKey("part_check->errors->{$error}");
     }
-    
+
     #[Scope]
     protected function hasWarning(Builder $query, string|PartError $warning): void
     {

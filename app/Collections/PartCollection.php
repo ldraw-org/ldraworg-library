@@ -11,7 +11,7 @@ use App\Collections\Traits\HasRelease;
 class PartCollection extends Collection
 {
     use HasRelease;
-    
+
     public function fixes(): self
     {
         return $this->unofficial()->whereNotNull('official_part');

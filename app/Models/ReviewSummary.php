@@ -20,13 +20,13 @@ class ReviewSummary extends Model
     public function parts(): Collection
     {
         $parts = [];
-        
+
         foreach (explode("\n", $this->list) as $item) {
             if (Str::of($item)->trim()->doesntStartWith('/')) {
                 $parts[] = $item;
             }
         }
-        
+
         return Part::doesntHave('unofficial_part')->whereIn('filename', $parts)->get();
     }
 }

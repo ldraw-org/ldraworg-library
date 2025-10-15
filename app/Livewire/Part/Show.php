@@ -7,7 +7,6 @@ use Filament\Schemas\Components\Section;
 use App\Enums\ExternalSite;
 use App\Enums\LibraryIcon;
 use App\Enums\PartCategory;
-use App\Enums\PartType;
 use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
 use App\Filament\Actions\EditNumberAction;
@@ -98,9 +97,10 @@ class Show extends Component implements HasSchemas, HasActions
         if ($part->exists) {
             $this->part = $part;
         } else {
-            $this->part = Part::when(Str::startsWith($filename, 'unofficial/'),
-                    fn (Builder $query) => $query->unofficial()
-                )
+            $this->part = Part::when(
+                Str::startsWith($filename, 'unofficial/'),
+                fn (Builder $query) => $query->unofficial()
+            )
                 ->where('filename', Str::chopStart($filename, 'unofficial/'))
                 ->orderBy('part_release_id', 'desc')
                 ->firstOrFail();

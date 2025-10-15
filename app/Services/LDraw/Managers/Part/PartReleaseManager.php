@@ -8,9 +8,7 @@ use App\Enums\PartType;
 use App\Events\PartReleased;
 use App\Jobs\CheckPart;
 use App\Jobs\UpdateImage;
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Services\LDraw\ZipFiles;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\Part\PartRelease;
@@ -20,9 +18,6 @@ use App\Models\Part\PartHistory;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Process;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class PartReleaseManager
@@ -62,8 +57,8 @@ class PartReleaseManager
             'short' => $now->format('y')."{$update}",
         ]);
     }
-    
-    
+
+
     public function createRelease(): void
     {
         $this->settings->tracker_locked = true;
@@ -288,7 +283,7 @@ class PartReleaseManager
                     ->toMediaCollection('view');
             }
         }
-        
+
     }
 
     protected function updateOfficialWithUnofficial(Part $upart, Part $opart): Part

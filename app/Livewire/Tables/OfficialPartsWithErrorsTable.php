@@ -4,12 +4,10 @@ namespace App\Livewire\Tables;
 
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Action;
 use App\Enums\CheckType;
 use App\Enums\PartError;
 use App\Filament\Actions\Part\Download\PartFileDownloadAction;
 use App\Models\Part\Part;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;

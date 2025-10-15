@@ -29,7 +29,7 @@ class LDConfigManager
         }
         Cache::set('ldraw_colour_codes', LdrawColour::pluck('code')->all());
     }
-    
+
     public function importAvatars(): void
     {
         $ldconfig = Storage::disk('library')->get('official/LDConfig.ldr');

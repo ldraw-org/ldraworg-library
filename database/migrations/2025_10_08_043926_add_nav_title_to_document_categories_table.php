@@ -7,8 +7,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -23,7 +22,7 @@ return new class extends Migration
             $table->renameColumn('nav_title', 'slug');
             $table->unique(['document_category_id', 'slug']);
         });
-        
+
         DocumentCategory::each(function (DocumentCategory $cat) {
             $cat->slug = Str::slug($cat->title);
             $cat->save();

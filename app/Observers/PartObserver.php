@@ -41,57 +41,57 @@ class PartObserver implements ShouldHandleEventsAfterCommit
                 Log::debug("Updated library.csv while saving {$part->id} ({$part->filename})");
             }
         }
-/*
-        if ($part->isDirty([
-            'description', 
-            'filename',
-            'user_id',
-            'type',
-            'type_qualifier',
-            'part_release_id',
-            'help',
-            'category',
-            'part_release_id',
-            'bfc',
-            'cmdline',
-            'license',
-            'preview'
-        ])) {
-            $part->generateHeader(false);
-        }
-*/
+        /*
+                if ($part->isDirty([
+                    'description',
+                    'filename',
+                    'user_id',
+                    'type',
+                    'type_qualifier',
+                    'part_release_id',
+                    'help',
+                    'category',
+                    'part_release_id',
+                    'bfc',
+                    'cmdline',
+                    'license',
+                    'preview'
+                ])) {
+                    $part->generateHeader(false);
+                }
+        */
     }
 
-/*
-    public function updating(Part $part): void
-    {
-        if ($part->isDirty()) {
-            $part->generateHeader(false);
+    /*
+        public function updating(Part $part): void
+        {
+            if ($part->isDirty()) {
+                $part->generateHeader(false);
+            }
+            if (config('ldraw.library_debug')) {
+                Log::debug("Updated part {$part->id} ({$part->filename})");
+            }
         }
-        if (config('ldraw.library_debug')) {
-            Log::debug("Updated part {$part->id} ({$part->filename})");
-        }
-    }
 
-    public function retrieved(Part $part): void
-    {
-        if (config('ldraw.library_debug')) {
-            Log::debug("Retrieved part {$part->id} ({$part->filename})");
+        public function retrieved(Part $part): void
+        {
+            if (config('ldraw.library_debug')) {
+                Log::debug("Retrieved part {$part->id} ({$part->filename})");
+            }
         }
-    }
 
-    public function pivotAttached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
-    {
-        if (config('ldraw.library_debug')) {
-            Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
+        public function pivotAttached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
+        {
+            if (config('ldraw.library_debug')) {
+                Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
+            }
         }
-    }
 
-    public function pivotDetached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
-    {
-        if (config('ldraw.library_debug')) {
-            Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
+        public function pivotDetached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
+        {
+            if (config('ldraw.library_debug')) {
+                Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
+            }
         }
-    }
-*/
+    */
 }

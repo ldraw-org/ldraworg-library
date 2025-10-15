@@ -33,7 +33,7 @@ class CheckPart implements ShouldQueue
     public function handle(): void
     {
         Nightwatch::dontSample();
-        
+
         $pm = app(PartManager::class);
 
         if ($this->p instanceof Part) {
