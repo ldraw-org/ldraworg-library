@@ -45,8 +45,6 @@ class RefreshDB extends Command
             $this->info($result->output());
             $this->info($result->errorOutput());
             $this->call('migrate');
-            $this->info('Running update');
-            $this->call('lib:update');
         } else {
             $this->info('This command cannot be run the the production environment');
         }
