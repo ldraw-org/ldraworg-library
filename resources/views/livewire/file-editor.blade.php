@@ -1,5 +1,5 @@
 <x-slot:title>File Editor</x-slot>
-<x-slot:menu><x-menu.library /></x-slot>
+<x-slot:menu>tracker</x-slot>
 <div class="flex flex-col space-y-4">
     <form wire:submit="getFile">
         {{ $this->form }}

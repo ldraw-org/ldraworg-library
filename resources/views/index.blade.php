@@ -2,9 +2,6 @@
     <x-slot:title>
         LDraw.org Library Main
     </x-slot>
-    <x-slot:menu>
-        <x-menu.library />
-    </x-slot>
     <div class="flex flex-col space-y-2 w-full place-items-center">
         <div class="bg-white border border-gray-200 rounded-lg p-2">
             Welcome to the LDraw.org library. Here you will find the Parts Tracker, parts updates, 

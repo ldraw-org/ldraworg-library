@@ -1,5 +1,5 @@
-<div>
-    <div class="p-2 w-min md:w-full md:w-min position-items-center">
+<div {{$attributes}}>
+    <div class="w-min md:w-full md:w-min position-items-center">
         <div class="block relative" x-data="{showChildren:false}" @mouseenter="showChildren=true" @mouseleave="showChildren=false"> 
     
             <div class="w-8 h-8 rounded-full flex justify-center items-center bg-purple-300 cursor-pointer">

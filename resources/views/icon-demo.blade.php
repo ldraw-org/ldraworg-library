@@ -2,9 +2,6 @@
     <x-slot:title>
         LDraw.org Icon and Colors Demo
     </x-slot>
-    <x-slot:menu>
-        <x-menu.library />
-    </x-slot>
     <div class="space-y-2">
         <p>
             Note: Colors listed are from the standard tailwind v3 palette<br>

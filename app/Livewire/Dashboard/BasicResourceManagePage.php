@@ -23,7 +23,7 @@ abstract class BasicResourceManagePage extends Component implements HasSchemas, 
 
     abstract public function table(Table $table): Table;
 
-    #[Layout('components.layout.base')]
+    #[Layout('components.layout.admin')]
     public function render()
     {
         return view('livewire.dashboard.basic-resource-manage-page', ['menu' => $this->menu]);

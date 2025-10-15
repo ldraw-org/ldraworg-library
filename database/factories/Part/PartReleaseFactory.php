@@ -3,6 +3,7 @@
 namespace Database\Factories\Part;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Enums\PartType;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Part\PartRelease>
@@ -23,18 +24,17 @@ class PartReleaseFactory extends Factory
         if ($update <= 9) {
             $update = "0{$update}";
         }
+        $new_of_type = [];
+        foreach(PartType::cases() as $type) {
+            $new_of_type[$type->value] = mt_rand(0, 3000);
+        }
         return [
             'created_at' => $date,
             'short' => $date->format('y')."{$update}",
             'name' => $date->format('Y')."-{$update}",
-            'part_data' => [
-                'total_files' => mt_rand(1, 3000),
-                'new_files' => mt_rand(1, 3000),
-                'new_types' => [
-                    ['name' => 'Part', 'count' => mt_rand(1, 3000)],
-                    ['name' => 'Primitive', 'count' => mt_rand(1, 3000)],
-                ]
-            ]
+            'total' => mt_rand(1, 3000),
+            'new' => mt_rand(0, 3000),
+            'new_of_type' => $new_of_type,
         ];
     }
 }

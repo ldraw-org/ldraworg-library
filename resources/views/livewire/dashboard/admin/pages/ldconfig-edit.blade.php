@@ -1,9 +1,6 @@
 <x-slot:title>
     LDConfig Manager
 </x-slot>
-<x-slot:menu>
-    <x-menu.tracker />
-</x-slot>
 <div>
     <div class="text-2xl font-bold">
         LDConfig Edit

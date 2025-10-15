@@ -1,15 +1,19 @@
-<div class="w-full relative">
-    <form class="grid grid-col-1 h-full" id="pt_search_comp" action="{{route('parts.list', ['tableSearch' => $search])}}" method="get" name="pt_search_comp">
-        <input class="border-gray-200 border-t border-b-0 border-r-0 py-2 md:py-0 pl-2 md:border-t-0 md:border-l w-full h-full lg:w-fit lg:justify-self-end" name="tableSearch" type="text" wire:model.live="search" wire:input="doSearch" placeholder="Quick Search">
-        <div 
-            class="flex flex-col border border-gray-200 rounded bg-white absolute top-full right-0 w-96 h-72 overflow-scroll z-50 divide-y"
-            x-show="$wire.hasResults"
-            x-transition:enter="transition ease-out duration-100" 
-            x-transition:enter-start="transform opacity-0"
-            x-cloak
-        >
-            @if($hasResults)
-                @foreach($results as $lib => $parts)
+<div>
+    <x-filament::modal id="site-search" alignment="center" width="7xl" lazy>
+        <x-slot name="trigger">
+            <x-mdi-magnify class="w-8 h-8"/>
+        </x-slot>
+        <x-slot name="heading">
+            Search
+        </x-slot>
+        <div class="h-[40vh]">
+            <form action="{{ route('parts.list', ['tableSearch' => $search]) }}">
+                <x-filament::input.wrapper>
+                    <x-filament::input type="text" wire:input="doSearch" wire:model.live="search" />
+                </x-filament::input.wrapper>
+            </form>
+            <div class="h-7/8 overflow-y-scroll p-2">
+                @forelse($results as $lib => $parts)
                     <div class="flex flex-row" wire:key="lib-{{$loop->index}}">
                         <div class="bg-gray-200 font-bold text-gray-500 p-2 w-1/3 h-full">
                             {{$lib}}
@@ -25,8 +29,10 @@
                             @endforeach
                         </div>
                     </div>
-                @endforeach
-            @endif
+                @empty
+                    {{--  --}}
+                @endforelse
+            </div>
         </div>
-    </form>
+    </x-filament::modal>
 </div>

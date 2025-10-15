@@ -1,5 +1,4 @@
-<x-layout.base>
-    <x-slot:title>{{$title}}</x-slot>
+<x-layout.base title="{{$title ?? Admin}}" menu="admin">
     <x-slot:messages>
         @if (tracker_locked())
             <x-message centered icon type="warning">
@@ -10,9 +9,6 @@
                 an excessibe amount of time, please post on the Parts Tracker Forum.
             </x-message>
         @endif
-    </x-slot>
-    <x-slot:menu>
-      <x-menu.admin />
     </x-slot>
     {{ $slot ?? '' }}
 </x-layout.base>    

@@ -1,7 +1,4 @@
 <x-slot name="title">Admin Dashboard</x-slot>
-<x-slot:menu>
-    <x-menu.admin />
-</x-slot>
 <div>
     <x-filament::tabs class="p-2">
         <x-filament::tabs.item 

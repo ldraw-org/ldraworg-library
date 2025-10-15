@@ -1,4 +1,4 @@
-@props(['title', 'favicon_color' => 'Green'])
+@props(['title' => '', 'favicon_color' => 'Green', 'menu' => 'library', 'logo' => 'tracker'])
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -26,29 +26,26 @@
       
         {{ $messages ?? '' }}
       
-        <div class="grid grid-cols-2 justify-stretch items-center">
-            <div class="justify-self-start">
-                <a href="https://www.ldraw.org">
-                    <img id="main-logo" src="{{asset('/images/banners/main.png')}}">
+        <div class="flex flex-col lg:flex-row space-y-2 lg:space-x-2 justify-items-end">
+            <div class="w-fit order-first flex-none">
+                <a href="{{route('index')}}">
+                    <img id="main-logo" src="{{asset('/images/banners/'. $logo . '.png')}}">
                 </a>
             </div>
-            @isset($rightlogo)
-                <div class="justify-self-end">
-                    <img src="{{$rightlogo}}">
+            <div class="flex flex-row space-x-2 items-end w-full">
+                <div class="md:grow">
+                    <x-dynamic-component component="{{ 'menu.' . $menu }}"  />
                 </div>
-            @endisset
+                <div class="self-center lg:self-end mb-1">
+                    @livewire('search.menu-item')
+                </div>
+                @auth
+                    <div class="self-center lg:self-end lg:mb-1">
+                        <x-menu.user-icon />
+                    </div>
+                @endauth
+            </div>
         </div>
-      
-        <div class="flex flex-col-reverse md:flex-row w-full">
-            <nav class="flex flex-col md:flex-row bg-white rounded-lg border border-gray-300 w-full">
-                {{$menu ?? ''}}
-                <livewire:search.menu-item />
-            </nav>
-            @auth
-                <x-menu.user-icon />
-            @endauth
-        </div>      
-
       <div class="main-content rounded-lg bg-white p-2">
          {{ $slot ?? '' }}
       </div>

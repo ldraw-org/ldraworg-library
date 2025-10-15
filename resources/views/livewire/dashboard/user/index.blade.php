@@ -1,7 +1,4 @@
 <x-slot name="title">User Dashboard</x-slot>
-<x-slot:menu>
-    <x-menu.library />
-</x-slot>
 <div>
     <x-filament::tabs class="p-2">
         <x-filament::tabs.item 

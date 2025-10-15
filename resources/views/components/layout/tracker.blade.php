@@ -1,5 +1,4 @@
-<x-layout.base>
-    <x-slot:title>{{$title}}</x-slot>
+<x-layout.base title="{{$title ?? 'Parts Tracker'}}" menu="tracker">
     <x-slot:messages>
         @if (tracker_locked())
             <x-message centered icon type="warning">
@@ -19,10 +18,6 @@
                 Please visits the CA confirm page to agree to the new CA: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="{{route('tracker.confirmCA.show')}}">Confirm the new CA</a>
             </x-message>
         @endif
-    </x-slot>
-    <x-slot:rightlogo>{{asset('/images/banners/tracker.png')}}</x-slot>
-    <x-slot:menu>
-      <x-menu.tracker />
     </x-slot>
     {{ $slot ?? '' }}
 </x-layout.base>    

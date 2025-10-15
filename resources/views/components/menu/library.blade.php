@@ -1,6 +1,7 @@
 <x-menu>
-    <x-menu.top-level-item label="Library Main" link="{{route('index')}}" /> 
-    <x-menu.top-level-item label="Parts List" link="{{route('parts.list')}}" /> 
+    <x-menu.top-level-item label="LDraw.org" link="https://www.ldraw.org" />
+    <x-menu.top-level-item label="Library" link="{{route('index')}}" /> 
+    <x-menu.top-level-item label="Parts" link="{{route('parts.list')}}" /> 
     <x-menu.top-level-item label="Parts Tracker" link="{{route('tracker.main')}}" />
     <x-menu.top-level-item label="Part Updates" link="{{route('part-update.index')}}" />
     <x-menu.top-level-item label="Documentation" link="{{route('documentation.index')}}" />

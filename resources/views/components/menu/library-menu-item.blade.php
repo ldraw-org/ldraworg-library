@@ -1,4 +1,5 @@
 <x-menu.top-level-item label="Library">
+    <x-menu.item label="LDraw.org Main Site" link="https://www.ldraw.org" />
     <x-menu.item label="Library Main" link="{{route('index')}}" />
     <x-menu.item label="Parts List" link="{{route('parts.list')}}" /> 
     <x-menu.item label="Parts Tracker" link="{{route('tracker.main')}}" />

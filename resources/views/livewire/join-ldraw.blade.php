@@ -1,10 +1,6 @@
 <x-slot:title>
     Join LDraw.org
 </x-slot>
-<x-slot:menu>
-    <x-menu.library />
-</x-slot>
-
 <div>
     @if ($meetsId)
         <form wire:submit="joinOrg">

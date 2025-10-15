@@ -5,7 +5,7 @@
         Auth::user()->can(\App\Enums\Permission::SiteSettingsEdit) ||
         Auth::user()->can(\App\Enums\Permission::LdconfigEdit)
     )
-        <x-menu.top-level-item label="Library Management">
+        <x-menu.top-level-item label="Library">
             @can(\App\Enums\Permission::SiteSettingsEdit)
             <x-menu.item label="General Library Settings" link="{{route('admin.settings.index')}}" />
             @endcan
@@ -21,7 +21,7 @@
         Auth::user()->can('create', \App\Models\User::class) ||
         Auth::user()->can('viewAny', \Spatie\Permission\Models\Role::class)
     )
-        <x-menu.top-level-item label="User Management">
+        <x-menu.top-level-item label="Users">
             @can('create', \App\Models\User::class)
                 <x-menu.item label="Add/Edit Users" link="{{route('admin.users.index')}}" />
             @endcan
@@ -31,12 +31,12 @@
         </x-menu.top-level-item>
     @endif
     @can('manage', \App\Models\Document\Document::class)
-        <x-menu.top-level-item label="Documentation Management">
+        <x-menu.top-level-item label="Documentation">
             <x-menu.item label="Add/Edit Documentation" link="{{route('admin.documents.index')}}" />
             <x-menu.item label="Add/Edit Documentation Categories" link="{{route('admin.document-categories.index')}}" />
         </x-menu.top-level-item>
     @endcan
     @can('manage', \App\Models\ReviewSummary::class)
-        <x-menu.top-level-item label="Add/Edit Part Review Summaries" link="{{route('admin.summaries.index')}}" />
+        <x-menu.top-level-item label="Review Summaries" link="{{route('admin.summaries.index')}}" />
     @endcan
 </x-menu>

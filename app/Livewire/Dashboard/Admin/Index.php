@@ -17,7 +17,7 @@ class Index extends Component
         $this->authorize(Permission::AdminDashboardView);
     }
 
-    #[Layout('components.layout.base')]
+    #[Layout('components.layout.admin')]
     public function render()
     {
         return view('livewire.dashboard.admin.index');

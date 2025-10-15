@@ -5,33 +5,38 @@ namespace App\Livewire\Search;
 use App\Models\Omr\Set;
 use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class MenuItem extends Component
 {
-    public string $search;
-    public array $results = [];
-    public bool $hasResults = false;
 
-    public function doSearch(LibrarySettings $settings)
+    public ?string $search = '';
+    public array $results = [];
+
+    #[On('doSearch')]
+    public function doSearch()
     {
+        $settings = app(LibrarySettings::class);
         $this->results = [];
-        $this->hasResults = false;
-        if (empty($this->search) || !is_string($this->search)) {
+        if (is_null($this->search) || $this->search == '') {
             return;
         }
         $limit = $settings->quick_search_limit;
         $uparts = Part::select(['id', 'filename', 'description'])->unofficial()->searchHeader($this->search)->orderBy('filename')->take($limit)->get();
         $oparts = Part::select(['id', 'filename', 'description'])->official()->searchHeader($this->search)->orderBy('filename')->take($limit)->get();
         if ($uparts->isNotEmpty()) {
-            $this->hasResults = true;
             foreach ($uparts as $part) {
                 $this->results['Unofficial Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
             }
         }
         if ($oparts->isNotEmpty()) {
-            $this->hasResults = true;
             foreach ($oparts as $part) {
                 $this->results['Official Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
             }
@@ -43,7 +48,6 @@ class MenuItem extends Component
                 ->orWhereHas('theme', fn (Builder $qu) => $qu->whereLike('name', "%{$this->search}%"));
         })->orderBy('name')->take($limit)->get();
         if ($sets->isNotEmpty()) {
-            $this->hasResults = true;
             foreach ($sets as $set) {
                 $this->results['OMR Models'][$set->id] = ['name' => $set->name, 'description' => $set->number];
             }
