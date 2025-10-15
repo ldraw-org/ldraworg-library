@@ -2,13 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\PartError;
-use App\Enums\VoteType;
-use App\Events\PartSubmitted;
-use App\Services\LDraw\LDrawFile;
-use App\Services\LDraw\Managers\Part\PartManager;
-use App\Services\LDraw\Managers\VoteManager;
 use App\Models\Part\Part;
+use App\Models\Part\PartHistory;
 use App\Models\User;
 use Illuminate\Console\Command;
 
@@ -33,6 +28,22 @@ class MassUpdate extends Command
      */
     public function handle()
     {
-        // Nothing yet
+        $kjm = User::firstWhere('realname', 'Kyle J. Mcdonald');
+        $csc = User::firstWhere('name', 'Deckard');
+        $unknown = User::find(290);
+        $hist = PartHistory::where('user_id', 290)
+            ->each(function (PartHistory $h) use ($kjm, $csc) {
+                if ($h->comment == 'BFC Certification') {
+                    $h->user_id = $kjm->id;
+                    $h->save();
+                } else {
+                    $h->user_id = $csc->id;
+                    $h->save();
+                }
+                $h->part->has_minor_edit = true;
+                $h->part->generateHeader();
+                $h->load('part');
+                $this->info($h->part->header);
+            });
     }
 }
