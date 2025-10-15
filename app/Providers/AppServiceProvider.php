@@ -83,15 +83,7 @@ class AppServiceProvider extends ServiceProvider
         Event::subscribe(PartEventSubscriber::class);
         
         Nightwatch::rejectQueuedJobs(function (QueuedJob $queuedjob) {
-            return str_contains($queuedjob->name, 'CheckPart');
-        });
-
-        Nightwatch::rejectQueuedJobs(function (QueuedJob $queuedjob) {
-            return str_contains($queuedjob->name, 'UpdateImages');
-        });
-
-        Nightwatch::rejectQueuedJobs(function (QueuedJob $queuedjob) {
-            return str_contains($queuedjob->name, 'PerformConversions');
+            return true; // Reject all queued job for now
         });
     }
 }
