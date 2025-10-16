@@ -7,9 +7,6 @@ use App\Models\Traits\HasPart;
 use App\Models\Traits\HasUser;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @mixin IdeHelperVote
- */
 class Vote extends Model
 {
     use HasUser;

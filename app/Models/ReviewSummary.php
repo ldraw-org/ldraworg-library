@@ -8,9 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
-/**
- * @mixin IdeHelperReviewSummary
- */
 class ReviewSummary extends Model
 {
     use HasOrder;

@@ -15,9 +15,6 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-/**
- * @mixin IdeHelperPartRelease
- */
 class PartRelease extends Model implements HasMedia
 {
     use InteractsWithMedia;

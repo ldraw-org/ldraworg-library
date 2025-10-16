@@ -5,9 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 
-/**
- * @mixin IdeHelperTrackerHistory
- */
 class TrackerHistory extends Model
 {
     protected $guarded = [];

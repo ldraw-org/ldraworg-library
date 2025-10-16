@@ -5,9 +5,6 @@ namespace App\Models\Part;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-/**
- * @mixin IdeHelperPartKeyword
- */
 class PartKeyword extends Model
 {
     protected $guarded = [];

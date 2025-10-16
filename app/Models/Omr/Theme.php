@@ -5,9 +5,6 @@ namespace App\Models\Omr;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @mixin IdeHelperTheme
- */
 class Theme extends Model
 {
     use HasRecursiveRelationships;

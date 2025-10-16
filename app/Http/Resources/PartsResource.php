@@ -6,9 +6,6 @@ use App\Models\Part\PartEvent;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @mixin PartEvent
- */
 class PartsResource extends JsonResource
 {
     /**

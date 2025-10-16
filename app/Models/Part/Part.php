@@ -48,9 +48,6 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 use Znck\Eloquent\Relations\BelongsToThrough;
 use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
 
-/**
- * @mixin IdeHelperPart
- */
 #[ObservedBy([PartObserver::class])]
 #[CollectedBy(PartCollection::class)]
 class Part extends Model implements HasMedia

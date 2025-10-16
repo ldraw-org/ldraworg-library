@@ -11,9 +11,6 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-/**
- * @mixin IdeHelperOmrModel
- */
 class OmrModel extends Model implements HasMedia
 {
     use InteractsWithMedia;
