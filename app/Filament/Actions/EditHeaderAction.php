@@ -50,7 +50,7 @@ class EditHeaderAction
                     $kws = $part->keywords;
                 } else {
                     $kws = $part->keywords
-                        ->reject(function (PartKeyword $kw) {
+                        ->reject(function (PartKeyword $kw): bool {
                             return Str::of($kw->keyword)->lower()->startsWith('rebrickable') ||
                             Str::of($kw->keyword)->lower()->startsWith('brickset') ||
                             Str::of($kw->keyword)->lower()->startsWith('brickowl') ||
@@ -65,9 +65,10 @@ class EditHeaderAction
             })
             ->using(fn (Part $p, array $data): Part => self::updateHeader($p, $data))
             ->successNotificationTitle('Header updated')
-            ->visible($part->isUnofficial() && Auth::user()?->can('update', $part) ?? false);
+            ->visible($part->isUnofficial() && (Auth::user()?->can('update', $part) ?? false));
     }
 
+    /** @return array<Filament\Forms\Components\Component> */
     protected static function formSchema(Part $part): array
     {
         return [
@@ -180,6 +181,7 @@ class EditHeaderAction
             ];
     }
 
+    /** @param array<mixed> $data */
     protected static function updateHeader(Part $part, array $data): Part
     {
         $manager = app(PartManager::class);
@@ -243,7 +245,7 @@ class EditHeaderAction
         }
         if (!is_null($part->getRebrickablePart())) {
             $extKeywords = collect($part->keywords
-                ->filter(function (PartKeyword $kw) {
+                ->filter(function (PartKeyword $kw): bool {
                     return Str::of($kw->keyword)->lower()->startsWith('rebrickable') ||
                     Str::of($kw->keyword)->lower()->startsWith('brickset') ||
                     Str::of($kw->keyword)->lower()->startsWith('brickowl') ||
@@ -252,7 +254,7 @@ class EditHeaderAction
                 ->pluck('keyword')
                 ->all());
             $new_kws = $new_kws
-                ->reject(function (string $kw) {
+                ->reject(function (string $kw):bool {
                     return Str::of($kw)->lower()->startsWith('rebrickable') ||
                     Str::of($kw)->lower()->startsWith('brickset') ||
                     Str::of($kw)->lower()->startsWith('brickowl') ||
@@ -271,7 +273,7 @@ class EditHeaderAction
         $old_hist = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()));
         $new_hist = collect($data['history'])
             ->map(
-                fn (array $state) =>
+                fn (array $state): string =>
                 '0 !HISTORY ' .
                 (new Carbon(Arr::get($state, 'created_at')))->toDateString() .
                 ' ' .
@@ -283,7 +285,7 @@ class EditHeaderAction
             $changes['old']['history'] = $old_hist->implode("\n");
             $part->setHistory($manager->parser->parse($new_hist->implode("\n"))->history ?? []);
             $part->load('history');
-            $changes['new']['history'] = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()))->implode("\n");
+            $changes['new']['history'] = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h): string => $h->toString()))->implode("\n");
         }
 
         if ($part->cmdline !== Arr::get($data, 'cmdline')) {

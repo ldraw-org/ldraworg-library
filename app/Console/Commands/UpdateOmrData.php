@@ -27,7 +27,7 @@ class UpdateOmrData extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $rb = new Rebrickable();
         $themes = $rb->getThemes();

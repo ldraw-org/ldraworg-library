@@ -26,7 +26,7 @@ class RenderParts extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->info("Queueing part images");
         if ($this->argument('part')) {
@@ -43,10 +43,11 @@ class RenderParts extends Command
                 );
         }
         $count = 0;
+        $onlyMissing = $this->option('missing');
         $parts
             ->lazy()
-            ->each(function (Part $p) use (&$count) {
-                if (!$this->option('missing') || ($this->option('missing') && !file_exists($p->getFirstMediaPath('image')))) {
+            ->each(function (Part $p) use (&$count, $onlyMissing) {
+                if (!$onlyMissing || !file_exists($p->getFirstMediaPath('image'))) {
                     UpdateImage::dispatch($p)->onQueue('maintenance');
                     $count++;
                 }

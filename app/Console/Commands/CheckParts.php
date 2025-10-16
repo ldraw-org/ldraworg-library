@@ -13,14 +13,14 @@ class CheckParts extends Command
 
     protected $description = 'Error check parts';
 
-    public function handle()
+    public function handle(): void
     {
         $this->info("Queuing parts for error check");
         if ($this->argument('part')) {
             $q = Part::whereIn('id', $this->argument('part'));
             $count = $q->count();
             if ($count > 0) {
-                CheckPart::dispatch($q->get()->onQueue('maintenance'));
+                CheckPart::dispatch($q->get())->onQueue('maintenance');
             }
         } else {
             $q = Part::query()

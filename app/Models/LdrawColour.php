@@ -16,6 +16,18 @@ class LdrawColour extends Model
 
     protected $guarded = [];
 
+    /**
+    * @return array{
+    *     'chrome': 'boolean',
+    *     'pearlescent': 'boolean',
+    *     'rubber': 'boolean',
+    *     'matte_metallic': 'boolean',
+    *     'metal': 'boolean',
+    *     'glitter': 'boolean',
+    *     'speckle': 'boolean',
+    *     'fabric': 'boolean'    
+    * }
+    */
     protected function casts(): array
     {
         return [

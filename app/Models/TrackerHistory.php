@@ -14,7 +14,7 @@ class TrackerHistory extends Model
 
     /**
     * @return array{
-    *     history_data: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
+    *     'history_data': 'Illuminate\\Database\\Eloquent\\Casts\\AsArrayObject',
     * }
     */
     protected function casts(): array

@@ -24,7 +24,7 @@ class RecountVotes extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->info('Recounting all votes');
         Part::unofficial()->lazy()->each->updatePartStatus();

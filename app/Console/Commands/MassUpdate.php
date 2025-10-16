@@ -25,7 +25,7 @@ class MassUpdate extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $kjm = User::firstWhere('realname', 'Kyle J. Mcdonald');
         $csc = User::firstWhere('name', 'Deckard');

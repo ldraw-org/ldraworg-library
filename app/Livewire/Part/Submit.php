@@ -5,6 +5,7 @@ namespace App\Livewire\Part;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Utilities\Get;
 use App\Services\LDraw\Parse\Parser;
+use App\Enums\PartType;
 use App\Enums\CheckType;
 use App\Enums\Permission;
 use App\Services\LDraw\Check\PartChecker;
@@ -67,22 +68,20 @@ class Submit extends Component implements HasSchemas
                             // Error check based on file type
                             if ($mimeType == 'text/plain') {
                                 $part = app(Parser::class)->parse($value->get());
-                                $pparts = Part::query()->byName($part->name ?? '')->get();
+
+                                $partname = $part->name ?? '';
+                                $pparts = Part::query()->byName($partname)->get();
                                 $unofficial_exists = $pparts->unofficial()->isNotEmpty();
                                 $official_exists = $pparts->official()->isNotEmpty();
                                 $pc = new PartChecker($part);
                                 $pc->standardChecks($value->getClientOriginalName());
                                 $errors = $pc->get(CheckType::holdable(), true);
-
-                                // A part in the p and parts folder cannot have the same name
-                                if (!is_null($pparts) && !is_null($part->type) && !is_null($part->name) &&
-                                    $pparts->where('filename', "p/{$part->name}")->isNotEmpty() &&
-                                    ($part->type == 'Part' || $part->type == 'Shortcut')) {
-                                    $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.duplicate', ['type' => 'Primitive']);
-                                } elseif (!is_null($pparts) && !is_null($part->type) && !is_null($part->name) &&
-                                    $pparts->where('filename', "parts/{$part->name}")->isNotEmpty() &&
-                                    $part->type == 'Primitive') {
-                                    $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.duplicate', ['type' => 'Parts']);
+                                
+                                if ($part->type == PartType::Primitive || $part->type?->inPArtsFolder()) {
+                                    $searchFolder = $part->type == PartType::Primitive ? 'parts/' : 'p/';
+                                    if ($pparts->where('filename', "{$searchFolder}{$partname}")->isNotEmpty()) {
+                                        $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.duplicate', ['type' => $part->type == PartType::Primitive ? 'Parts' : 'Primitive']);
+                                    }
                                 }
 
                                 foreach ($errors as $error) {

@@ -14,9 +14,5 @@ class UnknownPartNumber extends Model
     use HasUser;
     use HasParts;
 
-    protected $fillable = [
-        'number',
-        'user_id',
-        'notes',
-    ];
+    protected $guarded = [];
 }

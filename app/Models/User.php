@@ -50,6 +50,17 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    /**
+    * @return array{
+    *     'license': 'App\\Enums\\License',
+    *     'email_verified_at': 'datetime',
+    *     'profile_settings': 'array',
+    *     'is_legacy': 'boolean',
+    *     'is_synthetic': 'boolean',
+    *     'is_ptadmin': 'boolean',
+    *     'ca_confirm': 'boolean',
+    * }
+    */
     protected function casts(): array
     {
         return [

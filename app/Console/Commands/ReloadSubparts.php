@@ -26,7 +26,7 @@ class ReloadSubparts extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $lib = $this->option('official-only') ? 'official' : ($this->option('unofficial-only') ? 'unofficial' : 'all');
         $this->info("Reloading {$lib} subparts");

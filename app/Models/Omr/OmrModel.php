@@ -25,6 +25,17 @@ class OmrModel extends Model implements HasMedia
         'set',
     ];
 
+    /**
+    * @return array{
+    *     'notes': 'array',
+    *     'license': 'App\\Enums\\License',
+    *     'missing_parts': 'boolean',
+    *     'missing_patterns': 'boolean',
+    *     'missing_stickers': 'boolean',
+    *     'alt_model': 'boolean',
+    *     'approved': 'boolean'    
+    * }
+    */
     protected function casts(): array
     {
         return [

@@ -68,23 +68,23 @@ class Part extends Model implements HasMedia
 
     /**
     * @return array{
-    *     type: 'App\Enums\PartType',
-    *     type_qualifier: 'App\Enums\PartTypeQualifier',
-    *     license: 'App\Enums\License',
-    *     part_status: 'App\Enums\PartStatus',
-    *     category => 'App\Enums\PartCategory',
-    *     delete_flag: 'boolean',
-    *     manual_hold_flag: 'boolean',
-    *     has_minor_edit: 'boolean',
-    *     missing_parts: 'array',
-    *     can_release: 'boolean',
-    *     marked_for_release: 'boolean',
-    *     is_pattern: 'boolean',
-    *     is_composite: 'boolean',
-    *     is_dual_mould: 'boolean',
-    *     ready_for_admin: 'boolean'
-    *     rebrickable: 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
-    *     help: 'array',
+    *     'type': 'App\\Enums\\PartType',
+    *     'type_qualifier': 'App\\Enums\\PartTypeQualifier',
+    *     'license': 'App\\Enums\\License',
+    *     'part_status': 'App\\Enums\\PartStatus',
+    *     'category': 'App\\Enums\\PartCategory',
+    *     'delete_flag': 'boolean',
+    *     'manual_hold_flag': 'boolean',
+    *     'has_minor_edit': 'boolean',
+    *     'missing_parts': 'array',
+    *     'can_release': 'boolean',
+    *     'marked_for_release': 'boolean',
+    *     'is_pattern': 'boolean',
+    *     'is_composite': 'boolean',
+    *     'is_dual_mould': 'boolean',
+    *     'ready_for_admin': 'boolean',
+    *     'rebrickable': 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
+    *     'help': 'array'
     * }
     */
     protected function casts(): array

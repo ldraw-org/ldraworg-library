@@ -18,6 +18,14 @@ class RebrickablePart extends Model
 
     protected $guarded = [];
 
+    /**
+    * @return array{
+    *     'bricklink': 'array',
+    *     'brickowl': 'array',
+    *     'brickset': 'array',
+    *     'lego': 'array'
+    * }
+    */
     protected function casts(): array
     {
         return [

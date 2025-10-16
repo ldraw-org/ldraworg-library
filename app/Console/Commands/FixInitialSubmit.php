@@ -26,7 +26,7 @@ class FixInitialSubmit extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         Part::unofficial()
             ->whereDoesntHave('events', fn (Builder $query) => $query->where('initial_submit', true))

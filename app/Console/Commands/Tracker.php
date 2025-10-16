@@ -24,7 +24,7 @@ class Tracker extends Command
     /**
      * Execute the console command.
      */
-    public function handle(LibrarySettings $settings)
+    public function handle(LibrarySettings $settings): void
     {
         if ($this->option('lock')) {
             $settings->tracker_locked = true;

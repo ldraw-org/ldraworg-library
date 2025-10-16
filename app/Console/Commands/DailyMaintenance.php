@@ -27,7 +27,7 @@ class DailyMaintenance extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         // None of these need to happen daily on the dev server
         // and just soaks up resources.

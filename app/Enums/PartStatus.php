@@ -47,11 +47,13 @@ enum PartStatus: int
         };
     }
 
+    /** @return array<self> */
     public static function trackerStatus(): array
     {
         return [PartStatus::Certified, PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound];
     }
 
+    /** @return array<string, string> */
     public static function trackerStatusOptions(): array
     {
         return self::options(self::trackerStatus());

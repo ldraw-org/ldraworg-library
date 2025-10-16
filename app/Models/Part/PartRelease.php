@@ -28,18 +28,16 @@ class PartRelease extends Model implements HasMedia
 
     /**
     * @return array{
-    *     part_data: 'array',
-    *     new_of_type: 'array',
-    *     moved: 'array',
-    *     renamed: 'array',
-    *     fixed: 'array',
-    *     enabled: 'boolean'
+    *     'new_of_type': 'array',
+    *     'moved': 'array',
+    *     'renamed': 'array',
+    *     'fixed': 'array',
+    *     'enabled': 'boolean'
     * }
     */
     protected function casts(): array
     {
         return [
-            'part_data' => 'array',
             'new_of_type' => 'array',
             'moved' => 'array',
             'renamed' => 'array',

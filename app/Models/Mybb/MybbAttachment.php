@@ -14,6 +14,11 @@ class MybbAttachment extends Model
     public $timestamps = false;
     protected $connection = 'mybb';
 
+    /**
+    * @return array{
+    *     'posthash': 'boolean',
+    * }
+    */
     protected function casts(): array
     {
         return [

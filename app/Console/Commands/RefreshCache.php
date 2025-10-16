@@ -25,13 +25,14 @@ class RefreshCache extends Command
      */
     public function handle(): void
     {
-        $this->call('optimize:clear');
-        $this->call('icons:clear');
-        $this->call('filament:clear-cached-components');
-        $this->call('view:cache');
-        $this->call('optimize');
-        $this->call('filament:cache-components');
-        $this->call('icons:cache');
+        $this->call('down');
+        try {
+            $this->call('optimize:clear');
+            $this->call('optimize');
+          
+        } finally {
+            $this->call('up');
+        }
         $this->call('queue:restart');
     }
 }

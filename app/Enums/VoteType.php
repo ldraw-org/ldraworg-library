@@ -15,7 +15,7 @@ enum VoteType: string
     case Hold = 'H';
     case AdminFastTrack = 'T';
 
-    public function iconColor()
+    public function iconColor(): string
     {
         return match ($this) {
             VoteType::Comment => 'fill-blue-500',

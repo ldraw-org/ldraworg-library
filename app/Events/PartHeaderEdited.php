@@ -16,6 +16,7 @@ class PartHeaderEdited
 
     /**
      * Create a new event instance.
+     * @param array<mixed> $changes
      */
     public function __construct(
         public Part $part,

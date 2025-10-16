@@ -17,6 +17,12 @@ class StickerSheet extends Model
 {
     protected $guarded = [];
 
+    /**
+    * @return array{
+    *     'rebrickable': 'Illuminate\\Database\\Eloquent\\Casts\\AsArrayObject',
+    *     'part_colors': 'Illuminate\\Database\\Eloquent\\Casts\\AsArrayObject',
+    * }
+    */
     protected function casts(): array
     {
         return [

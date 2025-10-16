@@ -24,9 +24,9 @@ class UpdateLDConfig extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(LDConfigManager $manager): void
     {
-        app(LDConfigManager::class)->importColours();
-        app(LDConfigManager::class)->importAvatars();
+        $manager->importColours();
+        $manager->importAvatars();
     }
 }

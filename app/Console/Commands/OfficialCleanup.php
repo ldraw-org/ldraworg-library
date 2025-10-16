@@ -25,7 +25,7 @@ class OfficialCleanup extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         Part::official()->update([
             'part_status' => PartStatus::Official,

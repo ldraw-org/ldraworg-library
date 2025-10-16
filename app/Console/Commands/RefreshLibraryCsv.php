@@ -21,7 +21,7 @@ class RefreshLibraryCsv extends Command
      */
     protected $description = 'Refresh the library CSV file';
 
-    public function handle(SupportFiles $support)
+    public function handle(SupportFiles $support): void
     {
         $support->setLibraryCsv();
     }

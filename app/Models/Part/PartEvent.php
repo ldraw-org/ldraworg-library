@@ -22,29 +22,14 @@ class PartEvent extends Model
     use HasUser;
     use HasPart;
 
-    protected $fillable = [
-        'created_at',
-        'initial_submit',
-        'part_id',
-        'user_id',
-        'vote_type',
-        'event_type',
-        'part_release_id',
-        'comment',
-        'deleted_filename',
-        'deleted_description',
-        'moved_from_filename',
-        'moved_to_filename',
-        'initial_submit',
-        'header_changes',
-    ];
+    protected $guarded = [];
 
     /**
     * @return array{
-    *     initial_submit: 'boolean',
-    *     header_changes: 'array',
-    *     vote_type: 'App\Enums\VoteType',
-    *     event_type: 'App\Enums\EventType',
+    *     'initial_submit': 'boolean',
+    *     'header_changes': 'array',
+    *     'vote_type': 'App\\Enums\\VoteType',
+    *     'event_type': 'App\\Enums\\EventType',
     * }
     */
     protected function casts(): array

@@ -46,6 +46,7 @@ enum PartType: string
         };
     }
 
+    /** @return array<string> */
     public static function folders(): array
     {
         return array_unique(Arr::map(self::cases(), fn (self $type): string => $type->folder()));
@@ -91,11 +92,13 @@ enum PartType: string
         return in_array($this, self::partsFolderTypes());
     }
 
+    /** @return array<self> */
     public static function partsFolderTypes(): array
     {
         return [PartType::Part, PartType::Shortcut];
     }
 
+    /** @return array<self> */
     public static function imageFormat(): array
     {
         return [
@@ -107,6 +110,7 @@ enum PartType: string
         ];
     }
 
+    /** @return array<self> */
     public static function datFormat(): array
     {
         return [

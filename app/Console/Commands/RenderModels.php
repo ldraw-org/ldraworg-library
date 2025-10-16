@@ -25,8 +25,9 @@ class RenderModels extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
+
         $this->info("Queueing omr model images");
         if ($this->argument('model')) {
             $models = OmrModel::whereIn('id', $this->argument('model'));
@@ -35,10 +36,11 @@ class RenderModels extends Command
         }
 
         $count = 0;
+        $onlyMissing = $this->option('missing');
         $models
             ->lazy()
-            ->each(function (OmrModel $m) use (&$count) {
-                if (!$this->option('missing') || ($this->option('missing') && !file_exists($m->getFirstMediaPath('image')))) {
+            ->each(function (OmrModel $m) use (&$count, $onlyMissing) {
+                if (!$onlyMissing || !file_exists($m->getFirstMediaPath('image'))) {
                     UpdateImage::dispatch($m)->onQueue('maintenance');
                     $count++;
                 }

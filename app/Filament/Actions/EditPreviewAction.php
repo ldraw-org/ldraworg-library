@@ -37,6 +37,6 @@ class EditPreviewAction
                 }
             })
             ->successNotificationTitle('Header updated')
-            ->visible(!$part->isUnofficial() && Auth::user()?->can('updatePreview', $part) ?? false);
+            ->visible(!$part->isUnofficial() && (Auth::user()?->can('updatePreview', $part) ?? false));
     }
 }

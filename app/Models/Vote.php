@@ -15,16 +15,11 @@ class Vote extends Model
     use HasUser;
     use HasPart;
 
-    protected $fillable = [
-        'user_id',
-        'part_id',
-        'vote_type',
-        'comment'
-    ];
+    protected $guarded = [];
 
     /**
     * @return array{
-    *     vote_type: 'App\Enums\VoteType',
+    *     'vote_type': 'App\\Enums\\VoteType',
     * }
     */
     protected function casts(): array

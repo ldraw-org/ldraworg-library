@@ -59,7 +59,6 @@ class DocumentShowController extends Controller
                                     return 'pl-6 ' . match ($node->getListData()->type) {
                                         'bullet' => 'list-disc',
                                         'ordered' => 'list-decimal',
-                                        default => ''
                                     };
                                 }
                             ],

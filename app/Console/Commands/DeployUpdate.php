@@ -3,8 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Enums\Permission;
-use Spatie\Permission\Models\Permission as PermissionModel;
 
 class DeployUpdate extends Command
 {
@@ -25,11 +23,8 @@ class DeployUpdate extends Command
     /**
      * Execute the console command.
      */
-    public function handle(LibraryImport $import): void
+    public function handle(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        foreach (Permission::cases() as $permission) {
-            PermissionModel::findOrCreate($permission->value);
-        }
+      // Nothing yet
     }
 }

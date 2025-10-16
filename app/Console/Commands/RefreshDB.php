@@ -25,7 +25,7 @@ class RefreshDB extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         if (app()->environment('local')) {
             $this->info('Copying production db backup');
