@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Part;
 
 use App\Http\Resources\PartsResource;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Part\PartEvent;
-
+use Illuminate\Http\Resources\Json\ResourceCollection;
+  
 class LatestPartsController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(): ResourceCollection
     {
         $parts = PartEvent::with(['part'])
             ->where('initial_submit', true)

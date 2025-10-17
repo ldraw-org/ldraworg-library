@@ -210,7 +210,7 @@ class PartListTable extends BasicTable
                         ->selectable(
                             IsRelatedToOperator::make()
                                 ->titleAttribute('filename')
-                                ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->name()} - {$p->description}")
+                                ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->meta_name} - {$p->description}")
                                 ->searchable()
                                 ->multiple(),
                         )
@@ -221,7 +221,7 @@ class PartListTable extends BasicTable
                             IsRelatedToOperator::make()
                                 ->titleAttribute('filename')
                                 ->searchable()
-                                ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->name()} - {$p->description}")
+                                ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->meta_name} - {$p->description}")
                                 ->multiple(),
                         )
                         ->icon(LibraryIcon::ViewerStudLogo->value)
@@ -231,7 +231,7 @@ class PartListTable extends BasicTable
                             IsRelatedToOperator::make()
                                 ->titleAttribute('filename')
                                 ->searchable()
-                                ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->name()} - {$p->description}")
+                                ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->meta_name} - {$p->description}")
                                 ->multiple(),
                         )
                         ->icon(LibraryIcon::ViewerStudLogo->value)

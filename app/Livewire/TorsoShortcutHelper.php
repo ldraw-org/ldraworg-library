@@ -254,7 +254,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         } elseif (!is_null($bo_num)) {
             $rb_part = $rb->getParts(['brickowl_id' => $bo_num])?->first();
         } else {
-            $rb_part = $rb->getParts(['search' => basename(Part::find($this->data['torso'])->name(), '.dat')])?->first();
+            $rb_part = $rb->getParts(['search' => basename(Part::find($this->data['torso'])->meta_name, '.dat')])?->first();
         }
         if (!is_null($rb_part) && $rb_part['part_num'] != '3814') {
             $set('rebrickable', $rb_part['part_num']);
@@ -413,11 +413,11 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         $matrix = $matrix[1];
         array_shift($matrix);
         $p = Part::find($this->data['torso']);
-        $text .= "1 16 0 0 0 1 0 0 0 1 0 0 0 1 {$p->name()}\n";
+        $text .= "1 16 0 0 0 1 0 0 0 1 0 0 0 1 {$p->meta_name}\n";
         foreach ($this->templateParts() as $index => $tpart) {
             $index++;
             $p = Part::find($this->data["part_{$index}_id"]);
-            $text .= '1 ' . $this->data["part_{$index}_color"] . ' ' . $matrix[$index - 1] . $p->name() . "\n";
+            $text .= '1 ' . $this->data["part_{$index}_color"] . ' ' . $matrix[$index - 1] . $p->meta_name . "\n";
         }
         $this->parts = app(LDrawModelMaker::class)->webGl($text);
         $this->dispatch('render-model');

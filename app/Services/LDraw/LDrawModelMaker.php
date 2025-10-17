@@ -18,7 +18,7 @@ class LDrawModelMaker
         }
         $topModelName = basename($part->filename, '.dat') . '.ldr';
         $preview = $part->preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
-        $file = "0 FILE {$topModelName}\r\n1 {$preview} {$part->name()}\r\n0 FILE {$part->name()}\r\n{$part->get()}\r\n";
+        $file = "0 FILE {$topModelName}\r\n1 {$preview} {$part->meta_name}\r\n0 FILE {$part->meta_name}\r\n{$part->get()}\r\n";
         if ($part->isUnofficial()) {
             $sparts = $part->descendants()->doesntHave('unofficial_part')->get()->unique('filename');
         } else {
@@ -29,7 +29,7 @@ class LDrawModelMaker
             if ($p->isTexmap()) {
                 $file .= $p->get(true, true);
             } else {
-                $file .= "0 FILE {$p->name()}\r\n{$p->get()}\r\n";
+                $file .= "0 FILE {$p->meta_name}\r\n{$p->get()}\r\n";
             }
         });
         return $file;
@@ -66,7 +66,7 @@ class LDrawModelMaker
                 if ($p->isTexmap()) {
                     $file .= $p->get(true, true);
                 } else {
-                    $file .= "0 FILE {$p->name()}\r\n{$p->get()}\r\n";
+                    $file .= "0 FILE {$p->meta_name}\r\n{$p->get()}\r\n";
                 }
             });
         return $file;

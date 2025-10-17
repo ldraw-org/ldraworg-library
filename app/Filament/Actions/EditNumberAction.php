@@ -96,7 +96,7 @@ class EditNumberAction
                 PartHistory::create([
                     'part_id' => $upart->id,
                     'user_id' => Auth::user()->id,
-                    'comment' => 'Moved from ' . $part->name(),
+                    'comment' => 'Moved from ' . $part->meta_name,
                 ]);
                 $upart->refresh();
                 $manager->movePart($upart, $newName, $newType);

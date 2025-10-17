@@ -85,16 +85,16 @@ class ParsedPart
         foreach ($part->subparts as $s) {
             /** @var Part $s */
             if ($s->isTexmap()) {
-                $textures[] = str_replace('textures/', '', $s->name());
+                $textures[] = str_replace('textures/', '', $s->meta_name);
             } else {
-                $subs[] = $s->name();
+                $subs[] = $s->meta_name;
             }
         }
         $subs = ['subparts' => array_unique($subs), 'textures' => array_unique($textures)];
 
         return new self(
             $part->description,
-            $part->name(),
+            $part->meta_name,
             $part->user->name,
             $part->user->realname,
             is_null($part->release),

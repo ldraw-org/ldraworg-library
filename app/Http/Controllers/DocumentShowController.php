@@ -21,10 +21,12 @@ use League\CommonMark\Extension\CommonMark\Node\Inline\Link;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Strong;
 use League\CommonMark\Extension\DefaultAttributes\DefaultAttributesExtension;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class DocumentShowController extends Controller
 {
-    public function __invoke(Request $request, DocumentCategory $document_category, Document $document)
+    public function __invoke(Request $request, DocumentCategory $document_category, Document $document): View|RedirectResponse
     {
         Gate::authorize('view', $document);
 

@@ -8,10 +8,12 @@ use Illuminate\Support\Carbon;
 use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
-
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Http\Response;
+  
 class PartDownloadController extends Controller
 {
-    public function __invoke(string $library, string $filename)
+    public function __invoke(string $library, string $filename): StreamedResponse|Response
     {
         $is_zip = false;
         if (Str::endsWith($filename, '.zip')) {

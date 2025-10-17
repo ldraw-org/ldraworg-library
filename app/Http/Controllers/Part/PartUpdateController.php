@@ -6,10 +6,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\LDraw\SupportFiles;
 use App\Models\Part\PartRelease;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 class PartUpdateController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response|View
     {
         if ($request->has('output') && in_array(strtolower($request->query('output')), ['xml', 'tab'])) {
             $output = strtolower($request->query('output'));
@@ -26,7 +28,7 @@ class PartUpdateController extends Controller
         return view('tracker.release.index', ['releases' => $releases , 'latest' => $request->has('latest')]);
     }
 
-    public function view(PartRelease $release, Request $request)
+    public function view(PartRelease $release): View
     {
         return view('tracker.release.view', ['release' => $release]);
     }

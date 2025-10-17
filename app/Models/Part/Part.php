@@ -48,6 +48,10 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 use Znck\Eloquent\Relations\BelongsToThrough;
 use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
 
+/**
+ * @method static \Staudenmeir\LaravelAdjacencyList\Eloquent\Builder<static>|Part official()
+ * @method static \Staudenmeir\LaravelAdjacencyList\Eloquent\Builder<static>|Part unofficial()
+ */
 #[ObservedBy([PartObserver::class])]
 #[CollectedBy(PartCollection::class)]
 class Part extends Model implements HasMedia
@@ -312,6 +316,16 @@ class Part extends Model implements HasMedia
         );
     }
 
+    public function metaName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Str::of($this->filename)
+                ->replaceMatches('/^(parts\/|p\/)/i', '')
+                ->replace('/', '\\')
+                ->toString()
+        );
+    }
+
     public function uncertified_subparts(): Collection
     {
         return $this
@@ -426,10 +440,6 @@ class Part extends Model implements HasMedia
         return $this->isUnofficial() ? 'unofficial' : 'official';
     }
 
-    public function name(): string
-    {
-        return str_replace('/', '\\', str_replace(["parts/", "p/"], '', $this->filename));
-    }
 
     public function orderedEvents(): Collection
     {
@@ -638,7 +648,7 @@ class Part extends Model implements HasMedia
 
             $existing_subs = $subps->pluck('filename')->all();
             $esubs = [];
-            foreach ($existing_subs ?? [] as $s) {
+            foreach ($existing_subs as $s) {
                 $s = str_replace('textures/', '', $s);
                 $s = str_replace(['parts/', 'p/'], '', $s);
                 $esubs[] = str_replace('/', '\\', $s);
@@ -666,11 +676,10 @@ class Part extends Model implements HasMedia
     public function generateHeader(bool $save = true): void
     {
         $this->load('user', 'history', 'keywords', 'release');
-        $header = [];
-        $header[] = "0 {$this->description}" ?? '' ;
-        $header[] = "0 Name: {$this->name()}" ?? '';
-        $header[] = $this->user->toString();
 
+        $name = $this->meta_name;
+        $user = $this->user->toString();
+        $license = $this->license->ldrawString();
         $typestr = $this->type->ldrawString($this->isUnofficial());
         if (!is_null($this->type_qualifier)) {
             $typestr .= " {$this->type_qualifier->value}";
@@ -678,80 +687,51 @@ class Part extends Model implements HasMedia
         if (!is_null($this->release)) {
             $typestr .= $this->release->toString();
         }
-        $header[] = $typestr;
-        $header[] = $this->license->ldrawString();
-        $header[] = '';
 
-        if ($this->help) {
-            foreach ($this->help as $h) {
-                $header[] = "0 !HELP {$h}";
-            }
-            $header[] = '';
-        }
-
+        $help = !is_null($this->help) && count($this->help) > 0 ? '0 !HELP ' . implode("\n0 !HELP ", $this->help) : '';
+        $bfc = '';
         if (!is_null($this->bfc)) {
-            $header[] = "0 BFC CERTIFY {$this->bfc}";
-            $header[] = '';
+            $bfc = "0 BFC CERTIFY {$this->bfc}";
         } elseif (!$this->isTexmap()) {
-            $header[] = "0 BFC NOCERTIFY";
-            $header[] = '';
+            $bfc = "0 BFC NOCERTIFY";
         }
 
-        $addBlank = false;
-        if (!is_null($this->category) && $this->type->inPartsFolder()) {
-            $word = 1;
-            if (Str::of($this->description)->trim()->words(1, '')->replace(['~', '|', '=', '_'], '') == '') {
-                $word = 2;
+        $category = '';
+        $firstWord = Str::of($this->description)
+            ->replaceMatches('/^[~|=_]+/i', '')
+            ->trim()
+            ->words(1, '')
+            ->toString();
+        if (PartCategory::tryFrom($firstWord) != $this->category && $this->type->inPartsFolder()) {
+            $category = $this->category->ldrawString() . "\n";
+        }
+
+        $keywords = '';
+        $line = '';
+        $this->keywords->each(function (PartKeyword $keyword, int $id) use (&$keywords, &$line) {
+            $kw = ($line === '') ? $keyword->keyword : ', ' . $keyword->keyword;
+            if (Str::length("0 !KEYWORDS {$line}{$kw}") > 80) {
+                $keywords .= "\n0 !KEYWORDS {$line}";
+                $line = $keyword->keyword;
+            } else {
+                $line .= $kw;
             }
-            $cat = Str::of($this->description)->trim()->words($word, '')->replace(['~', '|', '=', '_', ' '], '')->toString();
-            $cat = PartCategory::tryFrom($cat);
-            if ($cat != $this->category) {
-                $header[] = $this->category->ldrawString();
-                $addBlank = true;
-            }
-        }
-        if ($this->keywords->isNotEmpty()) {
-            $kws = $this->keywords->pluck('keyword')->all();
-            $kwline = '';
-            foreach ($kws as $index => $kw) {
-                if (array_key_first($kws) == $index) {
-                    $kwline = "0 !KEYWORDS ";
-                }
-                if ($kwline !== "0 !KEYWORDS " && mb_strlen("{$kwline}, {$kw}") > 80) {
-                    $header[] = $kwline;
-                    $kwline = "0 !KEYWORDS ";
-                }
-                if ($kwline !== "0 !KEYWORDS ") {
-                    $kwline .= ", ";
-                }
-                $kwline .= $kw;
-                if (array_key_last($kws) == $index) {
-                    $header[] = $kwline;
-                    $addBlank = true;
-                }
-            }
-        }
-        if ($addBlank === true) {
-            $header[] = '';
-        }
+        });
+        $keywords .= $line !== '' ? "\n0 !KEYWORDS {$line}" : '';
+      
+        $preview = !is_null($this->preview) && $this->preview !== '' ? "0 !PREVIEW {$this->preview}" : '';
+        $cmdline = !is_null($this->cmdline) && $this->cmdline !== '' ? "0 !PREVIEW {$this->cmdline}" : '';
+        $history = $this->history
+              ->map(fn (PartHistory $h): string => $h->toString())
+              ->implode("\n");
 
-        if (!is_null($this->cmdline)) {
-            $header[] = "0 !CMDLINE {$this->cmdline}";
-            $header[] = '';
-        }
+        $header = "0 {$this->description}\n" .
+                  "0 Name: {$name}\n" .
+                  "{$user}\n{$typestr}\n{$license}\n\n" .
+                  "{$help}\n\n{$bfc}\n\n{$category}\n{$keywords}\n\n" .
+                  "{$cmdline}\n\n{$preview}\n\n{$history}";
 
-        if (!is_null($this->preview) && $this->preview != '16 0 0 0 1 0 0 0 1 0 0 0 1') {
-            $header[] = "0 !PREVIEW {$this->preview}";
-            $header[] = '';
-        }
-
-        if ($this->history->isNotEmpty()) {
-            foreach ($this->history as $h) {
-                $header[] = $h->toString();
-            }
-        }
-
-        $this->header = implode("\n", $header);
+        $this->header = trim(preg_replace('#\n{3,}#us', "\n\n", $header));
         if ($save) {
             $this->saveQuietly();
         }

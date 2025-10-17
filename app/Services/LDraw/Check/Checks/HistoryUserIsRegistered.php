@@ -14,7 +14,10 @@ class HistoryUserIsRegistered implements Check
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
         if ($part instanceof ParsedPart) {
-            foreach ($part->history ?? [] as $hist) {
+            foreach ($part->history ?? ['user' => '', 'type' => ''] as $hist) {
+                if (!in_array($hist['type'], ['{', '[']) {
+                    continue;
+                }
                 $user_registered = match ($hist['type']) {
                     '[' => User::where('name', $hist['user'])->exists(),
                     '{' => User::where('realname', $hist['user'])->exists(),

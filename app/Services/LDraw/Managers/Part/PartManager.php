@@ -262,7 +262,7 @@ class PartManager
         }
 
         $base = $this->parser->basepart(basename($part->filename));
-        if (is_null($base) || ("{$base}.dat" == $part->name() || "{$base}-f1.dat" == $part->name())) {
+        if (is_null($base) || ("{$base}.dat" == $part->meta_name || "{$base}-f1.dat" == $part->meta_name)) {
             $part->base_part()->disassociate();
             $part->is_pattern = false;
             $part->is_composite = false;
@@ -301,7 +301,7 @@ class PartManager
         }
 
         $values = [
-            'description' => "~Moved to " . str_replace(['.dat', '.png'], '', $newPart->name()),
+            'description' => "~Moved to " . str_replace(['.dat', '.png'], '', $newPart->meta_name),
             'filename' => $oldPart->filename,
             'user_id' => Auth::user()->id,
             'type' => $oldPart->type,
@@ -312,7 +312,7 @@ class PartManager
             'header' => '',
         ];
         $upart = Part::create($values);
-        $upart->setBody("1 16 0 0 0 1 0 0 0 1 0 0 0 1 {$newPart->name()}\n");
+        $upart->setBody("1 16 0 0 0 1 0 0 0 1 0 0 0 1 {$newPart->meta_name}\n");
         $oldPart->unofficial_part()->associate($upart);
         $oldPart->save();
         $upart->refresh();
@@ -322,7 +322,7 @@ class PartManager
 
     public function movePart(Part $part, string $newName, PartType $newType): bool
     {
-        $oldname = $part->name();
+        $oldname = $part->meta_name;
         if ($newName == '.dat' || $newName == '.png') {
             $newName = basename($part->filename);
         }
@@ -348,19 +348,19 @@ class PartManager
         $this->updateImage($part);
         foreach ($part->parents()->unofficial()->get() as $p) {
             if ($part->type->inPartsFolder() && $p->category === PartCategory::Moved) {
-                $p->description = str_replace($oldname, $part->name(), $p->description);
+                $p->description = str_replace($oldname, $part->meta_name, $p->description);
                 $p->save();
             }
             if ($part->isTexmap()) {
                 $toldname = str_replace('textures\\', '', $oldname);
-                $tnewname = str_replace('textures\\', '', $part->name());
+                $tnewname = str_replace('textures\\', '', $part->meta_name);
                 $p->body->body = str_replace($toldname, $tnewname, $p->body->body);
             } else {
-                $p->body->body = str_replace($oldname, $part->name(), $p->body->body);
+                $p->body->body = str_replace($oldname, $part->meta_name, $p->body->body);
             }
             $p->body->save();
         }
-        $this->updateMissing($part->name());
+        $this->updateMissing($part->meta_name);
         $this->checkPart($part);
         $part->updateReadyForAdmin();
         $this->addUnknownNumber($part);
@@ -435,7 +435,7 @@ class PartManager
             $p->parents()->whereIn('category', [PartCategory::Sticker, PartCategory::StickerShortcut])->update(['sticker_sheet_id' => $sticker->sticker_sheet->id]);
             $p->sticker_sheet()->associate($sticker->sticker_sheet);
         } else {
-            $m = preg_match('/^[\d]+/', $sticker->name(), $s);
+            $m = preg_match('/^[\d]+/', $sticker->meta_name, $s);
             if ($m) {
                 $sheet = StickerSheet::firstOrCreate([
                     'number' => $s[0]

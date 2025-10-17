@@ -65,15 +65,15 @@ class PartCollection extends Collection
         }
         $this->where('category', PartCategory::Moved)
             ->each(function (Part $part, int $id) use (&$data){
-                $data['moved'][] = ['from' => $part->name(),  'to' => $part->description];
+                $data['moved'][] = ['from' => $part->meta_name,  'to' => $part->description];
             });
         $this->whereNotNull('official_part')
             ->where('category', '!=', PartCategory::Moved)
             ->each(function (Part $part, int $id) use (&$data) {
                 if ($part->description != $part->official_part->description) {
-                    $data['renamed'][] = ['name' => $part->name(), 'old' => $part->description, 'new' => $part->official_part->description];
+                    $data['renamed'][] = ['name' => $part->meta_name, 'old' => $part->description, 'new' => $part->official_part->description];
                 } else {
-                    $data['fixed'][] = ['name' => $part->name(), 'description' => $part->description];
+                    $data['fixed'][] = ['name' => $part->meta_name, 'description' => $part->description];
                 }
             });
         return $data;

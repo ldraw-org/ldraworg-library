@@ -7,11 +7,12 @@ use App\Enums\EventType;
 use App\Http\Controllers\Controller;
 use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Builder;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class LastDayDownloadZipController extends Controller
 {
-    public function __invoke()
+    public function __invoke(): StreamedResponse
     {
         $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
         $zip = new ZipArchive();

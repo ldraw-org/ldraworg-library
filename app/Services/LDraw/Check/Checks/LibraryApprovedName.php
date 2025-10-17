@@ -13,7 +13,7 @@ class LibraryApprovedName implements Check
     public function check(ParsedPart|Part $part, Closure $fail): void
     {
         if ($part instanceof Part) {
-            $name = $part->name();
+            $name = $part->meta_name;
         } else {
             $name = $part->name;
         }

@@ -27,12 +27,12 @@ class MenuItem extends Component
         $oparts = Part::select(['id', 'filename', 'description'])->official()->searchHeader($this->tableSearch)->orderBy('filename')->take($limit)->get();
         if ($uparts->isNotEmpty()) {
             foreach ($uparts as $part) {
-                $this->results['Unofficial Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
+                $this->results['Unofficial Parts'][$part->id] = ['name' => $part->meta_name, 'description' => $part->description];
             }
         }
         if ($oparts->isNotEmpty()) {
             foreach ($oparts as $part) {
-                $this->results['Official Parts'][$part->id] = ['name' => $part->name(), 'description' => $part->description];
+                $this->results['Official Parts'][$part->id] = ['name' => $part->meta_name, 'description' => $part->description];
             }
         }
         $sets = Set::select(['id', 'name', 'number'])->where(function (Builder $q) {

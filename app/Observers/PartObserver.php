@@ -41,6 +41,17 @@ class PartObserver implements ShouldHandleEventsAfterCommit
                 Log::debug("Updated library.csv while saving {$part->id} ({$part->filename})");
             }
         }
+
+        // Null out empty attributes
+        if ($part->isDirty('help') && !is_null($part->help) && trim(implode('', $part->help)) === '') {
+            $part->help = null;
+        }
+        if ($part->isDirty('cmdline') && trim($part->cmdline) === '') {
+            $part->cmdline = null;
+        }
+        if ($part->isDirty('preview') && trim($part->preview) === '') {
+            $part->preview = null;
+        }
         /*
                 if ($part->isDirty([
                     'description',

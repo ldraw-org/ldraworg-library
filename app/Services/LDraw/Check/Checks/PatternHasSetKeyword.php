@@ -27,7 +27,7 @@ class PatternHasSetKeyword implements Check
             $cat = $part->category;
             $hasSetKw = $part
                 ->keywords
-                ->filter(fn (PartKeyword $kw) => Str::startsWith(Str::lower($kw->keyword), ['set ', 'cmf', 'build-a-minifigure']))
+                ->filter(fn (PartKeyword $kw): bool => Str::startsWith(Str::lower($kw->keyword), ['set ', 'cmf', 'build-a-minifigure']))
                 ->isNotEmpty();
         } else {
             $cat = $part->metaCategory ?? $part->descriptionCategory;
@@ -35,7 +35,7 @@ class PatternHasSetKeyword implements Check
                 return;
             }
             $hasSetKw = count(Arr::reject(
-                $part?->keywords ?? [],
+                $part->keywords ?? [],
                 fn (string $kw) => !Str::startsWith(Str::lower($kw), ['set ', 'cmf', 'build-a-minifigure'])
             )) > 0;
         }

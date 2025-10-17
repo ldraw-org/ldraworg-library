@@ -8,10 +8,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Part\Part;
 use Illuminate\Support\Carbon;
-
+use Illuminate\Http\Resources\Json\ResourceCollection;
+  
 class WeeklyPartsController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): ResourceCollection
     {
         if ($request->has('date')) {
             $date = new Carbon($request->get('date'));

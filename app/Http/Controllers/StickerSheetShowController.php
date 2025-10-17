@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Enums\PartCategory;
 use App\Models\StickerSheet;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class StickerSheetShowController extends Controller
 {
-    public function __invoke(Request $request, StickerSheet $sheet)
+    public function __invoke(StickerSheet $sheet): View
     {
         $flat = $sheet->parts
             ->whereNull('unofficial_part')

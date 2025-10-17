@@ -143,7 +143,7 @@ class PartReleaseManager
         $moved = $this->parts->where('category', PartCategory::Moved);
         foreach ($moved as $part) {
             /** @var Part $part */
-            $data['moved_parts'][] = ['name' => $part->name(),  'movedto' => $part->description];
+            $data['moved_parts'][] = ['name' => $part->meta_name,  'movedto' => $part->description];
         }
         $data['fixes'] = [];
         $data['rename'] = [];
@@ -153,9 +153,9 @@ class PartReleaseManager
         foreach ($notMoved as $part) {
             /** @var Part $part */
             if ($part->description != $part->official_part->description) {
-                $data['rename'][] = ['name' => $part->name(), 'decription' => $part->description, 'old_description' => $part->official_part->description];
+                $data['rename'][] = ['name' => $part->meta_name, 'decription' => $part->description, 'old_description' => $part->official_part->description];
             } else {
-                $data['fixed'][] = ['name' => $part->name(), 'decription' => $part->description];
+                $data['fixed'][] = ['name' => $part->meta_name, 'decription' => $part->description];
             }
         }
         $data['minor_edits'] = Part::official()->where('has_minor_edit', true)->count();

@@ -43,6 +43,7 @@
                 $this->editNumberAction->isVisible() ||
                 $this->editPreviewAction->isVisible() ||
                 $this->editBasePartAction->isVisible() ||
+                $this->regenerateHeaderAction->isVisible() ||
                 $this->updateImageAction->isVisible() ||
                 $this->recheckPartAction->isVisible() ||
                 $this->updateSubpartsAction->isVisible() ||
@@ -57,6 +58,7 @@
                         $this->editNumberAction,
                         $this->editPreviewAction,
                         $this->editBasePartAction,
+                        $this->regenerateHeaderAction,
                         $this->updateImageAction,
                         $this->recheckPartAction,
                         $this->updateSubpartsAction,
@@ -253,7 +255,7 @@
                 <x-3d-viewer.button.photo />
             </div>
             <div class="flex flex-col w-full h-full">
-                <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" partname="{{str_replace('\\', '/', $part->name())}}" modelid="{{$part->id}}"/>
+                <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" partname="{{str_replace('\\', '/', $part->meta_name)}}" modelid="{{$part->id}}"/>
             </div>
         </div>
     </x-filament::modal>

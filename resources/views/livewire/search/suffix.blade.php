@@ -16,7 +16,7 @@
     @elseif(!is_null($part))
         <div class="w-fit float-right p-2"><x-part.grid.item :$part show_obsolete /></div>
         <div class="text-xl font-bold">
-            Pattern/Composite/Sticker Shortcut Reference for <a class="underline decoration-dotted hover:decoration-solid" href="{{route('parts.show', $part)}}">{{$part->name()}} - {{$part->description}}</a>
+            Pattern/Composite/Sticker Shortcut Reference for <a class="underline decoration-dotted hover:decoration-solid" href="{{route('parts.show', $part)}}">{{$part->meta_name}} - {{$part->description}}</a>
         </div>
         <x-filament::tabs class="clear-both p-2">
             <x-filament::tabs.item

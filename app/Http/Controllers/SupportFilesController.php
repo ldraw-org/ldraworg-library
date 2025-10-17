@@ -7,25 +7,27 @@ use App\Services\LDraw\SupportFiles;
 use App\Models\Part\Part;
 use App\Models\Omr\OmrModel;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class SupportFilesController extends Controller
 {
-    public function webglpart(Part $part)
+    public function webglpart(Part $part, LDrawModelMaker $maker): JsonResponse
     {
-        return app(LDrawModelMaker::class)->webGl($part);
+        return response()->json($maker->webGl($part));
     }
 
-    public function webglmodel(OmrModel $omrmodel)
+    public function webglmodel(OmrModel $omrmodel, LDrawModelMaker $maker): JsonResponse
     {
-        return app(LDrawModelMaker::class)->webGl($omrmodel);
+        return response()->json($maker->webGl($omrmodel));
     }
 
-    public function categories()
+    public function categories(): Response
     {
         return response(SupportFiles::categoriesText())->header('Content-Type', 'text/plain');
     }
 
-    public function librarycsv()
+    public function librarycsv(): Response
     {
         if (!Storage::disk('library')->exists('library.csv')) {
             SupportFiles::setLibraryCsv();
@@ -33,7 +35,7 @@ class SupportFilesController extends Controller
         return response(Storage::disk('library')->get('library.csv'))->header('Content-Type', 'text/plain; charset=utf-8');
     }
 
-    public function ptreleases(string $output)
+    public function ptreleases(string $output): Response
     {
         $output = strtolower($output);
         if ($output === 'tab') {

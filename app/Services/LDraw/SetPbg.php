@@ -56,7 +56,8 @@ class SetPbg
         } else {
             $unpatterned = new Collection();
         }
-        $rb_parts->whereNull('part.external_ids.LDraw')
+        $rb_parts
+            ->whereNull('part.external_ids.LDraw')
             ->whereNotNull('part.print_of')
             ->transform(function (array $part, int $key) use ($unpatterned) {
                 $upart = $unpatterned->where('part_num', $part['part']['print_of'])
@@ -69,24 +70,28 @@ class SetPbg
                 return $part;
             });
 
-        foreach ($rb_parts->whereNotNull('part.external_ids.LDraw') as $part) {
-            $this->addPart($part);
-        }
+        $rb_parts
+            ->whereNotNull('part.external_ids.LDraw')
+            ->each(fn (array $part, int $key) => $this->addPart($part));
 
-        foreach ($rb_parts->whereNull('part.external_ids.LDraw') as $part) {
-            $p = Part::firstWhere('filename', 'parts/' . $part['part']['part_num'] . '.dat');
-            $sticker_sheet = StickerSheet::whereRelation('rebrickable_part', 'number', $part['part']['part_num'])->first();
-            if (!is_null($p)) {
-                $this->addPart($part, basename($p->name(), '.dat'));
-            } elseif (!is_null($sticker_sheet)) {
-                foreach ($sticker_sheet->complete_set() as $s) {
-                    $part['part']['part_num'] = basename($s->name(), '.dat');
-                    $this->addPart($part, $part['part']['part_num'], 16);
+        $rb_parts
+            ->whereNull('part.external_ids.LDraw')
+            ->each(function (array $part, int $key) {
+                $p = Part::firstWhere('filename', 'parts/' . $part['part']['part_num'] . '.dat');
+                $sticker_sheet = StickerSheet::whereRelation('rebrickable_part', 'number', $part['part']['part_num'])->first();
+                if (!is_null($p)) {
+                    $this->addPart($part, basename($p->filename, '.dat'));
+                } elseif (!is_null($sticker_sheet)) {
+                    $sticker_sheet
+                        ->complete_set() 
+                        ->each(function (Part $sticker) use ($part) {
+                            $part['part']['part_num'] = basename($sticker->filename, '.dat');
+                            $this->addPart($part, $part['part']['part_num'], 16);
+                        });
+                } else {
+                    $this->messages->add('missing', "<a class=\"underline decoration-dotted hover:decoration-solid\" href=\"{$part['part']['part_url']}\">{$part['part']['part_num']} ({$part['part']['name']})</a>");
                 }
-            } else {
-                $this->messages->add('missing', "<a class=\"underline decoration-dotted hover:decoration-solid\" href=\"{$part['part']['part_url']}\">{$part['part']['part_num']} ({$part['part']['name']})</a>");
-            }
-        }
+            });
 
         return $this->makePbg();
     }

@@ -252,6 +252,19 @@ class Show extends Component implements HasSchemas, HasActions
                 });
     }
 
+    public function regenerateHeaderAction(): Action
+    {
+        return Action::make('regenerateHeader')
+            ->action(function() {
+                $this->part->generateHeader();
+                Notification::make()
+                    ->title('Header Regenerated')
+                    ->success()
+                    ->send();
+            })
+            ->visible(Auth::user()?->can('update', $this->part) ?? false);
+    }
+
     public function downloadAction(): Action
     {
         return PartFileDownloadAction::make('download', $this->part)
@@ -423,7 +436,7 @@ class Show extends Component implements HasSchemas, HasActions
         return Action::make('viewBasePart')
             ->button()
             ->color('gray')
-            ->label("Base Part: {$this->part->base_part?->name()}")
+            ->label("Base Part: {$this->part->base_part?->meta_name}")
             ->url(route('parts.show', $this->part->base_part?->id ?? 0))
             ->visible(!is_null($this->part->base_part));
     }
