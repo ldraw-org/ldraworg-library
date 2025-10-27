@@ -89,11 +89,6 @@ class PartReleaseManager
         // Get part data
         $part_data = $this->getReleaseData();
 
-        // Make notes
-        $notes = $this->makeNotes($part_data);
-        $notesFile = $this->tempDir->path("Note{$this->release->short}CA.txt");
-        file_put_contents($notesFile, $notes);
-
         // create release
         $this->release = PartRelease::create([
             'name' => $next['name'],
@@ -102,7 +97,11 @@ class PartReleaseManager
             'new' => $part_data['new'],
             'new_of_type' => $part_data['new_of_type'],
         ]);
+        // Make notes
+        $notes = $this->makeNotes($part_data);
         $notesFile = $this->tempDir->path("Note{$this->release->short}CA.txt");
+        file_put_contents($notesFile, $notes);
+        $this->release->save();
     }
 
     protected function getNextUpdateNumber(): array
@@ -131,22 +130,15 @@ class PartReleaseManager
         $data['new'] = $this->parts->whereNull('official_part')->count();
         $data['new_of_type'] = [];
         foreach (PartType::cases() as $type) {
-            if ($type == PartType::Shortcut) {
-                continue;
-            }
-            if ($type->inPartsFolder()) {
-                $count = $this->parts
-                    ->whereNull('official_part')
-                    ->partsFolderOnly()
-                    ->count();
-            } else {
-                $count = $this->parts
-                    ->whereNull('official_part')
-                    ->where('type', $type)
-                    ->count();
-            }
-            $data[$type->value] = $count;
+            $count = $this->parts
+                ->whereNull('official_part')
+                ->where('type', $type)
+                ->count();
+            $data['new_of_type'][$type->value] = $count;
         }
+        $data['new_of_type'][PartType::Part->value] = 
+            $data['new_of_type'][PartType::Part->value] + $data['new_of_type'][PartType::Shortcut->value];
+        unset($data['new_of_type'][PartType::Shortcut->value]);
         $data['moved_parts'] = [];
         $moved = $this->parts->where('category', PartCategory::Moved);
         foreach ($moved as $part) {
@@ -182,8 +174,8 @@ class PartReleaseManager
             "   New files: {$data['new']}\n";
         foreach ($data as $cat => $value) {
             switch ($cat) {
-                case 'new_types':
-                    foreach ($data['new_types'] as $type => $count) {
+                case 'new_of_type':
+                    foreach ($value as $type => $count) {
                         if ($count > 0) {
                             $notes .= "   New {$type}s: {$count}\n";
                         }    
@@ -191,20 +183,20 @@ class PartReleaseManager
                     break;
                 case 'moved_parts':
                     $notes .= "\nMoved Parts\n";
-                    foreach ($data['moved_parts'] as $m) {
+                    foreach ($value as $m) {
                         $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['movedto']}\n";
                     }
                     break;
                 case 'rename':
                     $notes .= "\nRenamed Parts\n";
-                    foreach ($data['rename'] as $m) {
+                    foreach ($value as $m) {
                         $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['old_description']}\n" .
                         "   changed to    {$m['decription']}\n";
                     }
                     break;
                 case 'fixed':
                     $notes .= "\nOther Fixed Parts\n";
-                    foreach ($data['fixed'] as $m) {
+                    foreach ($value as $m) {
                         $notes .= "   {$m['name']}" . str_repeat(' ', max(27 - strlen($m['name']), 0)) . "{$m['decription']}\n";
                     }
                     break;
