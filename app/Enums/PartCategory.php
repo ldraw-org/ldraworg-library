@@ -108,4 +108,19 @@ enum PartCategory: string
         return "0 !CATEGORY {$this->value}";
     }
 
+    public static function inactiveCategories(): array
+    {
+        return [PartCategory::Moved, PartCategory::Obsolete];
+    }
+
+    public function isActive(): bool
+    {
+        return !in_array($this, $this->inactiveCategories());
+    }
+
+    public function isInactive(): bool
+    {
+        return in_array($this, $this->inactiveCategories());
+    }
+
 }
