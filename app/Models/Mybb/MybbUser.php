@@ -36,7 +36,7 @@ class MybbUser extends Model
         }
         $mybb = explode("_", $mybb);
         // The cookie should be in the format <uid>_<loginkey>
-        if (!is_array($mybb) || count($mybb) !== 2 || !is_numeric($mybb[0])) {
+        if (count($mybb) !== 2 || !is_numeric($mybb[0])) {
             return null;
         }
         // Look up the mybb user in the database ad check if in LDraw Member Group
