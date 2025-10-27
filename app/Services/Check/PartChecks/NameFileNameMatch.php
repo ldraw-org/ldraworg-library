@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\LDraw\Check\Checks;
+namespace App\Services\Check\PartChecks;
 
 use App\Enums\PartError;
 use App\Services\Check\Contracts\Check;
