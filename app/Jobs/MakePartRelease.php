@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Services\LDraw\PartsUpdateProcessor;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -12,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\User;
+use App\Services\LDraw\Managers\Part\PartReleaseManager;
 
 class MakePartRelease implements ShouldQueue, ShouldBeUnique
 {
@@ -44,7 +44,7 @@ class MakePartRelease implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        $updater = new PartsUpdateProcessor($this->parts, $this->user, $this->includeLdconfig, $this->extraFiles);
+        $updater = new PartReleaseManager($this->parts, $this->user, $this->includeLdconfig, $this->extraFiles);
         $updater->createRelease();
     }
 }

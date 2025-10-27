@@ -85,14 +85,24 @@ class PartReleaseManager
     {
         //Figure out next update number
         $next = $this->getNextUpdateNumber();
+
+        // Get part data
+        $part_data = $this->getReleaseData();
+
+        // Make notes
+        $notes = $this->makeNotes($part_data);
+        $notesFile = $this->tempDir->path("Note{$this->release->short}CA.txt");
+        file_put_contents($notesFile, $notes);
+
         // create release
         $this->release = PartRelease::create([
             'name' => $next['name'],
             'short' => $next['short'],
-            'part_data' => $this->getReleaseData(),
+            'total' => $part_data['total'],
+            'new' => $part_data['new'],
+            'new_of_type' => $part_data['new_of_type'],
         ]);
-        $notes = $this->tempDir->path("Note{$this->release->short}CA.txt");
-        file_put_contents($notes, $this->makeNotes());
+        $notesFile = $this->tempDir->path("Note{$this->release->short}CA.txt");
     }
 
     protected function getNextUpdateNumber(): array
@@ -117,9 +127,9 @@ class PartReleaseManager
     protected function getReleaseData(): array
     {
         $data = [];
-        $data['total_files'] = $this->parts->count();
-        $data['new_files'] = $this->parts->whereNull('official_part')->count();
-        $data['new_types'] = [];
+        $data['total'] = $this->parts->count();
+        $data['new'] = $this->parts->whereNull('official_part')->count();
+        $data['new_of_type'] = [];
         foreach (PartType::cases() as $type) {
             if ($type == PartType::Shortcut) {
                 continue;
@@ -135,9 +145,7 @@ class PartReleaseManager
                     ->where('type', $type)
                     ->count();
             }
-            if ($count > 0) {
-                $data['new_types'][] = ['name' => $type->description(), 'count' => $count];
-            }
+            $data[$type->value] = $count;
         }
         $data['moved_parts'] = [];
         $moved = $this->parts->where('category', PartCategory::Moved);
@@ -162,22 +170,23 @@ class PartReleaseManager
         return $data;
     }
 
-    protected function makeNotes(): string
+    protected function makeNotes(array $data): string
     {
-        $data = $this->release->part_data;
         $notes = "ldraw.org Parts Update {$this->release->name}\n" .
             str_repeat('-', 76) . "\n\n" .
             "Redistributable Parts Library - Core Library\n" .
             str_repeat('-', 76) . "\n\n" .
             "Notes created " . $this->release->created_at->format("r") . " by the Parts Tracker\n\n" .
             "Release statistics:\n" .
-            "   Total files: {$data['total_files']}\n" .
-            "   New files: {$data['new_files']}\n";
+            "   Total files: {$data['total']}\n" .
+            "   New files: {$data['new']}\n";
         foreach ($data as $cat => $value) {
             switch ($cat) {
                 case 'new_types':
-                    foreach ($data['new_types'] as $t) {
-                        $notes .= "   New {$t['name']}s: {$t['count']}\n";
+                    foreach ($data['new_types'] as $type => $count) {
+                        if ($count > 0) {
+                            $notes .= "   New {$type}s: {$count}\n";
+                        }    
                     }
                     break;
                 case 'moved_parts':
