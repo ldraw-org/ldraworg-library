@@ -16,7 +16,7 @@ class PatternPartDescription implements Check
 {
     public function check(ParsedPartCollection $part, Closure $message): void
     {
-        if (!$part->type()?->inPartsFolder() || is_null(Arr::get($part->nameRaw(), 'p'))) {
+        if (!$part->type()?->inPartsFolder() || !$part->isPattern()) {
             return;
         }
 

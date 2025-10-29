@@ -21,7 +21,6 @@ class ObsoletePartIsValid implements Check
         $desc = Str::of($part->description());
         $descObsolete = $desc->contains('(Obsolete)') || $desc->startsWith('~Obsolete');
         $catObsolete = $part->category() == PartCategory::Obsolete;
-
         if (($catObsolete && !$descObsolete) || (!$catObsolete && $descObsolete)) {
             $message(PartError::ImproperObsolete);
         }

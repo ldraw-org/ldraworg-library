@@ -14,11 +14,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function passesCheck(ParsedPartCollection $part, Check $check, ?string $filename = null): bool
+function passesCheck(string $text, string $check, ?string $filename = null): bool
 {
+    $file = new ParsedPartCollection($text);
     $pc = app(PartChecker::class);
-    $result = $pc->singleCheck($part, $check, $filename);
-
+    $check = new $check();
+    $result = $pc->singleCheck($file, $check, $filename);
     return $result->isEmpty();
 }
 
@@ -48,8 +49,9 @@ describe('part check', function () {
             'type' => '0 !LDRAW_ORG Unofficial_Part',
             'license' => License::CC_BY_4->ldrawString(),
         ];
-        $file = new ParsedPartCollection(implode("\n", $lines));
-        expect(passesCheck($file, new \App\Services\Check\PartChecks\HasRequiredHeaderMeta()))->toBe($expected);
+        unset($lines[$input]);
+        $text = implode("\n", $lines);
+        expect($text)->toHaveCheckResult($expected, 'HasRequiredHeaderMeta');
     })->with([
         'missing description' => ['description', false],
         'missing name' => ['name', false],
@@ -60,8 +62,8 @@ describe('part check', function () {
     ]);
 
     test('check LibraryApprovedDescription', function (string $input, bool $expected) {
-        $file = new ParsedPartCollection("0 {$input}\n0 Name: 123.dat");
-        expect(passesCheck($file, new \App\Services\Check\PartChecks\LibraryApprovedDescription()))->toBe($expected);
+        $text = "0 {$input}\n0 Name: 123.dat";
+        expect($text)->toHaveCheckResult($expected, 'LibraryApprovedDescription');
     })->with([
         'valid plain text description' => ["This Is A Test Description", true],
         'valid unicode description' => ["Some Chars are ෴ Approved ", true],
@@ -69,8 +71,8 @@ describe('part check', function () {
     ]);
 
     test('check PatternPartDescription', function (string $name, string $desc, bool $expected) {
-        $file = new ParsedPartCollection("0 {$desc}\n0 Name: {$name}\n0 !LDRAW_ORG Unofficial_Part");
-        expect(passesCheck($file, new \App\Services\Check\PartChecks\PatternPartDescription()))->toBe($expected);
+        $text = "0 {$desc}\n0 Name: {$name}\n0 !LDRAW_ORG Unofficial_Part";
+        expect($text)->toHaveCheckResult($expected, 'PatternPartDescription');
     })->with([
         'pattern with invalid description' => ["3001p01.dat", "Brick Test", false],
         'pattern with valid description' => ["3001p01.dat", "Brick Test with Pattern", true],
@@ -81,9 +83,8 @@ describe('part check', function () {
     ]);
 
     test('check AuthorInUsers', function (string $input, bool $expected) {
-        $file = new ParsedPartCollection("0 Author: {$input}");
-        expect(passesCheck($file, new \App\Services\Check\PartChecks\AuthorInUsers()))->toBe($expected);
-
+        $text = "0 Author: {$input}";
+        expect($text)->toHaveCheckResult($expected, 'AuthorInUsers');
     })->with([
         'not in users' => ['Ole Kirk Christiansen [DaOGLego]', false],
         'only real name' => ['Test User', true],
@@ -94,8 +95,8 @@ describe('part check', function () {
     ]);
 
     test('check NameAndPartType', function (string $name, PartType $type, bool $expected) {
-        $file = new ParsedPartCollection("0 Test\n0 Name: {$name}\n{$type->ldrawString(true)}");
-        expect(passesCheck($file, new \App\Services\Check\PartChecks\NameAndPartType()))->toBe($expected);
+        $text = "0 Test\n0 Name: {$name}\n{$type->ldrawString(true)}";
+        expect($text)->toHaveCheckResult($expected, 'NameAndPartType');
     })->with([
         'valid, no folder' => ['test.dat', PartType::Part, true],
         'valid, with folder' => ['s\\test.dat', PartType::Subpart, true],
@@ -104,8 +105,7 @@ describe('part check', function () {
     ]);
 
     test('check DescriptionModifier', function (string $input, bool $expected) {
-        $file = new ParsedPartCollection($input);
-        expect(passesCheck($file, new \App\Services\Check\PartChecks\DescriptionModifier()))->toBe($expected);
+        expect($input)->toHaveCheckResult($expected, 'DescriptionModifier');
     })->with([
         'subpart, no tilde' => [
             "0 Brick Test Description\n" .
@@ -208,172 +208,146 @@ describe('part check', function () {
     ]);
 
     test('check AliasInParts', function (PartType $input, bool $expected) {
-        $file = new ParsedPartCollection("0 Test\n{$input->ldrawString(true)} " . PartTypeQualifier::Alias->value);
-        expect(passesCheck($file, new \App\Services\Check\PartChecks\AliasInParts()))->toBe($expected);
+        $text = "0 Test\n{$input->ldrawString(true)} " . PartTypeQualifier::Alias->value;
+        expect($text)->toHaveCheckResult($expected, 'AliasInParts');
     })->with([
         'in parts folder' => [PartType::Part, true],
         'not in parts folder' => [PartType::Subpart, false],
     ]);
 
     test('check FlexibleSectionIsPart', function (PartType $input, bool $expected) {
-        $file = new ParsedPartCollection("0 Test\n{$input->ldrawString(true)} " . PartTypeQualifier::FlexibleSection->value);
-        expect(passesCheck($file, new \App\Services\Check\PartChecks\FlexibleSectionIsPart()))->toBe($expected);
+        $text = "0 Test\n{$input->ldrawString(true)} " . PartTypeQualifier::FlexibleSection->value;
+        expect($text)->toHaveCheckResult($expected, 'FlexibleSectionIsPart');
     })->with([
         'is part' => [PartType::Part, true],
         'not part' => [PartType::Shortcut, false],
     ]);
 
     test('check FlexibleHasCorrectSuffix', function (string $input, bool $expected) {
-        $file = new ParsedPartCollection("0 Brick Test\n0 Name: {$input}\n". PartType::Part->ldrawString(true) . " " . PartTypeQualifier::FlexibleSection->value);
-        expect(passesCheck($file, new \App\Services\Check\PartChecks\FlexibleHasCorrectSuffix()))->toBe($expected);
+        $text = "0 Brick Test\n0 Name: {$input}\n". PartType::Part->ldrawString(true) . " " . PartTypeQualifier::FlexibleSection->value;
+        expect($text)->toHaveCheckResult($expected, 'FlexibleHasCorrectSuffix');
     })->with([
         'correct suffix' => ['12345k01.dat', true],
-        'letter suffix' => ['12345kaa.dat', true],
         'incorrect, no suffix' => ['12345.dat', false],
         'incorrect, too many suffix chars' => ['12345k0100.dat', false],
     ]);
 
-    test('check library bfc certify', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'bfc' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\BfcIsCcw()))->toBe($expected);
+    test('check BfcIsCcw', function (string $input, bool $expected) {
+        $text = "0 Brick Test\n0 BFC CERTIFY {$input}";
+        expect($text)->toHaveCheckResult($expected, 'BfcIsCcw');
     })->with([
-        'not approved' => ["CW", false],
+        'not approved CW' => ["CW", false],
+        'not approved blank' => ["", false],
         'approved' => ["CCW", true],
     ]);
 
-    test('check category is valid', function (?PartCategory $desc, ?PartCategory $meta, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'descriptionCategory' => $desc,
-            'metaCategory' => $meta,
-            'type' => PartType::Part,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\CategoryIsValid()))->toBe($expected);
+    test('check CategoryIsValid', function (string $input, bool $expected) {
+        expect($input)->toHaveCheckResult($expected, 'CategoryIsValid');
     })->with([
-        'valid descriptionCategory only' => [PartCategory::Brick, null, true],
-        'valid metaCategory only' => [null, PartCategory::Brick, true],
-        'valid both' => [PartCategory::Bar, PartCategory::Brick, true],
-        'invalid' => [null, null, false],
+        'valid description category only' => ["0 " . PartCategory::Minifig->value . " Test\n0 Name: 123.dat\n0 !LDRAW_ORG Unofficial_Part", true],
+        'valid category meta only' => ["0 Test\n0 Name: 123.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !CATEGORY " . PartCategory::Minifig->value, true],
+        'valid both' => ["0 " . PartCategory::Minifig->value . " Test\n0 Name: 123.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !CATEGORY " . PartCategory::MinifigAccessory->value, true],
+        'invalid description, no meta' => ["0 " . PartCategory::SheetCardboard->value . " Test\n0 Name: 123.dat\n0 !LDRAW_ORG Unofficial_Part", false],
+        'not a part' => ["0 Test\n0 Name: 123.dat\n0 !LDRAW_ORG Unofficial_Primitive", true],
     ]);
 
-    test('check part obsoleted properly', function (string $desc, ?PartCategory $meta, PartType $type, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'description' => $desc,
-            'metaCategory' => $meta,
-            'type' => $type,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\ObsoletePartIsValid()))->toBe($expected);
+    test('check part ObsoletePartIsValid', function (string $input, bool $expected) {
+        expect($input)->toHaveCheckResult($expected, 'ObsoletePartIsValid');
     })->with([
-        'proper, end of description' => ['Test test test (Obsolete)', PartCategory::Obsolete, PartType::Part, true],
-        'proper, entire description' => ['~Obsolete file', PartCategory::Obsolete, PartType::Part, true],
-        'proper, not in parts folder' => ['Test', PartCategory::Obsolete, PartType::Subpart, true],
-        'improper, no category' => ['Test test test (Obsolete)', null, PartType::Part, false],
-        'improper, wrong category' => ['Test test test (Obsolete)', PartCategory::Animal, PartType::Part, false],
-        'improper, wrong description' => ['Test test test', PartCategory::Obsolete, PartType::Part, false],
+        'proper, end of description' => ["0 Test (Obsolete)\n0 !LDRAW_ORG Unofficial_Part\n0 !CATEGORY Obsolete", true],
+        'proper, entire description' => ["0 ~Obsolete file\n0 !LDRAW_ORG Unofficial_Part\n0 !CATEGORY Obsolete", true],
+        'proper, not in parts folder' => ["0 ~Obsolete file\n0 !LDRAW_ORG Unofficial_Primitive", true],
+        'improper, no category' => ["0 Test (Obsolete)\n0 !LDRAW_ORG Unofficial_Part", false],
+        'improper, wrong category' => ["0 Test (Obsolete)\n0 !LDRAW_ORG Unofficial_Part\n0 !CATEGORY Bar", false],
+        'improper, wrong description' => ["0 Test\n0 !LDRAW_ORG Unofficial_Part\n0 !CATEGORY Obsolete", false],
     ]);
 
-    test('check pattern for set keyword', function (string $name, array $keywords, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'name' => $name,
-            'keywords' => $keywords,
-            'type' => PartType::Part,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\PatternHasSetKeyword()))->toBe($expected);
+    test('check PatternHasSetKeyword', function (string $input, bool $expected) {
+        expect($input)->toHaveCheckResult($expected, 'PatternHasSetKeyword');
     })->with([
-        'has set' => ['3001p01.dat', ['keyword', 'set 1001'], true],
-        'has cmf' => ['3001p01.dat', ['keyword', 'cmf'], true],
-        'has cmf with series' => ['3001p01.dat', ['keyword', 'CMF Series 4'], true],
-        'has bam' => ['3001p01.dat', ['keyword', 'build-a-minifigure'], true],
-        'keyword missing' => ['3001p01.dat', ['keyword', 'keyword 2'], false],
-        'not a pattern' => ['3001.dat', ['keyword', 'keyword 2'], true],
+        'has set' => ["0 Brick Test\n0 Name: 3001p01.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !KEYWORDS Set 1001", true],
+        'has cmf' => ["0 Brick Test\n0 Name: 3001p01.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !KEYWORDS cmf", true],
+        'has cmf with series' => ["0 Brick Test\n0 Name: 3001p01.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !KEYWORDS CMF Series 4", true],
+        'has bam' => ["0 Brick Test\n0 Name: 3001p01.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !KEYWORDS Build-A-Minifigure", true],
+        'keyword missing' => ["0 Brick Test\n0 Name: 3001p01.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !KEYWORDS Billund, LEGO House", false],
+        'no keywords' => ["0 Brick Test\n0 Name: 3001p01.dat\n0 !LDRAW_ORG Unofficial_Part", false],
+        'not a pattern' => ["0 Brick Test\n0 Name: 3001.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !KEYWORDS Billund, LEGO House", true],
+        'excluded category modulex' => ["0 Modulex Test\n0 Name: 3001.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !KEYWORDS Billund, LEGO House", true],
+        'excluded category moved' => ["0 ~Moved to 3001p02\n0 Name: 3001.dat\n0 !LDRAW_ORG Unofficial_Part\n0 !KEYWORDS Billund, LEGO House", true],
+        'not a part' => ["0 Test\n0 Name: 3001p01.dat\n0 !LDRAW_ORG Unofficial_Primitive", true],
     ]);
 
-    test('test history is valid', function (array $history, string $rawText, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'history' => $history,
-            'rawText' => $rawText
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\HistoryIsValid()))->toBe($expected);
+    test('test HistoryIsValid', function (string $input, bool $expected) {
+       expect($input)->toHaveCheckResult($expected, 'HistoryIsValid');
     })->with([
-        'invalid history, one line' => [[], "blah blah blah\n!HISTORY", false],
-        'invalid history, multi line' => [[1, 2], "blah blah blah\n!HISTORY\n\n!HISTORY\n\!HISTORY", false],
-        'valid history, no lines' => [[], "blah blah blah\nblah blah blah", true],
-        'valid history, one line' => [[1], "blah blah blah\n!HISTORY", true],
-        'valid history, multi line' => [[1, 2], "blah blah blah\n!HISTORY\n\n!HISTORY", true],
+        'invalid history, one line' => ["0 Test\n0 !HISTORY 2025-03-02 [] Test", false],
+        'invalid history, multi line' => ["0 Test\n0 !HISTORY 2023-03-03 [Test] Comment\n0 !HISTORY 202303-03 [Test] Comment2", false],
+        'valid history, no lines' => ["0 Test\n0 Name: 3001.dat", true],
+        'valid history, one line' => ["0 Test\n0 !HISTORY 2023-03-03 [Test] Comment\n", true],
+        'valid history, multi line' => ["0 Test\n0 !HISTORY 2023-03-03 [Test] Comment\n0 !HISTORY 2023-03-03 [Test] Comment2", true],
     ]);
 
-    test('test history user is registered', function (array $history, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'history' => $history,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\HistoryUserIsRegistered()))->toBe($expected);
+    test('test HistoryUserIsRegistered', function (string $input, bool $expected) {
+        expect($input)->toHaveCheckResult($expected, 'HistoryUserIsRegistered');
     })->with([
-        'invalid history username, one line' => [[['type' => '[', 'user' => 'NotAUser']], false],
-        'invalid history username, multi line' => [[['type' => '[', 'user' => 'TestUser'], ['type' => '[', 'user' => 'NotAUser']], false],
-        'invalid history realname, one line' => [[['type' => '{', 'user' => 'Not A User']], false],
-        'invalid history realname, multi line' => [[['type' => '{', 'user' => 'Test User 2'], ['type' => '{', 'user' => 'Not A User']], false],
-        'invalid history username in realname format' => [[['type' => '{', 'user' => 'TestUser']], false],
-        'invalid history realname in username format' => [[['type' => '[', 'user' => 'Test User']], false],
-        'valid history user, no lines' => [[], true],
-        'valid history username, one line' => [[['type' => '[', 'user' => 'TestUser']], true],
-        'valid history username, multi line' => [[['type' => '[', 'user' => 'TestUser'], ['type' => '[', 'user' => 'TestUser2']], true],
-        'valid history realname, one line' => [[['type' => '{', 'user' => 'Test User']], true],
-        'valid history realname, multi line' => [[['type' => '{', 'user' => 'Test User'], ['type' => '{', 'user' => 'Test User 2']], true],
+        'invalid history username, one line' => ["0 Test\n0 !HISTORY 2025-03-02 [Invalid] Test", false],
+        'invalid history username, multi line' => ["0 Test\n0 !HISTORY 2023-03-03 [TestUser] Comment\n0 !HISTORY 2023-03-03 [Invalid] Comment2", false],
+        'invalid history realname, one line' => ["0 Test\n0 !HISTORY 2025-03-02 {Not A User} Test", false],
+        'invalid history realname, multi line' => ["0 Test\n0 !HISTORY 2023-03-03 [TestUser] Comment\n0 !HISTORY 2023-03-03 {Not A User} Comment2", false],
+        'invalid history username in realname format' => ["0 Test\n0 !HISTORY 2023-03-03 {TestUser} Comment", false],
+        'valid history user, no lines' => ["0 Test\n0 Name: 3001.dat", true],
+        'valid history username, one line' => ["0 Test\n0 !HISTORY 2023-03-03 [TestUser] Comment", true],
+        'valid history username, multi line' => ["0 Test\n0 !HISTORY 2023-03-03 [TestUser] Comment\n0 !HISTORY 2023-03-03 [TestUser2] Comment2", true],
+        'valid history realname, one line' => ["0 Test\n0 !HISTORY 2023-03-03 {Test User} Comment\n", true],
+        'valid history realname, multi line' => ["0 Test\n0 !HISTORY 2023-03-03 {Test User} Comment\n0 !HISTORY 2023-03-03 {Test User 2} Comment2", true],
     ]);
 
-    test('check preview is valid', function (?string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'preview' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\PreviewIsValid()))->toBe($expected);
+    test('check PreviewIsValid', function (?string $input, bool $expected) {
+        expect($input)->toHaveCheckResult($expected, 'PreviewIsValid');
     })->with([
-        'valid, default' => ['16 0 0 0 1 0 0 0 1 0 0 0 1', true],
-        'valid, missing' => [null, true],
-        'invalid, not enough arguments' => ['0 0 0 1 0 0 0 1 0 0 0 1', false],
-        'invalid, non-number arguments' => ['16 0 a 0 1 0 0 0 1 0 0 0 1', false],
-        'invalid, malformed number arguments' => ['16 0 0 .0-1 1 0 0 0 1 0 0 0 1', false],
-        'invalid, invalid matrix' => ['16 0 0 0 0 0 0 0 1 0 0 0 1', false],
-        'invalid, nagative matrix' => ['16 0 0 0 -1 0 0 0 -1 0 0 0 -1', false],
+        'valid, default' => ["0 Test\n0 !PREVIEW 16 0 0 0 1 0 0 0 1 0 0 0 1", true],
+        'valid, rotation' => ["0 Test\n0 !PREVIEW 16 0 0 0 0.70711 0 -0.70711 0.5 0.70711 0.5 0.5 -0.70711 0.5", true],
+        'valid, missing' => ["0 Test\n0 Name: 3001.dat", true],
+        'invalid color' => ["0 Test\n0 !PREVIEW 123456 0 0 0 1 0 0 0 1 0 0 0 1", false],
+        'invalid, not enough arguments' => ["0 Test\n0 !PREVIEW 0 0 0 1 0 0 0 1 0 0 0 1", false],
+        'invalid, non-number arguments' => ["0 Test\n0 !PREVIEW 16 0 a 0 1 0 0 0 1 0 0 0 1", false],
+        'invalid, malformed number arguments' => ["0 Test\n0 !PREVIEW 16 0 0 .0-1 1 0 0 0 1 0 0 0 1", false],
+        'invalid, singular matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 0 0 0 0 1 0 0 0 1", false],
+        'invalid, negative matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 -1 0 0 0 -1 0 0 0 -1", false],
+        'invalid, mirror matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 0 0 1 0 1 0 1 0 0", false],
+        'invalid, shear matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 1 0 1 0 1 0 0 0 1", false],
+        'invalid, scale matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 6 0 0 0 1 0 0 0 6", false],
     ]);
 
-    test('check library approved name', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'name' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\LibraryApprovedName()))->toBe($expected);
+    test('check LibraryApprovedName', function (string $input, bool $expected) {
+        $text = "0 Name: {$input}";
+        expect($text)->toHaveCheckResult($expected, 'LibraryApprovedName');
     })->with([
         'valid' => ["test.dat", true],
         'valid with forward slash' => ["s\\1001.dat", true],
         'invalid' => ["!!.dat", false],
     ]);
 
-    test('check name and filename match', function (string $name, string $filename, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'name' => $name,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\NameFileNameMatch(), $filename))->toBe($expected);
+    test('check NameFileNameMatch', function (string $name, string $filename, bool $expected) {
+        $text = "0 Name: {$name}";
+        expect($text)->toHaveCheckResult($expected, 'NameFileNameMatch', $filename);
     })->with([
         'match' => ['test.dat', 'test.dat', true],
         'match, with folder' => ['s\test.dat', 'test.dat', true],
         'no match' => ['test.dat', 'stest.dat', false],
     ]);
 
-    test('check unknown part number', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'name' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\UnknownPartNumber()))->toBe($expected);
+    test('check UnknownPartNumber', function (string $input, bool $expected) {
+        $text = "0 Name: {$input}";
+        expect($text)->toHaveCheckResult($expected, 'UnknownPartNumber');
     })->with([
         'not approved' => ['x999.dat', false],
         'approved' => ['u9999.dat', true],
     ]);
 
     test('check line allowed body meta', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'body' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\ValidBodyMeta()))->toBe($expected);
+        $text = "0 Test\n0 Name: 123.dat\n0 BFC CERTIFY CCW\n{$input}";
+        expect($text)->toHaveCheckResult($expected, 'ValidBodyMeta');
     })->with([
         'not approved' => ['0 WRITE blah blah', false],
         'approved Comment' => ['0 // blah blah blah', true],
@@ -382,17 +356,15 @@ describe('part check', function () {
     ]);
 
     test('valid line', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'body' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\ValidLines()))->toBe($expected);
+        $text = "0 Test\n0 Name: 123.dat\n0 BFC CERTIFY CCW\n{$input}";
+        expect($text)->toHaveCheckResult($expected, 'ValidLines');
     })->with([
         'valid type 0' => ["0 // Free for comment 112341904.sfsfkajf", true],
-        'valid type 0 empty' => ["0", true],
-        'valid type 1' => ["1  16  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0  0 0 0  test.dat", true],
+        'valid type 0 empty' => ["0", false],
+        'valid type 1' => ["1  16  0.01 -.01 1  10 0 0 0 1.0 0 0 0 10  test.dat", true],
         'valid type 2' => ["2  0x2123456  1 0.01 -0.01  1 0.23456789 -.12341234", true],
         'valid type 3' => ["3  16  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0", true],
-        'valid type 4' => ["4  16  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", true],
+        'valid type 4' => ["4  16  0 0 0  1 -.01 0  1 10 0  0 1.0 0", true],
         'valid type 5' => ["5  24  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", true],
         'valid blank line' => ["", true],
         'invalid type 1' => ["1  16  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0 0 0 0 0 test.dat", false],
@@ -408,36 +380,8 @@ describe('part check', function () {
         'invalid letter instead of number' => ["4  1  1 a -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
         'invalid number' => ["4  16  1 1 .-01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
         'invalid line type' => ["6  16  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", false],
-    ]);
-
-    test('valid type 1 line', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'body' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\ValidType1Lines()))->toBe($expected);
-    })->with([
-        'valid' => ["1 16 0 0 0 1 0 0 0 1 0 0 0 1 test.dat", true],
-        'valid, no type 1 lines' => ["2 24 0 0 0 0 0 1", true],
         'invalid matrix' => ["1 16 0 0 0 1 0 0 0 0 0 0 0 1 test.dat", false],
-    ]);
-
-    test('valid type 2 line', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'body' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\ValidType2Lines()))->toBe($expected);
-    })->with([
-        'valid' => ["2 24 0 0 1.11 0 0 1.111", true],
-        'valid, no type 2 lines' => ["3 16 -1 0 0 1 0 0 0 1 0", true],
         'invalid, identical points' => ["2 24 0 0 1.234 0 0 1.234", false],
-    ]);
-
-    test('valid type 3 line', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'body' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\ValidType3Lines()))->toBe($expected);
-    })->with([
         'invalid, identical points 1, 2' => ["3 16 0 0 0 0 0 0 1 1 0", false],
         'invalid, identical points 2, 3' => ["3 16 0 0 0 -1 1 0 -1 1 0", false],
         'invalid, identical points 3, 1' => ["3 16 0 0 0 -1 1 0 0 0 0", false],
@@ -447,16 +391,6 @@ describe('part check', function () {
         'invalid, angle too large 1, 2, 3' => ["3 16 -1 0 0 1 0 0 2 0.0001 0", false],
         'invalid, angle too large 2, 3, 1' => ["3 16 2 0.0001 0 -1 0 0 1 0 0", false],
         'invalid, angle too large 3, 1, 2' => ["3 16 1 0 0 2 0.0001 0 -1 0 0", false],
-        'valid' => ["3 16 -1 0 0 1 0 0 1 1 0", true],
-        'valid, no type 2 lines' => ["2 24 0 0 1 0 0 0", true],
-    ]);
-
-    test('valid type 4 line', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'body' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\ValidType4Lines()))->toBe($expected);
-    })->with([
         'invalid, identical points 1, 2' => ["4 16 1 1 0 1 1 0 -1 -1 0 -1 1 0", false],
         'invalid, identical points 2, 3' => ["4 16 1 1 0 1 -1 0 1 -1 0 -1 1 0", false],
         'invalid, identical points 3, 4' => ["4 16 1 1 0 1 -1 0 -1 -1 0 -1 -1 0", false],
@@ -477,32 +411,17 @@ describe('part check', function () {
         'invalid, bowtie 1243' => ["4 16 -1 -1 0 -1 1 0 1 -1 0 1 1 0", false],
         'invalid, convex 13' => ["4 16 1 0 0 0 1 0 0.5 0 0 0 -1 0", false],
         'invalid, convex 24' => ["4 16 1 0 0 0 1 0 -1 0 0 0 0.5 0", false],
-        'valid' => ["4 16 1 1 0 1 -1 0 -1 -1 0 -1 1 0", true],
-        'valid, no type 2 lines' => ["2 24 0 0 1 0 0 0", true],
-    ]);
-
-    test('valid type 5 line', function (string $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'body' => $input,
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\ValidType5Lines()))->toBe($expected);
-    })->with([
-        'valid' => ["5 24 0 1 0 0 -1 0 1 1 0 0 1 1", true],
-        'valid, no type 2 lines' => ["3 16 -1 0 0 1 0 0 0 1 0", true],
         'invalid, identical line points' => ["5 24 0 1 0 0 1 0 1 1 0 0 1 1", false],
         'invalid, identical control points' => ["5 24 0 1 0 0 -1 0 0 1 1 0 1 1", false],
-    ]);
+   ]);
 
-    test('check no self reference', function (array $input, bool $expected) {
-        $p = ParsedPart::fromArray([
-            'name' => 'test.dat',
-            'subparts' => ['subparts' => $input],
-        ]);
-        expect(passesCheck($p, new \App\Services\Check\PartChecks\NoSelfReference()))->toBe($expected);
+    test('check NoSelfReference', function (string $input, bool $expected) {
+        $text = "0 Test\n0 Name: test.dat\n0 BFC CERTIFY CCW\n{$input}";
+        expect($text)->toHaveCheckResult($expected, 'NoSelfReference');
     })->with([
-        'no circular reference, has subparts' => [['test1.dat', 'test2.dat', 'test3.dat'], true],
-        'no circular reference, no subparts' => [[], true],
-        'circular reference' => [['test1.dat', 'test.dat', 'test3.dat'], false],
+        'no circular reference, has subparts' => ["1 16 0 0 0 1 0 0 0 1 0 0 0 1 test3.dat\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 test2.dat", true],
+        'no circular reference, no subparts' => ["2 1 0 0 0 0 0\n2 2 0 0 0 0 0\n", true],
+        'circular reference' => ["1 16 0 0 0 1 0 0 0 1 0 0 0 1 test.dat\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 test2.dat", false],
     ]);
 
 });

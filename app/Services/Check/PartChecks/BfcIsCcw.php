@@ -11,7 +11,7 @@ class BfcIsCcw implements Check
 {
     public function check(ParsedPartCollection $part, Closure $message): void
     {
-        if ($part->bfc() !== 'CCW') {
+        if ($part->headerBfc() !== 'CCW') {
             $message(PartError::BfcNotCcw);
         }
     }

@@ -11,7 +11,7 @@ use Closure;
 
 class NameFileNameMatch implements Check, FilenameAwareCheck
 {
-    protected ?string $filename;
+    protected ?string $filename = null;
 
     public function setFilename(?string $filename): void
     {
@@ -20,7 +20,7 @@ class NameFileNameMatch implements Check, FilenameAwareCheck
 
     public function check(ParsedPartCollection $part, Closure $message): void
     {
-        if (!is_null($this->filename)) {
+        if (is_null($this->filename)) {
             return;
         }
         $name = basename(str_replace('\\', '/', $part->name()));

@@ -11,7 +11,7 @@ class NoSelfReference implements Check
 {
     public function check(ParsedPartCollection $part, Closure $message): void
     {
-        if (in_array($part->name(), $part->subparts())
+        if (in_array($part->name(), $part->subparts() ?? [])
         ) {
             $message(PartError::CircularReference);
         }

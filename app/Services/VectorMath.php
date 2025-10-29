@@ -2,76 +2,89 @@
 
 namespace App\Services;
 
-use MCordingley\LinearAlgebra\Vector;
+use MathPHP\LinearAlgebra\Vector;
 
 class VectorMath
 {
-    public static function hasColinearPoints(array $points): bool
+    public function triangleNormal(array $triangle): Vector
     {
-        $p1 = new Vector($points[0]);
-        $p2 = new Vector($points[1]);
-        $p3 = new Vector($points[2]);
+        [$a, $b, $c] = $triangle;
+        $a = new Vector($a);
+        $b = new Vector($b);
+        $c = new Vector($c);
+    
+        return $a->subtract($b)
+                 ->crossProduct($c->subtract($a))
+                 ->normalize();      
+    }
 
-        $v123 = $p1->subtractVector($p2)->dotProduct($p3->subtractVector($p2)) / ($p1->subtractVector($p2)->length() * $p3->subtractVector($p2)->length());
-        $angles[] = rad2deg($v123 >= 1 ? 0 : ($v123 <= -1 ? Pi() : acos($v123)));
+    public function angleBetweenTriangles(array $triangle1, array $triangle2): float
+    {
+        $n1 = $this->triangleNormal($triangle1);
+        $n2 = $this->triangleNormal($triangle2);
+        return $n1->angleBetween($n2, inDegrees: true);
+    }
+
+    public function angleAtVertex(array $p1, array $p2, array $p3): float
+    {
+        $v1 = (new Vector($p1))->subtract(new Vector($p2));
+        $v2 = (new Vector($p3))->subtract(new Vector($p2));
+
+        return $v1->angleBetween($v2, inDegrees: true);
+    }
+
+    public function isConvexQuad(array $quad): bool
+    {
+        [$p1, $p2, $p3, $p4] = $quad;
+    
+        $v1 = (new Vector($p2))->subtract(new Vector($p1));
+        $v2 = (new Vector($p3))->subtract(new Vector($p2));
+        $v3 = (new Vector($p4))->subtract(new Vector($p3));
+        $v4 = (new Vector($p1))->subtract(new Vector($p4));
+    
+        $c1 = $v1->crossProduct($v2)->normalize();
+        $c2 = $v2->crossProduct($v3)->normalize();
+        $c3 = $v3->crossProduct($v4)->normalize();
+        $c4 = $v4->crossProduct($v1)->normalize();
+    
+        $dot12 = $c1->dotProduct($c2);
+        $dot23 = $c2->dotProduct($c3);
+        $dot34 = $c3->dotProduct($c4);
+        $dot41 = $c4->dotProduct($c1);
+    
+        return $dot12 > 0 && $dot23 > 0 && $dot34 > 0 && $dot41 > 0;
+    }
+
+    public function hasColinearPoints(array $points): float|false
+    {
+        $angles = [];
+
+        $angles[] = $this->angleAtVertex($points[0], $points[1], $points[2]);
 
         if (count($points) == 3) {
-            $v231 = $p2->subtractVector($p3)->dotProduct($p1->subtractVector($p3)) / ($p2->subtractVector($p3)->length() * $p1->subtractVector($p3)->length());
-            $angles[] = rad2deg($v231 >= 1 ? 0 : ($v231 <= -1 ? Pi() : acos($v231)));
-            $v312 = $p3->subtractVector($p1)->dotProduct($p2->subtractVector($p1)) / ($p3->subtractVector($p1)->length() * $p2->subtractVector($p1)->length());
-            $angles[] = rad2deg($v312 >= 1 ? 0 : ($v312 <= -1 ? Pi() : acos($v312)));
+            $angles[] = $this->angleAtVertex($points[1], $points[2], $points[0]);
+            $angles[] = $this->angleAtVertex($points[2], $points[0], $points[1]);
         } else {
-            $p4 = new Vector($points[3]);
-            $v234 = $p2->subtractVector($p3)->dotProduct($p4->subtractVector($p3)) / ($p2->subtractVector($p3)->length() * $p4->subtractVector($p3)->length());
-            $angles[] = rad2deg($v234 >= 1 ? 0 : ($v234 <= -1 ? Pi() : acos($v234)));
-            $v341 = $p3->subtractVector($p4)->dotProduct($p1->subtractVector($p4)) / ($p3->subtractVector($p4)->length() * $p1->subtractVector($p4)->length());
-            $angles[] = rad2deg($v341 >= 1 ? 0 : ($v341 <= -1 ? Pi() : acos($v341)));
-            $v412 = $p4->subtractVector($p1)->dotProduct($p2->subtractVector($p1)) / ($p4->subtractVector($p1)->length() * $p2->subtractVector($p1)->length());
-            $angles[] = rad2deg($v412 >= 1 ? 0 : ($v412 <= -1 ? Pi() : acos($v412)));
+            $angles[] = $this->angleAtVertex($points[1], $points[2], $points[3]);
+            $angles[] = $this->angleAtVertex($points[2], $points[3], $points[0]);
+            $angles[] = $this->angleAtVertex($points[3], $points[0], $points[1]);          
         }
 
-        return max($angles) > config('ldraw.check.max_point_angle') || min($angles) < config('ldraw.check.min_point_angle');
+        if (max($angles) > config('ldraw.check.max_point_angle')) {
+            return max($angles);
+        } elseif (min($angles) < config('ldraw.check.min_point_angle')) {
+            return min($angles);
+        }
+
+        return false;
     }
 
-    public static function isConvex(array $points): bool
+    public function getMaxCoplanarAngle(array $points): float
     {
-        $p1 = new Vector($points[0]);
-        $p2 = new Vector($points[1]);
-        $p3 = new Vector($points[2]);
-        $p4 = new Vector($points[3]);
-
-        $v01 = $p2->subtractVector($p1);
-        $v02 = $p3->subtractVector($p1);
-        $v03 = $p4->subtractVector($p1);
-        $v12 = $p3->subtractVector($p2);
-        $v13 = $p4->subtractVector($p2);
-        $v23 = $p4->subtractVector($p3);
-
-        $a = $v01->crossProduct($v02)->dotProduct($v02->crossProduct($v03)) > 0;
-        $b = $v12->crossProduct($v01)->dotProduct($v01->crossProduct($v13)) > 0;
-        $c = -$v02->crossProduct($v12)->dotProduct($v12->crossProduct($v23)) > 0;
-        $concave = ($a && (($b && !$c) || ($c && !$b))) || (!$a && (($b && $c) || (!$b && !$c)));
-        $bowtie = (!$a && $b && !$c) || (!$a && !$b && $c);
-
-        return !$concave && !$bowtie;
-    }
-
-    public static function maxCoplanarAngle(array $points): float
-    {
-        $p1 = new Vector($points[0]);
-        $p2 = new Vector($points[1]);
-        $p3 = new Vector($points[2]);
-        $p4 = new Vector($points[3]);
-
-        $tri123_unorm = $p2->subtractVector($p1)->crossProduct($p3->subtractVector($p1))->normalize();
-        $tri341_unorm = $p4->subtractVector($p3)->crossProduct($p1->subtractVector($p3))->normalize();
-        $tri124_unorm = $p2->subtractVector($p1)->crossProduct($p4->subtractVector($p1))->normalize();
-        $tri234_unorm = $p4->subtractVector($p3)->crossProduct($p2->subtractVector($p3))->normalize();
-
-        $t1 = $tri123_unorm->dotProduct($tri341_unorm);
-        $t2 = $tri124_unorm->dotProduct($tri234_unorm);
-        $angle1 = rad2deg($t1 >= 1.0 ? 0.0 : ($t1 <= -1.0 ? Pi() : acos($t1)));
-        $angle2 = rad2deg($t2 >= 1.0 ? 0.0 : ($t2 <= -1.0 ? Pi() : acos($t2)));
-        return max($angle1, $angle2);
+        $tri11 = [$points[0], $points[1], $points[3]];
+        $tri12 = [$points[1], $points[2], $points[3]];
+        $tri21 = [$points[0], $points[2], $points[3]];
+        $tri22 = [$points[0], $points[1], $points[2]];
+        return max($this->angleBetweenTriangles($tri11, $tri12), $this->angleBetweenTriangles($tri21, $tri22));
     }
 }

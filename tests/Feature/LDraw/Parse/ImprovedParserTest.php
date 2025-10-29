@@ -810,56 +810,256 @@ describe('parse avatar', function () {
 describe('parse colour', function () {
     it('passes colour parse', function (string $input, array $expected) {
         $file = new ParsedPartCollection($input);
-        $type1line = $file->first();
-        expect($type1line)
+        $color = $file->first();
+        expect($color)
             ->toBeArray()
-            ->toHaveKeys(['category', 'description', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'file'])
-            ->category->toBeString()->toBe($expected[0])
-            ->description->toBeString()->toBe($expected[1])
-            ->a->toEqual($expected[2])
-            ->b->toEqual($expected[3])
-            ->c->toEqual($expected[4])
-            ->d->toEqual($expected[5])
-            ->e->toEqual($expected[6])
-            ->f->toEqual($expected[7])
-            ->g->toEqual($expected[8])
-            ->h->toEqual($expected[9])
-            ->i->toEqual($expected[10])
-            ->file->toBeString()->toBe($expected[11]);
+            ->toHaveKeys(['name', 'code', 'value', 'edge', 'alpha', 'luminance', 'material', 'material_params'])
+            ->name->toBeString()->toBe($expected['name'])
+            ->code->toBeNumeric()->toEqual($expected['code'])
+            ->value->toBeString()->toBe($expected['value'])
+            ->edge->toBeString()->toBe($expected['edge']);
+        if(Arr::has($expected, 'alpha')) {
+            expect($color)
+                ->alpha->toBeNumeric()->toEqual(Arr::get($expected, 'alpha'));          
+        } else {
+            expect($color)
+                ->alpha->toBeNull();
+        }
+        if(Arr::has($expected, 'luminance')) {
+            expect($color)
+                ->luminance->toBeNumeric()->toEqual(Arr::get($expected, 'luminance'));          
+        } else {
+            expect($color)
+                ->luminance->toBeNull();
+        }
+        if(Arr::has($expected, 'material')) {
+            expect($color)
+                ->material->toBeIn(['CHROME', 'PEARLESCENT', 'RUBBER', 'MATTE_METALLIC', 'METAL', 'MATERIAL'])
+                ->toBe(Arr::get($expected, 'material'));          
+        } else {
+            expect($color)
+                 ->material->toBeNull();
+        }
+        if(Arr::has($expected, 'material_params')) {
+            expect($color)->material_params
+                ->toBeArray()
+                ->toHaveKeys(['material_type', 'value', 'alpha', 'luminance', 'fraction', 'vfraction', 'size', 'minsize', 'maxsize', 'fabric_type'])
+                ->toMatchArray(Arr::get($expected, 'material_params'));          
+        } else {
+            expect($color)
+                 ->material_params->toBeNull();
+        }
     })->with([
-        'valid, single words' => ["0 !AVATAR CATEGORY \"Category\" DESCRIPTION \"Test\" PART 1 0 0 0 1 0 0 0 1 \"test.dat\"", ['Category', 'Test', 1, 0, 0, 0, 1, 0, 0, 0, 1, 'test.dat']],
-        'valid, muliple words' => ["0 !AVATAR CATEGORY \"Category Test\" DESCRIPTION \"Test Description\" PART 1 0 0 0 1 0 0 0 1 \"test.dat\"", ['Category Test', 'Test Description', 1, 0, 0, 0, 1, 0, 0, 0, 1, 'test.dat']],
+        'normal colour' => [
+             '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080', 
+             [
+                 'name' => 'Black',
+                 'code' => 0,
+                 'value' => '#1B2A34',
+                 'edge' => '#808080',
+             ]
+        ],
+        'transparent colour' => [
+             '0 !COLOUR Trans_Dark_Blue CODE 33 VALUE #0020A0 EDGE #000B38 ALPHA 128', 
+             [
+                 'name' => 'Trans_Dark_Blue',
+                 'code' => 33,
+                 'value' => '#0020A0',
+                 'edge' => '#000B38',
+                 'alpha' => 128,
+             ]
+        ],
+        'chrome colour' => [
+             '0 !COLOUR Chrome_Antique_Brass CODE 60 VALUE #645A4C EDGE #665B4D CHROME', 
+             [
+                 'name' => 'Chrome_Antique_Brass',
+                 'code' => 60,
+                 'value' => '#645A4C',
+                 'edge' => '#665B4D',
+                 'material' => 'CHROME',
+             ]
+        ],
+        'pearlescent colour' => [
+             '0 !COLOUR Pearl_Black CODE 83 VALUE #0A1327 EDGE #333333 PEARLESCENT', 
+             [
+                 'name' => 'Pearl_Black',
+                 'code' => 83,
+                 'value' => '#0A1327',
+                 'edge' => '#333333',
+                 'material' => 'PEARLESCENT',
+             ]
+        ],
+        'metal colour' => [
+             '0 !COLOUR Metallic_Silver CODE 80 VALUE #767676 EDGE #333333 METAL', 
+             [
+                 'name' => 'Metallic_Silver',
+                 'code' => 80,
+                 'value' => '#767676',
+                 'edge' => '#333333',
+                 'material' => 'METAL',
+             ]
+        ],
+        'rubber colour' => [
+             '0 !COLOUR Rubber_Dark_Orange CODE 10484 VALUE #91501C EDGE #333333 RUBBER', 
+             [
+                 'name' => 'Rubber_Dark_Orange',
+                 'code' => 10484,
+                 'value' => '#91501C',
+                 'edge' => '#333333',
+                 'material' => 'RUBBER',
+             ]
+        ],
+        'luminance colour' => [
+             '0 !COLOUR Glow_In_Dark_Opaque CODE 21 VALUE #E0FFB0 EDGE #B8FF4D ALPHA 240 LUMINANCE 15', 
+             [
+                 'name' => 'Glow_In_Dark_Opaque',
+                 'code' => 21,
+                 'value' => '#E0FFB0',
+                 'edge' => '#B8FF4D',
+                 'alpha' => '240',
+                 'luminance' => '15',
+             ]
+        ],
+        'glitter colour' => [
+             '0 !COLOUR Glitter_Trans_Dark_Pink CODE 114 VALUE #DF6695 EDGE #B9275F ALPHA 128 MATERIAL GLITTER VALUE #B92790 FRACTION 0.17 VFRACTION 0.2 SIZE 1', 
+             [
+                 'name' => 'Glitter_Trans_Dark_Pink',
+                 'code' => 114,
+                 'value' => '#DF6695',
+                 'edge' => '#B9275F',
+                 'alpha' => 128,
+                 'material' => 'MATERIAL',
+                 'material_params' => [
+                     'material_type' => 'GLITTER',
+                     'value' => '#B92790',
+                     'fraction' => 0.17,
+                     'vfraction' => 0.2,
+                     'size' => 1,
+                 ]
+             ]
+        ],
+        'opal colour' => [
+             '0 !COLOUR Opal_Trans_Clear CODE 360 VALUE #FCFCFC EDGE #C9C9C9 ALPHA 240 LUMINANCE 5 MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1', 
+             [
+                 'name' => 'Opal_Trans_Clear',
+                 'code' => 360,
+                 'value' => '#FCFCFC',
+                 'edge' => '#C9C9C9',
+                 'alpha' => 240,
+                 'luminance' => 5,
+                 'material' => 'MATERIAL',
+                 'material_params' => [
+                     'material_type' => 'GLITTER',
+                     'value' => '#FFFFFF',
+                     'fraction' => 0.8,
+                     'vfraction' => 0.6,
+                     'minsize' => 0.02,
+                     'maxsize' => 0.1
+                 ]
+             ]
+        ],
+        'speckle colour' => [
+             '0 !COLOUR Speckle_Black_Copper CODE 75 VALUE #000000 EDGE #AB6038 MATERIAL SPECKLE VALUE #AB6038 FRACTION 0.4 MINSIZE 1 MAXSIZE 3', 
+             [
+                 'name' => 'Speckle_Black_Copper',
+                 'code' => 75,
+                 'value' => '#000000',
+                 'edge' => '#AB6038',
+                 'material' => 'MATERIAL',
+                 'material_params' => [
+                     'material_type' => 'SPECKLE',
+                     'value' => '#AB6038',
+                     'fraction' => 0.4,
+                     'minsize' => 1,
+                     'maxsize' => 3
+                 ]
+             ]
+        ],
+        'fabric colour' => [
+             '0 !COLOUR Canvas_Black CODE 20000 VALUE #1B2A34 EDGE #808080 MATERIAL FABRIC CANVAS', 
+             [
+                 'name' => 'Canvas_Black',
+                 'code' => 20000,
+                 'value' => '#1B2A34',
+                 'edge' => '#808080',
+                 'material' => 'MATERIAL',
+                 'material_params' => [
+                     'material_type' => 'FABRIC',
+                     'fabric_type' => 'CANVAS'
+                 ]
+             ]
+        ],
     ]);
 
     it('fails colour parse', function (string $input) {
         $file = new ParsedPartCollection($input);
-        $type1line = $file->first();
-        expect($type1line)
+        $color = $file->first();
+        expect($color)
             ->toBeArray()
             ->toHaveKeys(['invalid'])
             ->invalid->toBeBool()->toBeTrue();
     })->with([
-        'bad number' => "0 !AVATAR CATEGORY \"Category\" DESCRIPTION \"Test\" PART 1 a 0 0 1 0 0 0 1 \"test.dat\"",
-        'too few numbers' => "0 !AVATAR CATEGORY \"Category\" DESCRIPTION \"Test\" PART 1  0 0 1 0 0 0 1 \"test.dat\"",
-        'too many numbers' => "0 !AVATAR CATEGORY \"Category\" DESCRIPTION \"Test\" PART 1 0 0 0 0 1 0 0 0 1 \"test.dat\"",
-        'no quotes, category' => "0 !AVATAR CATEGORY Category DESCRIPTION \"Test\" PART 1 0 0 0 1 0 0 0 1 \"test.dat\"",
-        'no quotes, description' => "0 !AVATAR CATEGORY \"Category\" DESCRIPTION Test PART 1 0 0 0 1 0 0 0 1 \"test.dat\"",
-        'no quotes, file' => "0 !AVATAR CATEGORY \"Category\" DESCRIPTION \"Test\" PART 1 0 0 0 1 0 0 0 1 test.dat",
-        'blank category' => "0 !AVATAR CATEGORY \"\" DESCRIPTION \"Test\" PART 1 0 0 0 1 0 0 0 1 \"test.dat\"",
-        'blank description' => "0 !AVATAR CATEGORY \"Category\" DESCRIPTION \"\" PART 1 0 0 0 1 0 0 0 1 \"test.dat\"",
-        'blank file' => "0 !AVATAR CATEGORY \"Category\" DESCRIPTION \"Test\" PART 1 0 0 0 1 0 0 0 1 \"\"",
+        'multi-word name no underscore' => '0 !COLOUR Black Black CODE 0 VALUE #1B2A34 EDGE #808080',
+        'blank name' => '0 !COLOUR CODE 0 VALUE #1B2A34 EDGE #808080',
+        'letter code number' => '0 !COLOUR Black CODE a VALUE #1B2A34 EDGE #808080',
+        'float code number' => '0 !COLOUR Black CODE 1.0 VALUE #1B2A34 EDGE #808080',
+        'blank code' => '0 !COLOUR Black CODE VALUE #1B2A34 EDGE #808080',
+        'missing code' => '0 !COLOUR Black VALUE #1B2A34 EDGE #808080',
+        'letter value' => '0 !COLOUR Black CODE 0 VALUE a EDGE #808080',
+        'float value' => '0 !COLOUR Black CODE 0 VALUE 0.0 EDGE #808080',
+        'missing rgb prefix value' => '0 !COLOUR Black CODE 0 VALUE AAAAAA EDGE #808080',
+        'bad prefix value' => '0 !COLOUR Black CODE 0 VALUE ^AAAAAA EDGE #808080',
+        'blank value' => '0 !COLOUR Black CODE 0 VALUE EDGE #808080',
+        'missing value' => '0 !COLOUR Black CODE 0 EDGE #808080',
+        'letter edge' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE a',
+        'float edge' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE 0.0',
+        'missing rgb prefix edge' => '0 !COLOUR Black CODE 0 VALUE #AAAAAA EDGE AAAAAA',
+        'bad prefix edge' => '0 !COLOUR Black CODE 0 VALUE #AAAAAA EDGE &808080',
+        'blank edge' => '0 !COLOUR Black CODE 0 VALUE #AAAAAA EDGE ',
+        'missing edge' => '0 !COLOUR Black CODE 0 VALUE #AAAAAA ',
+        'letter alpha' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 ALPHA a',
+        'float alpha' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 ALPHA 1.0',
+        'blank alpha' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 ALPHA ',
+        'letter luminance' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 LUMINANCE a',
+        'float luminance' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 LUMINANCE 1.0',
+        'blank luminance' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 LUMINANCE ',
+        'wrong material' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 CLOTH',
+        'material with invalid type' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL PLASTIC',
+        'material with missing type' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL VALUE #AAAAAA',
+        'material with letter value param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE a',
+        'material with float value param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE 1.0',
+        'material with missing prefix value param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE AAAAAA',
+        'material with incorrect prefix value param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE @AAAAAA',
+        'material with blank value param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE',
+        'material with letter alpha param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA ALPHA a',
+        'material with float alpha param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA ALPHA 1.0',
+        'material with blank alpha param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA ALPHA ',
+        'material with letter luminance param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA LUMINANCE a',
+        'material with float luminance param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA LUMINANCE 1.0',
+        'material with blank luminance param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA LUMINANCE ',
+        'material with letter fraction param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA FRACTION a',
+        'material with blank fraction param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA FRACTION ',
+        'material with letter vfraction param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA VFRACTION a',
+        'material with blank vfraction param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA VFRACTION ',
+        'material with letter size param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA SIZE a',
+        'material with blank size param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA SIZE ',
+        'material with letter maxsize param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA MAXSIZE a',
+        'material with blank maxsize param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA MAXSIZE ',
+        'material with letter minsize param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA MINSIZE a',
+        'material with blank minsize param' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL GLITTER VALUE #AAAAAA MINSIZE ',
+        'material with invalid fabric type' => '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080 MATERIAL FABRIC SUEDE',
     ]);
 });
 
 describe('all file parse', function () {
     beforeEach(function () {
         User::factory()->create([
-            'name' => 'Thomas Burger',
-            'realname' => 'grapeape',
+            'realname' => 'Thomas Burger',
+            'name' => 'grapeape',
         ]);
     });
 
-    it('parse file', function () {
+    it('passes parsing file', function () {
         $text = file_get_contents(__DIR__ . "/testfiles/parsetest.dat");
         $part = (new ParsedPartCollection($text));
         expect($part->description())->toBe('Brick  1 x  2 x  5 with SW Han Solo Carbonite Pattern');
@@ -881,5 +1081,7 @@ describe('all file parse', function () {
             ['date' => '2007-05-10', 'realname' => null, 'username' => 'PTadmin', 'comment' => 'Header formatted for Contributor Agreement'],
         ]);
         expect($part->subparts())->toBe(['2454aps5.png', 's\2454as01.dat']);
+        expect($part->hasInvalidLines())->toBeBool()->toBeFalse();
+        expect($part->bodyStartLine())->toBeInt()->toBe(22);
     });
 });

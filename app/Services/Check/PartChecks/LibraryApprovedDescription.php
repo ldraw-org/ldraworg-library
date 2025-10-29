@@ -14,7 +14,6 @@ class LibraryApprovedDescription implements Check
         if (is_null($part->description())) {
             return;
         }
-        dump($part->description());
         if (preg_match('~[\p{C}\p{Zl}\p{Zp}]~u', $part->description(), $matches)) {
             $message(PartError::InvalidDescription);
         }

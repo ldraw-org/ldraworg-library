@@ -13,11 +13,10 @@ class FlexibleHasCorrectSuffix implements Check
 {
     public function check(ParsedPartCollection $part, Closure $message): void
     {
-        $nameRaw = $part->nameRaw();
+        $hasKSuffix = $part->lastSuffixStartsWith('k');
         $category = $part->category();
-        dump(Arr::get($nameRaw, 'k'), is_null(Arr::get($nameRaw, 'k')));
         if ($part->type_qualifier() == PartTypeQualifier::FlexibleSection && $category?->isActive() &&
-            is_null(Arr::get($nameRaw, 'k'))
+            !$hasKSuffix
         ) {
             $message(PartError::FlexSectionIncorrectSuffix);
         }

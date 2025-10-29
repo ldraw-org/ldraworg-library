@@ -12,7 +12,7 @@ class CategoryIsValid implements Check
 {
     public function check(ParsedPartCollection $part, Closure $message): void
     {
-        if ($part->type()->inPartsFolder() && is_null($part->category())) {
+        if ($part->type()?->inPartsFolder() && is_null($part->category())) {
             $message(PartError::CategoryInvalid);
         }
     }

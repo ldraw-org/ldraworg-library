@@ -250,11 +250,11 @@ class ParsedPartCollection extends Collection
                     'description',
                     'name',
                     'author',
-                    'type',
+                    'ldraworg',
                     'license',
+                    'help',
                     'category',
                     'keywords',
-                    'help',
                     'cmdline',
                     'preview',
                     'history',
@@ -291,10 +291,10 @@ class ParsedPartCollection extends Collection
             ->implode("\n") ?? '';
     }
 
-    protected function lastSuffixStartsWith(string $letter): bool
+    public function lastSuffixStartsWith(string $letter): bool
     {
         $nameRaw = $this->getFirstMeta('name');
-        if (is_null($nameRaw) || is_null(Arr::get($nameRaw, 'suffixes'))) {
+        if (is_null($nameRaw) || is_null(Arr::get($nameRaw, 'suffixes')) || Arr::get($nameRaw, 'suffixes_invalid') === true) {
            return false;
         }
 

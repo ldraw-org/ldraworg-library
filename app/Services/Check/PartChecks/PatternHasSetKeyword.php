@@ -20,10 +20,10 @@ class PatternHasSetKeyword implements Check
         if (!$part->type()?->inPartsFolder() || $part->category() == PartCategory::Modulex || $part->category() == PartCategory::Moved) {
             return;
         }
+      
         $isPattern = $part->isPattern();
         $noKeyword = collect($part->keywords())
           ->doesntContain(fn (string $keyword) => Str::of($keyword)->lower()->startsWith(['set ', 'cmf', 'build-a-minifigure']));
-        
         if ($isPattern && $noKeyword) {
             $message(PartError::NoSetKeywordForPattern);
         }

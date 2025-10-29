@@ -38,7 +38,7 @@ class ImprovedParser {
         'comment' => '~^0\h+\/\/(?:\h+(?P<comment>.*))?$~u',
         'texmap_geometry' => '#^\h*(?<linetype>0)\h+!\:\h*(?P<tex_line>.+?)\h*$#u',
         'texmap' => '#^\h*(?<linetype>0)\h+!TEXMAP\h+(?P<command>START|NEXT|FALLBACK|END)(?:\h+(?P<method>PLANAR|CYLINDRICAL|SPHERICAL)\h+(?P<params>(?:[-+]?[0-9]*\.?[0-9]+\h+){8,10}[-+]?[0-9]*\.?[0-9]+)\h+(?P<file>\S+\.png)(?:\h+GLOSSMAP\h+(?P<glossfile>\S+\.png))?)?\h*$#u',
-        'colour' => '~^0\h+!COLOUR\h+(?P<name>[A-Za-z0-9_]+)\h+CODE\h+(?P<code>\d+)\h+VALUE\h+(?P<value>(?:0x|#)[A-Fa-f0-9]{6})(?:\h+EDGE\h+(?P<edge>(?:\d+|(?:0x|#)[A-Fa-f0-9]{6})))?(?:\h+ALPHA\h+(?P<alpha>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+LUMINANCE\h+(?P<luminance>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+(?P<flags>(?:CHROME|PEARLESCENT|RUBBER|MATTE_METALLIC|METAL|MATERIAL)(?:\h+(?:CHROME|PEARLESCENT|RUBBER|MATTE_METALLIC|METAL|MATERIAL))*))?(?:\h+MATERIAL\h+(?P<material_params>.*))?$~u',
+        'colour' => '~^0\h+!COLOUR\h+(?P<name>[A-Za-z0-9_]+)\h+CODE\h+(?P<code>\d+)\h+VALUE\h+(?P<value>(?:0x|#)[A-Fa-f0-9]{6})(?:\h+EDGE\h+(?P<edge>(?:\d+|(?:0x|#)[A-Fa-f0-9]{6})))(?:\h+ALPHA\h+(?P<alpha>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+LUMINANCE\h+(?P<luminance>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+(?P<material>(?:CHROME|PEARLESCENT|RUBBER|MATTE_METALLIC|METAL|MATERIAL)(?:\h+(?:CHROME|PEARLESCENT|RUBBER|MATTE_METALLIC|METAL|MATERIAL))*))?(?:\h+MATERIAL\h+(?P<material_params>.*))?$~u',
         'colour_material' => '~^(?P<material_type>GLITTER|SPECKLE|FABRIC)(?:\h+VALUE\h+(?P<value>(?:0x|#)[A-Fa-f0-9]{6}))?(?:\h+ALPHA\h+(?P<alpha>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+LUMINANCE\h+(?P<luminance>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+FRACTION\h+(?P<fraction>0(?:\.\d+)?|1(?:\.0+)?))?(?:\h+VFRACTION\h+(?P<vfraction>0(?:\.\d+)?|1(?:\.0+)?))?(?:\h+SIZE\h+(?P<size>(?:[1-9]\d*(?:\.\d+)?|0?\.\d*[1-9]\d*)))?(?:\h+MINSIZE\h+(?P<minsize>(?:[1-9]\d*(?:\.\d+)?|0?\.\d*[1-9]\d*))\h+MAXSIZE\h+(?P<maxsize>(?:[1-9]\d*(?:\.\d+)?|0?\.\d*[1-9]\d*)))?(?:\h+(?P<fabric_type>VELVET|CANVAS|STRING|FUR))?$~u',
         'avatar' => '#^\h*(?<linetype>0)\h+!AVATAR\h+CATEGORY\h+"(?P<category>[^"]+)"\h+DESCRIPTION\h+"(?P<description>[^"]+)"\h+PART\h+(?P<a>-?\d+(?:\.\d+)?)\h+(?P<b>-?\d+(?:\.\d+)?)\h+(?P<c>-?\d+(?:\.\d+)?)\h+(?P<d>-?\d+(?:\.\d+)?)\h+(?P<e>-?\d+(?:\.\d+)?)\h+(?P<f>-?\d+(?:\.\d+)?)\h+(?P<g>-?\d+(?:\.\d+)?)\h+(?P<h>-?\d+(?:\.\d+)?)\h+(?P<i>-?\d+(?:\.\d+)?)\h+"(?P<file>[^"]+)"$#u',
     ];
@@ -258,9 +258,8 @@ class ImprovedParser {
             return $match;
         }
         if (!is_null(Arr::get($match, 'material_params'))) {
-            $match['flags'] = 'MATERIAL';
+            $match['material'] = 'MATERIAL';
             if (! preg_match($this->patterns['colour_material'], $match['material_params'], $material, PREG_UNMATCHED_AS_NULL)) {
-                dd($match);
                 $match['invalid'] = true;
                 return $match;
             }

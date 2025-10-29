@@ -24,11 +24,11 @@ use App\Services\Check\PartChecks\PreviewIsValid;
 
 use App\Enums\PartError;
 use App\Services\Check\Contracts\Check;
+use App\Services\Check\Contracts\FilenameAwareCheck;
+use App\Services\Check\Contracts\SettingsAwareCheck;
 use App\Services\Check\PartChecks\AliasInParts;
 use App\Services\Check\PartChecks\BfcIsCcw;
 use App\Services\Check\PartChecks\LibraryApprovedLicense;
-use App\Services\LDraw\Check\Contracts\FilenameAwareCheck;
-use App\Services\LDraw\Check\Contracts\SettingsAwareCheck;
 use App\Services\Parser\ParsedPartCollection;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Collection;
