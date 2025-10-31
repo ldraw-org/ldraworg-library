@@ -5,7 +5,7 @@ namespace App\Services\Check;
 use App\Enums\PartError;
 use Illuminate\Support\Arr;
 
-class CheckMessage
+class CheckMessage 
 {
     private function __construct(
         public PartError $error,
@@ -13,6 +13,11 @@ class CheckMessage
         public ?string $value = null,
         public ?string $type = null,
     ) {
+    }
+
+    public static function fromPartError(PartError $error): self
+    {
+        return new self($error);
     }
 
     public static function fromArray(array $checkmessage): self

@@ -28,6 +28,8 @@ use App\Models\Traits\HasUser;
 use App\Models\User;
 use App\Models\Vote;
 use App\Observers\PartObserver;
+use App\Services\Check\CheckMessage;
+use App\Services\Parser\ParsedPartCollection;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -308,15 +310,34 @@ class Part extends Model implements HasMedia
         $query->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved]);
     }
 
-    protected function partCheck(): Attribute
+    protected function errors(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => new PartCheckBag(json_decode($value ?? '', true) ?? []),
-            set: fn (PartCheckBag $value) => json_encode($value->toArray())
+            get: fn (?string $value) => collect(json_decode($value ?? '{}', true))
+                ->map(fn (array $message) => CheckMessage::fromArray($message)),
+            set: fn (SupportCollection $value) => json_encode($value->map(fn (CheckMessage $message) => $message->toArray())->all())
         );
     }
 
-    public function metaName(): Attribute
+    protected function warnings(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => collect(json_decode($value ?? '{}', true))
+                ->map(fn (array $message) => CheckMessage::fromArray($message)),
+            set: fn (SupportCollection $value) => json_encode($value->map(fn (CheckMessage $message) => $message->toArray())->all())
+        );
+    }
+
+    protected function trackerHolds(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => collect(json_decode($value ?? '{}', true))
+                ->map(fn (array $message) => CheckMessage::fromArray($message)),
+            set: fn (SupportCollection $value) => json_encode($value->map(fn (CheckMessage $message) => $message->toArray())->all())
+        );
+    }
+
+    protected function metaName(): Attribute
     {
         return Attribute::make(
             get: fn () => Str::of($this->filename)
@@ -324,6 +345,11 @@ class Part extends Model implements HasMedia
                 ->replace('/', '\\')
                 ->toString()
         );
+    }
+
+    public function hasMessages(): bool
+    {
+        return $this->tracker_holds->isNotEmpty() || $this->errors->isNotEmpty() || $this->warnings->isNotEmpty();
     }
 
     public function uncertified_subparts(): Collection
@@ -498,6 +524,7 @@ class Part extends Model implements HasMedia
         if ($this->isOfficial()) {
             $this->part_status = PartStatus::Official;
             $this->saveQuietly();
+            return;
         }
         $old_sort = $this->part_status;
         $data = $this->voteTypeCount();
@@ -525,6 +552,11 @@ class Part extends Model implements HasMedia
 
     public function updateReadyForAdmin(): void
     {
+        if ($this->isOfficial()) {
+            $this->ready_for_admin = true;
+            $this->saveQuietly();
+            return;
+        }
         $old = $this->ready_for_admin;
         $this->ready_for_admin =
             in_array($this->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) &&
@@ -635,28 +667,39 @@ class Part extends Model implements HasMedia
             $this->missing_parts = [];
             $this->save();
         } else {
-            $subs = [];
-            foreach ($subparts['subparts'] ?? [] as $s) {
-                $s = str_replace('\\', '/', $s);
-                $subs[] = "parts/{$s}";
-                $subs[] = "p/{$s}";
-            }
-            foreach ($subparts['textures'] ?? [] as $s) {
-                $s = str_replace('\\', '/', $s);
-                $subs[] = "parts/textures/{$s}";
-                $subs[] = "p/textures/{$s}";
-            }
+            $subparts = collect($subparts);
+            $subs = $subparts
+                ->map( function (string $subpart) {
+                    $subpart = Str::of($subpart)->replace('\\', '/');
+                    if (pathinfo($subpart, PATHINFO_EXTENSION) == '.png') {
+                        return $subpart->prepend('parts/textures/')->toString();
+                    }
+                    return $subpart->prepend('parts/')->toString();
+                })
+                ->merge(
+                    $subparts
+                    ->map( function (string $subpart) {
+                        $subpart = Str::of($subpart)->replace('\\', '/');
+                        if (pathinfo($subpart, PATHINFO_EXTENSION) == '.png') {
+                            return $subpart->prepend('p/textures/')->toString();
+                        }
+                        return $subpart->prepend('p/')->toString();
+                    })
+                )
+                ->all();
             $subps = Part::whereIn('filename', $subs)->where('filename', '<>', $this->filename)->get();
             $this->subparts()->sync($subps->pluck('id')->all());
 
-            $existing_subs = $subps->pluck('filename')->all();
-            $esubs = [];
-            foreach ($existing_subs as $s) {
-                $s = str_replace('textures/', '', $s);
-                $s = str_replace(['parts/', 'p/'], '', $s);
-                $esubs[] = str_replace('/', '\\', $s);
-            }
-            $missing = collect(array_merge($subparts['subparts'] ?? [], $subparts['textures'] ?? []))->diff(collect($esubs))->values()->all();
+            $existing_subs = $subps
+                ->pluck('filename')
+                ->map(function (string $filename) {
+                    return Str::of($filename)
+                        ->replace('textures/', '')
+                        ->replace(['parts/', 'p/'], '')
+                        ->replace('/', '\\')
+                        ->toString();
+                });
+            $missing = $subparts->diff($existing_subs)->values()->all();
             $this->missing_parts = $missing;
             $this->save();
         }

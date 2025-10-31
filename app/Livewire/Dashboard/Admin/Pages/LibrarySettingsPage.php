@@ -5,16 +5,12 @@ namespace App\Livewire\Dashboard\Admin\Pages;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Fieldset;
 use App\Enums\License;
 use App\Enums\Permission;
-use App\Jobs\UpdateImage;
-use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -49,51 +45,8 @@ class LibrarySettingsPage extends Component implements HasSchemas
                                     ->required()
                                     ->integer(),
                            ]),
-                        Tab::make('Parser Settings')
-                            ->schema([
-                                Repeater::make('allowed_header_metas')
-                                    ->simple(
-                                        TextInput::make('meta')
-                                            ->string()
-                                    ),
-                                Repeater::make('allowed_body_metas')
-                                    ->simple(
-                                        TextInput::make('meta')
-                                            ->string()
-                                    ),
-                            ]),
-                        Tab::make('Pattern Codes')
-                            ->schema([
-                                KeyValue::make('pattern_codes')
-                                    ->label('Pattern Codes')
-                                    ->keyLabel('Code')
-                                    ->valueLabel('Pattern Description'),
-                           ]),
                         Tab::make('LDView Settings')
                             ->schema([
-                                Fieldset::make('Image Size')
-                                    ->schema([
-                                        TextInput::make('max_part_render_height')
-                                            ->required()
-                                            ->integer(),
-                                        TextInput::make('max_part_render_width')
-                                            ->required()
-                                            ->integer(),
-                                        TextInput::make('max_model_render_height')
-                                            ->required()
-                                            ->integer(),
-                                        TextInput::make('max_model_render_width')
-                                            ->required()
-                                            ->integer(),
-                                        TextInput::make('max_thumb_height')
-                                            ->required()
-                                            ->integer(),
-                                        TextInput::make('max_thumb_width')
-                                            ->required()
-                                            ->integer(),
-
-                                    ])
-                                    ->columns(2),
                                 KeyValue::make('ldview_options')
                                     ->label('LDView Options')
                                     ->keyLabel('Setting'),
@@ -110,17 +63,7 @@ class LibrarySettingsPage extends Component implements HasSchemas
         $form_data = [
             'tracker_locked' => $settings->tracker_locked,
             'ldview_options' => $settings->ldview_options,
-            'default_render_views' => $settings->default_render_views,
-            'max_part_render_height' => $settings->max_part_render_height,
-            'max_part_render_width' => $settings->max_part_render_width,
-            'max_model_render_height' => $settings->max_model_render_height,
-            'max_model_render_width' => $settings->max_model_render_width,
-            'max_thumb_height' => $settings->max_thumb_height,
-            'max_thumb_width' => $settings->max_thumb_width,
-            'allowed_header_metas' => $settings->allowed_header_metas,
-            'allowed_body_metas' => $settings->allowed_body_metas,
             'default_part_license' => $settings->default_part_license,
-            'pattern_codes' => $settings->pattern_codes,
             'quick_search_limit' => $settings->quick_search_limit,
         ];
         $this->form->fill($form_data);
@@ -129,34 +72,11 @@ class LibrarySettingsPage extends Component implements HasSchemas
     public function saveSettings(LibrarySettings $settings)
     {
         $form_data = $this->form->getState();
-        $view_changes = [];
         $settings->tracker_locked = $form_data['tracker_locked'];
         $settings->ldview_options = $form_data['ldview_options'];
-        if ($settings->default_render_views != $form_data['default_render_views']) {
-            $new = array_diff_assoc($form_data['default_render_views'], $settings->default_render_views);
-            $old = array_diff_assoc($settings->default_render_views, $form_data['default_render_views']);
-            $view_changes = array_merge(array_keys($new), array_keys($old));
-            $settings->default_render_views = $form_data['default_render_views'];
-        }
-        $settings->default_render_views = $form_data['default_render_views'];
-        $settings->max_part_render_height = $form_data['max_part_render_height'];
-        $settings->max_part_render_width = $form_data['max_part_render_width'];
-        $settings->max_model_render_height = $form_data['max_model_render_height'];
-        $settings->max_model_render_width = $form_data['max_model_render_width'];
-        $settings->max_thumb_height = $form_data['max_thumb_height'];
-        $settings->max_thumb_width = $form_data['max_thumb_width'];
-        $settings->allowed_header_metas = $form_data['allowed_header_metas'];
-        $settings->allowed_body_metas = $form_data['allowed_body_metas'];
-        $settings->pattern_codes = $form_data['pattern_codes'];
         $settings->quick_search_limit = $form_data['quick_search_limit'];
         $settings->default_part_license = $form_data['default_part_license'];
         $settings->save();
-        foreach ($view_changes as $part) {
-            Part::whereLike('filename', "%{$part}%")
-                ->partsFolderOnly()
-                ->each(fn (Part $p) => UpdateImage::dispatch($p));
-        }
-
     }
 
     #[Layout('components.layout.admin')]

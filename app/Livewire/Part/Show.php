@@ -201,7 +201,7 @@ class Show extends Component implements HasSchemas, HasActions
         return Action::make('recheckPart')
                 ->action(function () {
                     app(PartManager::class)->checkPart($this->part);
-                    $this->part->updatePartStatus();
+                    //$this->part->updatePartStatus();
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Part Error Checked')

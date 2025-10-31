@@ -18,10 +18,9 @@ pest()->extend(Tests\TestCase::class)->in('Feature');
 
 expect()->extend('toHaveCheckResult', function (bool $expected, string $check, ?string $filename = null) {
     $file = new ParsedPartCollection($this->value);
-    $pc = app(PartChecker::class);
     $check_namespace = '\\App\\Services\\Check\\PartChecks\\';
     $check = $check_namespace . $check;
     $check = new $check();
-    $result = $pc->singleCheck($file, $check, $filename);
+    $result = PartChecker::singleCheck($file, $check, $filename);
     expect($result->isEmpty())->toBe($expected);
 });

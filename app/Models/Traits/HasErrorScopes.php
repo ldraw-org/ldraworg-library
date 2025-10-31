@@ -11,37 +11,37 @@ trait HasErrorScopes
     #[Scope]
     protected function hasErrors(Builder $query): void
     {
-        $query->whereJsonLength('part_check->errors', '>', 0);
+        $query->whereJsonLength('errors', '>', 0);
     }
 
     #[Scope]
     protected function doesntHaveErrors(Builder $query): void
     {
-        $query->whereJsonLength('part_check->errors', '=', 0);
+        $query->whereJsonLength('errors', '=', 0);
     }
 
     #[Scope]
     protected function hasWarnings(Builder $query): void
     {
-        $query->whereJsonLength('part_check->warnings', '>', 0);
+        $query->whereJsonLength('warnings', '>', 0);
     }
 
     #[Scope]
     protected function doesntHaveWarnings(Builder $query): void
     {
-        $query->whereJsonLength('part_check->warnings', '=', 0);
+        $query->whereJsonLength('warnings', '=', 0);
     }
 
     #[Scope]
-    protected function hasTracker(Builder $query): void
+    protected function hasTrackerHolds(Builder $query): void
     {
-        $query->whereJsonLength('part_check->tracker_holds', '>', 0);
+        $query->whereJsonLength('tracker_holds', '>', 0);
     }
 
     #[Scope]
-    protected function doesntHaveTracker(Builder $query): void
+    protected function doesntHaveTrackerHolds(Builder $query): void
     {
-        $query->whereJsonLength('part_check->tracker_holds', '=', 0);
+        $query->whereJsonLength('tracker_holds', '=', 0);
     }
 
     #[Scope]
@@ -50,7 +50,7 @@ trait HasErrorScopes
         if ($error instanceof PartError) {
             $error = $error->value;
         }
-        $query->whereJsonContainsKey("part_check->errors->{$error}");
+        $query->whereJsonContains('errors', ['error' => $error]);
     }
 
     #[Scope]
@@ -59,7 +59,7 @@ trait HasErrorScopes
         if ($error instanceof PartError) {
             $error = $error->value;
         }
-        $query->orWhereJsonContainsKey("part_check->errors->{$error}");
+        $query->orWhereJsonContains('errors', ['error' => $error]);
     }
 
     #[Scope]
@@ -68,7 +68,7 @@ trait HasErrorScopes
         if ($error instanceof PartError) {
             $error = $error->value;
         }
-        $query->whereJsonDoesntContainKey("part_check->errors->{$error}");
+        $query->whereJsonDoesntContain('errors', ['error' => $error]);
     }
 
     #[Scope]
@@ -77,7 +77,7 @@ trait HasErrorScopes
         if ($error instanceof PartError) {
             $error = $error->value;
         }
-        $query->orWhereJsonDoesntContainKey("part_check->errors->{$error}");
+        $query->orWhereJsonDoesntContain('errors', ['error' => $error]);
     }
 
     #[Scope]
@@ -86,7 +86,7 @@ trait HasErrorScopes
         if ($warning instanceof PartError) {
             $warning = $warning->value;
         }
-        $query->whereJsonContainsKey("part_check->warnings->{$warning}");
+        $query->whereJsonContains('warnings', ['error' => $warning]);
     }
 
     #[Scope]
@@ -95,7 +95,7 @@ trait HasErrorScopes
         if ($warning instanceof PartError) {
             $warning = $warning->value;
         }
-        $query->orWhereJsonContainsKey("part_check->warnings->{$warning}");
+        $query->orWhereJsonContains('warnings', ['error' => $warning]);
     }
 
     #[Scope]
@@ -104,7 +104,7 @@ trait HasErrorScopes
         if ($warning instanceof PartError) {
             $warning = $warning->value;
         }
-        $query->whereJsonDoesntContainKey("part_check->warnings->{$warning}");
+        $query->whereJsonDoesntContain('warnings', ['error' => $warning]);
     }
 
     #[Scope]
@@ -113,7 +113,7 @@ trait HasErrorScopes
         if ($warning instanceof PartError) {
             $warning = $warning->value;
         }
-        $query->orWhereJsonDoesntContainKey("part_check->warnings->{$warning}");
+        $query->orWhereJsonDoesntContain('warnings', ['error' => $warning]);
     }
 
 }

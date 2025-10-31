@@ -47,7 +47,12 @@ class ParsedPartCollection extends Collection
     {
         return Arr::get($this->getFirstMeta('name') ?? [], 'name');
     }
-  
+
+    public function basepart(): ?string
+    {
+        return Arr::get($this->getFirstMeta('name') ?? [], 'basepart');
+    }
+
     public function author(): ?array
     {
         $author = $this->getFirstMeta('author');

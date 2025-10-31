@@ -2,9 +2,10 @@
 
 namespace App\Services\LDraw;
 
-use App\Services\LDraw\Parse\Parser;
 use App\Models\Omr\OmrModel;
 use App\Models\Part\Part;
+use App\Services\Parser\ImprovedParser;
+use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -38,22 +39,30 @@ class LDrawModelMaker
     public function modelMpd(string|OmrModel $model): string
     {
         if ($model instanceof OmrModel) {
-            $file = app(Parser::class)->dosLineEndings(file_get_contents($model->getFirstMediaPath('file')) . "\r\n");
+            $file = ImprovedParser::dosLineEndings(file_get_contents($model->getFirstMediaPath('file')) . "\r\n");
         } else {
             $file = $model;
         }
-        $parts = app(Parser::class)->getSubparts($file);
-        $subs = [];
-        foreach ($parts['subparts'] ?? [] as $s) {
-            $s = str_replace('\\', '/', $s);
-            $subs[] = "parts/{$s}";
-            $subs[] = "p/{$s}";
-        }
-        foreach ($parts['textures'] ?? [] as $s) {
-            $s = str_replace('\\', '/', $s);
-            $subs[] = "parts/textures/{$s}";
-            $subs[] = "p/textures/{$s}";
-        }
+        $subparts = collect((new ParsedPartCollection($file))->subparts($file));
+        $subs = $subparts
+            ->map( function (string $subpart) {
+                $subpart = Str::of($subpart)->replace('\\', '/');
+                if (pathinfo($subpart, PATHINFO_EXTENSION) == '.png') {
+                    return $subpart->prepend('parts/textures/')->toString();
+                }
+                return $subpart->prepend('parts/')->toString();
+            })
+            ->merge(
+                $subparts
+                ->map( function (string $subpart) {
+                    $subpart = Str::of($subpart)->replace('\\', '/');
+                    if (pathinfo($subpart, PATHINFO_EXTENSION) == '.png') {
+                        return $subpart->prepend('p/textures/')->toString();
+                    }
+                    return $subpart->prepend('p/')->toString();
+                })
+            )
+            ->all();
         $parts = new Collection();
         Part::with('descendantsAndSelf')
             ->doesntHave('unofficial_part')

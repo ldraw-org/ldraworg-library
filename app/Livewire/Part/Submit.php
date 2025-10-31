@@ -4,15 +4,15 @@ namespace App\Livewire\Part;
 
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Utilities\Get;
-use App\Services\LDraw\Parse\Parser;
 use App\Enums\PartType;
 use App\Enums\CheckType;
 use App\Enums\Permission;
-use App\Services\LDraw\Check\PartChecker;
 use App\Services\LDraw\LDrawFile;
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
+use App\Services\Check\PartChecker;
+use App\Services\Parser\ParsedPartCollection;
 use Closure;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -52,6 +52,7 @@ class Submit extends Component implements HasSchemas
                     ->multiple()
                     ->maxFiles(15)
                     ->storeFiles(false)
+                    ->previewable(false)
                     ->required()
                     ->live()
                     ->label('Files')
@@ -67,25 +68,24 @@ class Submit extends Component implements HasSchemas
 
                             // Error check based on file type
                             if ($mimeType == 'text/plain') {
-                                $part = app(Parser::class)->parse($value->get());
+                                $part = new ParsedPartCollection($value->get());
 
-                                $partname = $part->name ?? '';
+                                $partname = $part->name() ?? '';
                                 $pparts = Part::query()->byName($partname)->get();
                                 $unofficial_exists = $pparts->unofficial()->isNotEmpty();
                                 $official_exists = $pparts->official()->isNotEmpty();
                                 $pc = new PartChecker($part);
-                                $pc->standardChecks($value->getClientOriginalName());
-                                $errors = $pc->get(CheckType::holdable(), true);
+                                $errors = $pc->errorCheck($value->getClientOriginalName());
                                 
-                                if ($part->type == PartType::Primitive || $part->type?->inPArtsFolder()) {
-                                    $searchFolder = $part->type == PartType::Primitive ? 'parts/' : 'p/';
+                                if ($part->type() == PartType::Primitive || $part->type()?->inPartsFolder()) {
+                                    $searchFolder = $part->type() == PartType::Primitive ? 'parts/' : 'p/';
                                     if ($pparts->where('filename', "{$searchFolder}{$partname}")->isNotEmpty()) {
-                                        $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.duplicate', ['type' => $part->type == PartType::Primitive ? 'Parts' : 'Primitive']);
+                                        $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('newpartcheck.duplicate', ['type' => $part->type() == PartType::Primitive ? 'Parts' : 'Primitive']);
                                     }
                                 }
 
                                 foreach ($errors as $error) {
-                                    $this->part_errors[] = "{$value->getClientOriginalName()}: {$error}";
+                                    $this->part_errors[] = "{$value->getClientOriginalName()}: {$error->message()}";
                                 }
                             } elseif ($mimeType == 'image/png') {
                                 $filename = $value->getClientOriginalName();
@@ -103,7 +103,7 @@ class Submit extends Component implements HasSchemas
                             }
 
                             if (count($this->part_errors) > 0) {
-                                $fail('File errors');
+                                $fail("File errors");
                             }
                         },
                     ]),

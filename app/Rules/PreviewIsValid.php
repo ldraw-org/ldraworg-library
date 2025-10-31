@@ -2,8 +2,9 @@
 
 namespace App\Rules;
 
-use App\Services\LDraw\Check\PartChecker;
-use App\Services\LDraw\Parse\ParsedPart;
+use App\Services\Check\PartChecker;
+use App\Services\Check\PartChecks\PreviewIsValid as PartChecksPreviewIsValid;
+use App\Services\Parser\ParsedPartCollection;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -22,10 +23,10 @@ class PreviewIsValid implements DataAwareRule, ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $line = '16 0 0 0 '. ($attribute == 'mountedActions.0.data.preview_rotation' ? $value : Arr::get($this->data, 'mountedActions.0.data.preview_rotation', ''));
-        $p = ParsedPart::fromArray(['preview' => $line]);
-        $errors = (new PartChecker($p))->singleCheck(new \App\Services\LDraw\Check\Checks\PreviewIsValid());
-        if (count($errors) > 0) {
-            $fail($errors[0]);
+        $p = new ParsedPartCollection($line);
+        $errors = PartChecker::singleCheck($p, new PartChecksPreviewIsValid());
+        if ($errors->isNotEmpty()) {
+            $fail($errors->first()->message());
         }
     }
 }

@@ -174,7 +174,7 @@
         </div>
             <div class="text-lg font-bold">Status:</div>
             <x-part.status :$part show-status />
-            @if($part->part_check->get())
+            @if($part->hasMessages())
                 <x-message.not-releaseable :$part />
             @endif
         @if($part->isUnofficial())

@@ -9,12 +9,11 @@ use Filament\Actions\Action;
 use Filament\Schemas\Components\Utilities\Get;
 use App\Services\LDraw\LDrawModelMaker;
 use App\Services\LDraw\Managers\OmrModelManager;
-use App\Services\LDraw\Parse\Parser;
 use App\Services\LDraw\Rebrickable;
 use App\Models\Mybb\MybbAttachment;
 use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
-use App\Models\User;
+use App\Services\Parser\ParsedPartCollection;
 use Closure;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -100,7 +99,7 @@ class Add extends Component implements HasSchemas, HasTable, HasActions
         return Action::make('add')
             ->fillForm(fn (MybbAttachment $file): array => [
                 'set_id' => $this->getSetFromFilename($file->filename)?->id,
-                'user_id' => User::firstWhere('realname', Arr::get(app(Parser::class)->getAuthor($file->get()), 'realname'))?->id ?? $file->user->library_user?->id,
+                'user_id' => (new ParsedPartCollection($file->get()))->authorUser()?->id ?? $file->user->library_user?->id,
             ])
             ->schema([
                 AuthorSelect::make(),

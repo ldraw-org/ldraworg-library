@@ -6,11 +6,7 @@ use App\Enums\PartCategory;
 use App\Enums\PartError;
 use App\Services\Check\Contracts\Check;
 use App\Services\Parser\ParsedPartCollection;
-use App\Services\LDraw\Parse\Parser;
-use App\Models\Part\Part;
-use App\Models\Part\PartKeyword;
 use Closure;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class PatternHasSetKeyword implements Check

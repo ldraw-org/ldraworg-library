@@ -14,15 +14,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-function passesCheck(string $text, string $check, ?string $filename = null): bool
-{
-    $file = new ParsedPartCollection($text);
-    $pc = app(PartChecker::class);
-    $check = new $check();
-    $result = $pc->singleCheck($file, $check, $filename);
-    return $result->isEmpty();
-}
-
 beforeEach(function () {
     User::factory()->create([
         'name' => 'TestUser',

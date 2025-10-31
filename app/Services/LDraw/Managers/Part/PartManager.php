@@ -3,23 +3,22 @@
 namespace App\Services\LDraw\Managers\Part;
 
 use App\Enums\PartCategory;
-use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Events\PartSubmitted;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateParentParts;
 use App\Jobs\UpdateZip;
-use App\Services\LDraw\Check\PartChecker;
 use App\Services\LDraw\LDrawFile;
 use App\Services\LDraw\Managers\StickerSheetManager;
-use App\Services\LDraw\Parse\Parser;
 use App\Services\LDraw\Render\LDView;
 use App\Models\Part\Part;
 use App\Models\Part\UnknownPartNumber;
 use App\Models\RebrickablePart;
 use App\Models\StickerSheet;
 use App\Models\User;
+use App\Services\Check\PartChecker;
+use App\Services\Parser\ParsedPartCollection;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -34,9 +33,8 @@ use Spatie\TemporaryDirectory\TemporaryDirectory;
 class PartManager
 {
     public function __construct(
-        public Parser $parser,
         public LDView $render,
-        protected LibrarySettings $settings
+        protected LibrarySettings $settings,
     ) {
     }
 
@@ -78,8 +76,8 @@ class PartManager
             fn (LDrawFile $f, int $key) =>
                 $f->mimetype == 'text/plain' && Str::containsAll($f->contents, ['!TEXMAP', $filename])
         );
-
-        return PartType::tryFrom(Arr::get($this->parser->getType($p?->contents ?? ''), 'type') . '_Texmap') ?? PartType::PartTexmap;
+        $p = (new ParsedPartCollection($p->content));
+        return PartType::tryFrom(($p->type()?->value ?? '') . '_Texmap') ?? PartType::PartTexmap;
     }
 
     protected function makePartFromImage(LDrawFile $file, User $user, PartType $type): Part
@@ -100,24 +98,23 @@ class PartManager
 
     protected function makePartFromText(LDrawFile $file): Part
     {
-        $part = $this->parser->parse($file->contents);
+        $part = new ParsedPartCollection($file->contents);
 
-        $user = User::fromAuthor($part->username, $part->realname)->first();
-        $cat = $part->metaCategory ?? $part->descriptionCategory;
-        $filename = $part->type->folder() . '/' . basename(str_replace('\\', '/', $part->name));
-        $part->preview = $part->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $part->preview;
+        $user = $part->authorUser();
+        $filename = $part->type()->folder() . '/' . basename(str_replace('\\', '/', $part->name()));
+        $preview = $part->preview() == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $part->preview();
         $values = [
-            'description' => $part->description,
+            'description' => $part->description(),
             'filename' => $filename,
             'user_id' => $user->id,
-            'type' => $part->type,
-            'type_qualifier' => $part->type_qualifier,
+            'type' => $part->type(),
+            'type_qualifier' => $part->type_qualifier(),
             'license' => $user->license,
-            'bfc' => $part->bfc ?? null,
-            'category' => $cat,
-            'cmdline' => $part->cmdline,
-            'preview' => $part->preview,
-            'help' => $part->help,
+            'bfc' => $part->headerBfc(),
+            'category' => $part->category(),
+            'cmdline' => $part->cmdline(),
+            'preview' => $preview,
+            'help' => $part->help(),
             'header' => ''
         ];
         $upart = $this->makePart($values);
@@ -131,9 +128,9 @@ class PartManager
             $upart->preview = $upart->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $upart->preview;
             $upart->save();
         }
-        $upart->setKeywords($part->keywords ?? []);
-        $upart->setHistory($part->history ?? []);
-        $upart->setBody($part->body);
+        $upart->setKeywords($part->keywords() ?? []);
+        $upart->setHistory($part->history() ?? []);
+        $upart->setBody($part->bodyText());
         $upart->refresh();
         return $upart;
     }
@@ -260,8 +257,8 @@ class PartManager
         if (!$part->type->inPartsFolder() || $part->category == PartCategory::Moved || $part->isObsolete()) {
             return;
         }
-
-        $base = $this->parser->basepart(basename($part->filename));
+        $name = new ParsedPartCollection("0 Name: {$part->meta_name}");
+        $base = $name->basepart();
         if (is_null($base) || ("{$base}.dat" == $part->meta_name || "{$base}-f1.dat" == $part->meta_name)) {
             $part->base_part()->disassociate();
             $part->is_pattern = false;
@@ -282,8 +279,8 @@ class PartManager
             $part->base_part()->associate($bp);
         }
 
-        $part->is_pattern = $this->parser->patternName(basename($part->filename));
-        $part->is_composite = $this->parser->compositeName(basename($part->filename));
+        $part->is_pattern = $name->isPattern();
+        $part->is_composite = $name->isComposite();
         if ($part->isDirty()) {
             $part->save();
         }
@@ -335,8 +332,7 @@ class PartManager
             return false;
         }
         if (!$part->type->inPartsFolder() && $newType->inPartsFolder()) {
-            $dcat = $this->parser->getDescriptionCategory($part->header);
-            $part->category = $dcat;
+            $part->category = (new ParsedPartCollection($part->header))->category();
         }
         if ($part->type->folder() !== $newType->folder()) {
             $part->type = $newType;
@@ -372,7 +368,7 @@ class PartManager
     public function loadSubparts(Part $part): void
     {
         $hadMissing = is_array($part->missing_parts) && count($part->missing_parts) > 0;
-        $part->setSubparts($this->parser->getSubparts($part->body->body) ?? []);
+        $part->setSubparts((new ParsedPartCollection($part->body->body))->subparts());
         if ($hadMissing) {
             $part->refresh();
             $this->updateImage($part);
@@ -382,29 +378,13 @@ class PartManager
         }
     }
 
-    public function checkPart(Part $part, bool $checkFileErrors = true): void
+    public function checkPart(Part $part, ?string $filename = null): void
     {
-        $part->can_release = true;
-        $pc = new PartChecker($part);
-        $can_release = $pc->checkCanRelease($checkFileErrors);
-        $part->part_check = $pc->getPartCheckBag();
-
-        // Set Minifig warning but only for unofficial parts
-        if ($part->isUnofficial() && $part->type->inPartsFolder() && $part->category == PartCategory::Minifig) {
-            $part->part_check->add(PartError::WarningMinifigCategory);
-        }
-
-        // Set Sticker color warning.
-        if ($part->type->inPartsFolder() && $part->category == PartCategory::StickerShortcut) {
-            foreach (explode("\n", $part->body->body) as $line) {
-                if (Str::startsWith($line, '1 ') && Str::doesntStartWith($line, '1 16')) {
-                    $part->part_check->add(PartError::WarningStickerColor);
-                    break;
-                }
-            }
-        }
-
-        $part->can_release = $can_release;
+        $checker = new PartChecker($part);
+        $part->errors = $checker->errorCheck($filename);
+        $part->tracker_holds = $checker->trackerChecks();
+        $part->warnings = $checker->warningChecks();
+        $part->can_release = $part->isOfficial() || ($part->errors->isEmpty() && $part->tracker_holds->isEmpty());
         $part->updateReadyForAdmin();
         $part->save();
     }

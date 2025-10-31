@@ -3,8 +3,6 @@
 namespace App\Filament\Actions;
 
 use Filament\Schemas\Components\Utilities\Get;
-use App\Services\LDraw\Check\Checks\LibraryApprovedDescription;
-use App\Services\LDraw\Check\Checks\PatternPartDesciption;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -13,8 +11,6 @@ use App\Filament\Forms\Components\AuthorSelect;
 use App\Filament\Forms\Components\PreviewSelect;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
-use App\Services\LDraw\Check\PartChecker;
-use App\Services\LDraw\Parse\ParsedPart;
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
@@ -22,6 +18,10 @@ use App\Models\Part\PartKeyword;
 use App\Models\User;
 use App\Rules\HistoryEditIsValid;
 use App\Rules\PatternHasSet;
+use App\Services\Check\PartChecker;
+use App\Services\Check\PartChecks\LibraryApprovedDescription;
+use App\Services\Check\PartChecks\PatternPartDescription;
+use App\Services\Parser\ParsedPartCollection;
 use Closure;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
@@ -78,17 +78,15 @@ class EditHeaderAction
                 ->string()
                 ->rules([
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part, $get) {
-                        $p = ParsedPart::fromPart($part);
-                        $p->description = $value;
-                        $p->keywords = collect(explode(',', Str::of($get('keywords'))->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all();
-                        $errors = (new PartChecker($p))->singleCheck(new LibraryApprovedDescription());
-                        if ($errors) {
-                            $fail($errors[0]);
+                        $checker = new PartChecker($part);
+                        $errors = $checker->runChecks(new LibraryApprovedDescription());
+                        if ($errors->isNotEmpty()) {
+                            $fail($errors->first()->message());
                             return;
                         }
-                        $errors = (new PartChecker($p))->singleCheck(new PatternPartDesciption());
-                        if ($errors) {
-                            $fail($errors[0]);
+                        $errors = $checker->runChecks(new PatternPartDescription());
+                        if ($errors->isNotEmpty()) {
+                            $fail($errors->first()->message());
                         }
                     }
                 ]),
@@ -191,7 +189,7 @@ class EditHeaderAction
             $changes['new']['description'] = $data['description'];
             $part->description = $data['description'];
             if ($part->type->inPartsFolder()) {
-                $cat = $manager->parser->getDescriptionCategory($part->description);
+                $cat = (new ParsedPartCollection($part->description))->category();
                 if (!is_null($cat) && $part->category !== $cat) {
                     $part->category = $cat;
                 }
@@ -227,7 +225,7 @@ class EditHeaderAction
 
         if (Arr::has($data, 'help') && Arr::get($data, 'help')) {
             $newHelp = "0 !HELP " . str_replace(["\n","\r"], ["\n0 !HELP ",''], $data['help']);
-            $newHelp = $manager->parser->getHelp($newHelp);
+            $newHelp = (new ParsedPartCollection($newHelp))->help() ?? [];
         } else {
             $newHelp = [];
         }
@@ -283,7 +281,7 @@ class EditHeaderAction
             );
         if ($new_hist->diff($old_hist)->isNotEmpty() || $old_hist->diff($new_hist)->isNotEmpty()) {
             $changes['old']['history'] = $old_hist->implode("\n");
-            $part->setHistory($manager->parser->parse($new_hist->implode("\n"))->history ?? []);
+            $part->setHistory((new ParsedPartCollection($new_hist->implode("\n")))->history() ?? []);
             $part->load('history');
             $changes['new']['history'] = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h): string => $h->toString()))->implode("\n");
         }

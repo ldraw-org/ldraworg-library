@@ -34,8 +34,8 @@ class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
                     ->sortable(),
                 TextColumn::make('description')
                     ->sortable(),
-                TextColumn::make('part_check')
-                    ->state(fn (Part $part) => $part->part_check->get(CheckType::holdable(), true))
+                TextColumn::make('errors')
+                    ->state(fn (Part $part) => $part->errors->map->message())
                     ->listWithLineBreaks()
                     ->bulleted()
                     ->wrap()

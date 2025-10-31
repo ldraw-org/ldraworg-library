@@ -34,6 +34,9 @@ class PartObserver implements ShouldHandleEventsAfterCommit
     {
         if (config('ldraw.library_debug')) {
             Log::debug("Saving part {$part->id} ({$part->filename})");
+            if ($part->isDirty('part_status')) {
+                Log::debug("and status changed");
+            }
         }
         if ($part->isDirty(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
             UpdateLibraryCsv::dispatch();

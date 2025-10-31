@@ -2,12 +2,12 @@
 
 namespace App\Rules;
 
-use App\Services\LDraw\Check\Checks\PatternHasSetKeyword;
 use Illuminate\Translation\PotentiallyTranslatedString;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
-use App\Services\LDraw\Check\PartChecker;
-use App\Services\LDraw\Parse\ParsedPart;
+use App\Services\Check\PartChecker;
+use App\Services\Check\PartChecks\PatternHasSetKeyword;
+use App\Services\Parser\ParsedPartCollection;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -39,15 +39,19 @@ class PatternHasSet implements DataAwareRule, ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (Arr::get($this->data, $attribute, false)) {
-            $p = ParsedPart::fromArray([
-                'name' => str_replace(['parts/','p/'], '', Arr::get($this->data, 'mountedActions.0.data.filename', '')),
-                'type' => PartType::tryFrom(Arr::get($this->data, 'mountedActions.0.data.type', '')),
-                'metaCategory' => PartCategory::tryFrom(Arr::get($this->data, 'mountedActions.0.data.category', '')),
-                'keywords' => collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->all()
-            ]);
-            $errors = (new PartChecker($p))->singleCheck(new PatternHasSetKeyword());
-            if ($errors) {
-                $fail($errors[0]);
+            $name = str_replace(['parts/','p/'], '', Arr::get($this->data, 'mountedActions.0.data.filename', ''));
+            $type = PartType::tryFrom(Arr::get($this->data, 'mountedActions.0.data.type', ''))?->ldrawString(true) ?? '';
+            $category = PartCategory::tryFrom(Arr::get($this->data, 'mountedActions.0.data.category', ''))?->ldrawString() ?? '';
+            $keywords = collect(explode(',', Str::of($value)->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->implode(', ');
+            $text = "0 Test\n" .
+                "0 Name: {$name}\n" .
+                "{$type}\n" .
+                "{$category}\n" .
+                "!KEYWORDS {$keywords}";
+            $p = new ParsedPartCollection($text);
+            $errors = PartChecker::singleCheck($p, new PatternHasSetKeyword());
+            if ($errors->isNotEmpty()) {
+                $fail($errors->first()->message());
             }
         }
 

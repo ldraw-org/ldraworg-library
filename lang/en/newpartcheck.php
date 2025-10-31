@@ -19,7 +19,7 @@ return [
         'invalidnumbers' => 'Line :line invalid',
         'singular' => 'Line :line, singular rotation matrix',
         'identicalpoints' => 'Line :line, identical points',
-        'colinear' => 'Line :line, points are colinear',
+        'colinear' => 'Line :line, points are colinear (angle :value)',
         'notconvex' => 'Line :line, quad is concave or bowtie',
         'notcoplaner' => 'Line :line, quad is not coplanar (angle :value)',
     ],

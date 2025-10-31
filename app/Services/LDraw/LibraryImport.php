@@ -8,7 +8,7 @@ use App\Enums\VoteType;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
 use App\Models\User;
-use App\Services\LDraw\Parse\Parser;
+use App\Services\Parser\ImprovedParser;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -102,7 +102,7 @@ class LibraryImport
 
     public function parseEventFile(PartRelease $release, string $partFilename): void
     {
-        $metafile = Parser::unixLineEndings(Storage::get("events/{$release->name}/unofficial/{$partFilename}.meta"));
+        $metafile = ImprovedParser::unixLineEndings(Storage::get("events/{$release->name}/unofficial/{$partFilename}.meta"));
         if (is_null($metafile)) {
             return;
         }
@@ -202,7 +202,7 @@ class LibraryImport
             }
 
             if (preg_match($comment_pattern, $event, $matches)) {
-                $comment = Parser::fixEncoding(trim($matches[1]));
+                $comment = ImprovedParser::fixEncoding(trim($matches[1]));
                 if ($comment != '') {
                     $data['comment'] = $comment;
                 }

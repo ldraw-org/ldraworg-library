@@ -8,18 +8,18 @@ use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Grid;
-use App\Services\LDraw\Parse\Parser;
 use Filament\Schemas\Components\View;
 use App\Services\LDraw\Managers\Part\PartManager;
 use Filament\Schemas\Components\Fieldset;
 use App\Services\LDraw\LDrawModelMaker;
 use App\Enums\PartCategory;
 use App\Filament\Forms\Components\LDrawColourSelect;
-use App\Services\LDraw\Check\Checks\PatternHasSetKeyword;
-use App\Services\LDraw\Check\PartChecker;
 use App\Services\LDraw\LDrawFile;
 use App\Services\LDraw\Rebrickable;
 use App\Models\Part\Part;
+use App\Services\Check\PartChecker;
+use App\Services\Check\PartChecks\PatternHasSetKeyword;
+use App\Services\Parser\ParsedPartCollection;
 use Closure;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -200,10 +200,10 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                 ->extraAttributes(['class' => 'font-mono'])
                                 ->rules([
                                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) {
-                                        $p = app(Parser::class)->parse($this->makeShortcut());
-                                        $errors = (new PartChecker($p))->singleCheck(new PatternHasSetKeyword());
-                                        if (count($errors) > 0) {
-                                            $fail($errors[0]);
+                                        $p = new ParsedPartCollection($this->makeShortcut());
+                                        $errors = PartChecker::singleCheck($p, new PatternHasSetKeyword());
+                                        if ($errors->isNotEmpty()) {
+                                            $fail($errors->first()->message());
                                         }
                                     },
                                 ]),

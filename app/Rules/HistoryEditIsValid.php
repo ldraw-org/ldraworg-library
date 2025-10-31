@@ -2,15 +2,14 @@
 
 namespace App\Rules;
 
-use App\Services\LDraw\Parse\Parser;
-use App\Services\LDraw\Check\Checks\ValidLines;
-use App\Services\LDraw\Check\Checks\HistoryIsValid;
-use App\Services\LDraw\Check\Checks\HistoryUserIsRegistered;
 use Illuminate\Translation\PotentiallyTranslatedString;
-use App\Services\LDraw\Check\PartChecker;
 use App\Models\Part\Part;
 use App\Models\Part\PartHistory;
 use App\Models\User;
+use App\Services\Check\PartChecker;
+use App\Services\Check\PartChecks\HistoryIsValid;
+use App\Services\Check\PartChecks\HistoryUserIsRegistered;
+use App\Services\Parser\ParsedPartCollection;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -53,20 +52,16 @@ class HistoryEditIsValid implements ValidationRule, DataAwareRule
                 Str::of(Arr::get($state, 'comment'))->squish()->trim()->toString()
             );
         $part = Part::find(Arr::get($this->data, 'mountedActions.0.data.id'));
-        $p = app(Parser::class)->parse($value->implode("\n"));
-        $errors = (new PartChecker($p))->singleCheck(new ValidLines());
-        if ($errors) {
-            $fail($errors[0]);
+        $p = new ParsedPartCollection($value->implode("\n"));
+        $checker = new PartChecker($p);
+        $errors = $checker->runChecks(new HistoryIsValid());
+        if ($errors->isNotEmpty()) {
+            $fail($errors->first()->message());
             return;
         }
-        $errors = (new PartChecker($p))->singleCheck(new HistoryIsValid());
-        if ($errors) {
-            $fail($errors[0]);
-            return;
-        }
-        $errors = (new PartChecker($p))->singleCheck(new HistoryUserIsRegistered());
-        if ($errors) {
-            $fail($errors[0]);
+        $errors = $checker->runChecks(new HistoryUserIsRegistered());
+        if ($errors->isNotEmpty()) {
+            $fail($errors->first()->message());
             return;
         }
         $old_hist = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()));
