@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Part\PartHistory;
+use App\Events\PartSubmitted;
+use App\Models\Part\PartBody;
 use App\Models\User;
 use Illuminate\Console\Command;
 
@@ -27,22 +28,28 @@ class MassUpdate extends Command
      */
     public function handle(): void
     {
-        $kjm = User::firstWhere('realname', 'Kyle J. Mcdonald');
-        $csc = User::firstWhere('name', 'Deckard');
-        $unknown = User::find(290);
-        $hist = PartHistory::where('user_id', 290)
-            ->each(function (PartHistory $h) use ($kjm, $csc) {
-                if ($h->comment == 'BFC Certification') {
-                    $h->user_id = $kjm->id;
-                    $h->save();
-                } else {
-                    $h->user_id = $csc->id;
-                    $h->save();
+        $user = User::find(1);
+        PartBody::with('part')
+            ->lazy()
+            ->each(function (PartBody $b) use ($user) {
+                if (preg_match('~^0(?:\h+//)?\h*$~m', $b->body)) {
+                    $body = $b->body;
+                    $body = preg_replace('~^0(?:\h+//)?\h*$~m', '', $body);
+                    $body = preg_replace('~\n{3,}~us', "\n\n", trim($body));
+                    $b->body = $body;
+                    $b->save();
+                    if ($b->part->isOfficial()) {
+                        $b->part->has_minor_edit = true;
+                        $b->part->save();                  
+                    } else {
+                        $b->part->history()->create([
+                            'user_id' => $user->id,
+                            'comment' => 'Removed blank comments',
+                        ]);
+                        $b->part->generateHeader();
+                        PartSubmitted::dispatch($b->part, $user, 'Removed blank comments');
+                    }  
                 }
-                $h->part->has_minor_edit = true;
-                $h->part->generateHeader();
-                $h->load('part');
-                $this->info($h->part->header);
             });
     }
 }
