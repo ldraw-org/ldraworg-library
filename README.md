@@ -1,6 +1,6 @@
 LDraw.org Library Manager
 
-http://library.ldraw.org
+[LDraw.org Library](https://library.ldraw.org)
 
 
 TODO:
