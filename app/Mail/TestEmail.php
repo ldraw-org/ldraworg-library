@@ -8,13 +8,11 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
-use MailerSend\LaravelDriver\MailerSendTrait;
 
 class TestEmail extends Mailable
 {
     use Queueable;
     use SerializesModels;
-    use MailerSendTrait;
 
     /**
      * Create a new message instance.
@@ -46,9 +44,6 @@ class TestEmail extends Mailable
      */
     public function content()
     {
-        // Additional options for MailerSend API features
-        $this->mailersend(template_id: null);
-
         return new Content(
             text: 'emails.testemail',
         );

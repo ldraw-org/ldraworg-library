@@ -11,13 +11,11 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
-use MailerSend\LaravelDriver\MailerSendTrait;
 
 class DailyDigest extends Mailable
 {
     use Queueable;
     use SerializesModels;
-    use MailerSendTrait;
 
     protected $parts;
 
@@ -54,7 +52,6 @@ class DailyDigest extends Mailable
      */
     public function content()
     {
-        $this->mailersend(template_id: null);
         return new Content(
             markdown: 'emails.dailydigest-markdown',
             with: [

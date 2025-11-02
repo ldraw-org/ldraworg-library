@@ -23,9 +23,8 @@
         "laravel/pulse": "^1.4",
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.6.0",
-        "mailersend/laravel-driver": "^2.7.0",
+        "mailgun/mailgun-php": "^4.3",
         "markrogoyski/math-php": "^2.11",
-        "mcordingley/linearalgebra": "^3.0",
         "panphp/pan": "^0.1.8",
         "postare/blade-mdi": "^1.1",
         "spatie/image": "^3.8.0",
@@ -36,7 +35,8 @@
         "spatie/temporary-directory": "^2.3.0",
         "staudenmeir/belongs-to-through": "^2.17",
         "staudenmeir/laravel-adjacency-list": "^1.23.3",
-        "symfony/http-client": "^7.2.4"
+        "symfony/http-client": "^7.3",
+        "symfony/mailgun-mailer": "^7.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15.2",
