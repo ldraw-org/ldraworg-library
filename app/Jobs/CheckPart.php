@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Laravel\Nightwatch\Facades\Nightwatch;
 
 class CheckPart implements ShouldQueue
 {
@@ -32,8 +31,6 @@ class CheckPart implements ShouldQueue
      */
     public function handle(): void
     {
-        Nightwatch::dontSample();
-
         $pm = app(PartManager::class);
 
         if ($this->p instanceof Part) {

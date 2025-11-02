@@ -12,6 +12,7 @@ class CheckMessage
         public ?int $lineNumber = null,
         public ?string $value = null,
         public ?string $type = null,
+        public ?string $text = null,
     ) {
     }
 
@@ -30,7 +31,8 @@ class CheckMessage
             $error,
             Arr::get($checkmessage, 'lineNumber'),
             Arr::get($checkmessage, 'value'),
-            Arr::get($checkmessage, 'type'),            
+            Arr::get($checkmessage, 'type'),
+            Arr::get($checkmessage, 'text'),           
         );
     }
 
@@ -41,6 +43,7 @@ class CheckMessage
             'lineNumber' => $this->lineNumber,
             'value' => $this->value,
             'type' => $this->type,
+            'text' => $this->text,
         ];
     }
 
