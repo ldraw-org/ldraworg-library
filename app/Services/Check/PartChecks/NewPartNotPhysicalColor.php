@@ -2,6 +2,7 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\PartCategory;
 use App\Enums\PartError;
 use App\Enums\PartTypeQualifier;
 use App\Services\Check\Contracts\Check;
@@ -12,7 +13,8 @@ class NewPartNotPhysicalColor implements Check
 {
     public function check(ParsedPartCollection $part, Closure $message): void
     {
-        if ($part->type_qualifier() == PartTypeQualifier::PhysicalColour
+        if ($part->type_qualifier() == PartTypeQualifier::PhysicalColour &&
+            $part->category() !== PartCategory::Obsolete
         ) {
             $message(PartError::NewPartIsPhysicalColor);
         }
