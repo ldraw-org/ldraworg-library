@@ -766,7 +766,7 @@ class Part extends Model implements HasMedia
         $keywords .= $line !== '' ? "\n0 !KEYWORDS {$line}" : '';
       
         $preview = !is_null($this->preview) && $this->preview !== '' ? "0 !PREVIEW {$this->preview}" : '';
-        $cmdline = !is_null($this->cmdline) && $this->cmdline !== '' ? "0 !PREVIEW {$this->cmdline}" : '';
+        $cmdline = !is_null($this->cmdline) && $this->cmdline !== '' ? "0 !CMDLINE {$this->cmdline}" : '';
         $history = $this->history
               ->map(fn (PartHistory $h): string => $h->toString())
               ->implode("\n");
