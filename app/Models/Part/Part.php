@@ -648,12 +648,14 @@ class Part extends Model implements HasMedia
         }
         $history
             ->each(
-                fn (array $h, int $key) =>
+                fn (array $hist, int $key) =>
                 $this->history()->create([
                     'user_id' =>
-                        $h['user'] instanceof User ? $h['user']->id : User::fromAuthor($h['user'])->first()?->id,
-                    'created_at' => $h['date'],
-                    'comment' => $h['comment']
+                        Arr::get($hist, 'username') 
+                        ? User::firstWhere('name', Arr::get($hist, 'username'))->id 
+                        : User::firstWhere('realname', Arr::get($hist, 'realname'))->id,
+                    'created_at' => $hist['date'],
+                    'comment' => $hist['comment']
                 ])
             );
     }
