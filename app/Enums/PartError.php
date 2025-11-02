@@ -64,6 +64,7 @@ enum PartError: string
     case WarningMinifigCategory = 'warning.minifigcategory';
     case WarningNotCoplanar = 'warning.notcoplaner';
     case WarningStickerColor = 'warning.stickercolor';
+    case WarningLicense = 'warning.license';
 
     public function type(): CheckType
     {

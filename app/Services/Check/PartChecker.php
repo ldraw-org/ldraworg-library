@@ -37,6 +37,7 @@ use App\Services\Check\Contracts\SettingsAwareCheck;
 use App\Services\Check\PartChecks\AliasInParts;
 use App\Services\Check\PartChecks\BfcIsCcw;
 use App\Services\Check\PartChecks\LibraryApprovedLicense;
+use App\Services\Check\PartChecks\LibraryLicenseWarning;
 use App\Services\Parser\ParsedPartCollection;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Collection;
@@ -194,6 +195,7 @@ class PartChecker
         ];
         if (!is_null($this->libraryPart) && $this->libraryPart->isUnofficial()) {
             $checks[] = new MinifigCategoryWarning();
+            $checks[] = new LibraryLicenseWarning();          
         }
         $this->runChecks($checks);
         return $this->messages;

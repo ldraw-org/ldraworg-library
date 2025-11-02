@@ -46,6 +46,6 @@ class CheckMessage
 
     public function message(): string
     {
-       return __("newpartcheck.{$this->error->value}", ['line' => $this->lineNumber, 'value' => $this->value, 'type' => $this->type]);
+       return __("partcheck.{$this->error->value}", ['line' => $this->lineNumber, 'value' => $this->value, 'type' => $this->type]);
     }
 }

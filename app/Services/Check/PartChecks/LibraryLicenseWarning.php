@@ -8,12 +8,12 @@ use App\Services\Check\Contracts\Check;
 use App\Services\Parser\ParsedPartCollection;
 use Closure;
 
-class LibraryApprovedLicense implements Check
+class LibraryLicenseWarning implements Check
 {
     public function check(ParsedPartCollection $part, Closure $message): void
     {
-        if (is_null($part->license())) {
-            $message(error: PartError::LicenseNotLibraryApproved);
+        if ($part->license() != License::CC_BY_4) {
+            $message(error: PartError::WarningLicense);
         }
     }
 }

@@ -11,17 +11,17 @@ return [
     'obsoleteimproper' => 'An obsolete part must have the category Obsolete and ~Obsolete file or (Obsolete) in the description',
 
     'line' => [
-        'invalid' => 'Line :value invalid',
-        'invalidmeta' => 'Line :value, invalid META command or comment without //',
-        'invalidcolor' => 'Line :value, color code not in LDConfig.ldr',
-        'invalidcolor16' => 'Line :value, color code 16 not allowed for linetypes 2, 5',
-        'invalidcolor24' => 'Line :value, color code 24 not allowed for linetypes 1, 3, 4',
-        'invalidnumbers' => 'Line :value invalid',
-        'singular' => 'Line :value, singular rotation matrix',
-        'identicalpoints' => 'Line :value, identical points',
-        'colinear' => 'Line :value, points are colinear',
-        'notconvex' => 'Line :value, quad is concave or bowtie',
-        'notcoplaner' => 'Line :value, quad is not coplanar (angle :angle)',
+        'invalid' => 'Line :line invalid',
+        'invalidmeta' => 'Line :line, invalid META command or comment without //',
+        'invalidcolor' => 'Line :line, color code not in LDConfig.ldr',
+        'invalidcolor16' => 'Line :line, color code 16 not allowed for linetypes 2, 5',
+        'invalidcolor24' => 'Line :line, color code 24 not allowed for linetypes 1, 3, 4',
+        'invalidnumbers' => 'Line :line invalid',
+        'singular' => 'Line :line, singular rotation matrix',
+        'identicalpoints' => 'Line :line, identical points',
+        'colinear' => 'Line :line, points are colinear (angle :value)',
+        'notconvex' => 'Line :line, quad is concave or bowtie',
+        'notcoplaner' => 'Line :line, quad is not coplanar (angle :value)',
     ],
 
     'name' => [
@@ -41,7 +41,7 @@ return [
     ],
 
     'type' => [
-        'path' =>  'Path in Name: (:name) is invalid for !LDRAW_ORG part type (:type)',
+        'path' =>  'Path in Name: (:value) is invalid for !LDRAW_ORG part type (:type)',
         'phycolor' => 'Physical Color parts are no longer accepted',
         'alias' => 'Alias parts must have type Part or Shortcut',
         'flex' => 'Flexible Section parts must be of type Part',
@@ -52,7 +52,7 @@ return [
     ],
 
     'license' => [
-        'approved' => 'All parts are required to be CC BY 4.0',
+        'approved' => '!LICENSE line does not specify an approved license',
     ],
 
     'category' => [
@@ -86,7 +86,8 @@ return [
 
     'warning' => [
         'minifigcategory' => 'Ensure correct Minifig category',
-        'notcoplaner' => 'Line :value, quad is not coplanar (angle :angle)',
+        'notcoplaner' => 'Line :line, quad is not coplanar (angle :value)',
         'stickercolor' => 'Ensure stickers that are not color 16 are applied to defined transparent surfaces',
+        'license' => 'Parts without CC BY 4.0 license may not be released',
     ]
 ];

@@ -80,7 +80,7 @@ class Submit extends Component implements HasSchemas
                                 if ($part->type() == PartType::Primitive || $part->type()?->inPartsFolder()) {
                                     $searchFolder = $part->type() == PartType::Primitive ? 'parts/' : 'p/';
                                     if ($pparts->where('filename', "{$searchFolder}{$partname}")->isNotEmpty()) {
-                                        $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('newpartcheck.duplicate', ['type' => $part->type() == PartType::Primitive ? 'Parts' : 'Primitive']);
+                                        $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.duplicate', ['type' => $part->type() == PartType::Primitive ? 'Parts' : 'Primitive']);
                                     }
                                 }
 
