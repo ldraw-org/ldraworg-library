@@ -74,7 +74,7 @@ class ValidLines implements Check
                             return;
                         }
                         $angle = $vector->hasColinearPoints($points);
-                        if ($angle !== false) {
+                        if ($angle > config('ldraw.check.max_point_angle') || $angle < config('ldraw.check.min_point_angle')) {
                             $message(error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle);
                         }
                         break;
@@ -96,7 +96,7 @@ class ValidLines implements Check
                             return;
                         }
                         $angle = $vector->hasColinearPoints($points);
-                        if ($angle !== false) {
+                        if ($angle > config('ldraw.check.max_point_angle') || $angle < config('ldraw.check.min_point_angle')) {
                             $message(error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle);
                             return;
                         }
@@ -109,8 +109,6 @@ class ValidLines implements Check
                         $angle = $vector->getMaxCoplanarAngle($points);
                         if ($angle > config('ldraw.check.coplanar_angle_error')) {
                             $message(error: PartError::QuadNotCoplanar, lineNumber: $line['line_number'], value: $angle);
-                        } elseif ($angle > config('ldraw.check.coplanar_angle_warning')) {
-                            // $message(error: PartError::WarningNotCoplanar, lineNumber: $line['line_number'], value: $angle);
                         }
                         break;
                     case '5':
