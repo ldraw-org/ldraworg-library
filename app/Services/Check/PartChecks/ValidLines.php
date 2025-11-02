@@ -74,7 +74,7 @@ class ValidLines implements Check
                             return;
                         }
                         $angle = $vector->hasColinearPoints($points);
-                        if ($angle > config('ldraw.check.max_point_angle') || $angle < config('ldraw.check.min_point_angle')) {
+                        if ($angle !== false) {
                             $message(error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle);
                         }
                         break;
@@ -96,7 +96,7 @@ class ValidLines implements Check
                             return;
                         }
                         $angle = $vector->hasColinearPoints($points);
-                        if ($angle > config('ldraw.check.max_point_angle') || $angle < config('ldraw.check.min_point_angle')) {
+                        if ($angle !== false) {
                             $message(error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle);
                             return;
                         }

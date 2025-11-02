@@ -21,6 +21,9 @@ class QuadNotCoplanarWarning implements Check
                     [(float) $line['x3'], (float) $line['y3'], (float) $line['z3']],
                     [(float) $line['x4'], (float) $line['y4'], (float) $line['z4']],
                 ];
+                if ($vector->hasColinearPoints($points) !== false) {
+                    return;
+                }
                 $angle = $vector->getMaxCoplanarAngle($points);
                 if ($angle >= config('ldraw.check.coplanar_angle_warning') && $angle < config('ldraw.check.coplanar_angle_error')) {
                     $message(error: PartError::WarningNotCoplanar, lineNumber: $line['line_number'], value: $angle);
