@@ -84,12 +84,12 @@ class ParsedPartCollection extends Collection
 
     public function type(): ?PartType
     {
-        return PartType::tryFrom(Arr::get($this->getFirstMeta('ldraworg') ?? [], 'type'));  
+        return PartType::tryFrom(Arr::get($this->getFirstMeta('ldraworg') ?? [], 'type', ''));  
     }
 
     public function type_qualifier(): ?PartTypeQualifier
     {
-        return PartTypeQualifier::tryFrom(Arr::get($this->getFirstMeta('ldraworg') ?? [], 'type_qualifier'));  
+        return PartTypeQualifier::tryFrom(Arr::get($this->getFirstMeta('ldraworg') ?? [], 'type_qualifier', ''));  
     }
 
     public function license(): ?License
