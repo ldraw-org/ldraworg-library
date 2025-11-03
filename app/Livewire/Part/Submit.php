@@ -2,15 +2,16 @@
 
 namespace App\Livewire\Part;
 
+use App\Enums\PartError;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Utilities\Get;
 use App\Enums\PartType;
-use App\Enums\CheckType;
 use App\Enums\Permission;
 use App\Services\LDraw\LDrawFile;
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
+use App\Services\Check\CheckMessage;
 use App\Services\Check\PartChecker;
 use App\Services\Parser\ParsedPartCollection;
 use Closure;
@@ -61,7 +62,7 @@ class Submit extends Component implements HasSchemas
                             // Check if the fileformat is text or png
                             $mimeType = $mimeType = $this->getMimeType($value);
                             if (is_null($mimeType)) {
-                                $this->part_errors[] = "{$value->getClientOriginalName()}: Incorrect file type";
+                                $this->part_errors[$value->getClientOriginalName()][] = CheckMessage::fromPartError(PartError::InvalidFileFormat);
                                 $fail('File errors');
                                 return;
                             }
@@ -80,12 +81,15 @@ class Submit extends Component implements HasSchemas
                                 if ($part->type() == PartType::Primitive || $part->type()?->inPartsFolder()) {
                                     $searchFolder = $part->type() == PartType::Primitive ? 'parts/' : 'p/';
                                     if ($pparts->where('filename', "{$searchFolder}{$partname}")->isNotEmpty()) {
-                                        $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.duplicate', ['type' => $part->type() == PartType::Primitive ? 'Parts' : 'Primitive']);
+                                        $this->part_errors[$value->getClientOriginalName()][] = CheckMessage::fromArray([
+                                            'error' => PartError::DuplicateFile,
+                                            'value' => $part->type() == PartType::Primitive ? 'Parts' : 'Primitive',
+                                        ]);
                                     }
                                 }
 
                                 foreach ($errors as $error) {
-                                    $this->part_errors[] = "{$value->getClientOriginalName()}: {$error->message()}";
+                                    $this->part_errors[$value->getClientOriginalName()][] = $error;
                                 }
                             } elseif ($mimeType == 'image/png') {
                                 $filename = $value->getClientOriginalName();
@@ -95,11 +99,11 @@ class Submit extends Component implements HasSchemas
 
                             // Check if the part already exists on the tracker
                             if ($unofficial_exists && $get('replace') !== true) {
-                                $this->part_errors[] = "{$value->getClientOriginalName()}: " . __('partcheck.replace');
+                                $this->part_errors[$value->getClientOriginalName()][] = CheckMessage::fromPartError(PartError::ReplaceNotSelected);
                             }
 
                             if ($official_exists && !$unofficial_exists && $get('official_fix') !== true) {
-                                $this->part_errors[] = "{$value->getClientOriginalName()}: You must select Official File Fix to submit official part fixes";
+                                $this->part_errors[$value->getClientOriginalName()][] = CheckMessage::fromPartError(PartError::FixNotSelected);
                             }
 
                             if (count($this->part_errors) > 0) {

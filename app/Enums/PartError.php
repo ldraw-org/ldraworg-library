@@ -9,6 +9,12 @@ enum PartError: string
 {
     use CanBeOption;
 
+    case InvalidFileFormat = 'fileformat';
+    case DuplicateFile = 'duplicate';
+
+    case ReplaceNotSelected = 'replace';
+    case FixNotSelected = 'fix.checked';
+    
     case MissingHeaderMeta = 'missing';
     case CircularReference = 'circularreference';
     case BfcNotCcw = 'bfc';

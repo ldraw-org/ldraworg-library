@@ -4,8 +4,9 @@ namespace App\Services\Check;
 
 use App\Enums\PartError;
 use Illuminate\Support\Arr;
+use Livewire\Wireable;
 
-class CheckMessage 
+class CheckMessage implements Wireable
 {
     private function __construct(
         public PartError $error,
@@ -14,6 +15,16 @@ class CheckMessage
         public ?string $type = null,
         public ?string $text = null,
     ) {
+    }
+
+    public function toLivewire()
+    {
+        return $this->toArray();
+    }
+ 
+    public static function fromLivewire($value)
+    {
+        return self::fromArray($value);
     }
 
     public static function fromPartError(PartError $error): self

@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'fileformat' => 'The file :attribute is invalid (:value)',
-    'duplicate' => 'A :type already exists with this name',
+    'fileformat' => 'Files can only be text or png images',
+    'duplicate' => 'A :value already exists with this name',
     'missing' => 'Invalid/missing :attribute line',
     'circularreference' => 'Has a self referring Type 1 line',
     'bfc' => 'All parts must be BFC CERTIFY CCW',

@@ -6,13 +6,31 @@
         Parts Tracker File Submit Form
     </div>
     <div>
-        @if (count($this->part_errors) > 0)
+        @forelse($this->part_errors as $part => $error_list)
             <x-message icon type="error">
-                @foreach($this->part_errors as $error)
-                    {{$error}}<br>
-                @endforeach
-            </x-message>
-        @endif
+                <x-slot:header>{{ $part }}</x-slot>
+                <ul>
+                    @foreach($error_list as $error)
+                        <li>
+                            @if (!is_null($error->text))
+                                <x-accordion id="partError{{$loop->iteration}}">
+                                    <x-slot name="header">
+                                        <div>{{$error->message()}}</div>
+                                    </x-slot>
+                                    <div class="px-4 text-black">
+                                        Line text: {{ $error->text }}
+                                    </div>
+                                </x-accordion>
+                            @else
+                                {{ $error->message() }}
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+           </x-message>
+        @empty
+            {{-- Do nothing --}}
+        @endforelse
     </div>
     <form wire:submit="create">
         {{ $this->form }}
