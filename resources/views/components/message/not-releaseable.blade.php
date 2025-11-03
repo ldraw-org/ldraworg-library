@@ -61,8 +61,18 @@
         <ul>
             @foreach($part->warnings as $error)
                 <li wire:key="part-warning-{{$loop->iteration}}">
-                    {{$error->message()}}
-                </li>
+                    @if (!is_null($error->text))
+                        <x-accordion id="partWarning{{$loop->iteration}}{{ str_replace('.', '', $error->error->value) }}">
+                            <x-slot name="header">
+                                <div>{{$error->message()}}</div>
+                            </x-slot>
+                            <div class="px-4 text-black">
+                                Line text: {{ $error->text }}
+                            </div>
+                        </x-accordion>
+                    @else
+                        {{$error->message()}}
+                    @endif
             @endforeach
         </ul>
     </x-message>
