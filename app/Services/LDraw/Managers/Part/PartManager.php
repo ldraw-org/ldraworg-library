@@ -22,7 +22,6 @@ use App\Services\Parser\ParsedPartCollection;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
@@ -368,7 +367,7 @@ class PartManager
     public function loadSubparts(Part $part): void
     {
         $hadMissing = is_array($part->missing_parts) && count($part->missing_parts) > 0;
-        $part->setSubparts((new ParsedPartCollection($part->body->body))->subparts());
+        $part->setSubparts((new ParsedPartCollection($part->body->body))->subparts() ?? []);
         if ($hadMissing) {
             $part->refresh();
             $this->updateImage($part);
