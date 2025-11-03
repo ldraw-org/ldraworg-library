@@ -8,7 +8,7 @@
             @foreach($part->tracker_holds as $error)
                 @if ($error->error == \App\Enums\PartError::TrackerHasUncertifiedSubfiles->value)
                     <li wire:key="part-tracker_holds-{{$loop->iteration}}">
-                        <x-accordion id="showContents">
+                        <x-accordion id="uncertSubparts">
                             <x-slot name="header">
                                 <div>{{$error->message()}}</div>
                             </x-slot>
@@ -20,7 +20,7 @@
                         </x-accordion>
                     </li>
                 @else
-                    <li wire:key="part-error-{{$loop->iteration}}">
+                    <li wire:key="part-tracker_holds-{{$loop->iteration}}">
                         {{$error->message()}}
                     </li>
                 @endif
@@ -36,7 +36,18 @@
         <ul>
             @foreach($part->errors as $error)
                 <li wire:key="part-error-{{$loop->iteration}}">
-                    {{$error->message()}}
+                    @if (!is_null($error->text))
+                        <x-accordion id="partError{{$loop->iteration}}{{ str_replace('.', '', $error->error->value) }}">
+                            <x-slot name="header">
+                                <div>{{$error->message()}}</div>
+                            </x-slot>
+                            <div class="px-4 text-black">
+                                Line text: {{ $error->text }}
+                            </div>
+                        </x-accordion>
+                    @else
+                        {{$error->message()}}
+                    @endif
                 </li>
             @endforeach
         </ul>

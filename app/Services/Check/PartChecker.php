@@ -87,9 +87,9 @@ class PartChecker
         }
     }
 
-    public function add(PartError $error, ?int $lineNumber = null, ?string $value = null, ?string $type = null): void
+    public function add(PartError $error, ?int $lineNumber = null, ?string $value = null, ?string $type = null, ?string $text = null): void
     {
-        $this->messages->push(CheckMessage::fromArray(compact(['error', 'lineNumber', 'value', 'type'])));
+        $this->messages->push(CheckMessage::fromArray(compact(['error', 'lineNumber', 'value', 'type', 'text'])));
     }
 
     public static function singleCheck(ParsedPartCollection|Part $part, Check $check, ?string $filename = null): Collection
@@ -105,8 +105,8 @@ class PartChecker
             $check->setSettings(app(LibrarySettings::class));
         }
         $message = new Collection();
-        $add = function (PartError $error, ?int $lineNumber = null, ?string $value = null, ?string $type = null) use (&$message) {
-            $message->push(CheckMessage::fromArray(compact(['error', 'lineNumber', 'value', 'type'])));
+        $add = function (PartError $error, ?int $lineNumber = null, ?string $value = null, ?string $type = null, ?string $text = null) use (&$message) {
+            $message->push(CheckMessage::fromArray(compact(['error', 'lineNumber', 'value', 'type', 'text'])));
         };
         $check->check($part, \Closure::fromCallable($add));
         return $message;

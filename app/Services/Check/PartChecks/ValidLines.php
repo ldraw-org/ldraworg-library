@@ -22,7 +22,7 @@ class ValidLines implements Check
         if ($part->hasInvalidLines()) {
             $part->where('invalid', true)
                 ->sortby('line_number')
-                ->each(fn (array $line) => $message(error: PartError::LineInvalid, lineNumber: $line['line_number']));
+                ->each(fn (array $line) => $message(error: PartError::LineInvalid, lineNumber: $line['line_number'], text: $line['text']));
         }
         $codes = Cache::get('ldraw_colour_codes', LdrawColour::pluck('code')->all());
         $vector = new VectorMath();
@@ -31,13 +31,13 @@ class ValidLines implements Check
             ->sortby('line_number')
             ->each(function (array $line) use ($codes, $message, $vector) {
                 if (Str::doesntStartWith($line['color'], '0x') && !in_array($line['color'], $codes)) {
-                    $message(error: PartError::InvalidLineColor, lineNumber: $line['line_number']);
+                    $message(error: PartError::InvalidLineColor, lineNumber: $line['line_number'], text: $line['text']);
                 }
                 if ($line['color'] == '24' && in_array($line['linetype'], ['1','3','4'])) {
-                    $message(error: PartError::InvalidColor24, lineNumber: $line['line_number']);
+                    $message(error: PartError::InvalidColor24, lineNumber: $line['line_number'], text: $line['text']);
                 }
                 if ($line['color'] == '16' && in_array($line['linetype'], ['2','5'])) {
-                    $message(error: PartError::InvalidColor16, lineNumber: $line['line_number']);
+                    $message(error: PartError::InvalidColor16, lineNumber: $line['line_number'], text: $line['text']);
                 }
                 switch ($line['linetype']) {
                     case '1':
@@ -48,7 +48,7 @@ class ValidLines implements Check
                             [0, 0, 0, 1],
                         ]);
                         if ($matrix->isSingular()) {
-                            $message(error: PartError::RotationMatrixIsSingular, lineNumber: $line['line_number']);
+                            $message(error: PartError::RotationMatrixIsSingular, lineNumber: $line['line_number'], text: $line['text']);
                         }
                         break;
                     case '2':
@@ -70,12 +70,12 @@ class ValidLines implements Check
                             $points[1] == $points[2] ||
                             $points[2] == $points[0]
                         ) {
-                            $message(error: PartError::IdenticalPoints, lineNumber: $line['line_number']);
+                            $message(error: PartError::IdenticalPoints, lineNumber: $line['line_number'], text: $line['text']);
                             return;
                         }
                         $angle = $vector->hasColinearPoints($points);
                         if ($angle !== false) {
-                            $message(error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle);
+                            $message(error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle, text: $line['text']);
                         }
                         break;
                     case '4':
@@ -92,23 +92,23 @@ class ValidLines implements Check
                             $points[0] == $points[2] ||
                             $points[3] == $points[1]
                         ) {
-                            $message(error: PartError::IdenticalPoints, lineNumber: $line['line_number']);
+                            $message(error: PartError::IdenticalPoints, lineNumber: $line['line_number'], text: $line['text']);
                             return;
                         }
                         $angle = $vector->hasColinearPoints($points);
                         if ($angle !== false) {
-                            $message(error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle);
+                            $message(error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle, text: $line['text']);
                             return;
                         }
             
                         if (!$vector->isConvexQuad($points)) {
-                            $message(error: PartError::QuadNotConvex, lineNumber: $line['line_number']);
+                            $message(error: PartError::QuadNotConvex, lineNumber: $line['line_number'], text: $line['text']);
                             return;
                         }
             
                         $angle = $vector->getMaxCoplanarAngle($points);
                         if ($angle > config('ldraw.check.coplanar_angle_error')) {
-                            $message(error: PartError::QuadNotCoplanar, lineNumber: $line['line_number'], value: $angle);
+                            $message(error: PartError::QuadNotCoplanar, lineNumber: $line['line_number'], value: $angle, text: $line['text']);
                         }
                         break;
                     case '5':
@@ -120,7 +120,7 @@ class ValidLines implements Check
                         ]);
                         if ($points[0] == $points[1] ||
                             $points[2] == $points[3]) {
-                            $message(error: PartError::IdenticalPoints, lineNumber: $line['line_number']);
+                            $message(error: PartError::IdenticalPoints, lineNumber: $line['line_number'], text: $line['text']);
                         }
                         break;
                 }
