@@ -73,6 +73,7 @@
                     @else
                         {{$error->message()}}
                     @endif
+                </li>
             @endforeach
         </ul>
     </x-message>
