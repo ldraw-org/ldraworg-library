@@ -38,8 +38,8 @@ class MenuItem extends Component
         $sets = Set::select(['id', 'name', 'number'])->where(function (Builder $q) {
             $q->orWhereLike('number', "%{$this->tableSearch}%")
                 ->orWhereLike('name', "%{$this->tableSearch}%")
-                ->orWhereHas('models', fn (Builder $qu) => $qu->whereLike('alt_model_name', "%{$this->tableSearch}%"))
-                ->orWhereHas('theme', fn (Builder $qu) => $qu->whereLike('name', "%{$this->tableSearch}%"));
+                ->orWhereRelation('models', 'alt_model_name', 'LIKE', "%{$this->tableSearch}%")
+                ->orWhereRelation('theme', 'name', 'LIKE', "%{$this->tableSearch}%");
         })->orderBy('name')->take($limit)->get();
         if ($sets->isNotEmpty()) {
             foreach ($sets as $set) {
