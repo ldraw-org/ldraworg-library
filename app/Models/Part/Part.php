@@ -695,7 +695,6 @@ class Part extends Model implements HasMedia
                     })
                 )
                 ->all();
-            dd($subs);
             $subps = Part::whereIn('filename', $subs)->where('filename', '<>', $this->filename)->get();
             $this->subparts()->sync($subps->pluck('id')->all());
 
