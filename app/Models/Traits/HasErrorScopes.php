@@ -17,7 +17,7 @@ trait HasErrorScopes
     #[Scope]
     protected function doesntHaveErrors(Builder $query): void
     {
-        $query->whereJsonLength('errors', '=', 0);
+        $query->whereJsonLength('errors', 0);
     }
 
     #[Scope]
@@ -29,7 +29,7 @@ trait HasErrorScopes
     #[Scope]
     protected function doesntHaveWarnings(Builder $query): void
     {
-        $query->whereJsonLength('warnings', '=', 0);
+        $query->whereJsonLength('warnings', 0);
     }
 
     #[Scope]
@@ -41,7 +41,7 @@ trait HasErrorScopes
     #[Scope]
     protected function doesntHaveTrackerHolds(Builder $query): void
     {
-        $query->whereJsonLength('tracker_holds', '=', 0);
+        $query->whereJsonLength('tracker_holds', 0);
     }
 
     #[Scope]
