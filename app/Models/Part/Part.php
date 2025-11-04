@@ -358,6 +358,11 @@ class Part extends Model implements HasMedia
             ->get();
     }
 
+    public function isText(): bool
+    {
+        return $this->type->isDatFormat();
+    }
+
     public function isTexmap(): bool
     {
         return $this->type->isImageFormat();
@@ -441,22 +446,25 @@ class Part extends Model implements HasMedia
 
     public function lastChange(): Carbon
     {
-        $recent_change = $this->events()
-            ->whereIn(
-                'event_type',
-                [EventType::Submit, EventType::Rename, EventType::HeaderEdit, EventType::Release]
-            )
-            ->latest()
-            ->first();
-        if (is_null($recent_change)) {
-            return $this->isUnofficial() ? $this->created_at : $this->release->created_at;
+        if ($this->isOfficial()) {
+            $recent_change = $this->release->created_at;
+        } else {
+            $most_recent_event = $this->events()
+                ->unofficial()
+                ->whereIn(
+                    'event_type',
+                    [EventType::Submit, EventType::Rename, EventType::HeaderEdit, EventType::Release]
+                )
+                ->latest()
+                ->first();
+            $recent_change = $most_recent_event?->created_at ?? $this->created_at;
         }
         // Zip files only save in 2 sec, even increments
         // This ensures consistancy in time reporting
-        if ($recent_change->created_at->format('U') % 2 == 1) {
-            return $recent_change->created_at->subSecond();
+        if ($recent_change->format('U') % 2 == 1) {
+            return $recent_change->subSecond();
         }
-        return $recent_change->created_at;
+        return $recent_change;
     }
 
     public function libFolder(): string

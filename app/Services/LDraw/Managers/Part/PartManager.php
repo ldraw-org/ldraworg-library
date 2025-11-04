@@ -380,9 +380,14 @@ class PartManager
     public function checkPart(Part $part, ?string $filename = null): void
     {
         $checker = new PartChecker($part);
-        $part->errors = $checker->errorCheck($filename);
+        if ($part->isText()) {
+            $part->errors = $checker->errorCheck($filename);
+            $part->warnings = $checker->warningChecks();          
+        } else {
+            $part->errors = collect([]);
+            $part->warnings = collect([]);
+        }
         $part->tracker_holds = $checker->trackerChecks();
-        $part->warnings = $checker->warningChecks();
         $part->can_release = $part->isOfficial() || ($part->errors->isEmpty() && $part->tracker_holds->isEmpty());
         $part->updateReadyForAdmin();
         $part->save();
