@@ -6,9 +6,9 @@
         </x-slot:header>
         <ul>
             @foreach($part->tracker_holds as $error)
-                @if ($error->error == \App\Enums\PartError::TrackerHasUncertifiedSubfiles->value)
+                @if ($error->error == \App\Enums\PartError::TrackerHasUncertifiedSubfiles)
                     <li wire:key="part-tracker_holds-{{$loop->iteration}}">
-                        <x-accordion id="uncertSubparts">
+                        <x-accordion id="partTrackerHoldsUncertSubparts">
                             <x-slot name="header">
                                 <div>{{$error->message()}}</div>
                             </x-slot>
