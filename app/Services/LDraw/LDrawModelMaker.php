@@ -47,7 +47,7 @@ class LDrawModelMaker
         $subs = $subparts
             ->map( function (string $subpart) {
                 $subpart = Str::of($subpart)->replace('\\', '/');
-                if (pathinfo($subpart, PATHINFO_EXTENSION) == '.png') {
+                if (pathinfo($subpart, PATHINFO_EXTENSION) == 'png') {
                     return $subpart->prepend('parts/textures/')->toString();
                 }
                 return $subpart->prepend('parts/')->toString();
@@ -56,7 +56,7 @@ class LDrawModelMaker
                 $subparts
                 ->map( function (string $subpart) {
                     $subpart = Str::of($subpart)->replace('\\', '/');
-                    if (pathinfo($subpart, PATHINFO_EXTENSION) == '.png') {
+                    if (pathinfo($subpart, PATHINFO_EXTENSION) == 'png') {
                         return $subpart->prepend('p/textures/')->toString();
                     }
                     return $subpart->prepend('p/')->toString();

@@ -679,7 +679,7 @@ class Part extends Model implements HasMedia
             $subs = $subparts
                 ->map( function (string $subpart) {
                     $subpart = Str::of($subpart)->replace('\\', '/');
-                    if (pathinfo($subpart, PATHINFO_EXTENSION) == '.png') {
+                    if (pathinfo($subpart, PATHINFO_EXTENSION) == 'png') {
                         return $subpart->prepend('parts/textures/')->toString();
                     }
                     return $subpart->prepend('parts/')->toString();
@@ -688,13 +688,14 @@ class Part extends Model implements HasMedia
                     $subparts
                     ->map( function (string $subpart) {
                         $subpart = Str::of($subpart)->replace('\\', '/');
-                        if (pathinfo($subpart, PATHINFO_EXTENSION) == '.png') {
+                        if (pathinfo($subpart, PATHINFO_EXTENSION) == 'png') {
                             return $subpart->prepend('p/textures/')->toString();
                         }
                         return $subpart->prepend('p/')->toString();
                     })
                 )
                 ->all();
+            dd($subs);
             $subps = Part::whereIn('filename', $subs)->where('filename', '<>', $this->filename)->get();
             $this->subparts()->sync($subps->pluck('id')->all());
 
