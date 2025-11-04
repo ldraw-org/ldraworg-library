@@ -78,13 +78,19 @@ class EditHeaderAction
                 ->string()
                 ->rules([
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part, $get) {
-                        $checker = new PartChecker($part);
-                        $errors = $checker->runChecks(new LibraryApprovedDescription());
+                        $check_part = [
+                            'description' => "0 {$value}",
+                            'name' => "0 Name: {$part->metaName}",
+                            'category' => PartCategory::tryFrom($get('category') ?? '')?->ldrawString(),
+                            'keywords' => '0 !KEYWORDS ' . collect(explode(',', Str::of($get('keywords'))->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->implode(', ')
+                        ];
+                        $check_part = new ParsedPartCollection(implode("\n", $check_part));
+                        $errors = PartChecker::singleCheck($check_part, new LibraryApprovedDescription());
                         if ($errors->isNotEmpty()) {
                             $fail($errors->first()->message());
                             return;
                         }
-                        $errors = $checker->runChecks(new PatternPartDescription());
+                        $errors = PartChecker::singleCheck($check_part, new PatternPartDescription());
                         if ($errors->isNotEmpty()) {
                             $fail($errors->first()->message());
                         }
