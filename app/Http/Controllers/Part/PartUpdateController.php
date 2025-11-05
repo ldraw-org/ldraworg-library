@@ -23,7 +23,7 @@ class PartUpdateController extends Controller
         if ($request->has('latest')) {
             $releases = PartRelease::current();
         } else {
-            $releases = PartRelease::latest()->get();
+            $releases = PartRelease::with('media')->latest()->get();
         }
         return view('tracker.release.index', ['releases' => $releases , 'latest' => $request->has('latest')]);
     }
