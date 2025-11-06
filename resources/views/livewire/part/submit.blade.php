@@ -6,7 +6,7 @@
         Parts Tracker File Submit Form
     </div>
     <div>
-        @forelse($this->part_errors as $part => $error_list)
+        @forelse($part_errors as $part => $error_list)
             <x-message icon type="error">
                 <x-slot:header>{{ $part }}</x-slot>
                 <ul>
@@ -59,7 +59,7 @@
                 @foreach ($submitted_parts as $p)
                     <tr class="*:p-2">
                         <td>
-                            <img class="ui centered image" src="{{$p['image']}}" alt='part thumb image' title="part_thumb">
+                            <img class="object-scale-down w-[35px] max-h-[75px]" src="{{$p['image']}}" alt='part thumb image' title="part_thumb">
                         </td>
                         <td>{{$p['filename']}}</td>
                         <td>
@@ -69,8 +69,46 @@
                 @endforeach 
             </tbody>
         </table>
-        <x-filament::button wire:click="postSubmit">
+        <p>
+            The following files were rejected:
+        </p>
+        <div>
+            @empty($rejected_files)
+              None
+            @else
+                {{ $rejected_files }}
+            @endempty
+        </div>
+        <x-filament::button @click="$dispatch('close-modal', { id: 'post-submit' })">
             Ok
         </x-filament::button>
     </x-filament::modal>
+    @script
+        <script type="text/javascript">
+            $wire.on('FilePond:processfile', (e) => {
+                $wire.checkFile(e.file.filename, e.file.id);              
+            });
+            $wire.on('FilePond:removefile', (e) => {
+                $wire.removeFile(e.file.filename);              
+            });
+            $wire.on('failFile', (filename) => {
+                const files = document.querySelectorAll('.filepond--file-info-main');
+                files.forEach(element => {
+                    if (element.textContent == filename) {
+                        const fileinput = element.closest('.filepond--item');
+                        fileinput.dataset.filepondItemState = "error";
+                    }
+                });
+            });
+            $wire.on('passFile', (filename) => {
+                const files = document.querySelectorAll('.filepond--file-info-main');
+                files.forEach(element => {
+                    if (element.textContent == filename) {
+                        const fileinput = element.closest('.filepond--item');
+                        fileinput.dataset.filepondItemState = "processing-complete";
+                    }
+                });
+            });
+        </script>
+    @endscript
 </div>
