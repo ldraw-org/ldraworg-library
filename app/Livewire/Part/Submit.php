@@ -223,7 +223,9 @@ class Submit extends Component implements HasSchemas
                 break;
             default:
                 $errors->push(CheckMessage::fromPartError(PartError::InvalidFileFormat));
-                continue;
+                $this->part_errors[$file->getClientOriginalName()] = $errors->values()->all();
+                $this->dispatch('failFile', $filename);
+                return;
         }
             // Check if the part already exists on the tracker
         if ($unofficial_exists && $this->data['replace'] !== true) {
