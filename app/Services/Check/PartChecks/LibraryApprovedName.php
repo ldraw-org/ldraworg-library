@@ -11,7 +11,7 @@ class LibraryApprovedName implements Check
 {
     public function check(ParsedPartCollection $part, Closure $message): void
     {
-        if (! preg_match(config('ldraw.patterns.library_approved_name'), $part->name(), $matches)) {
+        if (! preg_match('~^[^\p{C}\p{Zl}\p{Zp}]+$~u', $part->name(), $matches)) {
             $message(PartError::PartNameInvalid);
         }
     }

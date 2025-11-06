@@ -20,7 +20,6 @@ class ImprovedParser {
 
         'name' => '#^\h*(?<linetype>0)\h+Name:\h*(?P<name>[^\h]+)\h*$#u',
         'basepart' => '~^^(?<basepart>[uts]?\d+(?:[a-d][a-z]|[a-oq-z])?)~i',
-//        'suffix_validate' => '~(?<suffix>(?:(?:p(?:[0-9a-z]{2}|\d{4}|[cd][0-9a-z][0-9a-l])|c[0-9a-z]{2}|d[0-9a-z]{2}|k\d{2})+)?(?:-f\d+)?)$~i',
         'suffix_validate' => '~(?<suffix>(?:(?:p[a-z0-9]{2,4}|c[0-9a-z]{2}|d[0-9a-z]{2}|k[0-9a-z]{2})+)?(?:-f[0-9a-z])?)$~i',
         'suffix_extract'  => '~p(?:\d{4}|[cd][0-9a-z][0-9a-l]|[0-9a-z]{2})|c[a-z0-9]{2}|d[a-z0-9]{2}|k[0-9a-z]{2}|-f[0-9a-z]~i',
 
@@ -32,7 +31,7 @@ class ImprovedParser {
         'keywords' => '#^\h*(?<linetype>0)\h+!KEYWORDS\h+(?P<keywords>.*?)\h*$#u',
         'bfc' => '~^\h*(?<linetype>0)\h+BFC\h+(?<bfc>NOCERTIFY|CERTIFY|CW|CCW|CLIP|NOCLIP|INVERTNEXT)(?:\h+(?<winding>CW|CCW))?\h*$~iu',
         'cmdline' => '#^\h*(?<linetype>0)\h+!CMDLINE\h+(?P<cmdline>.*?)\h*$#u',
-        'preview' => '#^\h*(?<linetype>0)\h+!PREVIEW\h+(?<color>\d+)\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<a>-?(?:\d*\.\d+|\d+))\h+(?<b>-?(?:\d*\.\d+|\d+))\h+(?<c>-?(?:\d*\.\d+|\d+))\h+(?<d>-?(?:\d*\.\d+|\d+))\h+(?<e>-?(?:\d*\.\d+|\d+))\h+(?<f>-?(?:\d*\.\d+|\d+))\h+(?<g>-?(?:\d*\.\d+|\d+))\h+(?<h>-?(?:\d*\.\d+|\d+))\h+(?<i>-?(?:\d*\.\d+|\d+))\h*$#u',
+        'preview' => '~^\h*(?<linetype>0)\h+!PREVIEW\h+(?<color>\d+)\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<rotation_matrix>(?<a>-?(?:\d*\.\d+|\d+))\h+(?<b>-?(?:\d*\.\d+|\d+))\h+(?<c>-?(?:\d*\.\d+|\d+))\h+(?<d>-?(?:\d*\.\d+|\d+))\h+(?<e>-?(?:\d*\.\d+|\d+))\h+(?<f>-?(?:\d*\.\d+|\d+))\h+(?<g>-?(?:\d*\.\d+|\d+))\h+(?<h>-?(?:\d*\.\d+|\d+))\h+(?<i>-?(?:\d*\.\d+|\d+)))\h*$~u',
         'history' =>  '#^\h*(?<linetype>0)\h+!HISTORY\h+(?P<date>\d{4}-\d{2}-\d{2})\h+(?:\[(?P<username>[a-zA-Z0-9_.-]+)\]|\{(?P<realname>[^\}]+)\})\h+(?P<comment>.+?)\h*$#u',
 
         'comment' => '~^\h*(?<linetype>0)\h+\/\/(?:\h+(?P<comment>.*))$~u',
@@ -58,6 +57,7 @@ class ImprovedParser {
                 $this->patterns['ldraworg']
             );      
     }
+    
     public static function fixEncoding(string $text): string
     {
         $old_encode = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1', 'ASCII']);
