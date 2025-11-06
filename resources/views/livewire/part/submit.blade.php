@@ -47,6 +47,8 @@
         <p>
             The following files passed validation checks and have been submitted to the Parts Tracker
         </p>
+        <livewire:tables.submitted-parts-table :parts="$submitted_parts" />
+{{--  
         <table class="border border-gray-200 rounded-lg w-full">
             <thead class="border-b-2 border-b-black">
                 <tr class="*:bg-gray-200 *:font-bold *:justify-self-start *:p-2">
@@ -69,6 +71,7 @@
                 @endforeach 
             </tbody>
         </table>
+--}}
         <p>
             The following files were rejected:
         </p>
