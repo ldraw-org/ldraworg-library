@@ -102,8 +102,8 @@ class Submit extends Component implements HasSchemas
 
     public function create(): void
     {
-        $rejected_files = null;
-        $submitted_parts = [];
+        $this->rejected_files = null;
+        $this->submitted_parts = [];
         $manager = app(PartManager::class);
         $data = $this->form->getState();
         if (array_key_exists('user_id', $data) && Auth::user()->can(Permission::PartSubmitProxy)) {
