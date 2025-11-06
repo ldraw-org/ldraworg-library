@@ -3,7 +3,7 @@
 return [
     'fileformat' => 'Files can only be text or png images',
     'duplicate' => 'A :value already exists with this name',
-    'missing' => 'Invalid/missing :attribute line',
+    'missing' => 'Invalid/missing :value line',
     'circularreference' => 'Has a self referring Type 1 line',
     'bfc' => 'All parts must be BFC CERTIFY CCW',
     'previewinvalid' => 'Invalid PREVIEW line or singular/negative matrix',
