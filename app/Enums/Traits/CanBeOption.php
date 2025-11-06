@@ -6,7 +6,7 @@ trait CanBeOption
 {
     public function label(): string
     {
-        return preg_replace('/(.*?[a-z]{1})([A-Z]{1}.*?)/', '${1} ${2}', $this->name);
+        return preg_replace('/(?<=\p{Ll})(?=\p{Lu})|(?<=\p{L})(?=\p{N})|(?<=\p{N})(?=\p{L})/u', ' ', $this->name);
     }
 
     /**

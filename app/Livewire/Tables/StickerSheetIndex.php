@@ -63,7 +63,7 @@ class StickerSheetIndex extends BasicTable implements HasActions
                         'parts as stickers_need_votes_count' =>
                             function (Builder $q) {
                                 $q->where('category', PartCategory::Sticker)
-                                    ->where('part_status', PartStatus::NeedsMoreVotes);
+                                    ->whereIn('part_status', [PartStatus::Needs1MoreVote,PartStatus::Needs2MoreVotes]);
                             }
                     ])
                     ->visible(Auth::user()?->can(Permission::PartVoteCertify) ?? false),
@@ -77,9 +77,9 @@ class StickerSheetIndex extends BasicTable implements HasActions
                             function (Builder $q) {
                                 $q->where('category', PartCategory::StickerShortcut)
                                 ->unofficial()
-                                ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes])
+                                ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::Needs1MoreVote, PartStatus::Needs2MoreVotes])
                                 ->whereDoesntHave('subparts', function (Builder $q) {
-                                    $q->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound]);
+                                    $q->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::Needs1MoreVote,  PartStatus::Needs2MoreVotes, PartStatus::ErrorsFound]);
                                 });
                             }
                     ])

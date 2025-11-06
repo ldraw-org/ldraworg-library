@@ -86,7 +86,7 @@ class CategoryStatus extends BasicTable implements HasActions
                         'unofficial' => $status->forget(PartStatus::Official->value)->sum(),
                         'certified' => $status->get(PartStatus::Certified->value, 0),
                         'admin_ready' => $status->get(PartStatus::AwaitingAdminReview->value, 0),
-                        'needs_more_votes' => $status->get(PartStatus::NeedsMoreVotes->value, 0),
+                        'needs_more_votes' => $status->get(PartStatus::Needs1MoreVote->value, 0) + $status->get(PartStatus::Needs2MoreVotes->value, 0),
                         'held' => $status->get(PartStatus::ErrorsFound->value, 0),
                     ];
                 }

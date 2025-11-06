@@ -159,7 +159,7 @@ class PartChecker
     protected function hasAllSubpartsCertified(): bool
     {
         return $this->libraryPart->descendants()
-            ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])
+            ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::Needs2MoreVotes, PartStatus::Needs1MoreVote, PartStatus::ErrorsFound])
             ->doesntExist();
     }
 

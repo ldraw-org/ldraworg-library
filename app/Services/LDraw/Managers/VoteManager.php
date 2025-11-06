@@ -93,7 +93,7 @@ class VoteManager
         }
         $part
             ->descendantsAndSelf()
-            ->where('part_status', PartStatus::NeedsMoreVotes)
+            ->whereIn('part_status', [PartStatus::Needs2MoreVotes, PartStatus::Needs1MoreVote])
             ->whereDoesntHave('votes', fn (Builder $q) => $q->where('user_id', $user->id)->whereIn('vote_type', [VoteType::AdminReview, VoteType::AdminFastTrack]))
             ->unofficial()
             ->get()

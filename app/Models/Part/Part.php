@@ -354,7 +354,7 @@ class Part extends Model implements HasMedia
     {
         return $this
             ->descendants()
-            ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])
+            ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::Needs2MoreVotes, PartStatus::Needs1MoreVote, PartStatus::ErrorsFound])
             ->get();
     }
 
@@ -537,8 +537,10 @@ class Part extends Model implements HasMedia
 
         if ($data[VoteType::Hold->value] != 0) {
             $this->part_status = PartStatus::ErrorsFound;
+        } elseif (($data[VoteType::Certify->value] + $data[VoteType::AdminReview->value] < 1) && $data[VoteType::AdminFastTrack->value] == 0) {
+            $this->part_status = PartStatus::Needs2MoreVotes;
         } elseif (($data[VoteType::Certify->value] + $data[VoteType::AdminReview->value] < 2) && $data[VoteType::AdminFastTrack->value] == 0) {
-            $this->part_status = PartStatus::NeedsMoreVotes;
+            $this->part_status = PartStatus::Needs1MoreVote;
         } elseif ($data[VoteType::AdminFastTrack->value] == 0 && $data[VoteType::AdminReview->value] == 0 && $data[VoteType::Certify->value] >= 2) {
             $this->part_status = PartStatus::AwaitingAdminReview;
         } elseif (($data[VoteType::AdminReview->value] > 0 && ($data[VoteType::Certify->value] + $data[VoteType::AdminReview->value]) > 2) || $data[VoteType::AdminFastTrack->value] > 0) {
@@ -566,13 +568,13 @@ class Part extends Model implements HasMedia
         $old = $this->ready_for_admin;
         $this->ready_for_admin =
             in_array($this->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) &&
-            !$this->descendants()->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->exists();
+            !$this->descendants()->whereIn('part_status', [PartStatus::Needs1MoreVote, PartStatus::Needs2MoreVotes, PartStatus::ErrorsFound])->exists();
         if ($old != $this->ready_for_admin) {
             $this->saveQuietly();
             $this->ancestors->unique()->unofficial()->each(function (Part $p) {
                 $p->ready_for_admin =
                     in_array($p->part_status, [PartStatus::Certified, PartStatus::AwaitingAdminReview]) &&
-                    !$p->descendants()->whereIn('part_status', [PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound])->exists();
+                    !$p->descendants()->whereIn('part_status', [PartStatus::Needs1MoreVote, PartStatus::Needs2MoreVotes, PartStatus::ErrorsFound])->exists();
                 $p->saveQuietly();
             });
         }

@@ -74,7 +74,7 @@ class VotePolicy
         return $part->isUnofficial() &&
             $part->type->inPartsFolder() &&
             $part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::ErrorsFound)->isEmpty() &&
-            !$part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::NeedsMoreVotes)->isEmpty() &&
+            !$part->descendantsAndSelf->unofficial()->whereIn('part_status', [PartStatus::Needs2MoreVotes, PartStatus::Needs1MoreVote])->isEmpty() &&
             $this->vote($user, $part, VoteType::Certify) &&
             $user->can(Permission::PartVoteCertifyAll) &&
             !$this->settings->tracker_locked;

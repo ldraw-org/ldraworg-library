@@ -11,9 +11,10 @@ enum PartStatus: int
     case Official = 0;
     case Certified = 1;
     case AwaitingAdminReview = 2;
-    case NeedsMoreVotes = 3;
-    case UncertifiedSubfiles = 4;
-    case ErrorsFound = 5;
+    case Needs1MoreVote = 3;
+    case Needs2MoreVotes = 4;
+    case UncertifiedSubfiles = 5;
+    case ErrorsFound = 6;
 
     public function iconColor(): string
     {
@@ -21,7 +22,8 @@ enum PartStatus: int
             PartStatus::Official => 'fill-blue-800',
             PartStatus::Certified => 'fill-lime-400',
             PartStatus::AwaitingAdminReview => 'fill-blue-800',
-            PartStatus::NeedsMoreVotes => 'fill-gray-400',
+            PartStatus::Needs1MoreVote => 'fill-gray-400',
+            PartStatus::Needs2MoreVotes => 'fill-gray-600',
             PartStatus::UncertifiedSubfiles => 'fill-yellow-300',
             PartStatus::ErrorsFound => 'fill-red-500',
         };
@@ -41,7 +43,8 @@ enum PartStatus: int
             PartStatus::Official => '#1e40af',
             PartStatus::Certified => '#a3e635',
             PartStatus::AwaitingAdminReview => '#1e40af',
-            PartStatus::NeedsMoreVotes => '#9ca3af',
+            PartStatus::Needs1MoreVote => '#9ca3af',
+            PartStatus::Needs2MoreVotes => '#9ca3af',
             PartStatus::UncertifiedSubfiles => '#fde047',
             PartStatus::ErrorsFound => '#ef4444',
         };
@@ -50,7 +53,7 @@ enum PartStatus: int
     /** @return array<self> */
     public static function trackerStatus(): array
     {
-        return [PartStatus::Certified, PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound];
+        return [PartStatus::Certified, PartStatus::AwaitingAdminReview, PartStatus::Needs1MoreVote, PartStatus::Needs2MoreVotes, PartStatus::ErrorsFound];
     }
 
     /** @return array<string, string> */

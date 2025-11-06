@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\PartStatus;
 use App\Models\TrackerHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\View\View;
 
 class TrackerHistoryController extends Controller
@@ -15,11 +16,12 @@ class TrackerHistoryController extends Controller
         $data = [];
         foreach ($history as $h) {
             $data[] = [
-                PartStatus::Certified->name => $h->history_data[PartStatus::Certified->value],
-                PartStatus::AwaitingAdminReview->name => $h->history_data[PartStatus::AwaitingAdminReview->value],
-                PartStatus::NeedsMoreVotes->name => $h->history_data[PartStatus::NeedsMoreVotes->value],
-                PartStatus::UncertifiedSubfiles->name => $h->history_data[PartStatus::UncertifiedSubfiles->value] ?? 0,
-                PartStatus::ErrorsFound->name => $h->history_data[PartStatus::ErrorsFound->value],
+                PartStatus::Certified->name => Arr::get($h->history_data, PartStatus::Certified->value, 0),
+                PartStatus::AwaitingAdminReview->name => Arr::get($h->history_data, PartStatus::AwaitingAdminReview->value, 0),
+                PartStatus::Needs1MoreVote->name => Arr::get($h->history_data, PartStatus::Needs2MoreVotes->value, 0) + 
+                    Arr::get($h->history_data, PartStatus::Needs1MoreVote->value, 0),
+                PartStatus::UncertifiedSubfiles->name => Arr::get($h->history_data, PartStatus::UncertifiedSubfiles->value, 0),
+                PartStatus::ErrorsFound->name => Arr::get($h->history_data, PartStatus::ErrorsFound->value, 0),
                 'date' => date_format($h->created_at, 'Y-m-d'),
             ];
         }
@@ -42,9 +44,9 @@ class TrackerHistoryController extends Controller
                     'barThickness' => 1,
                 ],
                 [
-                    'label' => PartStatus::NeedsMoreVotes->label(),
-                    'data' => array_column($data, PartStatus::NeedsMoreVotes->name),
-                    'backgroundColor' => PartStatus::NeedsMoreVotes->chartColor(),
+                    'label' => "Needs More Votes",
+                    'data' => array_column($data, PartStatus::Needs1MoreVote->name),
+                    'backgroundColor' => PartStatus::Needs1MoreVote->chartColor(),
                     'barThickness' => 1,
                 ],
                 [

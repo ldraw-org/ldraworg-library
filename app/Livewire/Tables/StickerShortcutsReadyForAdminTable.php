@@ -27,9 +27,9 @@ class StickerShortcutsReadyForAdminTable extends BasicTable implements HasAction
                         $q->orWhere('category', PartCategory::StickerShortcut)
                             ->orWhereLike('description', 'Minifig Torso with Arms %');
                     })
-                    ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes])
+                    ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::Needs2MoreVotes, PartStatus::Needs1MoreVote])
                     ->whereDoesntHave('descendants', function (Builder $q) {
-                        $q->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::NeedsMoreVotes, PartStatus::ErrorsFound]);
+                        $q->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::Needs2MoreVotes, PartStatus::Needs1MoreVote, PartStatus::ErrorsFound]);
                     })
             )
             ->defaultSort('created_at', 'asc')
