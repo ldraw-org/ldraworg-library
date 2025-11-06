@@ -62,12 +62,17 @@ class PartTable
                     ->sortable(),
                 TextColumn::make('description')
                     ->sortable(),
+                TextColumn::make('updated_at')
+                    ->label('Date Updated')
+                    ->sortable()
+                    ->extraAttributes(['class' => 'hidden'])
+                    ->extraHeaderAttributes(['class' => 'hidden'])
                 ])->alignment(Alignment::Start),
                 PartStatusColumn::make('part_status')
                     ->sortable()
                     ->grow(false)
                     ->label('Status')
-            ])->from('md')
+            ])->from('md'),
         ];
     }
 
