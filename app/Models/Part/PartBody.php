@@ -10,10 +10,7 @@ class PartBody extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'body',
-        'part_id',
-    ];
+    protected $guarded = [];
 
     public $timestamps = false;
 
