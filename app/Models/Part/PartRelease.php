@@ -23,6 +23,8 @@ class PartRelease extends Model implements HasMedia
 
     protected $guarded = [];
 
+    protected $with = ['media'];
+
     /**
     * @return array{
     *     'new_of_type': 'array',

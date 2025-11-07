@@ -20,6 +20,7 @@ class OmrModel extends Model implements HasMedia
 
     protected $with = [
         'set',
+        'media'
     ];
 
     /**
