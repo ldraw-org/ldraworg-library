@@ -7,6 +7,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use App\Enums\Permission;
 use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\Parser\ParsedPartCollection;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -43,6 +44,14 @@ class LdconfigEdit extends Component implements HasSchemas
                                     ->rows(20)
                                     ->extraAttributes(['class' => 'font-mono'])
                                     ->required()
+                                    ->rules([
+                                        fn (): \Closure => function (string $attribute, mixed $value, \Closure $fail) {
+                                            $result = $this->fileValid($value);
+                                            if ($result !== true) {
+                                                $fail("Text has invalid lines: {$result}");
+                                            }
+                                        }
+                                    ])
                             ]),
                             Tab::make('LDCfgalt')
                             ->schema([
@@ -51,10 +60,24 @@ class LdconfigEdit extends Component implements HasSchemas
                                     ->rows(20)
                                     ->extraAttributes(['class' => 'font-mono'])
                                     ->required()
+                                    ->rules([
+                                        fn (): \Closure => function (string $attribute, mixed $value, \Closure $fail) {
+                                            $result = $this->fileValid($value);
+                                            if ($result !== true) {
+                                                $fail("Text has invalid lines: {$result}");
+                                            }
+                                        }
+                                    ])
                             ])
                     ])
             ])
             ->statePath('data');
+    }
+
+    protected function fileValid(string $text): string|true
+    {
+        $file = new ParsedPartCollection($text);
+        return $file->allLinesValid() ? true : $file->where('invalid', true)->pluck('line_number')->implode(', ');
     }
 
     public function updateFiles(): void

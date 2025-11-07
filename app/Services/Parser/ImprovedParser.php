@@ -24,7 +24,10 @@ class ImprovedParser {
         'suffix_extract'  => '~p(?:\d{4}|[cd][0-9a-z][0-9a-l]|[0-9a-z]{2})|c[a-z0-9]{2}|d[a-z0-9]{2}|k[0-9a-z]{2}|-f[0-9a-z]~i',
 
         'author' => '#^\h*(?<linetype>0)\h+Author:\h*(?:(?P<realname>[^\[]*?)\h*)?(?:\[(?P<username>[A-Za-z0-9_.-]+)\])?\h*$#u',
+
         'ldraworg' => '#^\h*(?<linetype>0)\h+!LDRAW_ORG\h+(?:(?P<unofficial>Unofficial)_?)?(?P<type>###PartTypes###)(?:\h+(?P<type_qualifier>###PartTypeQualifiers###))?(?:\h+(?P<release_type>ORIGINAL|UPDATE))?(?:\h+(?P<release>\d{4}-\d{2}))?\h*$#u',
+        'ld_config_ldraworg' => '~^\h*(?<linetype>0)\h+!LDRAW_ORG\h+Configuration\h+UPDATE\h+[0-9]{4}-[0-9]{2}-[0-9]{2}\h*~u',
+
         'category' => '#^\h*(?<linetype>0)\h+!CATEGORY\h+(?P<category>.*?)\h*$#u',
         'license' => '#^\h*(?<linetype>0)\h+!LICENSE\h+(?P<license>.*?)\h*$#u',
         'help' => '#^\h*(?<linetype>0)\h+!HELP\h+(?P<help>.*?)\h*$#u',
@@ -125,7 +128,7 @@ class ImprovedParser {
                                 $match = $this->matchMetaCommand('author', $line);
                                 break;
                             case '!LDRAW_ORG':
-                                $match = $this->matchMetaCommand('ldraworg', $line);
+                                $match = $this->matchLDrawOrgCommand($line);
                                 break;
                             case '!LICENSE':
                                 $line = preg_replace('#\h+#u', ' ', $line);
@@ -211,6 +214,15 @@ class ImprovedParser {
         }
         $match['meta'] = $type;
         
+        return $match;
+    }
+
+    public function matchLDrawOrgCommand(string $line): array
+    {
+        $match = $this->matchMetaCommand('ldraworg', $line);
+        if ($match['invalid'] === true) {
+            $match = $this->matchMetaCommand('ld_config_ldraworg', $line);
+        }
         return $match;
     }
 
