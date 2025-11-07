@@ -47,7 +47,7 @@ class PatternHasSet implements DataAwareRule, ValidationRule
                 "0 Name: {$name}\n" .
                 "{$type}\n" .
                 "{$category}\n" .
-                "!KEYWORDS {$keywords}";
+                "0 !KEYWORDS {$keywords}";
             $p = new ParsedPartCollection($text);
             $errors = PartChecker::singleCheck($p, new PatternHasSetKeyword());
             if ($errors->isNotEmpty()) {
