@@ -12,19 +12,24 @@ class TrackerHistoryController extends Controller
 {
     public function __invoke(Request $request): View
     {
-        $history = TrackerHistory::latest()->get();
-        $data = [];
-        foreach ($history as $h) {
-            $data[] = [
-                PartStatus::Certified->name => Arr::get($h->history_data, PartStatus::Certified->value, 0),
-                PartStatus::AwaitingAdminReview->name => Arr::get($h->history_data, PartStatus::AwaitingAdminReview->value, 0),
-                PartStatus::Needs1MoreVote->name => Arr::get($h->history_data, PartStatus::Needs2MoreVotes->value, 0) + 
-                    Arr::get($h->history_data, PartStatus::Needs1MoreVote->value, 0),
-                PartStatus::UncertifiedSubfiles->name => Arr::get($h->history_data, PartStatus::UncertifiedSubfiles->value, 0),
-                PartStatus::ErrorsFound->name => Arr::get($h->history_data, PartStatus::ErrorsFound->value, 0),
-                'date' => date_format($h->created_at, 'Y-m-d'),
-            ];
-        }
+        $data = TrackerHistory::latest()
+            ->get()
+            ->map(function (TrackerHistory $h) {
+                return [
+                    PartStatus::Certified->name => Arr::get($h->history_data, PartStatus::Certified->value, 0),
+                    PartStatus::AwaitingAdminReview->name => Arr::get($h->history_data, PartStatus::AwaitingAdminReview->value, 0),
+                    PartStatus::Needs1MoreVote->name => Arr::get($h->history_data, PartStatus::Needs2MoreVotes->value, 0) + 
+                        Arr::get($h->history_data, PartStatus::Needs1MoreVote->value, 0),
+                    PartStatus::UncertifiedSubfiles->name => 
+                        Arr::get($h->history_data, PartStatus::UncertifiedSubfiles->value, 0) == Arr::get($h->history_data, PartStatus::ErrorsFound->value)
+                        ? 0 
+                        : Arr::get($h->history_data, PartStatus::UncertifiedSubfiles->value, 0),
+                    PartStatus::ErrorsFound->name => Arr::get($h->history_data, PartStatus::ErrorsFound->value, 0),
+                    'date' => date_format($h->created_at, 'Y-m-d'),
+                ];
+            })
+            ->all();
+        //dd($data[100]);
         $chart = app()->chartjs
             ->name('ptHistory')
             ->type('bar')
