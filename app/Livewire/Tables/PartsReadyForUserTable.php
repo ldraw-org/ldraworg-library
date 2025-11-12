@@ -21,7 +21,7 @@ class PartsReadyForUserTable extends BasicTable implements HasActions
     {
         return $table
             ->query(
-                Part::with('votes', 'official_part')
+                Part::with('media', 'votes', 'official_part')
                     ->unofficial()
                     ->partsFolderOnly()
                     ->whereHas('descendantsAndSelf', fn (Builder $query) => 
@@ -30,6 +30,9 @@ class PartsReadyForUserTable extends BasicTable implements HasActions
                             PartStatus::Needs2MoreVotes,
                         ])
                         ->whereDoesntHave('votes', fn (Builder $v) => $v->where('user_id', Auth::user()->id))
+                    )
+                    ->whereDoesntHave('descendantsAndSelf', fn($q) =>
+                        $q->where('part_status', PartStatus::ErrorsFound)
                     )
             )
             ->defaultSort('created_at', 'asc')

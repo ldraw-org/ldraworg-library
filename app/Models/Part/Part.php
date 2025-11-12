@@ -67,8 +67,6 @@ class Part extends Model implements HasMedia
 
     protected $guarded = [];
 
-    protected $with = ['media'];
-
     /**
     * @return array{
     *     'type': 'App\\Enums\\PartType',
