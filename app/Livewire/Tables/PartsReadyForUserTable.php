@@ -37,6 +37,7 @@ class PartsReadyForUserTable extends BasicTable implements HasActions
             )
             ->defaultSort('created_at', 'asc')
             ->heading('Parts Ready For My Vote')
+            ->description('The parts listed here have at least one subpart that can be voted on by you. Visit the part detail page and click on the uncertified subparts accordian to view what parts need votes.')
             ->columns(PartTable::columns())
             ->filters([
                 TernaryFilter::make('exclude_fixes')
