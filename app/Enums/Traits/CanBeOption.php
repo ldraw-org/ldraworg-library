@@ -9,6 +9,11 @@ trait CanBeOption
         return preg_replace('/(?<=\p{Ll})(?=\p{Lu})|(?<=\p{L})(?=\p{N})|(?<=\p{N})(?=\p{L})/u', ' ', $this->name);
     }
 
+    public function getLabel(): ?string
+    {
+        return $this->label();
+    }
+  
     /**
     * @param array<\BackedEnum>|array{} $types
     * @return array<int|string, string> 

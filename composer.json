@@ -26,6 +26,7 @@
         "markrogoyski/math-php": "^2.11",
         "panphp/pan": "^0.1.8",
         "postare/blade-mdi": "^1.1",
+        "saade/filament-adjacency-list": "^4.0",
         "sentry/sentry-laravel": "^4.18",
         "spatie/image": "^3.8.0",
         "spatie/laravel-backup": "^9.2.7",

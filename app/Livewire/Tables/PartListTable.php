@@ -151,7 +151,7 @@ class PartListTable extends BasicTable
                         ->icon(LibraryIcon::CategoryConstraint->value)
                         ->multiple(),
                     SelectConstraint::make('part_errors')
-                        ->options(PartError::options())
+                        ->options(PartError::class)
                         ->icon(LibraryIcon::Error->value)
                         ->multiple()
                         ->operators([
@@ -160,8 +160,7 @@ class PartListTable extends BasicTable
                                     $values = $operator->getSettings()['values'];
                                     $query->where(function (Builder $query_inner) use ($values, $isInverse) {
                                         foreach ($values as $value) {
-                                            $query_inner->{$isInverse ? 'orDoesntHaveError' : 'orHasError'}($value)
-                                                ->{$isInverse ? 'orDoesntHaveWarning' : 'orHasWarning'}($value);
+                                            $query_inner->{$isInverse ? 'orDoesntHaveIssue' : 'orHasIssue'}($value);
                                         }
                                     });
                                 })

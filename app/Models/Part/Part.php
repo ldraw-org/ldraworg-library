@@ -127,6 +127,17 @@ class Part extends Model implements HasMedia
             });
     }
 
+    public function getCustomPaths()
+    {
+        return [
+            [
+                'name' => 'tree_path',
+                'column' => 'id',
+                'separator' => '.children.',
+            ],
+        ];
+    }
+  
     public function newCollection(array $models = []): PartCollection
     {
         return new PartCollection($models);

@@ -4,8 +4,9 @@ namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
 use Illuminate\Support\Str;
+use Filament\Support\Contracts\HasLabel;
 
-enum PartError: string
+enum PartError: string implements HasLabel
 {
     use CanBeOption;
 

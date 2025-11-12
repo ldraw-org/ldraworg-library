@@ -10,39 +10,39 @@ use Illuminate\Support\Collection;
 class ImprovedParser {
     protected array $patterns = [
         'line_type_0' => '~^\h*(?<linetype>0)\h+(?P<content>(?P<first_word>\S+)(?:\h+(?P<rest>.*))?)$~u',
-        'line_type_1' => '#^\h*(?<linetype>1)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<a>-?(?:\d*\.\d+|\d+))\h+(?<b>-?(?:\d*\.\d+|\d+))\h+(?<c>-?(?:\d*\.\d+|\d+))\h+(?<d>-?(?:\d*\.\d+|\d+))\h+(?<e>-?(?:\d*\.\d+|\d+))\h+(?<f>-?(?:\d*\.\d+|\d+))\h+(?<g>-?(?:\d*\.\d+|\d+))\h+(?<h>-?(?:\d*\.\d+|\d+))\h+(?<i>-?(?:\d*\.\d+|\d+))\h*(?<file>.+?)\h*$#u',
-        'line_type_2' => '#^\h*(?<linetype>2)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h*$#u',
-        'line_type_3' => '#^\h*(?<linetype>3)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h+(?<x3>-?(?:\d*\.\d+|\d+))\h+(?<y3>-?(?:\d*\.\d+|\d+))\h+(?<z3>-?(?:\d*\.\d+|\d+))\h*$#u',
-        'line_type_4' => '#^\h*(?<linetype>4)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h+(?<x3>-?(?:\d*\.\d+|\d+))\h+(?<y3>-?(?:\d*\.\d+|\d+))\h+(?<z3>-?(?:\d*\.\d+|\d+))\h+(?<x4>-?(?:\d*\.\d+|\d+))\h+(?<y4>-?(?:\d*\.\d+|\d+))\h+(?<z4>-?(?:\d*\.\d+|\d+))\h*$#u',
-        'line_type_5' => '#^\h*(?<linetype>5)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h+(?<x3>-?(?:\d*\.\d+|\d+))\h+(?<y3>-?(?:\d*\.\d+|\d+))\h+(?<z3>-?(?:\d*\.\d+|\d+))\h+(?<x4>-?(?:\d*\.\d+|\d+))\h+(?<y4>-?(?:\d*\.\d+|\d+))\h+(?<z4>-?(?:\d*\.\d+|\d+))\h*$#u',
+        'line_type_1' => '~^\h*(?<linetype>1)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<a>-?(?:\d*\.\d+|\d+))\h+(?<b>-?(?:\d*\.\d+|\d+))\h+(?<c>-?(?:\d*\.\d+|\d+))\h+(?<d>-?(?:\d*\.\d+|\d+))\h+(?<e>-?(?:\d*\.\d+|\d+))\h+(?<f>-?(?:\d*\.\d+|\d+))\h+(?<g>-?(?:\d*\.\d+|\d+))\h+(?<h>-?(?:\d*\.\d+|\d+))\h+(?<i>-?(?:\d*\.\d+|\d+))\h*(?<file>.+?)\h*$~u',
+        'line_type_2' => '~^\h*(?<linetype>2)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h*$~u',
+        'line_type_3' => '~^\h*(?<linetype>3)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h+(?<x3>-?(?:\d*\.\d+|\d+))\h+(?<y3>-?(?:\d*\.\d+|\d+))\h+(?<z3>-?(?:\d*\.\d+|\d+))\h*$~u',
+        'line_type_4' => '~^\h*(?<linetype>4)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h+(?<x3>-?(?:\d*\.\d+|\d+))\h+(?<y3>-?(?:\d*\.\d+|\d+))\h+(?<z3>-?(?:\d*\.\d+|\d+))\h+(?<x4>-?(?:\d*\.\d+|\d+))\h+(?<y4>-?(?:\d*\.\d+|\d+))\h+(?<z4>-?(?:\d*\.\d+|\d+))\h*$~u',
+        'line_type_5' => '~^\h*(?<linetype>5)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h+(?<x3>-?(?:\d*\.\d+|\d+))\h+(?<y3>-?(?:\d*\.\d+|\d+))\h+(?<z3>-?(?:\d*\.\d+|\d+))\h+(?<x4>-?(?:\d*\.\d+|\d+))\h+(?<y4>-?(?:\d*\.\d+|\d+))\h+(?<z4>-?(?:\d*\.\d+|\d+))\h*$~u',
 
-        'description' => '#^\h*(?<linetype>0)\h+(?P<description>(?:(?P<prefix>[~_=|]+)\h*)?(?P<category>[^\h]+).*?)\h*$#u',
+        'description' => '~^\h*(?<linetype>0)\h+(?P<description>(?:(?P<prefix>[~_=|]+)\h*)?(?P<category>[^\h]+).*?)\h*$~u',
 
-        'name' => '#^\h*(?<linetype>0)\h+Name:\h*(?P<name>[^\h]+)\h*$#u',
+        'name' => '~^\h*(?<linetype>0)\h+Name:\h*(?P<name>[^\h]+)\h*$~u',
         'basepart' => '~^^(?<basepart>[uts]?\d+(?:[a-d][a-z]|[a-oq-z])?)~i',
         'suffix_validate' => '~(?<suffix>(?:(?:p[a-z0-9]{2,4}|c[0-9a-z]{2}|d[0-9a-z]{2}|k[0-9a-z]{2})+)?(?:-f[0-9a-z])?)$~i',
         'suffix_extract'  => '~p(?:\d{4}|[cd][0-9a-z][0-9a-l]|[0-9a-z]{2})|c[a-z0-9]{2}|d[a-z0-9]{2}|k[0-9a-z]{2}|-f[0-9a-z]~i',
 
-        'author' => '#^\h*(?<linetype>0)\h+Author:\h*(?:(?P<realname>[^\[]*?)\h*)?(?:\[(?P<username>[A-Za-z0-9_.-]+)\])?\h*$#u',
+        'author' => '~^\h*(?<linetype>0)\h+Author:\h*(?:(?P<realname>[^\[]*?)\h*)?(?:\[(?P<username>[A-Za-z0-9_.-]+)\])?\h*$~u',
 
-        'ldraworg' => '#^\h*(?<linetype>0)\h+!LDRAW_ORG\h+(?:(?P<unofficial>Unofficial)_?)?(?P<type>###PartTypes###)(?:\h+(?P<type_qualifier>###PartTypeQualifiers###))?(?:\h+(?P<release_type>ORIGINAL|UPDATE))?(?:\h+(?P<release>\d{4}-\d{2}))?\h*$#u',
+        'ldraworg' => '~^\h*(?<linetype>0)\h+!LDRAW_ORG\h+(?:(?P<unofficial>Unofficial)_?)?(?P<type>###PartTypes###)(?:\h+(?P<type_qualifier>###PartTypeQualifiers###))?(?:\h+(?P<release_type>ORIGINAL|UPDATE))?(?:\h+(?P<release>\d{4}-\d{2}))?\h*$~u',
         'ld_config_ldraworg' => '~^\h*(?<linetype>0)\h+!LDRAW_ORG\h+Configuration\h+UPDATE\h+[0-9]{4}-[0-9]{2}-[0-9]{2}\h*~u',
 
-        'category' => '#^\h*(?<linetype>0)\h+!CATEGORY\h+(?P<category>.*?)\h*$#u',
-        'license' => '#^\h*(?<linetype>0)\h+!LICENSE\h+(?P<license>.*?)\h*$#u',
-        'help' => '#^\h*(?<linetype>0)\h+!HELP\h+(?P<help>.*?)\h*$#u',
-        'keywords' => '#^\h*(?<linetype>0)\h+!KEYWORDS\h+(?P<keywords>.*?)\h*$#u',
+        'category' => '~^\h*(?<linetype>0)\h+!CATEGORY\h+(?P<category>.*?)\h*$~u',
+        'license' => '~^\h*(?<linetype>0)\h+!LICENSE\h+(?P<license>.*?)\h*$~u',
+        'help' => '~^\h*(?<linetype>0)\h+!HELP\h+(?P<help>.*?)\h*$~u',
+        'keywords' => '~^\h*(?<linetype>0)\h+!KEYWORDS\h+(?P<keywords>.*?)\h*$~u',
         'bfc' => '~^\h*(?<linetype>0)\h+BFC\h+(?<bfc>NOCERTIFY|CERTIFY|CW|CCW|CLIP|NOCLIP|INVERTNEXT)(?:\h+(?<winding>CW|CCW))?\h*$~iu',
-        'cmdline' => '#^\h*(?<linetype>0)\h+!CMDLINE\h+(?P<cmdline>.*?)\h*$#u',
+        'cmdline' => '~^\h*(?<linetype>0)\h+!CMDLINE\h+(?P<cmdline>.*?)\h*$~u',
         'preview' => '~^\h*(?<linetype>0)\h+!PREVIEW\h+(?<color>\d+)\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<rotation_matrix>(?<a>-?(?:\d*\.\d+|\d+))\h+(?<b>-?(?:\d*\.\d+|\d+))\h+(?<c>-?(?:\d*\.\d+|\d+))\h+(?<d>-?(?:\d*\.\d+|\d+))\h+(?<e>-?(?:\d*\.\d+|\d+))\h+(?<f>-?(?:\d*\.\d+|\d+))\h+(?<g>-?(?:\d*\.\d+|\d+))\h+(?<h>-?(?:\d*\.\d+|\d+))\h+(?<i>-?(?:\d*\.\d+|\d+)))\h*$~u',
         'history' =>  '#^\h*(?<linetype>0)\h+!HISTORY\h+(?P<date>\d{4}-\d{2}-\d{2})\h+(?:\[(?P<username>[a-zA-Z0-9_.-]+)\]|\{(?P<realname>[^\}]+)\})\h+(?P<comment>.+?)\h*$#u',
 
         'comment' => '~^\h*(?<linetype>0)\h+\/\/(?:\h+(?P<comment>.*))$~u',
-        'texmap_geometry' => '#^\h*(?<linetype>0)\h+!\:\h*(?P<tex_line>.+?)\h*$#u',
-        'texmap' => '#^\h*(?<linetype>0)\h+!TEXMAP\h+(?P<command>START|NEXT|FALLBACK|END)(?:\h+(?P<method>PLANAR|CYLINDRICAL|SPHERICAL)\h+(?P<params>(?:[-+]?[0-9]*\.?[0-9]+\h+){8,10}[-+]?[0-9]*\.?[0-9]+)\h+(?P<file>\S+\.png)(?:\h+GLOSSMAP\h+(?P<glossfile>\S+\.png))?)?\h*$#u',
+        'texmap_geometry' => '~^\h*(?<linetype>0)\h+!\:\h*(?P<tex_line>.+?)\h*$~u',
+        'texmap' => '~^\h*(?<linetype>0)\h+!TEXMAP\h+(?P<command>START|NEXT|FALLBACK|END)(?:\h+(?P<method>PLANAR|CYLINDRICAL|SPHERICAL)\h+(?P<params>(?:[-+]?[0-9]*\.?[0-9]+\h+){8,10}[-+]?[0-9]*\.?[0-9]+)\h+(?P<file>\S+\.png)(?:\h+GLOSSMAP\h+(?P<glossfile>\S+\.png))?)?\h*$~u',
         'colour' => '~^0\h+!COLOUR\h+(?P<name>[A-Za-z0-9_]+)\h+CODE\h+(?P<code>\d+)\h+VALUE\h+(?P<value>(?:0x|#)[A-Fa-f0-9]{6})(?:\h+EDGE\h+(?P<edge>(?:\d+|(?:0x|#)[A-Fa-f0-9]{6})))(?:\h+ALPHA\h+(?P<alpha>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+LUMINANCE\h+(?P<luminance>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+(?P<material>(?:CHROME|PEARLESCENT|RUBBER|MATTE_METALLIC|METAL|MATERIAL)(?:\h+(?:CHROME|PEARLESCENT|RUBBER|MATTE_METALLIC|METAL|MATERIAL))*))?(?:\h+MATERIAL\h+(?P<material_params>.*))?$~u',
         'colour_material' => '~^(?P<material_type>GLITTER|SPECKLE|FABRIC)(?:\h+VALUE\h+(?P<value>(?:0x|#)[A-Fa-f0-9]{6}))?(?:\h+ALPHA\h+(?P<alpha>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+LUMINANCE\h+(?P<luminance>(?:25[0-5]|2[0-4]\d|1?\d{1,2})))?(?:\h+FRACTION\h+(?P<fraction>0(?:\.\d+)?|1(?:\.0+)?))?(?:\h+VFRACTION\h+(?P<vfraction>0(?:\.\d+)?|1(?:\.0+)?))?(?:\h+SIZE\h+(?P<size>(?:[1-9]\d*(?:\.\d+)?|0?\.\d*[1-9]\d*)))?(?:\h+MINSIZE\h+(?P<minsize>(?:[1-9]\d*(?:\.\d+)?|0?\.\d*[1-9]\d*))\h+MAXSIZE\h+(?P<maxsize>(?:[1-9]\d*(?:\.\d+)?|0?\.\d*[1-9]\d*)))?(?:\h+(?P<fabric_type>VELVET|CANVAS|STRING|FUR))?$~u',
-        'avatar' => '#^\h*(?<linetype>0)\h+!AVATAR\h+CATEGORY\h+"(?P<category>[^"]+)"\h+DESCRIPTION\h+"(?P<description>[^"]+)"\h+PART\h+(?P<a>-?\d+(?:\.\d+)?)\h+(?P<b>-?\d+(?:\.\d+)?)\h+(?P<c>-?\d+(?:\.\d+)?)\h+(?P<d>-?\d+(?:\.\d+)?)\h+(?P<e>-?\d+(?:\.\d+)?)\h+(?P<f>-?\d+(?:\.\d+)?)\h+(?P<g>-?\d+(?:\.\d+)?)\h+(?P<h>-?\d+(?:\.\d+)?)\h+(?P<i>-?\d+(?:\.\d+)?)\h+"(?P<file>[^"]+)"$#u',
+        'avatar' => '~^\h*(?<linetype>0)\h+!AVATAR\h+CATEGORY\h+"(?P<category>[^"]+)"\h+DESCRIPTION\h+"(?P<description>[^"]+)"\h+PART\h+(?P<a>-?\d+(?:\.\d+)?)\h+(?P<b>-?\d+(?:\.\d+)?)\h+(?P<c>-?\d+(?:\.\d+)?)\h+(?P<d>-?\d+(?:\.\d+)?)\h+(?P<e>-?\d+(?:\.\d+)?)\h+(?P<f>-?\d+(?:\.\d+)?)\h+(?P<g>-?\d+(?:\.\d+)?)\h+(?P<h>-?\d+(?:\.\d+)?)\h+(?P<i>-?\d+(?:\.\d+)?)\h+"(?P<file>[^"]+)"$~u',
     ];
 
     public function __construct()
