@@ -146,14 +146,11 @@ class PartChecker
 
     protected function hasCertifiedParentInParts(): bool
     {
-        return Part::withQueryConstraint(
-            fn ($query) =>
-                $query->whereIn('parts.part_status', [PartStatus::Certified, PartStatus::Official]),
-            fn () =>
-                $this->libraryPart->ancestors()
-        )
-        ->whereIn('type', PartType::partsFolderTypes())
-        ->exists();
+        return $this->libraryPart
+            ->ancestors()
+            ->whereIn('part_status', [PartStatus::Certified, PartStatus::Official])
+            ->whereIn('type', PartType::partsFolderTypes())
+            ->exists();
     }
 
     protected function hasAllSubpartsCertified(): bool
