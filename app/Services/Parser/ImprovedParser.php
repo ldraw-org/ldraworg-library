@@ -16,10 +16,10 @@ class ImprovedParser {
         'line_type_4' => '~^\h*(?<linetype>4)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h+(?<x3>-?(?:\d*\.\d+|\d+))\h+(?<y3>-?(?:\d*\.\d+|\d+))\h+(?<z3>-?(?:\d*\.\d+|\d+))\h+(?<x4>-?(?:\d*\.\d+|\d+))\h+(?<y4>-?(?:\d*\.\d+|\d+))\h+(?<z4>-?(?:\d*\.\d+|\d+))\h*$~u',
         'line_type_5' => '~^\h*(?<linetype>5)\h+(?<color>(?:\d+|0x2[0-9A-Fa-f]{6}))\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<x2>-?(?:\d*\.\d+|\d+))\h+(?<y2>-?(?:\d*\.\d+|\d+))\h+(?<z2>-?(?:\d*\.\d+|\d+))\h+(?<x3>-?(?:\d*\.\d+|\d+))\h+(?<y3>-?(?:\d*\.\d+|\d+))\h+(?<z3>-?(?:\d*\.\d+|\d+))\h+(?<x4>-?(?:\d*\.\d+|\d+))\h+(?<y4>-?(?:\d*\.\d+|\d+))\h+(?<z4>-?(?:\d*\.\d+|\d+))\h*$~u',
 
-        'description' => '~^\h*(?<linetype>0)\h+(?P<description>(?:(?P<prefix>[~_=|]+)\h*)?(?P<category>[^\h]+).*?)\h*$~u',
+        'description' => '#^\h*(?<linetype>0)\h+(?P<description>(?:(?P<prefix>[~_=|]+)\h*)?(?P<category>[^\h]+).*?)\h*$#u',
 
         'name' => '~^\h*(?<linetype>0)\h+Name:\h*(?P<name>[^\h]+)\h*$~u',
-        'basepart' => '~^^(?<basepart>[uts]?\d+(?:[a-d][a-z]|[a-oq-z])?)~i',
+        'basepart' => '~^(?<basepart>[uts]?\d+(?:[a-d][a-z]|[a-oq-z])?)~i',
         'suffix_validate' => '~(?<suffix>(?:(?:p[a-z0-9]{2,4}|c[0-9a-z]{2}|d[0-9a-z]{2}|k[0-9a-z]{2})+)?(?:-f[0-9a-z])?)$~i',
         'suffix_extract'  => '~p(?:\d{4}|[cd][0-9a-z][0-9a-l]|[0-9a-z]{2})|c[a-z0-9]{2}|d[a-z0-9]{2}|k[0-9a-z]{2}|-f[0-9a-z]~i',
 
@@ -35,7 +35,7 @@ class ImprovedParser {
         'bfc' => '~^\h*(?<linetype>0)\h+BFC\h+(?<bfc>NOCERTIFY|CERTIFY|CW|CCW|CLIP|NOCLIP|INVERTNEXT)(?:\h+(?<winding>CW|CCW))?\h*$~iu',
         'cmdline' => '~^\h*(?<linetype>0)\h+!CMDLINE\h+(?P<cmdline>.*?)\h*$~u',
         'preview' => '~^\h*(?<linetype>0)\h+!PREVIEW\h+(?<color>\d+)\h+(?<x1>-?(?:\d*\.\d+|\d+))\h+(?<y1>-?(?:\d*\.\d+|\d+))\h+(?<z1>-?(?:\d*\.\d+|\d+))\h+(?<rotation_matrix>(?<a>-?(?:\d*\.\d+|\d+))\h+(?<b>-?(?:\d*\.\d+|\d+))\h+(?<c>-?(?:\d*\.\d+|\d+))\h+(?<d>-?(?:\d*\.\d+|\d+))\h+(?<e>-?(?:\d*\.\d+|\d+))\h+(?<f>-?(?:\d*\.\d+|\d+))\h+(?<g>-?(?:\d*\.\d+|\d+))\h+(?<h>-?(?:\d*\.\d+|\d+))\h+(?<i>-?(?:\d*\.\d+|\d+)))\h*$~u',
-        'history' =>  '#^\h*(?<linetype>0)\h+!HISTORY\h+(?P<date>\d{4}-\d{2}-\d{2})\h+(?:\[(?P<username>[a-zA-Z0-9_.-]+)\]|\{(?P<realname>[^\}]+)\})\h+(?P<comment>.+?)\h*$#u',
+        'history' =>  '~^\h*(?<linetype>0)\h+!HISTORY\h+(?P<date>\d{4}-\d{2}-\d{2})\h+(?:\[(?P<username>[a-zA-Z0-9_.-]+)\]|\{(?P<realname>[^\}]+)\})\h+(?P<comment>.+?)\h*$~u',
 
         'comment' => '~^\h*(?<linetype>0)\h+\/\/(?:\h+(?P<comment>.*))$~u',
         'texmap_geometry' => '~^\h*(?<linetype>0)\h+!\:\h*(?P<tex_line>.+?)\h*$~u',
@@ -213,7 +213,7 @@ class ImprovedParser {
             $match['invalid'] = false;
         }
         $match['meta'] = $type;
-        
+
         return $match;
     }
 
