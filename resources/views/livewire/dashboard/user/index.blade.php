@@ -19,6 +19,12 @@
         >
             My Votes
         </x-filament::tabs.item>    
+        <x-filament::tabs.item 
+            :active="$activeTab === 'parts-ready-for-user'"
+            wire:click="$set('activeTab', 'parts-ready-for-user')"
+        >
+            Parts Ready For My Vote
+        </x-filament::tabs.item>    
         <x-filament::tabs.item
             :active="$activeTab === 'unumbers'"
             wire:click="$set('activeTab', 'unumbers')"
@@ -34,6 +40,9 @@
             @break
         @case('user-part-events')
             <livewire:tables.user-part-events-table />
+            @break 
+        @case('parts-ready-for-user')
+            <livewire:tables.parts-ready-for-user-table />
             @break 
         @case('user-votes')
             <livewire:tables.user-votes-table />
