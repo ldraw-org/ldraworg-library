@@ -17,6 +17,7 @@ use App\Models\Part\UnknownPartNumber;
 use App\Models\RebrickablePart;
 use App\Models\StickerSheet;
 use App\Models\User;
+use App\Services\Check\CheckMessageCollection;
 use App\Services\Check\PartChecker;
 use App\Services\Parser\ParsedPartCollection;
 use App\Settings\LibrarySettings;
@@ -383,7 +384,7 @@ class PartManager
         if ($part->isText()) {
             $part->check_messages = $this->checker->run($part);
         } else {
-            $part->check_messages = new CheckMessagesCollection();
+            $part->check_messages = new CheckMessageCollection();
         }
         $part->can_release = $part->isOfficial() || ($part->check_messages->doesntHaveHoldableIssues());
         $part->updateReadyForAdmin();
