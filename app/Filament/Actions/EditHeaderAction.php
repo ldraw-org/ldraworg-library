@@ -81,17 +81,18 @@ class EditHeaderAction
                         $check_part = [
                             'description' => "0 {$value}",
                             'name' => "0 Name: {$part->metaName}",
+                            'type' => PartType::tryFrom($get('type'))?->ldrawString(true),
                             'category' => PartCategory::tryFrom($get('category') ?? '')?->ldrawString(),
                             'keywords' => '0 !KEYWORDS ' . collect(explode(',', Str::of($get('keywords'))->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->implode(', ')
                         ];
                         $check_part = new ParsedPartCollection(implode("\n", $check_part));
                         $errors = app(PartChecker::class)->runSingle(LibraryApprovedDescription::class, $check_part);
-                        if ($errors->isNotEmpty()) {
+                        if ($errors->hasErrors()) {
                             $fail($errors->first()->message());
                             return;
                         }
                         $errors = app(PartChecker::class)->runSingle(PatternPartDescription::class, $check_part);
-                        if ($errors->isNotEmpty()) {
+                        if ($errors->hasErrors()) {
                             $fail($errors->first()->message());
                         }
                     }
