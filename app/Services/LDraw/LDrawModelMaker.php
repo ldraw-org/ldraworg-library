@@ -42,14 +42,18 @@ class LDrawModelMaker
         $query = $includeSelf ? $part->descendantsAndSelf() : $part->descendants();
 
         $query = $part->isUnofficial()
-            ? $query->doesntHave('unofficial_part')
+            ? $query->doesntHave('official_part')
             : $query->official();
 
         $subpartFilenames = $query->distinct()->pluck('filename');
+//        dd($subpartFilenames);
+        $query = Part::with('body')
+            ->select('id', 'filename', 'type', 'header');
+        $query = $part->isUnofficial()
+            ? $query->doesntHave('official_part')
+            : $query->official();
         
-        return Part::with('body')
-            ->select('id', 'filename', 'type', 'header')
-            ->whereIn('filename', $subpartFilenames)
+        return $query->whereIn('filename', $subpartFilenames)
             ->get();
     }
   
