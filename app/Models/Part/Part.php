@@ -328,33 +328,6 @@ class Part extends Model implements HasMedia
         );
     }
 
-    protected function errors(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value) => collect(json_decode($value ?? '{}', true))
-                ->map(fn (array $message) => CheckMessage::fromArray($message)),
-            set: fn (SupportCollection $value) => json_encode($value->map(fn (CheckMessage $message) => $message->toArray())->all())
-        );
-    }
-
-    protected function warnings(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value) => collect(json_decode($value ?? '{}', true))
-                ->map(fn (array $message) => CheckMessage::fromArray($message)),
-            set: fn (SupportCollection $value) => json_encode($value->map(fn (CheckMessage $message) => $message->toArray())->all())
-        );
-    }
-
-    protected function trackerHolds(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value) => collect(json_decode($value ?? '{}', true))
-                ->map(fn (array $message) => CheckMessage::fromArray($message)),
-            set: fn (SupportCollection $value) => json_encode($value->map(fn (CheckMessage $message) => $message->toArray())->all())
-        );
-    }
-
     protected function metaName(): Attribute
     {
         return Attribute::make(
