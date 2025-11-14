@@ -3,25 +3,24 @@
 namespace App\Services\Check\PartChecks;
 
 use App\Enums\PartCategory;
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
 use Illuminate\Support\Str;
 
-class PatternHasSetKeyword implements Check
+class PatternHasSetKeyword extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        if (!$part->type()?->inPartsFolder() || $part->category() == PartCategory::Modulex || $part->category() == PartCategory::Moved) {
+        if (!$this->part->type()?->inPartsFolder() || $this->part->category() == PartCategory::Modulex || $this->part->category() == PartCategory::Moved) {
             return;
         }
       
-        $isPattern = $part->isPattern();
-        $noKeyword = collect($part->keywords())
+        $isPattern = $this->part->isPattern();
+        $noKeyword = collect($this->part->keywords())
           ->doesntContain(fn (string $keyword) => Str::of($keyword)->lower()->startsWith(['set ', 'cmf', 'build-a-minifigure']));
         if ($isPattern && $noKeyword) {
-            $message(PartError::NoSetKeywordForPattern);
+            yield $this->error(CheckType::Error, PartError::NoSetKeywordForPattern);
         }
     }
 }

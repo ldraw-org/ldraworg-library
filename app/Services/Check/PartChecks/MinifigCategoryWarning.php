@@ -2,18 +2,20 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
 use App\Enums\PartCategory;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
+use App\Services\Check\Traits\PartOnly;
 
-class MinifigCategoryWarning implements Check
+class MinifigCategoryWarning extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    use PartOnly;
+
+    public function check(): iterable
     {
-        if ($part->type()?->inPartsFolder() && $part->category() == PartCategory::Minifig) {
-            $message(PartError::WarningMinifigCategory);
+        if ($this->part->rawPart()->isUnofficial() && $this->part->type()?->inPartsFolder() && $this->part->category() == PartCategory::Minifig) {
+            yield $this->error(CheckType::Warning, PartError::WarningMinifigCategory);
         }
     }
 }

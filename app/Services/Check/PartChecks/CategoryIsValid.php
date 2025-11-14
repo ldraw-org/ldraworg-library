@@ -2,18 +2,16 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use App\Models\Part\Part;
-use Closure;
+use App\Services\Check\BaseCheck;
 
-class CategoryIsValid implements Check
+class CategoryIsValid extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        if ($part->type()?->inPartsFolder() && is_null($part->category())) {
-            $message(PartError::CategoryInvalid);
+        if ($this->part->type()?->inPartsFolder() && is_null($this->part->category())) {
+            yield $this->error(CheckType::Error, PartError::CategoryInvalid);
         }
     }
 }

@@ -2,19 +2,18 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
 
-class NameAndPartType implements Check
+class NameAndPartType extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        $name = str_replace('\\', '/', $part->name());
-        $file = $part->type()?->nameFolder() == '' ? basename($name) : $part->type()?->nameFolder() . '\\' . basename($name);
-        if ($file !== $part->name()) {
-            $message(error: PartError::NameTypeMismatch, value: $part->name(), type: $part->type()?->value);
+        $name = str_replace('\\', '/', $this->part->name());
+        $file = $this->part->type()?->nameFolder() == '' ? basename($name) : $this->part->type()?->nameFolder() . '\\' . basename($name);
+        if ($file !== $this->part->name()) {
+            yield $this->error(CheckType::Error, error: PartError::NameTypeMismatch, value: $this->part->name(), type: $this->part->type()?->value);
         }
     }
 }

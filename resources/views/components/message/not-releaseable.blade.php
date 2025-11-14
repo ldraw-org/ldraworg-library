@@ -1,11 +1,11 @@
 @props(['part'])
-@if ($part->tracker_holds->isNotEmpty())
+@if ($part->check_messages->hasTrackerHolds())
     <x-message compact icon type="error">
         <x-slot:header>
             This part has the following automated holds from the Parts Tracker
         </x-slot:header>
         <ul>
-            @foreach($part->tracker_holds as $error)
+            @foreach($part->check_messages->getTrackerHolds() as $error)
                 @if ($error->error == \App\Enums\PartError::TrackerHasUncertifiedSubfiles)
                     <li wire:key="part-tracker_holds-{{$loop->iteration}}">
                         <x-accordion id="partTrackerHoldsUncertSubparts">
@@ -28,13 +28,13 @@
         </ul>
     </x-message>
 @endif
-@if ($part->errors->isNotEmpty())
+@if ($part->check_messages->hasErrors())
     <x-message compact icon type="error">
         <x-slot:header>
             This part has the following errors
         </x-slot:header>
         <ul>
-            @foreach($part->errors as $error)
+            @foreach($part->check_messages->getErrors() as $error)
                 <li wire:key="part-error-{{$loop->iteration}}">
                     @if (!is_null($error->text))
                         <x-accordion id="partError{{$loop->iteration}}{{ str_replace('.', '', $error->error->value) }}">
@@ -53,13 +53,13 @@
         </ul>
     </x-message>
 @endif
-@if ($part->warnings->isNotEmpty())
+@if ($part->check_messages->hasWarnings())
     <x-message compact icon type="warning">
         <x-slot:header>
             This part has the following warnings
         </x-slot:header>
         <ul>
-            @foreach($part->warnings as $error)
+            @foreach($part->check_messages->getWarnings() as $error)
                 <li wire:key="part-warning-{{$loop->iteration}}">
                     @if (!is_null($error->text))
                         <x-accordion id="partWarning{{$loop->iteration}}{{ str_replace('.', '', $error->error->value) }}">

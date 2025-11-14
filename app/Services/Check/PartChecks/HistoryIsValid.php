@@ -2,18 +2,19 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use App\Models\Part\Part;
-use Closure;
+use App\Services\Check\BaseCheck;
+use App\Services\Check\Traits\ParsedPartOnly;
 
-class HistoryIsValid implements Check
+class HistoryIsValid extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    use ParsedPartOnly;
+  
+    public function check(): iterable
     {
-        if ($part->hasInvalidHistory()) {
-            $message(PartError::HistoryInvalid);
+        if ($this->part->hasInvalidHistory()) {
+            yield $this->error(CheckType::Error, PartError::HistoryInvalid);
         }
     }
 }

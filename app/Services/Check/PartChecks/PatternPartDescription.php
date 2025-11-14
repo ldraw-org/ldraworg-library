@@ -3,24 +3,23 @@
 namespace App\Services\Check\PartChecks;
 
 use App\Enums\PartCategory;
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
 
-class PatternPartDescription implements Check
+class PatternPartDescription extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        if (!$part->type()?->inPartsFolder() || !$part->isPattern()) {
+        if (!$this->part->type()?->inPartsFolder() || !$this->part->isPattern()) {
             return;
         }
 
-        $notExcludedCategory = !in_array($part->category(), [PartCategory::Moved, PartCategory::Sticker, PartCategory::StickerShortcut]);
-        $hasPattern = preg_match('~Pattern(?:\h+\(.*\))?$~ui', $part->description(), $matches);
-        $doesntHavekeyword = !in_array('Colour Combination', $part->keywords() ?? []);
+        $notExcludedCategory = !in_array($this->part->category(), [PartCategory::Moved, PartCategory::Sticker, PartCategory::StickerShortcut]);
+        $hasPattern = preg_match('~Pattern(?:\h+\(.*\))?$~ui', $this->part->description(), $matches);
+        $doesntHavekeyword = !in_array('Colour Combination', $this->part->keywords());
         if ($notExcludedCategory && !$hasPattern && $doesntHavekeyword) {
-            $message(PartError::PatternNotInDescription);
+            yield $this->error(CheckType::Error, PartError::PatternNotInDescription);
         }
     }
 }

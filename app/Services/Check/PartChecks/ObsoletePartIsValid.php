@@ -3,26 +3,24 @@
 namespace App\Services\Check\PartChecks;
 
 use App\Enums\PartCategory;
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use App\Models\Part\Part;
-use Closure;
+use App\Services\Check\BaseCheck;
 use Illuminate\Support\Str;
 
-class ObsoletePartIsValid implements Check
+class ObsoletePartIsValid extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        if (!$part->type()?->inPartsFolder()) {
+        if (!$this->part->type()?->inPartsFolder()) {
             return;
         }
 
-        $desc = Str::of($part->description());
+        $desc = Str::of($this->part->description());
         $descObsolete = $desc->contains('(Obsolete)') || $desc->startsWith('~Obsolete');
-        $catObsolete = $part->category() == PartCategory::Obsolete;
+        $catObsolete = $this->part->category() == PartCategory::Obsolete;
         if (($catObsolete && !$descObsolete) || (!$catObsolete && $descObsolete)) {
-            $message(PartError::ImproperObsolete);
+            yield $this->error(CheckType::Error, PartError::ImproperObsolete);
         }
     }
 }

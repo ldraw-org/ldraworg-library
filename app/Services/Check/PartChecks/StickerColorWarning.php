@@ -2,24 +2,22 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
 use App\Enums\PartCategory;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
 
-class StickerColorWarning implements Check
+class StickerColorWarning extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        if ($part->type()?->inPartsFolder() && $part->category() == PartCategory::StickerShortcut) {
-            $part->where('linetype', 1)
-                ->each(function (array $line) use ($message) {
-                    if ($line['color'] != 16) {
-                        $message(PartError::WarningStickerColor);
-                        return false;
-                    }
-                });
-        }
+        if ($this->part->type()?->inPartsFolder() && $this->part->category() == PartCategory::StickerShortcut) {
+            foreach($this->part->bodyLines()->where('linetype', 1) as $line) {
+                if ($line['color'] != 16) {
+                    yield $this->error(CheckType::Warning, PartError::WarningStickerColor);
+                    break;
+                }
+            }
+       }
     }
 }

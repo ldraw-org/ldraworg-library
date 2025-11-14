@@ -2,15 +2,17 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
+use App\Services\Check\BaseCheck;
 use App\Services\Check\Contracts\FilenameAwareCheck;
-use App\Services\Parser\ParsedPartCollection;
+use App\Services\Check\Traits\ParsedPartOnly;
 use Illuminate\Support\Str;
-use Closure;
 
-class NameFileNameMatch implements Check, FilenameAwareCheck
+class NameFileNameMatch extends BaseCheck implements FilenameAwareCheck
 {
+    use ParsedPartOnly;
+    
     protected ?string $filename = null;
 
     public function setFilename(?string $filename): void
@@ -18,14 +20,14 @@ class NameFileNameMatch implements Check, FilenameAwareCheck
         $this->filename = is_string($filename) ? Str::lower($filename) : null;
     }
 
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
         if (is_null($this->filename)) {
             return;
         }
-        $name = basename(str_replace('\\', '/', $part->name()));
+        $name = basename(str_replace('\\', '/', $this->part->name()));
         if ($name !== $this->filename) {
-            $message(PartError::NameAndFilenameNotEqual);
+            yield $this->error(CheckType::Error, PartError::NameAndFilenameNotEqual);
         }
     }
 }

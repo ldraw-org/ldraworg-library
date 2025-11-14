@@ -201,7 +201,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                 ->rules([
                                     fn (): Closure => function (string $attribute, mixed $value, Closure $fail) {
                                         $p = new ParsedPartCollection($this->makeShortcut());
-                                        $errors = PartChecker::singleCheck($p, new PatternHasSetKeyword());
+                                        $errors = app(PartChecker::class)->runSingle(PatternHasSetKeyword::class, $p);
                                         if ($errors->isNotEmpty()) {
                                             $fail($errors->first()->message());
                                         }

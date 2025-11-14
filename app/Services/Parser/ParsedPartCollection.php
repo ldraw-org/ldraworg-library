@@ -201,20 +201,44 @@ class ParsedPartCollection extends Collection
         return count($history) ? $history : null;
     }
 
-    public function subparts(): ?array
+    protected function getSubparts(): self
     {
-        $subparts = $this
+        return $this
             ->pluck('file')
             ->merge($this->pluck('glossfile'), $this->pluck('tex_geometry.line.file'))
             ->filter()
             ->map(fn (string $subpart) => Str::of($subpart)->lower()->trim()->toString())
             ->unique()
-            ->sort()
+            ->sort();
+    }
+  
+    public function subparts(): ?array
+    {
+        $subparts = $this
+            ->getSubparts()
             ->values()
             ->all();
         return count($subparts) ? $subparts : null;
     }
 
+    public function subpartFilenames(): ?array
+    {
+        $subparts = $this
+            ->getSubparts()
+            ->map(function (string $subpart) {
+                $subpart = str_replace('\\', '/', $subpart);
+                $isTexture = pathinfo($subpart, PATHINFO_EXTENSION) === 'png';
+            
+                return [
+                    $isTexture ? 'parts/textures/' . $subpart : 'parts/' . $subpart,
+                    $isTexture ? 'p/textures/'     . $subpart : 'p/'     . $subpart,
+                ];
+            })
+            ->flatMap(fn($paths) => $paths)
+            ->all();
+        return count($subparts) ? $subparts : null; 
+    }
+  
     public function hasInvalidLines(): bool
     {
         return $this->isNotEmpty() &&

@@ -3,20 +3,22 @@
 namespace App\Services\Check\PartChecks;
 
 use App\Enums\PartCategory;
+use App\Enums\CheckType;
 use App\Enums\PartError;
 use App\Enums\PartTypeQualifier;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
+use App\Services\Check\Traits\ParsedPartOnly;
 
-class NewPartNotPhysicalColor implements Check
+class NewPartNotPhysicalColor extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    use ParsedPartOnly;
+    
+    public function check(): iterable
     {
-        if ($part->type_qualifier() == PartTypeQualifier::PhysicalColour &&
-            $part->category() !== PartCategory::Obsolete
+        if ($this->part->type_qualifier() == PartTypeQualifier::PhysicalColour &&
+            $this->part->category() !== PartCategory::Obsolete
         ) {
-            $message(PartError::NewPartIsPhysicalColor);
+            yield $this->error(CheckType::Error, PartError::NewPartIsPhysicalColor);
         }
     }
 }

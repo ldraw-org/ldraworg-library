@@ -85,12 +85,12 @@ class EditHeaderAction
                             'keywords' => '0 !KEYWORDS ' . collect(explode(',', Str::of($get('keywords'))->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->implode(', ')
                         ];
                         $check_part = new ParsedPartCollection(implode("\n", $check_part));
-                        $errors = PartChecker::singleCheck($check_part, new LibraryApprovedDescription());
+                        $errors = app(PartChecker::class)->runSingle(LibraryApprovedDescription::class, $check_part);
                         if ($errors->isNotEmpty()) {
                             $fail($errors->first()->message());
                             return;
                         }
-                        $errors = PartChecker::singleCheck($check_part, new PatternPartDescription());
+                        $errors = app(PartChecker::class)->runSingle(PatternPartDescription::class, $check_part);
                         if ($errors->isNotEmpty()) {
                             $fail($errors->first()->message());
                         }

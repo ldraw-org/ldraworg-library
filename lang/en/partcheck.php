@@ -4,6 +4,7 @@ return [
     'fileformat' => 'Files can only be text or png images',
     'duplicate' => 'A :value already exists with this name',
     'missing' => 'Invalid/missing :value line',
+    'authorinvalid' => 'Author line invalid or listed author is not registered',
     'circularreference' => 'Has a self referring Type 1 line',
     'bfc' => 'All parts must be BFC CERTIFY CCW',
     'previewinvalid' => 'Invalid PREVIEW line or singular/negative matrix',
@@ -14,6 +15,7 @@ return [
         'invalid' => 'Line :line invalid',
         'invalidmeta' => 'Line :line, invalid META command or comment without //',
         'invalidcolor' => 'Line :line, color code not in LDConfig.ldr',
+        'invalidcoloredlines' => 'Line :line, linetypes 2 and 5 should only be color 24',
         'invalidcolor16' => 'Line :line, color code 16 not allowed for linetypes 2, 5',
         'invalidcolor24' => 'Line :line, color code 24 not allowed for linetypes 1, 3, 4',
         'invalidnumbers' => 'Line :line invalid',
@@ -45,10 +47,6 @@ return [
         'phycolor' => 'Physical Color parts are no longer accepted',
         'alias' => 'Alias parts must have type Part or Shortcut',
         'flex' => 'Flexible Section parts must be of type Part',
-    ],
-
-    'author' => [
-        'registered' => ':value is not a Parts Tracker registered author',
     ],
 
     'license' => [

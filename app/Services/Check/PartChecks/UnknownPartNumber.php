@@ -2,19 +2,18 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
 use Illuminate\Support\Str;
 
-class UnknownPartNumber implements Check
+class UnknownPartNumber extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        $name = basename(str_replace('\\', '/', $part->name()));
+        $name = basename(str_replace('\\', '/', $this->part->name()));
         if (Str::startsWith($name, 'x')) {
-            $message(PartError::UnknownPartNumberName);
+            yield $this->error(CheckType::Error, PartError::UnknownPartNumberName);
         }
     }
 }

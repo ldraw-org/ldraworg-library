@@ -2,20 +2,16 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
 
-class LibraryApprovedDescription implements Check
+class LibraryApprovedDescription extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        if (is_null($part->description())) {
-            return;
-        }
-        if (preg_match('~[\p{C}\p{Zl}\p{Zp}]~u', $part->description(), $matches)) {
-            $message(PartError::InvalidDescription);
+        if (preg_match('~[\p{C}\p{Zl}\p{Zp}]~u', $this->part->description(), $matches)) {
+            yield $this->error(CheckType::Error, PartError::InvalidDescription);
         }
     }
 }

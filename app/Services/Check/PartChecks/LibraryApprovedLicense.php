@@ -2,18 +2,19 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\License;
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
+use App\Services\Check\Traits\ParsedPartOnly;
 
-class LibraryApprovedLicense implements Check
+class LibraryApprovedLicense extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    use ParsedPartOnly;
+
+    public function check(): iterable
     {
-        if (is_null($part->license())) {
-            $message(error: PartError::LicenseNotLibraryApproved);
+        if (is_null($this->part->license())) {
+            yield $this->error(CheckType::Error, error: PartError::LicenseNotLibraryApproved);
         }
     }
 }

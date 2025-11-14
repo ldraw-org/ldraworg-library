@@ -2,20 +2,19 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
 use App\Enums\PartTypeQualifier;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
 
-class AliasInParts implements Check
+class AliasInParts extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        if ($part->type_qualifier() == PartTypeQualifier::Alias &&
-            ! $part->type()?->inPartsFolder()
+        if ($this->part->type_qualifier() == PartTypeQualifier::Alias &&
+            ! $this->part->type()?->inPartsFolder()
         ) {
-            $message(PartError::AliasNotInParts);
+            yield $this->error(CheckType::Error, PartError::AliasNotInParts);
         }
     }
 }

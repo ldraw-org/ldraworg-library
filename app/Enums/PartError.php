@@ -17,6 +17,8 @@ enum PartError: string implements HasLabel
     case FixNotSelected = 'fix.checked';
     
     case MissingHeaderMeta = 'missing';
+    case AuthorInvalid = 'authorinvalid';
+
     case CircularReference = 'circularreference';
     case BfcNotCcw = 'bfc';
     case PreviewInvalid = 'previewinvalid';
@@ -24,6 +26,7 @@ enum PartError: string implements HasLabel
     case LineInvalid = 'line.invalid';
     case InvalidLineType0 = 'line.invalidmeta';
     case InvalidLineColor = 'line.invalidcolor';
+    case InvalidColoredLines = 'line.invalidcoloredlines';
     case InvalidColor16 = 'line.invalidcolor16';
     case InvalidColor24 = 'line.invalidcolor24';
     case InvalidLineNumbers = 'line.invalidnumbers';
@@ -52,8 +55,6 @@ enum PartError: string implements HasLabel
     case AliasNotInParts = 'type.alias';
     case FlexSectionNotPart = 'type.flex';
 
-    case AuthorNotRegistered = 'author.registered';
-
     case LicenseNotLibraryApproved = 'license.approved';
 
     case CategoryInvalid = 'category.invalid';
@@ -72,9 +73,4 @@ enum PartError: string implements HasLabel
     case WarningNotCoplanar = 'warning.notcoplaner';
     case WarningStickerColor = 'warning.stickercolor';
     case WarningLicense = 'warning.license';
-
-    public function type(): CheckType
-    {
-        return CheckType::tryFrom(Str::of($this->value)->replace('.', ' ')->words(1, '')->plural()) ?? CheckType::Error;
-    }
 }

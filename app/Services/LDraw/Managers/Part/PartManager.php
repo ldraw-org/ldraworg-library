@@ -34,6 +34,7 @@ class PartManager
     public function __construct(
         public LDView $render,
         protected LibrarySettings $settings,
+        protected PartChecker $checker,
     ) {
     }
 
@@ -379,16 +380,12 @@ class PartManager
 
     public function checkPart(Part $part, ?string $filename = null): void
     {
-        $checker = new PartChecker($part);
         if ($part->isText()) {
-            $part->errors = $checker->errorCheck($filename);
-            $part->warnings = $checker->warningChecks();          
+            $part->check_messages = $this->checker->run($part);
         } else {
-            $part->errors = collect([]);
-            $part->warnings = collect([]);
+            $part->check_messages = new CheckMessagesCollection();
         }
-        $part->tracker_holds = $checker->trackerChecks();
-        $part->can_release = $part->isOfficial() || ($part->errors->isEmpty() && $part->tracker_holds->isEmpty());
+        $part->can_release = $part->isOfficial() || ($part->check_messages->doesntHaveHoldableIssues());
         $part->updateReadyForAdmin();
         $part->save();
     }

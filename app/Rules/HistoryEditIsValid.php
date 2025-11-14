@@ -53,12 +53,13 @@ class HistoryEditIsValid implements ValidationRule, DataAwareRule
             );
         $part = Part::find(Arr::get($this->data, 'mountedActions.0.data.id'));
         $p = new ParsedPartCollection($value->implode("\n"));
-        $errors = PartChecker::singleCheck($p, new HistoryIsValid());
+        $checker = app(PartChecker::class);
+        $errors = $checker->runSingle(HistoryIsValid::class, $p);
         if ($errors->isNotEmpty()) {
             $fail($errors->first()->message());
             return;
         }
-        $errors = PartChecker::singleCheck($p, new HistoryUserIsRegistered());
+        $errors = $checker->runSingle(HistoryUserIsRegistered::class, $p);
         if ($errors->isNotEmpty()) {
             $fail($errors->first()->message());
             return;

@@ -28,6 +28,7 @@ use App\Models\User;
 use App\Models\Vote;
 use App\Observers\PartObserver;
 use App\Services\Check\CheckMessage;
+use App\Services\Check\CheckMessageCollection;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -317,6 +318,14 @@ class Part extends Model implements HasMedia
     protected function activeParts(Builder $query): void
     {
         $query->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved]);
+    }
+
+    protected function checkMessages(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => CheckMessageCollection::fromArray(json_decode($value ?? '[]', true)),
+            set: fn (CheckMessageCollection $value) => json_encode($value->toArray())
+        );
     }
 
     protected function errors(): Attribute

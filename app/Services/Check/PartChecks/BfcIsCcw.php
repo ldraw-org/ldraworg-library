@@ -2,17 +2,16 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
 
-class BfcIsCcw implements Check
+class BfcIsCcw extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        if ($part->headerBfc() !== 'CCW') {
-            $message(PartError::BfcNotCcw);
+        if ($this->part->bfc() !== 'CCW') {
+            yield $this->error(CheckType::Error, PartError::BfcNotCcw);
         }
     }
 }

@@ -3,12 +3,14 @@
 namespace App\Services\Check;
 
 use App\Enums\PartError;
+use App\Enums\CheckType;
 use Illuminate\Support\Arr;
 use Livewire\Wireable;
 
 class CheckMessage implements Wireable
 {
     private function __construct(
+        public CheckType $checkType,
         public PartError $error,
         public ?int $lineNumber = null,
         public ?string $value = null,
@@ -29,16 +31,21 @@ class CheckMessage implements Wireable
 
     public static function fromPartError(PartError $error): self
     {
-        return new self($error);
+        return new self(CheckType::Error, $error);
     }
 
     public static function fromArray(array $checkmessage): self
     {
+        $checkType = Arr::get($checkmessage, 'checkType');
+        if (! $checkType instanceof CheckType) {
+            $checkType = CheckType::tryFrom($checkType);
+        }
         $error = Arr::get($checkmessage, 'error');
         if (! $error instanceof PartError) {
             $error = PartError::tryFrom($error);
         }
         return new self(
+            $checkType,
             $error,
             Arr::get($checkmessage, 'lineNumber'),
             Arr::get($checkmessage, 'value'),
@@ -50,6 +57,7 @@ class CheckMessage implements Wireable
     public function toArray(): array
     {
         return [
+            'checkType' => $this->checkType,
             'error' => $this->error,
             'lineNumber' => $this->lineNumber,
             'value' => $this->value,

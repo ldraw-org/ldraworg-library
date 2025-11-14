@@ -2,28 +2,29 @@
 
 namespace App\Services\Check\PartChecks;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
+use App\Services\Check\BaseCheck;
 use App\Models\User;
-use Closure;
+use App\Services\Check\Traits\ParsedPartOnly;
 use Illuminate\Support\Arr;
 
-class HistoryUserIsRegistered implements Check
+class HistoryUserIsRegistered extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    use ParsedPartOnly;
+
+    public function check(): iterable
     {
-        collect($part->history())
-            ->each(function (array $history) use ($message) {
-                $username = Arr::get($history, 'username');
-                $realname = Arr::get($history, 'realname');
-                if (!is_null($username) && !is_null($realname)) {
-                    $message(PartError::HistoryAuthorNotRegistered);
-                } elseif (!is_null($username) && User::where('name', $username)->doesntExist()) {
-                    $message(PartError::HistoryAuthorNotRegistered);
-                } elseif (!is_null($realname) && User::where('realname', $realname)->doesntExist()) {
-                    $message(PartError::HistoryAuthorNotRegistered);
-                }
-            });
+        foreach($this->part->history() as $history) {
+            $username = Arr::get($history, 'username');
+            $realname = Arr::get($history, 'realname');
+            $usernameNotFound = !is_null($username) && User::where('name', $username)->doesntExist();
+            $realnameNotFound = !is_null($realname) && User::where('realname', $realname)->doesntExist();
+            
+            if ($usernameNotFound || $realnameNotFound) {
+                yield $this->error(CheckType::Error, PartError::HistoryAuthorNotRegistered, value: $username ?? $realname);
+                return false;
+            }
+        }
     }
 }

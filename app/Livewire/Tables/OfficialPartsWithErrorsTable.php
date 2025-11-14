@@ -21,7 +21,7 @@ class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
     {
         return $table
             ->query(
-                Part::official()->hasErrors()->whereDoesntHave('unofficial_part')
+                Part::official()->whereDoesntHave('unofficial_part')->hasErrors()
             )
             ->heading('Official Parts With Errors')
             ->columns([
@@ -35,7 +35,7 @@ class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
                 TextColumn::make('description')
                     ->sortable(),
                 TextColumn::make('errors')
-                    ->state(fn (Part $part) => $part->errors->map->message())
+                    ->state(fn (Part $part) => $part->check_messages->getErrors()->map->message())
                     ->listWithLineBreaks()
                     ->bulleted()
                     ->wrap()
@@ -51,11 +51,11 @@ class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
                     ->multiple()
                     ->query(function (Builder $query, array $data) {
                         if (count($data['values']) == 1) {
-                            $query->hasError($data['values'][0]);
+                            $query->hasMessage($data['values'][0]);
                         } else {
                             $query->where(function (Builder $query_inner) use ($data) {
                                 foreach ($data['values'] as $value) {
-                                    $query_inner->orHasError($value);
+                                    $query_inner->orHasMessage($value);
                                 }
                             });
                         }

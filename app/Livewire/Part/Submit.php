@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Part;
 
+use App\Enums\CheckType;
 use App\Enums\PartError;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Utilities\Get;
@@ -12,6 +13,7 @@ use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
 use App\Services\Check\CheckMessage;
+use App\Services\Check\CheckMessageCollection;
 use App\Services\Check\PartChecker;
 use App\Services\Parser\ParsedPartCollection;
 use Closure;
@@ -193,7 +195,7 @@ class Submit extends Component implements HasSchemas
                 break;
             }
         }
-        $errors = new Collection();
+        $errors = new CheckMessageCollection();
         $mimeType = $mimeType = $this->getMimeType($file);
         switch($mimeType) {
             case 'text/plain':
@@ -203,13 +205,14 @@ class Submit extends Component implements HasSchemas
                 $pparts = Part::query()->byName($partname)->get();
                 $unofficial_exists = $pparts->unofficial()->isNotEmpty();
                 $official_exists = $pparts->official()->isNotEmpty();
-                $pc = new PartChecker($part);
-                $errors = $errors->merge($pc->errorCheck($file->getClientOriginalName()));
+                $pc = app(PartChecker::class);
+                $errors = $errors->merge($pc->run($part, $file->getClientOriginalName()));
                 
                 if ($part->type() == PartType::Primitive || $part->type()?->inPartsFolder()) {
                     $searchFolder = $part->type() == PartType::Primitive ? 'parts/' : 'p/';
                     if ($pparts->where('filename', "{$searchFolder}{$partname}")->isNotEmpty()) {
                         $errors->push(CheckMessage::fromArray([
+                            'checkType' => CheckType::Error,
                             'error' => PartError::DuplicateFile,
                             'value' => $part->type() == PartType::Primitive ? 'Parts' : 'Primitive',
                         ]));

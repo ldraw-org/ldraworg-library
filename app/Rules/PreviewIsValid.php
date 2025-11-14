@@ -24,7 +24,7 @@ class PreviewIsValid implements DataAwareRule, ValidationRule
     {
         $line = '16 0 0 0 '. ($attribute == 'mountedActions.0.data.preview_rotation' ? $value : Arr::get($this->data, 'mountedActions.0.data.preview_rotation', ''));
         $p = new ParsedPartCollection($line);
-        $errors = PartChecker::singleCheck($p, new PartChecksPreviewIsValid());
+        $errors = app(PartChecker::class)->runSingle(PartChecksPreviewIsValid::class, $p);
         if ($errors->isNotEmpty()) {
             $fail($errors->first()->message());
         }

@@ -3,22 +3,21 @@
 namespace App\Services\Check\PartChecks;
 
 use App\Enums\PartCategory;
+use App\Enums\CheckType;
 use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
-use App\Services\Check\Contracts\Check;
-use App\Services\Parser\ParsedPartCollection;
-use Closure;
+use App\Services\Check\BaseCheck;
 use Illuminate\Support\Str;
 
-class DescriptionModifier implements Check
+class DescriptionModifier extends BaseCheck
 {
-    public function check(ParsedPartCollection $part, Closure $message): void
+    public function check(): iterable
     {
-        $prefix = $part->descriptionPrefix() ?? '';
-        $type = $part->type();
+        $prefix = $this->part->descriptionPrefix() ?? '';
+        $type = $this->part->type();
         if ($type == PartType::Subpart && !Str::startsWith($prefix, '~')) {
-            $message(PartError::NoTildeForSubpart);
+            yield $this->error(CheckType::Error, PartError::NoTildeForSubpart);
             return;
         }
 
@@ -26,20 +25,20 @@ class DescriptionModifier implements Check
             return;
         }
                        
-        if ($part->category()?->isInactive() && !Str::startsWith($prefix, '~')) {
-            $message(PartError::NoTildeForMovedObsolete);
+        if ($this->part->category()?->isInactive() && !Str::startsWith($prefix, '~')) {
+            yield $this->error(CheckType::Error, PartError::NoTildeForMovedObsolete);
             return;
         }
-        if ($part->type_qualifier() == PartTypeQualifier::Alias && !Str::contains($prefix, '=')) {
-            $message(PartError::NoEqualsForAlias);
+        if ($this->part->type_qualifier() == PartTypeQualifier::Alias && !Str::contains($prefix, '=')) {
+            yield $this->error(CheckType::Error, PartError::NoEqualsForAlias);
             return;
         }
             
-        $name = basename($part->name());
+        $name = basename($this->part->name());
 
         if (Str::startsWith($name, 't') &&
             !Str::contains($prefix, '|')) {
-            $message(PartError::NoPipeForThirdParty);
+            yield $this->error(CheckType::Error, PartError::NoPipeForThirdParty);
         }
 
     }

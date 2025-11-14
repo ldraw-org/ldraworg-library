@@ -160,7 +160,7 @@ class PartListTable extends BasicTable
                                     $values = $operator->getSettings()['values'];
                                     $query->where(function (Builder $query_inner) use ($values, $isInverse) {
                                         foreach ($values as $value) {
-                                            $query_inner->{$isInverse ? 'orDoesntHaveIssue' : 'orHasIssue'}($value);
+                                            $query_inner->{$isInverse ? 'orDoesntHaveMessage' : 'orHasMessage'}($value);
                                         }
                                     });
                                 })
