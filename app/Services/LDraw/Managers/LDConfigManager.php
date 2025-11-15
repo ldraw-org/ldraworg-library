@@ -4,6 +4,7 @@ namespace App\Services\LDraw\Managers;
 
 use App\Models\Avatar;
 use App\Models\LdrawColour;
+use App\Services\LDraw\Rebrickable;
 use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -11,23 +12,31 @@ use Illuminate\Support\Facades\Storage;
 
 class LDConfigManager
 {
+    public function __construct(
+        protected Rebrickable $rb
+    ) {
+        
+    }
+  
     public function getLDConfig(): ParsedPartCollection
     {
         $ldconfig = Storage::disk('library')->get('official/LDConfig.ldr');
         return new ParsedPartCollection($ldconfig)->where('invalid', false);
-
     }
 
     public function importColours(): void
     {
+        $rbColors = $this->rb->getColors();
         $this->getLDConfig()
             ->where('meta', 'colour')
-            ->each(function (array $color) {
+            ->each(function (array $color) use ($rbColors) {
                 $c = LdrawColour::where('name', $color['name'])->where('code', '!=', $color['code'])->first();
                 if (!is_null($c)) {
                     $c->delete();
                 }
                 $params = Arr::get($color, 'material_params', []);
+                $rbId = $rbColors->where('id', '!=', '-1')->first(fn (array $rbValues) => in_array($color['code'], Arr::get($rbValues, 'external_ids.LDraw.ext_ids', [])))['id'] ?? null;
+                $rbName = $rbColors->where('id', '!=', '-1')->first(fn (array $rbValues) => in_array($color['code'], Arr::get($rbValues, 'external_ids.LDraw.ext_ids', [])))['name'] ?? null;
                 $color = [
                     'name' => $color['name'],
                     'code' => $color['code'],
@@ -52,10 +61,12 @@ class LDConfigManager
                     'material_size' => Arr::get($params, 'size'),
                     'material_minsize' => Arr::get($params, 'minsize'),
                     'material_maxsize' => Arr::get($params, 'maxsize'),
+                    'rebrickable_id' => $rbId,
+                    'rebrickable_name' => $rbName,
                 ];
                 LdrawColour::updateOrCreate(['code' => $color['code']], $color);
             });
-        Cache::set('ldraw_colour_codes', LdrawColour::pluck('code')->all());
+        Cache::set('ldraw_colour_codes', LdrawColour::pluck('rebrickable_id', 'code')->all());
     }
 
     public function importAvatars(): void

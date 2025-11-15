@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Filament\Schemas\Schema;
-use App\Services\LDraw\SetPbg;
+use App\Services\LDraw\ImprovedSetPbg;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -52,7 +52,7 @@ class PbgGenerator extends Component implements HasSchemas
         if (!str_ends_with($set, '-1')) {
             $set .= "-1";
         }
-        $set_pbg = new SetPbg();
+        $set_pbg = app(ImprovedSetPbg::class);
         $this->pbg = $set_pbg->pbg($set);
         $this->hasMessages = $set_pbg->messages->isNotEmpty();
         $this->hasErrors = $set_pbg->messages->has('errors');
