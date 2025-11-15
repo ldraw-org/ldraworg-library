@@ -155,7 +155,7 @@ class ImprovedSetPbg
     protected function resolveColor(array $part, ?int $fallback = null): int
     {
         $rbId = $part['color']['id'];
-        $colorId = collect(Cache::get('ldraw_colour_codes', []))
+        $colorId = collect(Cache::get('ldraw_colour_codes_to_rebrickable', []))
           ->search(fn($value, $key) => $value === $rbId); 
         
         if ($colorId !== null) {

@@ -66,7 +66,8 @@ class LDConfigManager
                 ];
                 LdrawColour::updateOrCreate(['code' => $color['code']], $color);
             });
-        Cache::set('ldraw_colour_codes', LdrawColour::pluck('rebrickable_id', 'code')->all());
+        Cache::set('ldraw_colour_codes', LdrawColour::pluck('code')->all());
+        Cache::set('ldraw_colour_codes_to_rebrickable', LdrawColour::pluck('rebrickable_id', 'code')->all());
     }
 
     public function importAvatars(): void
