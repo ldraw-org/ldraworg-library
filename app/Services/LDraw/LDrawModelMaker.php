@@ -45,15 +45,10 @@ class LDrawModelMaker
             ? $query->doesntHave('unofficial_part')
             : $query->official();
 
-        $subpartFilenames = $query->distinct()->pluck('filename');
-//        dd($subpartFilenames);
-        $query = Part::with('body')
-            ->select('id', 'filename', 'type', 'header');
-        $query = $part->isUnofficial()
-            ? $query->doesntHave('unofficial_part')
-            : $query->official();
-        
-        return $query->whereIn('filename', $subpartFilenames)
+        $subpartIds = $query->distinct()->pluck('id');
+        return Part::with('body')
+            ->select('id', 'filename', 'type', 'header')
+            ->whereIn('id', $subpartIds)
             ->get();
     }
   
@@ -65,18 +60,19 @@ class LDrawModelMaker
             $file = $model;
         }
         $subpartFilenames = (new ParsedPartCollection($file))->subpartFilenames($file) ?? [];
-        $allLibraryFilenames = [];
+        $allLibraryIds = [];
         Part::whereIn('filename', $subpartFilenames)
-            ->each(function (Part $part) use (&$allLibraryFilenames) {
+            ->doesntHave('unofficial_part')
+            ->each(function (Part $part) use (&$allLibraryIds) {
                 $this->getPartSubparts($part, true)
-                    ->each(function (Part $p) use (&$allLibraryFilenames) {
-                        $allLibraryFilenames[$p->filename] = true;
+                    ->each(function (Part $p) use (&$allLibraryIds) {
+                        $allLibraryIds[$p->id] = true;
                     });
             }); 
         $lines = [];
         Part::with('body')
           ->select('id', 'filename', 'type', 'header')
-          ->whereIn('filename', array_keys($allLibraryFilenames))
+          ->whereIn('id', array_keys($allLibraryIds))
           ->each(function (Part $p) use (&$lines) {
                 if ($p->isTexmap()) {
                     $lines[] = $p->get(true, true);
