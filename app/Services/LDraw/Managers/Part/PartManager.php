@@ -19,6 +19,7 @@ use App\Models\StickerSheet;
 use App\Models\User;
 use App\Services\Check\CheckMessageCollection;
 use App\Services\Check\PartChecker;
+use App\Services\LDraw\Rebrickable;
 use App\Services\Parser\ParsedPartCollection;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
@@ -36,6 +37,7 @@ class PartManager
         public LDView $render,
         protected LibrarySettings $settings,
         protected PartChecker $checker,
+        protected Rebrickable $rebrickable,
     ) {
     }
 
@@ -443,7 +445,7 @@ class PartManager
     public function updateRebrickable(Part $part, bool $updateOfficial = false): void
     {
         if ($part->canSetRebrickablePart()) {
-            RebrickablePart::findOrCreateFromPart($part);
+            RebrickablePart::findOrCreateFromPart($part, $this->rebrickable);
         }
         if (is_null($part->sticker_sheet_id) && $part->type_qualifier == PartTypeQualifier::Alias && is_null($part->getRebrickablePart())) {
             $part->rebrickable_part()->associate($part->subparts->first()->rebrickable_part);

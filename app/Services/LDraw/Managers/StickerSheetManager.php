@@ -29,7 +29,7 @@ class StickerSheetManager
 
     public function updateRebrickablePart(StickerSheet $sheet, bool $updateOfficial = false): void
     {
-        RebrickablePart::findOrCreateFromStickerSheet($sheet);
+        RebrickablePart::findOrCreateFromStickerSheet($sheet, $this->rebrickable);
         $sheet->load('rebrickable_part')
             ->parts?->each(function (Part $p) use ($updateOfficial) {
                 $p->setExternalSiteKeywords($updateOfficial);
