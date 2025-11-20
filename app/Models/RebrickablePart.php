@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Illuminate\Support\Collection;
 
 class RebrickablePart extends Model
 {
@@ -56,14 +55,16 @@ class RebrickablePart extends Model
     public static function updateOrCreateFromArray(array $partData): self
     {
         $values = [
-            'number'    => Arr::get($partData, 'part_num'),
-            'name'      => Arr::get($partData, 'name', 'Unknown'),
-            'url'       => Arr::get($partData, 'part_url'),
+            'number' => Arr::get($partData, 'part_num'),
+            'name' => Arr::get($partData, 'name', 'Unknown'),
+            'url' => Arr::get($partData, 'part_url'),
             'image_url' => Arr::get($partData, 'part_img_url'),
             'bricklink' => Arr::get($partData, 'external_ids.BrickLink', []),
-            'brickset'  => Arr::get($partData, 'external_ids.Brickset', []),
-            'brickowl'  => Arr::get($partData, 'external_ids.BrickOwl', []),
-            'lego'      => Arr::get($partData, 'external_ids.LEGO', []),
+            'brickset' => Arr::get($partData, 'external_ids.Brickset', []),
+            'brickowl' => Arr::get($partData, 'external_ids.BrickOwl', []),
+            'lego' => Arr::get($partData, 'external_ids.LEGO', []),
+            'rb_part_category_id' => Arr::get($partData, 'part_cat_id'),
+            'element' => Arr::get($partData, 'element'),
         ];
 
         return static::updateOrCreate(

@@ -69,7 +69,7 @@ class UpdateReleaseRebrickable extends Command
             '3816.dat',
             '3817.dat',
         ];
-        $parts->filter(fn (Part $p, int $id): bool => is_null($p->getRebrickablePart()))
+        $parts->filter(fn (Part $p, int $id): bool => is_null($p->rebrickable_part))
             ->reject(fn (Part $p, int $id): bool => in_array(basename($p?->base_part->filename ?? ''), $reject_list))
             ->each(fn (Part $p, int $id): mixed => UpdateRebrickable::dispatch($p, true));
     }

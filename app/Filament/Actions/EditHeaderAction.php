@@ -6,16 +6,9 @@ use Filament\Schemas\Components\Utilities\Get;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
-use App\Events\PartHeaderEdited;
 use App\Filament\Forms\Components\AuthorSelect;
 use App\Filament\Forms\Components\PreviewSelect;
-use App\Jobs\UpdateRebrickable;
-use App\Jobs\UpdateZip;
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
-use App\Models\Part\PartHistory;
-use App\Models\Part\PartKeyword;
-use App\Models\User;
 use App\Rules\HistoryEditIsValid;
 use App\Rules\PatternHasSet;
 use App\Services\Check\PartChecker;
@@ -30,40 +23,23 @@ use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Services\PartHeaderEdit;
 
 class EditHeaderAction
 {
     public static function make(Part $part, ?string $name = null): EditAction
     {
+        $headerEditor = app(PartHeaderEdit::class);
+      
         return EditAction::make($name)
             ->label('Edit Header')
             ->record($part)
             ->schema(self::formSchema($part))
-            ->mutateRecordDataUsing(function (array $data) use ($part): array {
-                $data['help'] = implode("\n", $part->help ?? []);
-                if (is_null($part->getRebrickablePart())) {
-                    $kws = $part->keywords;
-                } else {
-                    $kws = $part->keywords
-                        ->reject(function (PartKeyword $kw): bool {
-                            return Str::of($kw->keyword)->lower()->startsWith('rebrickable') ||
-                            Str::of($kw->keyword)->lower()->startsWith('brickset') ||
-                            Str::of($kw->keyword)->lower()->startsWith('brickowl') ||
-                            Str::of($kw->keyword)->lower()->startsWith('bricklink');
-                        });
-                }
-                $data['keywords'] = $kws->sortBy('keyword')->implode('keyword', ', ');
-                $preview = $part->previewValues();
-                $data['preview_rotation'] = $preview['rotation'];
-                $data['history'] = $part->history->sortBy('created_at')->map->only('created_at', 'user_id', 'comment')->all();
-                return $data;
-            })
-            ->using(fn (Part $p, array $data): Part => self::updateHeader($p, $data))
+            ->mutateRecordDataUsing(fn (array $data) => $headerEditor->setupHeaderData($part, $data))
+            ->using(fn (Part $p, array $data): Part => $headerEditor->storeHeaderData($p, $data))
             ->successNotificationTitle('Header updated')
             ->visible($part->isUnofficial() && (Auth::user()?->can('update', $part) ?? false));
     }
@@ -184,146 +160,5 @@ class EditHeaderAction
                 ->nullable()
                 ->string()
             ];
-    }
-
-    /** @param array<mixed> $data */
-    protected static function updateHeader(Part $part, array $data): Part
-    {
-        $manager = app(PartManager::class);
-        $changes = ['old' => [], 'new' => []];
-        if ($data['description'] !== $part->description) {
-            $changes['old']['description'] = $part->description;
-            $changes['new']['description'] = $data['description'];
-            $part->description = $data['description'];
-            if ($part->type->inPartsFolder()) {
-                $cat = (new ParsedPartCollection($part->description))->category();
-                if (!is_null($cat) && $part->category !== $cat) {
-                    $part->category = $cat;
-                }
-            }
-        }
-        if ($part->type->inPartsFolder() &&
-            Arr::has($data, 'category') &&
-            $part->category !== PartCategory::tryFrom($data['category'])
-        ) {
-            $cat = PartCategory::tryFrom($data['category']);
-            $changes['old']['category'] = $part->category->value;
-            $changes['new']['category'] = $cat->value;
-            $part->category = $cat;
-        }
-
-        if ($part->type->inPartsFolder() && Arr::has($data, 'type') && PartType::tryFrom($data['type']) !== $part->type) {
-            $pt = PartType::tryFrom($data['type']);
-            $changes['old']['type'] = $part->type->value;
-            $changes['new']['type'] = $pt->value;
-            $part->type = $pt;
-        }
-
-        if (Arr::has($data, 'type_qualifier')) {
-            $pq = PartTypeQualifier::tryFrom($data['type_qualifier']);
-        } else {
-            $pq = null;
-        }
-        if ($part->type_qualifier !== $pq) {
-            $changes['old']['qual'] = $part->type_qualifier->value ?? '';
-            $changes['new']['qual'] = $pq->value ?? '';
-            $part->type_qualifier = $pq;
-        }
-
-        if (Arr::has($data, 'help') && Arr::get($data, 'help')) {
-            $newHelp = "0 !HELP " . str_replace(["\n","\r"], ["\n0 !HELP ",''], $data['help']);
-            $newHelp = (new ParsedPartCollection($newHelp))->help() ?? [];
-        } else {
-            $newHelp = [];
-        }
-
-        if ($part->help !== $newHelp) {
-            $changes['old']['help'] = "0 !HELP " . implode("\n0 !HELP ", $part->help ?? []);
-            $changes['new']['help'] = "0 !HELP " . implode("\n0 !HELP ", $newHelp);
-            $part->help = $newHelp;
-        }
-
-        if (!Arr::has($data, 'keywords')) {
-            $new_kws = collect([]);
-        } else {
-            $new_kws = collect(explode(',', Str::of($data['keywords'])->trim()->squish()->replace(["\n", ', ',' ,'], ',')->toString()))->filter();
-        }
-        if (!is_null($part->getRebrickablePart())) {
-            $extKeywords = collect($part->keywords
-                ->filter(function (PartKeyword $kw): bool {
-                    return Str::of($kw->keyword)->lower()->startsWith('rebrickable') ||
-                    Str::of($kw->keyword)->lower()->startsWith('brickset') ||
-                    Str::of($kw->keyword)->lower()->startsWith('brickowl') ||
-                    Str::of($kw->keyword)->lower()->startsWith('bricklink');
-                })
-                ->pluck('keyword')
-                ->all());
-            $new_kws = $new_kws
-                ->reject(function (string $kw):bool {
-                    return Str::of($kw)->lower()->startsWith('rebrickable') ||
-                    Str::of($kw)->lower()->startsWith('brickset') ||
-                    Str::of($kw)->lower()->startsWith('brickowl') ||
-                    Str::of($kw)->lower()->startsWith('bricklink');
-                })
-                ->merge($extKeywords);
-        }
-        $partKeywords = collect($part->keywords->pluck('keyword')->all());
-        if ($partKeywords->diff($new_kws)->isNotEmpty() || $new_kws->diff($partKeywords)->isNotEmpty()) {
-            $changes['old']['keywords'] = implode(", ", $partKeywords->all());
-            $changes['new']['keywords'] = implode(", ", $new_kws->all());
-            $part->setKeywords($new_kws->all());
-            UpdateRebrickable::dispatch($part);
-        }
-
-        $old_hist = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h) => $h->toString()));
-        $new_hist = collect($data['history'])
-            ->map(
-                fn (array $state): string =>
-                '0 !HISTORY ' .
-                (new Carbon(Arr::get($state, 'created_at')))->toDateString() .
-                ' ' .
-                (User::find(Arr::get($state, 'user_id'))?->historyString() ?? '') .
-                ' ' .
-                Str::of(Arr::get($state, 'comment'))->squish()->trim()->toString()
-            );
-        if ($new_hist->diff($old_hist)->isNotEmpty() || $old_hist->diff($new_hist)->isNotEmpty()) {
-            $changes['old']['history'] = $old_hist->implode("\n");
-            $part->setHistory((new ParsedPartCollection($new_hist->implode("\n")))->history() ?? []);
-            $part->load('history');
-            $changes['new']['history'] = collect($part->history->sortBy('created_at')->map(fn (PartHistory $h): string => $h->toString()))->implode("\n");
-        }
-
-        if ($part->cmdline !== Arr::get($data, 'cmdline')) {
-            $changes['old']['cmdline'] = $part->cmdline ?? '';
-            $changes['new']['cmdline'] = Arr::get($data, 'cmdline', '');
-            $part->cmdline = Arr::get($data, 'cmdline');
-        }
-
-        $preview = '16 0 0 0 ' . Str::of(Arr::get($data, 'preview_rotation'))->squish();
-        $preview = $preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $preview;
-
-        $preview_changed = false;
-        if ($part->preview !== $preview) {
-            $changes['old']['preview'] = $part->preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
-            $changes['new']['preview'] = $preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
-            $part->preview = $preview;
-            $preview_changed = true;
-        }
-
-        if (count($changes['new']) > 0) {
-            $part->save();
-            $part->refresh();
-            $part->generateHeader();
-            if ($preview_changed) {
-                $manager->updateImage($part);
-            }
-            $manager->checkPart($part);
-            // Post an event
-            PartHeaderEdited::dispatch($part, Auth::user(), $changes, $data['editcomment'] ?? null);
-            Auth::user()->notification_parts()->syncWithoutDetaching([$part->id]);
-            UpdateZip::dispatch($part);
-        }
-
-        return $part;
     }
 }

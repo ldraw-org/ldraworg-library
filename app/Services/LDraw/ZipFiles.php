@@ -26,7 +26,8 @@ class ZipFiles
             $zipparts = $part->descendantsAndSelf->official()->unique();
         }
         $zipparts->each(function (Part $part) use ($zip) {
-            $zip->addFromString($part->filename, $part->get());
+            self::addPartToZip($zip, $part);
+            //$zip->addFromString($part->filename, $part->get());
         });
         $zip->close();
         $file = file_get_contents($dir->path($name));
@@ -42,7 +43,7 @@ class ZipFiles
             if (!is_null($oldfilename)) {
                 $zip->deleteName($oldfilename);
             }
-            self::addPartToZip($zip, $part, $tempDir);
+            self::addPartToZip($zip, $part);
             $zip->close();
         } else {
             $zip->open(Storage::disk('library')->path('unofficial/ldrawunf.zip'), ZipArchive::CREATE | ZipArchive::OVERWRITE);
@@ -50,9 +51,9 @@ class ZipFiles
             $zip->addFile(Storage::disk('library')->path('official/CAlicense.txt'), 'CAlicense.txt');
             $zip->addFile(Storage::disk('library')->path('official/CAlicense4.txt'), 'CAlicense4.txt');
             $zip->close();
-            Part::unofficial()->chunk(500, function (Collection $parts) use ($zip, $tempDir) {
+            Part::unofficial()->chunk(500, function (Collection $parts) use ($zip) {
                 $zip->open(Storage::disk('library')->path('unofficial/ldrawunf.zip'));
-                $parts->each(fn (Part $part) => self::addPartToZip($zip, $part, $tempDir));
+                $parts->each(fn (Part $part) => self::addPartToZip($zip, $part));
                 $zip->close();
             });
         }
@@ -89,13 +90,13 @@ class ZipFiles
         $updateZip->close();
         $completeZip->close();
 
-        Part::official()->chunk(100, function (Collection $parts) use ($updateZip, $completeZip, $updateZipName, $completeZipName, $tempDir, $release) {
+        Part::official()->chunk(100, function (Collection $parts) use ($updateZip, $completeZip, $updateZipName, $completeZipName, $release) {
             $updateZip->open($updateZipName);
             $completeZip->open($completeZipName);
-            $parts->each(function (Part $part) use ($updateZip, $completeZip, $tempDir, $release) {
-                self::addPartToZip($completeZip, $part, $tempDir, 'ldraw/');
+            $parts->each(function (Part $part) use ($updateZip, $completeZip, $release) {
+                self::addPartToZip($completeZip, $part, 'ldraw/');
                 if ($part->part_release_id == $release->id || $part->has_minor_edit) {
-                    self::addPartToZip($updateZip, $part, $tempDir, 'ldraw/');
+                    self::addPartToZip($updateZip, $part, 'ldraw/');
                 }
             });
             $updateZip->close();
@@ -103,6 +104,17 @@ class ZipFiles
         });
     }
 
+    protected static function addPartToZip(ZipArchive $zip, Part $part, string $prefix = ''): void
+    {
+        $filename = $prefix . $part->filename;
+        $timestamp = $part->lastChange()->getTimestamp();
+        
+        $flags = $part->isTexmap() ? ZipArchive::FL_ENC_RAW : 0;
+        $zip->addFromString($filename, $part->get(), flags: $flags);
+        $zip->setMtimeName($filename, $timestamp);
+    }
+
+/*
     protected static function addPartToZip(ZipArchive $zip, Part $part, ?TemporaryDirectory $tempDir = null, $prefix = ''): void
     {
         if (is_null($tempDir)) {
@@ -120,4 +132,6 @@ class ZipFiles
         $zip->setMtimeName($part->filename, $time);
         $zip->setCompressionName($part->filename, ZipArchive::CM_DEFAULT);
     }
+*/
+  
 }

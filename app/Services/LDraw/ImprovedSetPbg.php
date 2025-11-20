@@ -5,7 +5,8 @@ namespace App\Services\LDraw;
 use App\Enums\PartCategory;
 use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
-use App\Models\StickerSheet;
+use App\Models\RebrickablePart;
+use App\Services\LDraw\Managers\StickerSheetManager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Cache;
@@ -17,7 +18,8 @@ class ImprovedSetPbg
 
     public function __construct(
         public MessageBag $messages,
-        protected Rebrickable $rb
+        protected Rebrickable $rb,
+        protected StickerSheetManager $stickerManager,
     ) {}
 
     public function pbg(string $set_number): string|false
@@ -97,12 +99,14 @@ class ImprovedSetPbg
         $filename = $this->buildFilename($partNum);
 
         $p = Part::where('filename', $filename)->first();
-        $stickerSheet = StickerSheet::whereRelation('rebrickable_part', 'number', $partNum)->first();
+        $stickerSheet = RebrickablePart::where('rb_part_category_id', 58)
+            ->where('number', $partNum)
+            ->first();
 
         if ($p) {
             $this->addPart($part, $this->getBasename($p->filename), $color);
         } elseif ($stickerSheet) {
-            $stickerSheet->complete_set()->each(
+            $this->stickerManager->complete_set($stickerSheet)->each(
                 fn(Part $sticker) => $this->addPart($part, $this->getBasename($sticker->filename), $color)
             );
         } else {

@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PartCategory;
-use App\Models\StickerSheet;
-use Illuminate\Http\Request;
+use App\Models\RebrickablePart;
 use Illuminate\View\View;
 
 class StickerSheetShowController extends Controller
 {
-    public function __invoke(StickerSheet $sheet): View
+    public function __invoke(RebrickablePart $sheet): View
     {
+        if ($sheet->rb_part_category_id !== 58) {
+            abort(404, 'Not a sticker sheet');
+        }
         $flat = $sheet->parts
             ->whereNull('unofficial_part')
             ->where('category', PartCategory::Sticker)

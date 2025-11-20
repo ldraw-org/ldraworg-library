@@ -7,7 +7,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\Permission;
-use App\Models\StickerSheet;
+use App\Models\RebrickablePart;
 use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -23,13 +23,16 @@ class StickerSheetIndex extends BasicTable implements HasActions
     public function table(Table $table): Table
     {
         return $table
-            ->query(StickerSheet::has('parts'))
+            ->query(
+                RebrickablePart::where('rb_part_category_id', '58')
+                ->has('parts')
+            )
             ->heading('Sticker Sheets')
             ->columns([
                 TextColumn::make('number')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('rebrickable_part.name')
+                TextColumn::make('name')
                     ->label('Description')
                     ->grow()
                     ->sortable()
@@ -87,6 +90,6 @@ class StickerSheetIndex extends BasicTable implements HasActions
             ])
             ->persistSortInSession()
             ->persistSearchInSession()
-            ->recordUrl(fn (StickerSheet $s): string => route('parts.sticker-sheet.show', $s));
+            ->recordUrl(fn (RebrickablePart $rbPart): string => route('parts.sticker-sheet.show', $rbPart));
     }
 }

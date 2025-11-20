@@ -17,4 +17,17 @@ enum ExternalSite: string
         $urlStart = config("ldraw.external_sites.{$this->value}");
         return is_null($urlStart) ? null : $urlStart . $number;
     }
+
+    public static function prefixes(): array
+    {
+        return array_map(
+            fn (self $site) => strtolower($site->value),
+            self::cases()
+        );
+    }
+
+    public function keywordPrefix(): string
+    {
+        return strtolower($this->value) . ' ';
+    }
 }

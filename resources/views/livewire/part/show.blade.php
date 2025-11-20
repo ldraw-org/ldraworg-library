@@ -137,7 +137,7 @@
                     <div class="font-bold text-lg">
                         External Sites:
                     </div>
-                    @if (!is_null($part->getRebrickablePart()))
+                    @if (!is_null($part->rebrickable_part))
                         <x-library-icon icon="link-on" class="w-5" color="fill-gray-400" title="External site data provided by Rebrickable.com" />
                     @else
                         <x-library-icon icon="link-off" class="w-5" color="fill-red-300" title="External site data provided by part keywords" />

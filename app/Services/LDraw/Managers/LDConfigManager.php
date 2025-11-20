@@ -66,8 +66,8 @@ class LDConfigManager
                 ];
                 LdrawColour::updateOrCreate(['code' => $color['code']], $color);
             });
-        Cache::set('ldraw_colour_codes', LdrawColour::pluck('code')->all());
-        Cache::set('ldraw_colour_codes_to_rebrickable', LdrawColour::pluck('rebrickable_id', 'code')->all());
+        Cache::put('ldraw_colour_codes', LdrawColour::pluck('code')->all());
+        Cache::put('ldraw_colour_codes_to_rebrickable', LdrawColour::pluck('rebrickable_id', 'code')->all());
     }
 
     public function importAvatars(): void
@@ -86,6 +86,6 @@ class LDConfigManager
             })
             ->all();
         Avatar::upsert($avatars, uniqueBy: 'category', update: ['part', 'matrix', 'description']);
-        Cache::set('avatar_parts', Arr::mapWithKeys($avatars, fn (array $a, int $key) => [$a['category'] => $a['part']]));
+        Cache::put('avatar_parts', Arr::mapWithKeys($avatars, fn (array $a, int $key) => [$a['category'] => $a['part']]));
     }
 }

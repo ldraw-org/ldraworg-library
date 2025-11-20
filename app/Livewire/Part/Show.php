@@ -148,8 +148,8 @@ class Show extends Component implements HasSchemas, HasActions
     public function stickerSearchAction(): Action
     {
         return Action::make('stickerSearch')
-                ->url(fn () => route('parts.sticker-sheet.show', $this->part->sticker_sheet ?? ''))
-                ->visible(!is_null($this->part->sticker_sheet_id))
+                ->url(fn () => route('parts.sticker-sheet.show', $this->part->rebrickable_part ?? ''))
+                ->visible($this->part->rebrickable_part?->rb_part_category_id === 58)
                 ->label('View sticker sheet parts')
                 ->color('gray')
                 ->outlined();

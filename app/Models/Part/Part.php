@@ -27,7 +27,6 @@ use App\Models\Traits\HasUser;
 use App\Models\User;
 use App\Models\Vote;
 use App\Observers\PartObserver;
-use App\Services\Check\CheckMessage;
 use App\Services\Check\CheckMessageCollection;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
@@ -46,7 +45,6 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
-use Znck\Eloquent\Relations\BelongsToThrough;
 use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
 
 /**
@@ -244,11 +242,6 @@ class Part extends Model implements HasMedia
         return $this->belongsTo(RebrickablePart::class, 'rebrickable_part_id', 'id');
     }
 
-    public function sticker_rebrickable_part(): BelongsToThrough
-    {
-        return $this->belongsToThrough(RebrickablePart::class, StickerSheet::class);
-    }
-
     #[Scope]
     protected function byName(Builder $query, string $name): void
     {
@@ -292,26 +285,13 @@ class Part extends Model implements HasMedia
     protected function canHaveRebrickablePart(Builder $query): void
     {
         $query->partsFolderOnly()
+            ->activeParts()
             ->where(
                 fn (Builder $query2) =>
                 $query2->orWhereNull('type_qualifier')->orWhere('type_qualifier', PartTypeQualifier::Alias)
             )
             ->whereNotLike('description', '~%')
-            ->whereNotLike('description', '|%')
-            ->whereNotLike('description', '%(Obsolete)')
-            ->whereNotIn('category', [PartCategory::Moved, PartCategory::Obsolete, PartCategory::StickerShortcut]);
-    }
-
-    #[Scope]
-    protected function hasRebrickablePart(Builder $query): void
-    {
-        $query->where(fn (Builder $query2) => $query2->orHas('rebrickable_part')->orHas('sticker_rebrickable_part'));
-    }
-
-    #[Scope]
-    protected function doesntHaveRebrickablePart(Builder $query): void
-    {
-        $query->doesntHave('rebrickable_part')->doesntHave('sticker_rebrickable_part');
+            ->whereNotLike('description', '|%');
     }
 
     #[Scope]
@@ -406,35 +386,40 @@ class Part extends Model implements HasMedia
             $this->category != PartCategory::StickerShortcut &&
             $this->type_qualifier !== PartTypeQualifier::FlexibleSection &&
             $this->type_qualifier !== PartTypeQualifier::PhysicalColour &&
-            is_null($this->sticker_sheet_id) &&
             !Str::of($this->description)->startsWith('~') &&
             !Str::of($this->description)->startsWith('|');
     }
 
-    public function getRebrickablePart(): ?RebrickablePart
-    {
-        if ($this->sticker_sheet && $this->category != PartCategory::StickerShortcut) {
-            return $this->sticker_rebrickable_part;
-        } else {
-            return $this->rebrickable_part;
-        }
-    }
-
     public function getExternalSiteNumber(ExternalSite $external): ?string
     {
-        $rb_part = $this->getRebrickablePart();
-        if (is_null($rb_part)) {
-            $kw = $this->keywords
-            ->first(fn (PartKeyword $kw) => Str::of($kw->keyword)->lower()->startsWith($external->value))?->keyword ?? '';
-            $number = Str::of($kw)->lower()->chopStart("{$external->value} ")->trim();
-            return $number == '' ? null : $number;
+        $rbPart = $this->rebrickable_part;
+        if (is_null($rbPart)) {
+            $match = $this->keywords->first(function (PartKeyword $kw) use ($external) {
+                return Str::lower($kw->keyword)
+                    ->startsWith(strtolower($external->value) . ' ');
+            });
+    
+            if (!$match) {
+                return null;
+            }
+    
+            $num = trim(Str::after(
+                strtolower($match->keyword),
+                strtolower($external->value . ' ')
+            ));
+    
+            return $num === '' ? null : $num;
         }
-        if ($external == ExternalSite::Rebrickable) {
-            return $rb_part->number;
+        if ($external === ExternalSite::Rebrickable) {
+            return $rbPart->number;
         }
-        $name = $this->sticker_sheet?->number ?? basename($this->filename, '.dat');
-        $site_data = ($rb_part->{$external->value}) ?? [];
-        return Arr::first($site_data, fn (string $number, int $key) => $number == $name) ?? Arr::first($site_data);
+      
+        $name = $rbPart->ldraw_number ?? basename($this->filename, '.dat');
+        $siteList = ($rbPart->{$external->value}) ?? [];
+        $number = collect($siteList)->first(function (string $siteNumber) use ($name) {
+            return $siteNumber === $name;
+        });
+        return $number ?: Arr::first($siteList);
     }
 
     public function lastChange(): Carbon
@@ -575,56 +560,70 @@ class Part extends Model implements HasMedia
 
     public function setKeywords(array|Collection $keywords): void
     {
-        if (!$keywords instanceof Collection) {
-            if (is_array($keywords)) {
-                $keywords = collect($keywords);
-            }
-            $keywords = $keywords
-                ->filter()
-                ->map(fn (string $kw, int $key): string => Str::of($kw)->trim()->squish()->toString())
-                ->filter()
-                ->map(
-                    fn (string $kw, int $key): array =>
-                    ['id' => PartKeyword::firstOrCreate(['keyword' => $kw])->id]
-                );
-        }
-        $keywords = $keywords->unique('id')->pluck('id')->filter()->all();
-        $this->keywords()->sync($keywords);
+        $keywords = collect($keywords);
+    
+        $keywordIds = $keywords
+            ->filter()
+            ->map(fn (string $kw) => Str::of($kw)->trim()->squish()->lower()->toString())
+            ->filter()
+            ->map(function (string $kw): int {
+                $stored = Str::of($kw)->ucfirst()->toString();
+    
+                return PartKeyword::firstOrCreate(
+                    ['keyword' => $stored],
+                )->id;
+            })
+            ->unique()
+            ->values();
+        $this->keywords()->sync($keywordIds->all());
     }
-
+  
     public function setExternalSiteKeywords(bool $updateOfficial = false): void
     {
-        $rb_part = $this->getRebrickablePart();
-        if (!is_null($rb_part) && ($updateOfficial || $this->isUnofficial())) {
-            $part_num = basename($this->filename, '.dat');
-            $okws = $this->keywords
-                ->filter(
-                    fn (PartKeyword $key) =>
-                    Str::of($key->keyword)->lower()->startsWith('rebrickable') ||
-                    Str::of($key->keyword)->lower()->startsWith('bricklink') ||
-                    Str::of($key->keyword)->lower()->startsWith('brickset') ||
-                    Str::of($key->keyword)->lower()->startsWith('brickowl')
+        $rbPart = $this->rebrickable_part;
+        if (!is_null($rbPart) && ($updateOfficial || $this->isUnofficial())) {
+    
+            $partNum = basename($this->filename, '.dat');
+    
+    
+            $prefixes = ExternalSite::prefixes();
+    
+            $idsToRemove = $this->keywords
+                ->filter(fn (PartKeyword $kw) =>
+                    Str::startsWith(Str::lower($kw->keyword), $prefixes)
                 )
                 ->pluck('id');
-            if ($okws->isNotEmpty()) {
-                $this->keywords()->detach($okws->all());
+    
+            if ($idsToRemove->isNotEmpty()) {
+                $this->keywords()->detach($idsToRemove->all());
                 $this->load('keywords');
             }
-            $kws = $this->keywords->pluck('keyword')->all();
-            $kw_set = false;
-            if ($rb_part->number != $part_num) {
-                $kws[] = "Rebrickable {$rb_part->number}";
-                $kw_set = true;
+            
+            $keywords = $this->keywords->pluck('keyword')->all();
+            $kwSet = false;
+    
+            if ($rbPart->number !== $partNum) {
+                $keywords[] = ucfirst(ExternalSite::Rebrickable->value) . ' ' . $rbPart->number;
+                $kwSet = true;
             }
-            $bl = $this->getExternalSiteNumber(ExternalSite::BrickLink);
-            if (!is_null($bl) && $bl != $part_num) {
-                $kws[] = "BrickLink {$bl}";
-                $kw_set = true;
+    
+            foreach (ExternalSite::cases() as $site) {
+                if ($site === ExternalSite::Rebrickable) {
+                    continue;
+                }
+    
+                $num = $this->getExternalSiteNumber($site);
+                if (!is_null($num) && $num !== $partNum) {
+                    $keywords[] = ucfirst($site->value) . ' ' . $num;
+                    $kwSet = true;
+                }
             }
-            if ($this->isOfficial() && $kw_set) {
+            
+            if ($this->isOfficial() && $kwSet) {
                 $this->has_minor_edit = true;
             }
-            $this->setKeywords($kws);
+            
+            $this->setKeywords($keywords);
             $this->load('keywords');
             $this->generateHeader();
         }
@@ -633,79 +632,88 @@ class Part extends Model implements HasMedia
     public function setHistory(array|SupportCollection $history): void
     {
         $this->history()->delete();
-        if (is_array($history)) {
-            $history = collect($history);
-        } elseif ($history instanceof Collection) {
-            $history = collect(
-                $history
-                ->map(
-                    fn (PartHistory $h) =>
-                    [
-                        'user' => $h->user->name,
-                        'date' => $h->created_at,
-                        'comment' => $h->comment,
-                    ]
-                )
-                ->all()
-            );
+    
+        $history = collect($history);
+    
+        if ($history->first() instanceof PartHistory) {
+            $history = $history->map(fn (PartHistory $h): array => [
+                'username' => $h->user->name,
+                'realname' => $h->user->realname,
+                'date'     => $h->created_at,
+                'comment'  => $h->comment,
+            ]);
         }
-        $history
-            ->each(
-                fn (array $hist, int $key) =>
-                $this->history()->create([
-                    'user_id' =>
-                        Arr::get($hist, 'username') 
-                        ? User::firstWhere('name', Arr::get($hist, 'username'))->id 
-                        : User::firstWhere('realname', Arr::get($hist, 'realname'))->id,
-                    'created_at' => $hist['date'],
-                    'comment' => $hist['comment']
-                ])
-            );
+    
+        $history->each(function (array $hist): void {
+            $userId = $hist['username']
+                ? User::where('name', $hist['username'])->firstOrFail()->id
+                : User::where('realname', $hist['realname'])->firstOrFail()->id;
+    
+            $this->history()->create([
+                'user_id'    => $userId,
+                'created_at' => $hist['date'],
+                'comment'    => $hist['comment'],
+            ]);
+        });
     }
-
+  
     public function setSubparts(array|Collection $subparts): void
     {
+        $currentPartId   = $this->id;
+        $currentFilename = $this->filename;
+    
         if ($subparts instanceof Collection) {
-            $this->subparts()->sync($subparts->pluck('id')->all());
+            $partIds = $subparts
+                ->pluck('id')
+                ->filter(fn ($id) => $id !== $currentPartId)
+                ->all();
+    
+            $this->subparts()->sync($partIds);
             $this->missing_parts = [];
             $this->save();
-        } else {
-            $subparts = collect($subparts);
-            $subs = $subparts
-                ->map( function (string $subpart) {
-                    $subpart = Str::of($subpart)->replace('\\', '/');
-                    if (pathinfo($subpart, PATHINFO_EXTENSION) == 'png') {
-                        return $subpart->prepend('parts/textures/')->toString();
-                    }
-                    return $subpart->prepend('parts/')->toString();
-                })
-                ->merge(
-                    $subparts
-                    ->map( function (string $subpart) {
-                        $subpart = Str::of($subpart)->replace('\\', '/');
-                        if (pathinfo($subpart, PATHINFO_EXTENSION) == 'png') {
-                            return $subpart->prepend('p/textures/')->toString();
-                        }
-                        return $subpart->prepend('p/')->toString();
-                    })
-                )
-                ->all();
-            $subps = Part::whereIn('filename', $subs)->where('filename', '<>', $this->filename)->get();
-            $this->subparts()->sync($subps->pluck('id')->all());
-
-            $existing_subs = $subps
-                ->pluck('filename')
-                ->map(function (string $filename) {
-                    return Str::of($filename)
-                        ->replace('textures/', '')
-                        ->replace(['parts/', 'p/'], '')
-                        ->replace('/', '\\')
-                        ->toString();
-                });
-            $missing = $subparts->diff($existing_subs)->values()->all();
-            $this->missing_parts = $missing;
-            $this->save();
+            return;
         }
+
+        $subparts = collect($subparts)
+            ->filter(fn ($filename) => $filename && $filename !== $currentFilename)
+            ->values();
+    
+        if ($subparts->isEmpty()) {
+            $this->subparts()->sync([]);
+            $this->missing_parts = [];
+            $this->save();
+            return;
+        }
+    
+        $foundParts = Part::whereIn('filename', $subparts)->get()->keyBy('filename');
+    
+        $partIds = [];
+        $missing = [];
+    
+        $missingMap = [];
+        foreach ($subparts as $filename) {
+            $logicalName = preg_replace('#^(p/|parts/|p/textures/|parts/textures/)#', '', $filename);
+            $missingMap[$logicalName][] = $filename;
+        }
+
+        foreach ($missingMap as $logicalName => $paths) {
+            $found = false;
+            foreach ($paths as $path) {
+                if (isset($foundParts[$path])) {
+                    $partIds[] = $foundParts[$path]->id;
+                    $found = true;
+                    break;
+                }
+            }
+    
+            if (!$found) {
+                $missing[] = $logicalName;
+            }
+        }
+    
+        $this->subparts()->sync($partIds);
+        $this->missing_parts = $missing;
+        $this->save();
     }
 
     public function setBody(string|PartBody $body): void
