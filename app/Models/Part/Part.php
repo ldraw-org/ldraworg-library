@@ -677,11 +677,9 @@ class Part extends Model implements HasMedia
             $this->save();
             return;
         }
-
         $subparts = collect($subparts)
             ->filter(fn ($filename) => $filename && $filename !== $currentFilename)
             ->values();
-    
         if ($subparts->isEmpty()) {
             $this->subparts()->sync([]);
             $this->missing_parts = [];
@@ -689,8 +687,8 @@ class Part extends Model implements HasMedia
             return;
         }
     
-        $foundParts = Part::whereIn('filename', $subparts)->get()->keyBy('filename');
-    
+        $foundParts = Part::whereIn('filename', $subparts)->get();
+        
         $partIds = [];
         $missing = [];
     
@@ -703,8 +701,7 @@ class Part extends Model implements HasMedia
         foreach ($missingMap as $logicalName => $paths) {
             $found = false;
             foreach ($paths as $path) {
-                if (isset($foundParts[$path])) {
-                    $partIds[] = $foundParts[$path]->id;
+                if ($foundParts->where('filename', $path)->isNotEmpty()) {
                     $found = true;
                     break;
                 }
@@ -715,7 +712,7 @@ class Part extends Model implements HasMedia
             }
         }
     
-        $this->subparts()->sync($partIds);
+        $this->subparts()->sync($foundParts->pluck('id'));
         $this->missing_parts = $missing;
         $this->save();
     }
