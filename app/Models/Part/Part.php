@@ -395,7 +395,7 @@ class Part extends Model implements HasMedia
         $rbPart = $this->rebrickable_part;
         if (is_null($rbPart)) {
             $match = $this->keywords->first(function (PartKeyword $kw) use ($external) {
-                return Str::lower($kw->keyword)
+                return Str::of($kw->keyword)->lower()
                     ->startsWith(strtolower($external->value) . ' ');
             });
     
