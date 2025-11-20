@@ -2,12 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\UpdateRebrickable;
 use App\Models\Part\Part;
-use App\Models\RebrickablePart;
-use App\Models\StickerSheet;
-use App\Services\LDraw\Rebrickable;
+use App\Services\LDraw\Managers\Part\PartManager;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
 
 class DeployUpdate extends Command
 {
@@ -28,31 +26,13 @@ class DeployUpdate extends Command
     /**
      * Execute the console command.
      */
-    public function handle(Rebrickable $rebrickable): void
+    public function handle(PartManager $manager): void
     {
-        $stickers = Cache::get('rebrickable_stickers', fn () => $rebrickable->getParts(['part_cat_id' => 58, 'page_size' => 1000]));
-        
-        $stickers->each(function (array $sticker) {
-            RebrickablePart::updateOrCreateFromArray($sticker);
-        });
-
-        StickerSheet::with('rebrickable_part', 'parts')
-            ->each(function (StickerSheet $sheet) {
-                if (!is_null($sheet->rebrickable_part_id)) {
-                    $rbPart = $sheet->rebrickable_part;
-                    $rbPart->ldraw_number = $sheet->number;
-                    $sheet->rebrickable_part->save();
-                } else {
-                    $rbPart = RebrickablePart::create([
-                        'number' => "u-{$sheet->number}",
-                        'name' => "Sticker sheet {$sheet->number}",
-                        'rb_part_category_id' => 58,
-                        'is_local' => true,
-                        'ldraw_number' => $sheet->number,
-                    ]);
-                }
-                $partIds = $sheet->parts->pluck('id');
-                Part::whereIn('id', $partIds)->update(['rebrickable_part_id' => $rbPart->id]);
-           });
+        Part::where('updated_at', '>', now()->subHours(12))
+            ->each(function (Part $part) use ($manager) {
+                $manager->loadSubparts($part);
+                $manager->updateImage($part);
+                UpdateRebrickable::dispatch($part);
+            });
     }
 }

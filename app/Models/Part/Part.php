@@ -581,7 +581,7 @@ class Part extends Model implements HasMedia
     {
         $rbPart = $this->rebrickable_part;
         if (is_null($rbPart) || 
-            ($this->Official() && !$updateOfficial) || 
+            ($this->isOfficial() && !$updateOfficial) || 
             $this->category->isInactive() ||
             ($rbPart->rb_part_category_id == 58 && $this->category == PartCategory::StickerShortcut)
         ) {
