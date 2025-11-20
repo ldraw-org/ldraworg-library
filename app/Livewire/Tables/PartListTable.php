@@ -15,6 +15,7 @@ use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
 use App\Models\User;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\Constraint;
@@ -29,6 +30,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Url;
 
 class PartListTable extends BasicTable
@@ -95,6 +97,10 @@ class PartListTable extends BasicTable
                 ->label('Part Status')
                 ->multiple()
                 ->options(PartStatus::trackerStatusOptions()),
+            Filter::make('my_votes')
+                ->label('Exclude parts with my vote')
+                ->query(fn (Builder $query) => $query->whereDoesntHave('votes', fn (Builder $query2) => $query2->where('user_id', Auth::user()?->id)))
+                ->visible(fn () => Auth::check()),
             SelectFilter::make('category')
                 ->options(PartCategory::options())
                 ->searchable()
