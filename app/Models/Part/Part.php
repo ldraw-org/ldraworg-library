@@ -563,7 +563,7 @@ class Part extends Model implements HasMedia
     
         $keywordIds = $keywords
             ->filter()
-            ->map(fn (string $kw) => Str::of($kw)->trim()->squish()->lower()->toString())
+            ->map(fn (string $kw) => Str::of($kw)->trim()->squish()->toString())
             ->filter()
             ->map(function (string $kw): int {
                 $stored = Str::of($kw)->ucfirst()->toString();
