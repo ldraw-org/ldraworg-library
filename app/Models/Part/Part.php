@@ -383,7 +383,6 @@ class Part extends Model implements HasMedia
         return $this->type->inPartsFolder() &&
             !$this->isObsolete() &&
             $this->category != PartCategory::Moved &&
-            $this->category != PartCategory::StickerShortcut &&
             $this->type_qualifier !== PartTypeQualifier::FlexibleSection &&
             $this->type_qualifier !== PartTypeQualifier::PhysicalColour &&
             !Str::of($this->description)->startsWith('~') &&
@@ -581,52 +580,57 @@ class Part extends Model implements HasMedia
     public function setExternalSiteKeywords(bool $updateOfficial = false): void
     {
         $rbPart = $this->rebrickable_part;
-        if (!is_null($rbPart) && ($updateOfficial || $this->isUnofficial())) {
-    
-            $partNum = basename($this->filename, '.dat');
-    
-    
-            $prefixes = ExternalSite::prefixes();
-    
-            $idsToRemove = $this->keywords
-                ->filter(fn (PartKeyword $kw) =>
-                    Str::startsWith(Str::lower($kw->keyword), $prefixes)
-                )
-                ->pluck('id');
-    
-            if ($idsToRemove->isNotEmpty()) {
-                $this->keywords()->detach($idsToRemove->all());
-                $this->load('keywords');
+        if (is_null($rbPart) || 
+            ($this->Official() && !$updateOfficial) || 
+            $this->category->isInactive() ||
+            ($rbPart->rb_part_category_id == 58 && $this->category == PartCategory::StickerShortcut)
+        ) {
+            return;
+        }
+
+        $partNum = basename($this->filename, '.dat');
+
+
+        $prefixes = ExternalSite::prefixes();
+
+        $idsToRemove = $this->keywords
+            ->filter(fn (PartKeyword $kw) =>
+                Str::startsWith(Str::lower($kw->keyword), $prefixes)
+            )
+            ->pluck('id');
+
+        if ($idsToRemove->isNotEmpty()) {
+            $this->keywords()->detach($idsToRemove->all());
+            $this->load('keywords');
+        }
+        
+        $keywords = $this->keywords->pluck('keyword')->all();
+        $kwSet = false;
+
+        if ($rbPart->number !== $partNum) {
+            $keywords[] = ucfirst(ExternalSite::Rebrickable->value) . ' ' . $rbPart->number;
+            $kwSet = true;
+        }
+
+        foreach (ExternalSite::cases() as $site) {
+            if ($site === ExternalSite::Rebrickable) {
+                continue;
             }
-            
-            $keywords = $this->keywords->pluck('keyword')->all();
-            $kwSet = false;
-    
-            if ($rbPart->number !== $partNum) {
-                $keywords[] = ucfirst(ExternalSite::Rebrickable->value) . ' ' . $rbPart->number;
+
+            $num = $this->getExternalSiteNumber($site);
+            if (!is_null($num) && $num !== $partNum) {
+                $keywords[] = ucfirst($site->value) . ' ' . $num;
                 $kwSet = true;
             }
-    
-            foreach (ExternalSite::cases() as $site) {
-                if ($site === ExternalSite::Rebrickable) {
-                    continue;
-                }
-    
-                $num = $this->getExternalSiteNumber($site);
-                if (!is_null($num) && $num !== $partNum) {
-                    $keywords[] = ucfirst($site->value) . ' ' . $num;
-                    $kwSet = true;
-                }
-            }
-            
-            if ($this->isOfficial() && $kwSet) {
-                $this->has_minor_edit = true;
-            }
-            
-            $this->setKeywords($keywords);
-            $this->load('keywords');
-            $this->generateHeader();
         }
+        
+        if ($this->isOfficial() && $kwSet) {
+            $this->has_minor_edit = true;
+        }
+        
+        $this->setKeywords($keywords);
+        $this->load('keywords');
+        $this->generateHeader();
     }
 
     public function setHistory(array|SupportCollection $history): void

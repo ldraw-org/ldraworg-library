@@ -127,6 +127,14 @@ class StickerSheetManager
         return null;
     }
 
+    public function isFormed(Part $part): bool
+    {
+        if (is_null($part->rebrickable_part) || $part->rebrickable_part->rb_part_category_id !== 58) {
+            return false;
+        }
+        return !is_null($this->extractFlatBaseFromFormed(basename($part->filename, '.dat')));
+    }
+
     protected function extractFlatBaseFromFormed(string $name): ?string
     {
         if (preg_match('/^(.*?)[cC]\d+$/', $name, $m)) {
