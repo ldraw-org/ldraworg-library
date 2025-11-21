@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\RebrickablePart;
 use App\Services\LDraw\Managers\StickerSheetManager;
+use App\Services\LDraw\Rebrickable;
 use Illuminate\Console\Command;
 
 class DeployUpdate extends Command
@@ -25,12 +26,18 @@ class DeployUpdate extends Command
     /**
      * Execute the console command.
      */
-    public function handle(StickerSheetManager $manager): void
+    public function handle(Rebrickable $rebrickable, StickerSheetManager $manager): void
     {
+        $stickers = $rebrickable->getParts(['part_cat_id' => 58, 'page_size' => 1000]);
+        
+        $stickers->each(function (array $sticker) {
+            RebrickablePart::updateOrCreateFromArray($sticker);
+        });
+
         $sheets = RebrickablePart::sticker_sheets()
           ->where('is_local', false)
           ->get();
-
+        dd($sheets->count());
         foreach ($sheets as $sheet) {
             dispatch(function () use ($sheet, $manager) {
                 $manager->refreshStickerSets($sheet);
