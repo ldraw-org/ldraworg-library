@@ -101,6 +101,10 @@ class PartListTable extends BasicTable
                 ->label('Exclude parts with my vote')
                 ->query(fn (Builder $query) => $query->whereDoesntHave('votes', fn (Builder $query2) => $query2->where('user_id', Auth::user()?->id)))
                 ->visible(fn () => Auth::check()),
+            Filter::make('parent_ready_for_admin')
+                ->label('Has a parent ready for admin')
+                ->query(fn (Builder $query) => $query->whereHas('ancestors', fn (Builder $query2) => $query2->whereIn('part_status', [PartStatus::Certified, PartStatus::AwaitingAdminReview])))
+                ->visible(fn () => Auth::check()),
             SelectFilter::make('category')
                 ->options(PartCategory::options())
                 ->searchable()
