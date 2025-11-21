@@ -68,7 +68,6 @@ class PartReleaseManager
         Log::debug('Releasing Parts');
         $this->releaseParts();
         Part::canHaveRebrickablePart()
-            ->doesntHave('sticker_sheet')
             ->where(
                 fn ($q) => $q->where('part_release_id', $this->release->id)->orWhere('has_minor_edit', true)
             )
@@ -303,7 +302,6 @@ class PartReleaseManager
             'help' => $upart->help,
             'header' => $upart->header,
             'rebrickable_part_id' => $upart->rebrickable_part_id,
-            'sticker_sheet_id' => $upart->sticker_sheet_id,
             'preview' => $upart->preview,
         ];
         $opart->fill($values);
