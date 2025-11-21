@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdateRebrickable;
-use App\Models\Part\Part;
-use App\Services\LDraw\Managers\Part\PartManager;
+use App\Models\RebrickablePart;
+use App\Services\LDraw\Managers\StickerSheetManager;
 use Illuminate\Console\Command;
 
 class DeployUpdate extends Command
@@ -26,13 +25,15 @@ class DeployUpdate extends Command
     /**
      * Execute the console command.
      */
-    public function handle(PartManager $manager): void
+    public function handle(StickerSheetManager $manager): void
     {
-        Part::where('updated_at', '>', now()->subHours(12))
-            ->each(function (Part $part) use ($manager) {
-                $manager->loadSubparts($part);
-                $manager->updateImage($part);
-                UpdateRebrickable::dispatch($part);
+        $sheets = RebrickablePart::sticker_sheets()
+          ->where('is_local', false);
+          
+        foreach ($sheets as $sheet) {
+            dispatch(function () use ($sheet, $manager) {
+                $manager->refreshStickerSets($sheet);
             });
+        }
     }
 }

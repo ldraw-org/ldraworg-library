@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use App\Enums\ExternalSite;
 use App\Services\LDraw\Rebrickable;
+use App\Models\Omr\Set;
 use App\Models\Part\Part;
 use App\Models\Traits\HasParts;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 class RebrickablePart extends Model
 {
@@ -22,7 +23,9 @@ class RebrickablePart extends Model
      *     'bricklink': 'array',
      *     'brickowl': 'array',
      *     'brickset': 'array',
-     *     'lego': 'array'
+     *     'lego': 'array',
+     *     'is_local': 'boolean',
+     *     'refreshed_at': 'datetime'
      * }
      */
     protected function casts(): array
@@ -32,25 +35,28 @@ class RebrickablePart extends Model
             'brickowl' => 'array',
             'brickset' => 'array',
             'lego' => 'array',
+            'is_local' => 'boolean',
+            'refreshed_at' => 'datetime',
         ];
     }
 
-  /* TODO: RebrickableSet
     public function sets(): BelongsToMany
     {
-        return $this->belongsToMany(RebrickableSet::class, 'rebrickable_set_part', 'rebrickable_part_id', 'set_id')
-                    ->withPivot('color_id', 'quantity');
+        return $this->belongsToMany(Set::class, 'rebrickable_parts_sets', 'rebrickable_part_id', 'set_id')
+                    ->withPivot('ldraw_colour_id', 'quantity');
     }
-*/
 
-    public function sticker_sheets(): HasMany
+    #[Scope]
+    protected function sticker_sheets(Builder $query): void
     {
-        return $this->hasMany(StickerSheet::class);
+        $query->where('rb_part_category_id', 58);
     }
 
-    // -------------------------
-    // Core Update / Create
-    // -------------------------
+    #[Scope]
+    protected function exclude_stickers(Builder $query): void
+    {
+        $query->where('rb_part_category_id', '!=', 58);
+    }
 
     public static function updateOrCreateFromArray(array $partData): self
     {
@@ -65,6 +71,7 @@ class RebrickablePart extends Model
             'lego' => Arr::get($partData, 'external_ids.LEGO', []),
             'rb_part_category_id' => Arr::get($partData, 'part_cat_id'),
             'element' => Arr::get($partData, 'element'),
+            'refreshed_at' => now(),
         ];
 
         return static::updateOrCreate(
@@ -72,22 +79,6 @@ class RebrickablePart extends Model
             $values
         );
     }
-
-    public function refreshFromApi(Rebrickable $rbService): self
-    {
-        $data = $rbService->getParts(['ldraw_id' => $this->number])->first();
-
-        if ($data) {
-            static::updateOrCreateFromArray($data);
-            $this->refresh(); // reload the model from DB
-        }
-
-        return $this;
-    }
-
-    // -------------------------
-    // Find or create from Part
-    // -------------------------
 
     public static function findOrCreateFromPart(Part $part, Rebrickable $rbService): ?self
     {
@@ -98,7 +89,6 @@ class RebrickablePart extends Model
             return null;
         }
 
-        // Prefer exact match
         $rbData = $rbParts->firstWhere('part_num', $partNum) ?? $rbParts->first();
         if (!$rbData) {
             return null;
@@ -106,101 +96,9 @@ class RebrickablePart extends Model
 
         $rb = static::updateOrCreateFromArray($rbData);
 
-        // Associate and save
         $part->rebrickable_part()->associate($rb);
         $part->save();
 
         return $rb;
-    }
-
-    // -------------------------
-    // Find or create from StickerSheet
-    // -------------------------
-
-    public static function findOrCreateFromStickerSheet(StickerSheet $sheet, Rebrickable $rbService): ?self
-    {
-        $rbData = static::lookupStickerSheetData($sheet, $rbService);
-        if (!$rbData) {
-            return null;
-        }
-
-        return static::persistStickerSheetData($sheet, $rbData);
-    }
-
-    protected static function lookupStickerSheetData(StickerSheet $sheet, Rebrickable $rbService): ?array
-    {
-        return static::findBySheetNumber($sheet, $rbService)
-            ?? static::findByPartRebrickableId($sheet, $rbService)
-            ?? static::findByPartBrickLinkId($sheet, $rbService)
-            ?? static::findBySearch($sheet, $rbService)
-            ?? static::findBySetParts($sheet, $rbService);
-    }
-
-    protected static function persistStickerSheetData(StickerSheet $sheet, array $rbData): self
-    {
-        $rbPart = static::updateOrCreateFromArray($rbData);
-        $sheet->rebrickable_part()->associate($rbPart);
-        $sheet->save();
-
-        return $rbPart;
-    }
-
-    // -------------------------
-    // Lookup Strategies
-    // -------------------------
-
-    protected static function findBySheetNumber(StickerSheet $sheet, Rebrickable $rbService): ?array
-    {
-        $data = $rbService->getPart($sheet->number);
-        return $data->isNotEmpty() ? $data->first() : null;
-    }
-
-    protected static function findByPartRebrickableId(StickerSheet $sheet, Rebrickable $rbService): ?array
-    {
-        $part = $sheet->parts?->first(fn(Part $p) => $p->getExternalSiteNumber(ExternalSite::Rebrickable));
-        if (!$part) return null;
-
-        $data = $rbService->getPart($part->getExternalSiteNumber(ExternalSite::Rebrickable));
-        return $data->isNotEmpty() ? $data->first() : null;
-    }
-
-    protected static function findByPartBrickLinkId(StickerSheet $sheet, Rebrickable $rbService): ?array
-    {
-        $part = $sheet->parts?->first(fn(Part $p) => $p->getExternalSiteNumber(ExternalSite::BrickLink));
-        if (!$part) return null;
-
-        $data = $rbService->getParts(['bricklink_id' => $part->getExternalSiteNumber(ExternalSite::BrickLink)]);
-        return $data->isNotEmpty() ? $data->first() : null;
-    }
-
-    protected static function findBySearch(StickerSheet $sheet, Rebrickable $rbService): ?array
-    {
-        $data = $rbService->getParts(['search' => $sheet->number]);
-        return $data->first(fn($item) => Str::startsWith($item['name'], 'Sticker Sheet')) ?? null;
-    }
-
-    protected static function findBySetParts(StickerSheet $sheet, Rebrickable $rbService): ?array
-    {
-        $sets = collect();
-        $sheet->parts?->each(function (Part $part) use (&$sets) {
-            $keywords = $part->keywords?->pluck('keyword')
-                ->filter(fn(string $kw) => Str::of($kw)->lower()->startsWith('set'))
-                ->map(fn(string $kw) => Str::of($kw)->lower()->chopStart('set ')->append('-1')->toString());
-            $sets = $sets->merge($keywords);
-        });
-
-        $rbData = null;
-        $sets->unique()->each(function (string $set) use (&$rbService, &$rbData) {
-            $rbSet = $rbService->getSetParts($set);
-            if ($rbSet->isNotEmpty()) {
-                $part = $rbSet->first(fn(array $item) => Str::startsWith($item['part']['name'], 'Sticker Sheet'));
-                if (!is_null($part['part'] ?? null)) {
-                    $rbData = $part['part'];
-                    return false; // break loop
-                }
-            }
-        });
-
-        return $rbData;
     }
 }

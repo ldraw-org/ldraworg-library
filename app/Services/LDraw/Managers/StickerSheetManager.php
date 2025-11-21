@@ -12,7 +12,8 @@ class StickerSheetManager
 {
 
     public function __construct(
-        protected Rebrickable $rebrickable
+        protected Rebrickable $rebrickable,
+        protected SetManager $setManager,
     )
     {}
 
@@ -43,6 +44,12 @@ class StickerSheetManager
         });
     }
 
+    public function refreshStickerSets(RebrickablePart $sheet)
+    {
+        $this->rebrickable->getPartColorSets($sheet->number, 9999)
+            ->each(fn (array $set) => $this->setManager->updateOrCreateSetFromArray($set));
+    }
+  
     public function getStickerPart(Part $part): ?RebrickablePart
     {
         if ($part->category !== PartCategory::Sticker && $part->category !== PartCategory::StickerShortcut) {
@@ -76,19 +83,18 @@ class StickerSheetManager
         }
 
         // Lookup via set keyword
-        foreach ($part->keywords ?? [] as $kw) {
-            if (preg_match('/set\s+([\w\-]+)/i', $kw, $m)) {
-                $setNum = $m[1];
-                if (!preg_match('/-\d$/', $setNum)) {
-                    $setNum .= '-1';
-                }
-                $rbData = $this->rebrickable->getSetParts($setNum)
-                    ->first(fn(array $item) => $item['part']['part_cat_id'] === 58);
-
-                if (!is_null($rbData)) {
-                    return RebrickablePart::updateOrCreateFromArray($rbData['part']);
-                }
-            }
+        $setNumbers = collect($part->keywords)
+            ->filter(fn ($kw) => preg_match('/set\s+([\w\-]+)/i', $kw, $matches))
+            ->map(fn ($kw) => preg_replace('/^set\s+/i', '', $kw))
+            ->map(fn ($setNum) => preg_match('/-\d$/', $setNum) ? $setNum : $setNum . '-1')
+            ->unique();
+        
+        $rbPart = RebrickablePart::whereHas('sets', function ($query) use ($setNumbers) {
+            $query->whereIn('set_number', $setNumbers);
+        })->first();
+        
+        if ($rbPart) {
+            return $rbPart;
         }
 
         // Create local placeholder

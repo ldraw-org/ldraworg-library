@@ -26,7 +26,7 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
 
         return $table
             ->heading('OMR Model List')
-            ->query(Set::with(['models', 'theme']))
+            ->query(Set::with(['models', 'theme'])->has('models'))
             ->defaultSort('number')
             ->columns([
                 ImageColumn::make('image')
