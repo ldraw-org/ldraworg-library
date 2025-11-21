@@ -28,16 +28,10 @@ class DeployUpdate extends Command
      */
     public function handle(Rebrickable $rebrickable, StickerSheetManager $manager): void
     {
-        $stickers = $rebrickable->getParts(['part_cat_id' => 58, 'page_size' => 1000]);
-        
-        $stickers->each(function (array $sticker) {
-            RebrickablePart::updateOrCreateFromArray($sticker);
-        });
-
         $sheets = RebrickablePart::sticker_sheets()
           ->where('is_local', false)
           ->get();
-        dd($sheets->count());
+
         foreach ($sheets as $sheet) {
             dispatch(function () use ($sheet, $manager) {
                 $manager->refreshStickerSets($sheet);
