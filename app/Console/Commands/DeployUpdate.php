@@ -30,13 +30,10 @@ class DeployUpdate extends Command
      */
     public function handle(PartManager $partManager): void
     {
-        RebrickablePart::where('is_local', true)->delete();
 
-        Part::whereIn('category', [PartCategory::Sticker, PartCategory::StickerShortcut])
-            ->partsFolderOnly()
+        Part::partsFolderOnly()
             ->each(function (Part $part) use ($partManager) {
-                $this->info("Updating {$part->filename}");
-                $partManager->updateRebrickable($part);
+                $partManager->updateBasePart($part);
             });
     }
 }

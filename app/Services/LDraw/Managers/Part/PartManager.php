@@ -259,7 +259,7 @@ class PartManager
         if (!$part->type->inPartsFolder() || $part->category == PartCategory::Moved || $part->isObsolete()) {
             return;
         }
-        $name = new ParsedPartCollection("0 Name: {$part->meta_name}");
+        $name = new ParsedPartCollection("0 Name: {$part->meta_name}\n" . $part->type->ldrawString(true));
         $base = $name->basepart();
         if (is_null($base) || ("{$base}.dat" == $part->meta_name || "{$base}-f1.dat" == $part->meta_name)) {
             $part->base_part()->disassociate();
