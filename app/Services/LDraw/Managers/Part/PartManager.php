@@ -17,6 +17,7 @@ use App\Models\RebrickablePart;
 use App\Models\User;
 use App\Services\Check\CheckMessageCollection;
 use App\Services\Check\PartChecker;
+use App\Services\LDraw\Managers\RebrickablePartManager;
 use App\Services\LDraw\Rebrickable;
 use App\Services\Parser\ParsedPartCollection;
 use App\Settings\LibrarySettings;
@@ -37,6 +38,7 @@ class PartManager
         protected PartChecker $checker,
         protected Rebrickable $rebrickable,
         protected StickerSheetManager $stickerManager,
+        protected RebrickablePartManager $rebrickablePartManager,
     ) {
     }
 
@@ -417,7 +419,7 @@ class PartManager
                 $part->save();
                 return;
             }
-            RebrickablePart::findOrCreateFromPart($part, $this->rebrickable);
+            $this->rebrickablePartManager->findOrCreateFromPart($part, $this->rebrickable);
             $part->setExternalSiteKeywords($updateOfficial);
         }
     }

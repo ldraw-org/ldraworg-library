@@ -7,6 +7,7 @@ use App\Models\Part\Part;
 use App\Models\RebrickablePart;
 use App\Services\LDraw\Rebrickable;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 class StickerSheetManager
 {
@@ -14,6 +15,7 @@ class StickerSheetManager
     public function __construct(
         protected Rebrickable $rebrickable,
         protected SetManager $setManager,
+        protected RebrickablePartManager $rebrickablePartManager,
     )
     {}
 
@@ -89,22 +91,34 @@ class StickerSheetManager
             ->map(fn ($setNum) => preg_match('/-\d$/', $setNum) ? $setNum : $setNum . '-1')
             ->unique();
         
-        $rbPart = RebrickablePart::whereHas('sets', function ($query) use ($setNumbers) {
-            $query->whereIn('set_number', $setNumbers);
-        })->first();
+        $rbPart = RebrickablePart::where('rb_part_category_id', 58)
+            ->whereHas('sets', function ($query) use ($setNumbers) {
+                $query->whereIn('number', $setNumbers);
+            })
+            ->first();
         
         if ($rbPart) {
             return $rbPart;
         }
 
-        // Create local placeholder
-        return RebrickablePart::updateOrCreate([
-            'number' => "u-{$flatBase}",
-            'is_local' => true,
-            'rb_part_category_id' => 58,
-        ], [
-            'name' => "Sticker Sheet for {$flatBase}",
-        ]);
+        if (Str::startsWith($flatBase, 's')) {
+            return RebrickablePart::updateOrCreate([
+                'number' => "u-unknown",
+                'is_local' => true,
+                'rb_part_category_id' => 58,
+            ], [
+                'name' => "Unknown Sticker Sheet",
+            ]);
+        } else {
+            // Create local placeholder
+            return RebrickablePart::updateOrCreate([
+                'number' => "u-{$flatBase}",
+                'is_local' => true,
+                'rb_part_category_id' => 58,
+            ], [
+                'name' => "Sticker Sheet for {$flatBase}",
+            ]);
+        }   
 
     }
 
@@ -113,14 +127,18 @@ class StickerSheetManager
         $filename = basename($part->filename, '.dat');
 
         // Case 1 — formed sticker (ends in cNN)
-        if ($flat = $this->extractFlatBaseFromFormed($filename)) {
+        $flat = $this->extractFlatBaseFromFormed($filename);
+        if ($flat && $part->category === PartCategory::Sticker) {
             return $this->stripLetterSuffix($flat);
         }
 
         // Case 2 — sticker shortcut
         if ($part->category === PartCategory::StickerShortcut) {
             if ($sticker = $this->extractStickerSubpart($part)) {
-                $flat = basename($sticker->filename, '.dat');
+                $flat = $this->extractFlatBaseFromFormed(basename($sticker->filename, '.dat'));
+                if (!$flat) {
+                    $flat = basename($sticker->filename, '.dat');
+                }
                 return $this->stripLetterSuffix($flat);
             }
         }
@@ -151,7 +169,8 @@ class StickerSheetManager
 
     protected function stripLetterSuffix(string $flat): string
     {
-        return preg_replace('/[a-z]+$/i', '', $flat);
+        preg_replace('/-f\d$/', '', $flat);
+        return preg_replace('/[A-Za-z][A-Za-z0-9]?$/', '', $flat);
     }
 
     protected function extractStickerSubpart(Part $part): ?Part

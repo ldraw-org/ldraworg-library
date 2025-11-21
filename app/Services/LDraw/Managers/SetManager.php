@@ -12,6 +12,7 @@ class SetManager
 
     public function __construct(
         protected Rebrickable $rebrickable,
+        protected RebrickablePartManager $rebrickablePartManager,
     )
     {}
 
@@ -43,7 +44,7 @@ class SetManager
         $parts->each(function (array $part) use ($set, $colors) {
             $part_vals = $part['part']; 
             $part_vals['element'] = $part['element_id']; 
-            $rbPart = RebrickablePart::updateOrCreateFromArray($part_vals); 
+            $rbPart = $this->rebrickablePartManager->updateOrCreateFromArray($part_vals); 
             $color = $colors->search(fn($value, $key) => $value === $part['color']['id']) ?? $part['color']['id']; 
             $set->rebrickable_parts()->attach($rbPart->id, ['quantity' => $part['quantity'], 'ldraw_colour_id' => $color]); 
         });
