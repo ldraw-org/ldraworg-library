@@ -28,8 +28,9 @@ class DeployUpdate extends Command
     public function handle(StickerSheetManager $manager): void
     {
         $sheets = RebrickablePart::sticker_sheets()
-          ->where('is_local', false);
-          
+          ->where('is_local', false)
+          ->get();
+
         foreach ($sheets as $sheet) {
             dispatch(function () use ($sheet, $manager) {
                 $manager->refreshStickerSets($sheet);
