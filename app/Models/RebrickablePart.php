@@ -57,48 +57,4 @@ class RebrickablePart extends Model
     {
         $query->where('rb_part_category_id', '!=', 58);
     }
-
-    public static function updateOrCreateFromArray(array $partData): self
-    {
-        $values = [
-            'number' => Arr::get($partData, 'part_num'),
-            'name' => Arr::get($partData, 'name', 'Unknown'),
-            'url' => Arr::get($partData, 'part_url'),
-            'image_url' => Arr::get($partData, 'part_img_url'),
-            'bricklink' => Arr::get($partData, 'external_ids.BrickLink', []),
-            'brickset' => Arr::get($partData, 'external_ids.Brickset', []),
-            'brickowl' => Arr::get($partData, 'external_ids.BrickOwl', []),
-            'lego' => Arr::get($partData, 'external_ids.LEGO', []),
-            'rb_part_category_id' => Arr::get($partData, 'part_cat_id'),
-            'element' => Arr::get($partData, 'element'),
-            'refreshed_at' => now(),
-        ];
-
-        return static::updateOrCreate(
-            ['number' => $values['number']],
-            $values
-        );
-    }
-
-    public static function findOrCreateFromPart(Part $part, Rebrickable $rbService): ?self
-    {
-        $partNum = basename($part->filename, '.dat');
-
-        $rbParts = $rbService->getParts(['ldraw_id' => $partNum]);
-        if ($rbParts->isEmpty()) {
-            return null;
-        }
-
-        $rbData = $rbParts->firstWhere('part_num', $partNum) ?? $rbParts->first();
-        if (!$rbData) {
-            return null;
-        }
-
-        $rb = static::updateOrCreateFromArray($rbData);
-
-        $part->rebrickable_part()->associate($rb);
-        $part->save();
-
-        return $rb;
-    }
 }

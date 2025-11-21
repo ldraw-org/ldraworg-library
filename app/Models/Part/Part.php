@@ -12,7 +12,6 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\VoteType;
 use App\Models\RebrickablePart;
-use App\Models\StickerSheet;
 use App\Models\Traits\HasErrorScopes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -223,12 +222,6 @@ class Part extends Model implements HasMedia
     public function shortcuts(): HasMany
     {
         return $this->HasMany(Part::class, 'base_part_id', 'id')->where('category', PartCategory::StickerShortcut);
-    }
-
-    public function sticker_sheet(): BelongsTo
-    {
-        return $this->BelongsTo(StickerSheet::class, 'sticker_sheet_id', 'id');
-
     }
 
     public function unknown_part_number(): BelongsTo
