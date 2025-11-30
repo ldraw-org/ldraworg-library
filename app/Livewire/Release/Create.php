@@ -70,16 +70,16 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                             ->grow(false)
                             ->label('Status'),
                         TextColumn::make('part_check')
-                            ->state(fn (Part $part) => $part->part_check->get(translated: true))
+                            ->state(fn (Part $part) => $part->check_messages->map->message())
                             ->listWithLineBreaks()
                             ->alignment(Alignment::End),
                     ])->alignment(Alignment::End),
                 ])->from('md')
             ])
             ->recordClasses(function (Part $p) {
-                if ($p->part_check->has([CheckType::Error, CheckType::TrackerHold])) {
+                if ($p->check_messages->hasHoldableIssues()) {
                     return '!bg-red-300';
-                } elseif ($p->part_check->has(CheckType::Warning)) {
+                } elseif ($p->check_messages->hasWarnings()) {
                     return '!bg-orange-300';
                 }
                 return null;

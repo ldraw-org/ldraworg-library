@@ -33,7 +33,7 @@ class SupportFiles
                     . ',"' . str_replace('"', '""', $part->description) . '"'
                     . ',' . route('part.download', ['library' => is_null($part->part_release_id) ? 'unofficial' : 'official', 'filename' => $part->filename])
                     . ',' . version('media/ldraw/' . $part->libFolder() . '/' . substr($part->filename, 0, -3) . 'png')
-                    . ',' . $media->created_at->format('Y-m-d');
+                    . ',' . $media?->created_at->format('Y-m-d') ?? $part->created_at->format('Y-m-d');
             })
             ->implode("\n");
         Storage::disk('library')->put('library.csv', $csv);

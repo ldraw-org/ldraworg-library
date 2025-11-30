@@ -14,7 +14,7 @@ class RenderParts extends Command
      *
      * @var string
      */
-    protected $signature = 'lib:render-parts {part?*} {--o|official-only} {--u|unofficial-only} {--missing}';
+    protected $signature = 'lib:render-parts {part?*} {--o|official-only} {--u|unofficial-only} {--M|missing}';
 
     /**
      * The console command description.
