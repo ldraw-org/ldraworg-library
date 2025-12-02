@@ -35,7 +35,7 @@ class MenuItem extends Component
                 $this->results['Official Parts'][$part->id] = ['name' => $part->meta_name, 'description' => $part->description];
             }
         }
-        $sets = Set::select(['id', 'name', 'number'])->where(function (Builder $q) {
+        $sets = Set::select(['id', 'name', 'number'])->has('models')->where(function (Builder $q) {
             $q->orWhereLike('number', "%{$this->tableSearch}%")
                 ->orWhereLike('name', "%{$this->tableSearch}%")
                 ->orWhereRelation('models', 'alt_model_name', 'LIKE', "%{$this->tableSearch}%")
