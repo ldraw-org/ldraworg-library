@@ -109,6 +109,11 @@ class Part extends Model implements HasMedia
         ];
     }
 
+    public function enableCycleDetection(): bool
+    {
+        return true;
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('image')
@@ -681,7 +686,7 @@ class Part extends Model implements HasMedia
         }
     
         $foundParts = Part::whereIn('filename', $subparts)->get();
-        
+        dd($foundParts->pluck('id'));
         $partIds = [];
         $missing = [];
     
