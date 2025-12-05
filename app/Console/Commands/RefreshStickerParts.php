@@ -12,7 +12,7 @@ class RefreshStickerParts extends Command
      *
      * @var string
      */
-    protected $signature = 'app:refresh-sticker-parts';
+    protected $signature = 'lib:refresh-sticker-parts';
 
     /**
      * The console command description.
@@ -27,6 +27,6 @@ class RefreshStickerParts extends Command
     public function handle()
     {
         UpdateRebrickableStickerParts::dispatch();
-        $this->info('Sticker part queued fro refresh');
+        $this->info('Sticker parts queued for refresh');
     }
 }
