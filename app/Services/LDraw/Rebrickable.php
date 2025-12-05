@@ -56,10 +56,16 @@ class Rebrickable
 
             $all = $all->merge($response['results']);
 
-            if ($firstPageOnly || empty($response['next'])) {
+            if (empty($response['next'])) {
                 break;
             }
 
+            if ($firstPageOnly) {
+                if (array_key_exists('count', $response)) {
+                    $all->put('count', $response['count']);
+                }
+                break;
+            }
             $currentUrl = $response['next'];
         }
 

@@ -316,11 +316,6 @@ class Part extends Model implements HasMedia
         );
     }
 
-    public function hasMessages(): bool
-    {
-        return $this->tracker_holds->isNotEmpty() || $this->errors->isNotEmpty() || $this->warnings->isNotEmpty();
-    }
-
     public function uncertified_subparts(): Collection
     {
         return $this
@@ -390,6 +385,11 @@ class Part extends Model implements HasMedia
     public function getExternalSiteNumber(ExternalSite $external): ?string
     {
         $rbPart = $this->rebrickable_part;
+
+        if (!is_null($rbPart) && $rbPart->is_local) {
+            return null;
+        }
+
         if (is_null($rbPart)) {
             $match = $this->keywords->first(function (PartKeyword $kw) use ($external) {
                 return Str::of($kw->keyword)->lower()
@@ -579,6 +579,7 @@ class Part extends Model implements HasMedia
     {
         $rbPart = $this->rebrickable_part;
         if (is_null($rbPart) || 
+            $rbPart->is_local ||
             ($this->isOfficial() && !$updateOfficial) || 
             $this->category->isInactive() ||
             ($rbPart->rb_part_category_id == 58 && $this->category == PartCategory::StickerShortcut)
@@ -686,7 +687,6 @@ class Part extends Model implements HasMedia
         }
     
         $foundParts = Part::whereIn('filename', $subparts)->get();
-        dd($foundParts->pluck('id'));
         $partIds = [];
         $missing = [];
     

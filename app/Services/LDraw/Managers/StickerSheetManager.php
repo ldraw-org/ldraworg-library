@@ -46,12 +46,53 @@ class StickerSheetManager
         });
     }
 
-    public function refreshStickerSets(RebrickablePart $sheet)
+    function refreshStickerParts(): void
+    {
+        $stickerParts = $this->rebrickable->getParts([
+            'part_cat_id' => 58,
+            'page' => 1,
+            'page_size' => 1,
+        ], true);
+
+        $rbCount = $stickerParts->get('count');
+        $dbCount = RebrickablePart::where('rb_part_category_id', 58)
+            ->where('is_local', false)
+            ->count();
+        if ($rbCount == $dbCount) {
+            return;
+        }
+      
+        $stickerParts = $this->rebrickable
+            ->getParts([
+                'part_cat_id' => 58,
+                'page_size' => 1000,
+            ]);
+      
+        $rbStickerNumbers = $stickerParts
+            ->pluck('part_num')
+            ->values();
+        $dbStickerNumbers = RebrickablePart::where('rb_part_category_id', 58)
+            ->where('is_local', false)
+            ->pluck('number')
+            ->values();
+
+        $newNumbers = $rbStickerNumbers->diff($dbStickerNumbers)->values()->all();
+        $newNumbersSet = array_flip($newNumbers);
+
+        $stickerParts
+            ->filter(fn (array $item) => isset($newNumbersSet[$item['part_num']]))
+            ->each(function (array $item) {
+                $rbPart  = $this->rebrickablePartManager->updateOrCreateFromArray($item);
+                $this->refreshStickerSets($rbPart);
+            });
+    }
+
+    public function refreshStickerSets(RebrickablePart $sheet): void
     {
         $this->rebrickable->getPartColorSets($sheet->number, 9999)
             ->each(fn (array $set) => $this->setManager->updateOrCreateSetFromArray($set));
     }
-  
+    
     public function getStickerPart(Part $part): ?RebrickablePart
     {
         if ($part->category !== PartCategory::Sticker && $part->category !== PartCategory::StickerShortcut) {
@@ -85,18 +126,16 @@ class StickerSheetManager
         }
 
         // Lookup via set keyword
-        $setNumbers = collect($part->keywords)
+        $setNumbers = $part->keywords->pluck('keyword')
             ->filter(fn ($kw) => preg_match('/set\s+([\w\-]+)/i', $kw, $matches))
             ->map(fn ($kw) => preg_replace('/^set\s+/i', '', $kw))
             ->map(fn ($setNum) => preg_match('/-\d$/', $setNum) ? $setNum : $setNum . '-1')
             ->unique();
-        
         $rbPart = RebrickablePart::where('rb_part_category_id', 58)
             ->whereHas('sets', function ($query) use ($setNumbers) {
                 $query->whereIn('number', $setNumbers);
             })
             ->first();
-        
         if ($rbPart) {
             return $rbPart;
         }
