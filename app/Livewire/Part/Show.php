@@ -412,22 +412,9 @@ class Show extends Component implements HasSchemas, HasActions
 
     public function editBasePartAction(): Action
     {
-        return EditAction::make('editBasePart')
-            ->label('Edit Base Part')
-            ->record($this->part)
-            ->schema([
-                Select::make('base_part_id')
-                    ->searchable()
-                    ->options(
-                        Part::doesntHave('official_part')
-                            ->partsFolderOnly()
-                            ->where('is_pattern', false)
-                            ->where('category', '!=', PartCategory::Moved)
-                            ->whereNotLike('description', '%Obsolete%')
-                            ->pluck('filename', 'id')
-                    )
-                    ->optionsLimit(50000),
-            ])
+        return Action::make('editBasePart')
+            ->label('Refresh Base Part/Meta Data')
+            ->action(fn () => app(PartManager::class)->updateBasePart($this->part))
             ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 

@@ -19,7 +19,7 @@ class ImprovedParser {
         'description' => '#^\h*(?<linetype>0)\h+(?P<description>(?:(?P<prefix>[~_=|]+)\h*)?(?P<category>[^\h]+).*?)\h*$#u',
 
         'name' => '~^\h*(?<linetype>0)\h+Name:\h*(?P<name>[^\h]+)\h*$~u',
-        'basepart' => '~^(?<basepart>[uts]?\d+(?:[a-d][a-z]|[a-oq-z])?)~i',
+        'basepart' => '~^^(?<basepart>[uts]?\d+(?:[a-d][a-z]|[a-oq-z])?)~i',
         'suffix_validate' => '~(?<suffix>(?:(?:p[a-z0-9]{2,4}|c[0-9a-z]{2}|d[0-9a-z]{2}|k[0-9a-z]{2})+)?(?:-f[0-9a-z])?)$~i',
         'suffix_extract'  => '~p(?:\d{4}|[cd][0-9a-z][0-9a-l]|[0-9a-z]{2})|c[a-z0-9]{2}|d[a-z0-9]{2}|k[0-9a-z]{2}|-f[0-9a-z]~i',
 
@@ -293,13 +293,7 @@ class ImprovedParser {
         preg_match($this->patterns['basepart'], $filename, $bp);
         preg_match($this->patterns['suffix_validate'], $filename, $s);
         $suffixes = Arr::get($s, 'suffix', '');
-        $prelim_basepart = Arr::get($bp, 'basepart', '');
-        if ($prelim_basepart . $suffixes != $filename) {
-            $basepart = substr($prelim_basepart, 0, -1);
-        } else {
-            $basepart = $prelim_basepart;
-        }
-        
+        $basepart = str_replace($suffixes, '', $filename);
         if ($basepart . $suffixes != $filename) {
             $match['basepart'] = null;
             $match['suffixes'] = null;
