@@ -114,7 +114,7 @@ class Submit extends Component implements HasSchemas
             $user = Auth::user();
         }
         $files = collect($data['partfiles'])
-            ->reject(fn (TemporaryUploadedFile $file) => array_key_exists($file->getClientOriginalName(), $this->part_errors))
+            ->reject(fn (TemporaryUploadedFile $file) => array_key_exists($file->getClientOriginalName(), $this->part_errors) || $file->get() == null)
             ->map(fn (TemporaryUploadedFile $file) => LDrawFile::fromUploadedFile($file))
             ->values()
             ->all();
@@ -195,8 +195,11 @@ class Submit extends Component implements HasSchemas
                 break;
             }
         }
+        if (is_null($file)) {
+            return;
+        }
         $errors = new CheckMessageCollection();
-        $mimeType = $mimeType = $this->getMimeType($file);
+        $mimeType = $this->getMimeType($file);
         switch($mimeType) {
             case 'text/plain':
                 $part = new ParsedPartCollection($file->get());

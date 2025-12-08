@@ -74,14 +74,18 @@ class PartManager
         if (!is_null($p)) {
             return $p->type;
         }
-
         // See if it is used by the group of submitted files
         $p = $files->first(
             fn (LDrawFile $f, int $key) =>
                 $f->mimetype == 'text/plain' && Str::containsAll($f->contents, ['!TEXMAP', $filename])
         );
-        $p = (new ParsedPartCollection($p->content));
-        return PartType::tryFrom(($p->type()?->value ?? '') . '_Texmap') ?? PartType::PartTexmap;
+        if (!is_null($p)) {
+            $p = (new ParsedPartCollection($p->content));
+            $type = $p->type();
+            return is_null($type) ? PartType::PartTexmap : PartType::tryfrom($type->value . '_Texmap');
+        }
+        
+        return PartType::PartTexmap;
     }
 
     protected function makePartFromImage(LDrawFile $file, User $user, PartType $type): Part
