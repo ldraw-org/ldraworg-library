@@ -10,6 +10,8 @@ use GdImage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Image\Image;
+use Spatie\Image\Enums\Fit;
 use Spatie\ImageOptimizer\OptimizerChain;
 use Spatie\ImageOptimizer\Optimizers\Optipng;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -17,18 +19,21 @@ use Spatie\TemporaryDirectory\TemporaryDirectory;
 class LDView
 {
     protected readonly bool $debug;
+    protected OptimizerChain $optimizer;
 
     public function __construct(
         protected LibrarySettings $settings,
         protected LDrawModelMaker $modelmaker,
     ) {
         $this->debug = config('ldraw.ldview_debug', false);
+        $this->optimizer = (new OptimizerChain())->addOptimizer(new Optipng([]));
     }
 
     public function render(string|Part|OmrModel $part): GDImage
     {
         $tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
         $ldconfigPath = Storage::disk('library')->path('official/LDConfig.ldr');
+        
         // LDview requires a p and parts directory
         $ldrawdir = $tempDir->path("ldraw");
         $tempDir->path("ldraw/parts");
@@ -36,31 +41,50 @@ class LDView
 
         // Store the part as an mpd
         $filename = $tempDir->path("part.mpd");
+        $contents = $part instanceof Part ? $this->modelmaker->partMpd($part) : $this->modelmaker->modelMpd($part);
+        file_put_contents($filename, $contents);
 
-        if ($part instanceof Part) {
-            file_put_contents($filename, $this->modelmaker->partMpd($part));
-        } else {
-            file_put_contents($filename, $this->modelmaker->modelMpd($part));
-        }
+        // Pull max height, width from settings
+        $width = $part instanceof Part ? $this->settings->max_part_render_width : $this->settings->max_model_render_width;
+        $height = $part instanceof Part ? $this->settings->max_part_render_height : $this->settings->max_model_render_height;
 
-        if ($part instanceof Part) {
-            $normal_size = "-SaveWidth={$this->settings->max_part_render_width} -SaveHeight={$this->settings->max_part_render_height}";
-        } else {
-            $normal_size = "-SaveWidth={$this->settings->max_model_render_width} -SaveHeight={$this->settings->max_model_render_height}";
-        }
         $imagepath = $tempDir->path("part.png");
-
-        // Make the ldview.ini
-        $cmds = ['[General]'];
-        foreach ($this->settings->ldview_options as $command => $value) {
-            $cmds[] = "{$command}={$value}";
-        }
-
-        $inipath = $tempDir->path("ldview.ini");
-        file_put_contents($inipath, implode("\n", $cmds));
-
+      
+        $options = [
+            'ProcessLDConfig' => '1',
+            'LDConfig' => $ldconfigPath,
+            'LDrawDir' => $ldrawdir,
+            'SaveWidth' => $width * 2,
+            'SaveHeight' => $height * 2,
+            'SaveAlpha' => '1',
+            'SaveZoomToFit' => '1',
+            'SaveSnapshot' => $imagepath,
+            'BFC' => '0',
+            'FOV' => '0.1',
+            'Texmaps' => '1',
+            'AutoCrop' => '1',
+            'Seams' => '0',
+            'SeamWidth' => '0',
+            'LightVector' => '-1,1,1',
+            'MemoryUsage' => '0',
+            'UseSpecular' => '0',
+            'TextureStuds' => '0',
+            'DefaultColor3' => '0xFFFF80',
+            'BackgroundColor3' => '0xFFFFFF',
+            'LineSmoothing' => '1',
+            'SubduedLighting' => '1',
+            'UseQualityStuds' => '1',
+            'CheckPartTracker' => '0',
+            'ShowHighlightLines' => '1',
+            'ConditionalHighlights' => '1',
+        ];
+      
+        $cmdOptions = collect($options)
+            ->map(fn (string $value, string $command) => "-{$command}={$value}")
+            ->implode(' ');
+      
         // Run LDView
-        $ldviewcmd = "ldview {$filename} -LDConfig={$ldconfigPath} -LDrawDir={$ldrawdir} -IniFile={$inipath} {$normal_size} -SaveSnapshot={$imagepath}";
+        $ldviewcmd = "ldview {$filename} {$cmdOptions}";
         if ($this->debug) {
             Log::debug($ldviewcmd);
         }
@@ -70,12 +94,17 @@ class LDView
             Log::debug($result->output());
             Log::debug($result->errorOutput());
             Storage::put("/debug/part.mpd", file_get_contents($filename));
-            Storage::put("/debug/ldview.ini", file_get_contents($inipath));
         }
+      
         if (!file_exists($imagepath)) {
             file_put_contents($imagepath, base64_decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII="));
+        } else {
+            $image = Image::load($imagepath)
+                ->fit(Fit::Contain, $width, $height)
+                ->optimize($this->optimizer)
+                ->save();
         }
-        (new OptimizerChain())->addOptimizer(new Optipng([]))->optimize($imagepath);
+      
         $png = imagecreatefrompng($imagepath);
         imagesavealpha($png, true);
 
