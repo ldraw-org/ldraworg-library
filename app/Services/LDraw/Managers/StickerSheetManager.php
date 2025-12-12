@@ -67,18 +67,26 @@ class StickerSheetManager
                 'part_cat_id' => 58,
                 'page_size' => 1000,
             ]);
-      
+
+        $dbStickerParts = RebrickablePart::where('rb_part_category_id', 58)
+            ->where('is_local', false)
+            ->get();
+
         $rbStickerNumbers = $stickerParts
             ->pluck('part_num')
             ->values();
-        $dbStickerNumbers = RebrickablePart::where('rb_part_category_id', 58)
-            ->where('is_local', false)
+        $dbStickerNumbers = $dbStickerParts
             ->pluck('number')
             ->values();
 
+
+        $removedNumbers = $dbStickerNumbers->diff($rbStickerNumbers)->values()->all();
+        RebrickablePart::whereIn('number', $removedNumbers)
+            ->update(['is_local' => true]);
+
+
         $newNumbers = $rbStickerNumbers->diff($dbStickerNumbers)->values()->all();
         $newNumbersSet = array_flip($newNumbers);
-
         $stickerParts
             ->filter(fn (array $item) => isset($newNumbersSet[$item['part_num']]))
             ->each(function (array $item) {
@@ -124,7 +132,6 @@ class StickerSheetManager
         if ($rbPart) {
             return $rbPart;
         }
-
         // Lookup via set keyword
         $setNumbers = $part->keywords->pluck('keyword')
             ->filter(fn ($kw) => preg_match('/set\s+([\w\-]+)/i', $kw, $matches))
