@@ -29,17 +29,3 @@ if (!function_exists('store_backup')) {
         Storage::put("backup/files/{$filename}", $contents);
     }
 }
-
-if (!function_exists('blank_image_base64')) {
-    function blank_image(): string
-    {
-        return base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=');
-    }
-}
-
-if (!function_exists('blank_image_url')) {
-    function blank_image_url(): string
-    {
-        return 'data:image/png;base64,' . base64_encode(blank_image());
-    }
-}

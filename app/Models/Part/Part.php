@@ -118,6 +118,10 @@ class Part extends Model implements HasMedia
     {
         $this->addMediaCollection('image')
             ->singleFile()
+            ->useFallbackPath(public_path('images/pending.png'))
+            ->useFallbackUrl(asset('images/pending.png'))
+            ->useFallbackPath(public_path('images/pending-thumb.png'), 'thumb')
+            ->useFallbackUrl(asset('images/pending-thumb.png'), 'thumb')
             ->registerMediaConversions(function (Media $media) {
                 $this->addMediaConversion('thumb')
                     ->keepOriginalImageFormat()

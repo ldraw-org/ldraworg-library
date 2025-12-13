@@ -75,7 +75,7 @@ class CategoryStatus extends BasicTable implements HasActions
                         ->doesntHave('unofficial_part')
                         ->get()
                         ->countBy('part_status');
-                    $image = Part::firstWhere('filename', 'parts/'. Arr::get($parts, $cat->value, ''))?->getFirstMediaUrl('image', 'thumb') ?? blank_image_url();
+                    $image = Part::firstWhere('filename', 'parts/'. Arr::get($parts, $cat->value, ''))?->getFirstMediaUrl('image', 'thumb') ?? asset('images/pending-thumb.png');
                     return [
                         'category' => $cat->value,
                         'image' => $image,

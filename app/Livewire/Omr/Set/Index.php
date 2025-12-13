@@ -30,7 +30,7 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
             ->defaultSort('number')
             ->columns([
                 ImageColumn::make('image')
-                    ->state(fn (Set $set) => $set->mainModel()?->getFirstMediaUrl('image', 'thumb') ?? blank_image_url())
+                    ->state(fn (Set $set) => $set->mainModel()->getFirstMediaUrl('image', 'thumb'))
                     ->grow(false)
                     ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]']),
                 TextColumn::make('number')

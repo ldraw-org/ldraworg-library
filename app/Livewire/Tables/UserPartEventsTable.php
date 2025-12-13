@@ -48,16 +48,7 @@ class UserPartEventsTable extends BasicTable implements HasActions
                         ->label('Date/Time')
                         ->grow(false),
                     ImageColumn::make('image')
-                        ->state(
-                            function (PartEvent $event) {
-                                if (!is_null($event->part)) {
-                                    return $event->part->getFirstMediaUrl('image', 'thumb');
-                                } else {
-                                    // One pixel transparent png
-                                    return blank_image_url();
-                                }
-                            }
-                        )
+                        ->state(fn (PartEvent $event) => $event->part?->getFirstMediaUrl('image', 'thumb') ?? asset('images/pending-thumb.png'))
                         ->extraImgAttributes(['class' => 'object-scale-down w-[35px] max-h-[75px]'])
                         ->grow(false),
                     TextColumn::make('user.name')
@@ -65,11 +56,8 @@ class UserPartEventsTable extends BasicTable implements HasActions
                         ->grow(false)
                         ->visibleFrom('md'),
                     TextColumn::make('part.filename')
-                        ->state(
-                            fn (PartEvent $e) =>
-                                !is_null($e->part) ? $e->part->filename : $e->deleted_filename
-                        )
-                        ->description(fn (PartEvent $e): string => !is_null($e->part) ? $e->part->description : $e->deleted_description)
+                        ->state(fn (PartEvent $e) => $e->part?->filename ?? $e->deleted_filename)
+                        ->description(fn (PartEvent $e): string => $e->part?->description ?? $e->deleted_description)
                         ->label('Part')
                         ->visibleFrom('md'),
                     Stack::make([
@@ -77,11 +65,8 @@ class UserPartEventsTable extends BasicTable implements HasActions
                             ->description(fn (PartEvent $e): string => $e->user->realname ?? '')
                             ->grow(false),
                         TextColumn::make('part.filename')
-                            ->state(
-                                fn (PartEvent $e) =>
-                                    !is_null($e->part) ? $e->part->filename : $e->deleted_filename
-                            )
-                            ->description(fn (PartEvent $e): string => !is_null($e->part) ? $e->part->description : $e->deleted_description)
+                            ->state(fn (PartEvent $e) => $e->part?->filename ?? $e->deleted_filename)
+                            ->description(fn (PartEvent $e): string => $e->part?->description ?? $e->deleted_description)
                             ->label('Part'),
                     ])->hiddenFrom('sm'),
                     PartStatusColumn::make('status')
