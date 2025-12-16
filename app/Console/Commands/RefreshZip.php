@@ -26,9 +26,9 @@ class RefreshZip extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(ZipFiles $zipfiles): void
     {
         Storage::disk('library')->delete('unofficial/ldrawunf.zip');
-        ZipFiles::unofficialZip(Part::unofficial()->first());
+        $zipfiles->unofficialZip(Part::unofficial()->first());
     }
 }

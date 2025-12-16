@@ -26,6 +26,7 @@ class PartReleaseManager
     protected PartManager $manager;
     protected TemporaryDirectory $tempDir;
     protected LibrarySettings $settings;
+    protected ZipFiles $zipfiles;
 
     public function __construct(
         protected Collection $parts,
@@ -36,6 +37,7 @@ class PartReleaseManager
         $this->manager = app(PartManager::class);
         $this->tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
         $this->settings = app(LibrarySettings::class);
+        $this->zipfiles = app(ZipFiles::class);
     }
 
     public function createNextRelease(): PartRelease
@@ -327,7 +329,7 @@ class PartReleaseManager
 
         // Make and copy the new archives to the library
         Log::debug('Making Zips');
-        ZipFiles::releaseZips($this->release, $this->extraFiles, file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt")), $this->includeLdconfig, $this->tempDir);
+        $this->zipfiles->releaseZips($this->release, $this->extraFiles, file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt")), $this->includeLdconfig, $this->tempDir);
         Storage::disk('library')->put("updates/lcad{$this->release->short}.zip", file_get_contents($this->tempDir->path("lcad{$this->release->short}.zip")));
         Storage::disk('library')->put("updates/complete.zip", file_get_contents($this->tempDir->path("complete.zip")));
 
@@ -368,7 +370,7 @@ class PartReleaseManager
 
         // Reset the unofficial zip file
         Storage::disk('library')->delete('unofficial/ldrawunf.zip');
-        ZipFiles::unofficialZip(Part::unofficial()->first());
+        $this->zipfiles->unofficialZip(Part::unofficial()->first());
 
         //Recheck and regenerate affected parts
         $affectedParts = new Collection();

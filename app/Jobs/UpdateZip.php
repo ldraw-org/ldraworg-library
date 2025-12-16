@@ -33,8 +33,8 @@ class UpdateZip implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(ZipFiles $zipfiles)
     {
-        ZipFiles::unofficialZip($this->part, $this->oldfilename);
+        $zipfiles->unofficialZip($this->part, $this->oldfilename);
     }
 }

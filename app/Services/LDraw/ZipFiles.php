@@ -11,7 +11,7 @@ use ZipArchive;
 
 class ZipFiles
 {
-    public static function partZip(Part $part): ?string
+    public function partZip(Part $part): ?string
     {
         if (!$part->type->inPartsFolder()) {
             return null;
@@ -20,23 +20,23 @@ class ZipFiles
         $zip = new ZipArchive();
         $name = basename($part->filename, '.dat') . '.zip';
         $zip->open($dir->path($name), ZipArchive::CREATE | ZipArchive::OVERWRITE);
-        if ($part->isUnofficial()) {
-            $zipparts = $part->descendantsAndSelf()->doesntHave('unofficial_part')->get()->unique();
-        } else {
-            $zipparts = $part->descendantsAndSelf->official()->unique();
+        $query = $part->isUnofficial()
+            ? $part->descendantsAndSelf()->doesntHave('unofficial_part')
+            : $part->descendantsAndSelf()->official();
+
+        $seen = [];
+
+        foreach ($query->cursor() as $zipPart) {
+            $seen[$zipPart->id] = true;
+            self::addPartToZip($zip, $zipPart);
         }
-        $zipparts->each(function (Part $part) use ($zip) {
-            self::addPartToZip($zip, $part);
-            //$zip->addFromString($part->filename, $part->get());
-        });
         $zip->close();
         $file = file_get_contents($dir->path($name));
         return $file ?: '';
     }
 
-    public static function unofficialZip(?Part $part = null, ?string $oldfilename = null): void
+    public function unofficialZip(?Part $part = null, ?string $oldfilename = null): void
     {
-        $tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
         $zip = new ZipArchive();
         if (Storage::disk('library')->exists('unofficial/ldrawunf.zip')) {
             $zip->open(Storage::disk('library')->path('unofficial/ldrawunf.zip'));
@@ -59,7 +59,7 @@ class ZipFiles
         }
     }
 
-    public static function releaseZips(PartRelease $release, array $extraFiles, string $notes, bool $includeLDConfig, TemporaryDirectory $tempDir): void
+    public function releaseZips(PartRelease $release, array $extraFiles, string $notes, bool $includeLDConfig, TemporaryDirectory $tempDir): void
     {
         $updateZipName = $tempDir->path("lcad{$release->short}.zip");
         $completeZipName = $tempDir->path("complete.zip");
@@ -104,7 +104,7 @@ class ZipFiles
         });
     }
 
-    protected static function addPartToZip(ZipArchive $zip, Part $part, string $prefix = ''): void
+    protected function addPartToZip(ZipArchive $zip, Part $part, string $prefix = ''): void
     {
         $filename = $prefix . $part->filename;
         $timestamp = $part->lastChange()->getTimestamp();
@@ -113,25 +113,5 @@ class ZipFiles
         $zip->addFromString($filename, $part->get(), flags: $flags);
         $zip->setMtimeName($filename, $timestamp);
     }
-
-/*
-    protected static function addPartToZip(ZipArchive $zip, Part $part, ?TemporaryDirectory $tempDir = null, $prefix = ''): void
-    {
-        if (is_null($tempDir)) {
-            $tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
-        }
-        $path = $tempDir->path($part->filename);
-        file_put_contents($path, $part->get());
-        $time = (int) $part->lastChange()->format('U');
-        touch($path, $time);
-        if ($part->isTexmap()) {
-            $zip->addFile($path, $prefix . $part->filename, 0, 0, ZipArchive::FL_ENC_RAW);
-        } else {
-            $zip->addFile($path, $prefix . $part->filename);
-        }
-        $zip->setMtimeName($part->filename, $time);
-        $zip->setCompressionName($part->filename, ZipArchive::CM_DEFAULT);
-    }
-*/
   
 }

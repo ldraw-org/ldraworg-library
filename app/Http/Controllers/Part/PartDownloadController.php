@@ -13,6 +13,11 @@ use Illuminate\Http\Response;
   
 class PartDownloadController extends Controller
 {
+    public function __construct(
+        protected ZipFiles $zipfiles
+    )
+    {}
+
     public function __invoke(string $library, string $filename): StreamedResponse|Response
     {
         $is_zip = false;
@@ -30,7 +35,7 @@ class PartDownloadController extends Controller
                     ->where('filename', $filename)
                     ->firstOrFail();
         if ($is_zip) {
-            $contents = ZipFiles::partZip($part);
+            $contents = $this->zipfiles->partZip($part);
             return response()->streamDownload(
                 function () use ($contents) {
                     echo $contents;
