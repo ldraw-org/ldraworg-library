@@ -35,12 +35,21 @@ class MenuItem extends Component
                 $this->results['Official Parts'][$part->id] = ['name' => $part->meta_name, 'description' => $part->description];
             }
         }
-        $sets = Set::select(['id', 'name', 'number'])->has('models')->where(function (Builder $q) {
-            $q->orWhereLike('number', "%{$this->tableSearch}%")
-                ->orWhereLike('name', "%{$this->tableSearch}%")
-                ->orWhereRelation('models', 'alt_model_name', 'LIKE', "%{$this->tableSearch}%")
-                ->orWhereRelation('theme', 'name', 'LIKE', "%{$this->tableSearch}%");
-        })->orderBy('name')->take($limit)->get();
+        $sets = Set::query()
+            ->select(['sets.id', 'sets.name', 'sets.number'])
+            ->has('models')
+            ->where(function (Builder $q) {
+                $search = "%{$this->tableSearch}%";
+
+                $q->orWhereLike('sets.number', $search)
+                ->orWhereLike('sets.name', $search)
+                ->orWhereRelation('models', 'alt_model_name', 'LIKE', $search)
+                ->orWhereRelation('theme', 'name', 'LIKE', $search);
+            })
+            ->orderBy('sets.name')
+            ->take($limit)
+            ->get();
+
         if ($sets->isNotEmpty()) {
             foreach ($sets as $set) {
                 $this->results['OMR Models'][$set->id] = ['name' => $set->name, 'description' => $set->number];
