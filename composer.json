@@ -10,7 +10,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3.0",
+        "php": "^8.4.0",
         "blade-ui-kit/blade-icons": "^1.8",
         "fico7489/laravel-pivot": "^3.0",
         "filament/filament": "^4.0",
