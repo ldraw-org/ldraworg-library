@@ -73,4 +73,5 @@ enum PartError: string implements HasLabel
     case WarningNotCoplanar = 'warning.notcoplaner';
     case WarningStickerColor = 'warning.stickercolor';
     case WarningLicense = 'warning.license';
+    case WarningDescriptionNumberSpaces = 'warning.descriptionnumbers';
 }

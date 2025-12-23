@@ -87,5 +87,6 @@ return [
         'notcoplaner' => 'Line :line, quad is not coplanar (angle :value)',
         'stickercolor' => 'Ensure stickers that are not color 16 are applied to defined transparent surfaces',
         'license' => 'Parts without CC BY 4.0 license may not be released',
+        'descriptionnumbers' => 'Number in description may need a leading space'
     ]
 ];

@@ -56,6 +56,7 @@ class PartChecker
         \App\Services\Check\PartChecks\MinifigCategoryWarning::class,
         \App\Services\Check\PartChecks\LibraryLicenseWarning::class,
         \App\Services\Check\PartChecks\StickerColorWarning::class,
+        \App\Services\Check\PartChecks\DescriptionNumberWarning::class,
     ];
 
     public function run(Part|ParsedPartCollection $subject, ?string $filename = null): CheckMessageCollection
