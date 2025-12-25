@@ -14,6 +14,7 @@ use App\Filament\Tables\Columns\PartStatusColumn;
 use App\Models\Part\Part;
 use App\Filament\Tables\Filters\AuthorFilter;
 use Filament\Support\Enums\Alignment;
+use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
@@ -24,6 +25,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 
 class PartTable
 {
@@ -61,6 +63,8 @@ class PartTable
                     ->weight(FontWeight::Bold)
                     ->sortable(),
                 TextColumn::make('description')
+                    ->extraCellAttributes(['class' => 'whitespace-pre-wrap'])
+                    ->fontFamily(FontFamily::Mono)
                     ->sortable(),
                 TextColumn::make('updated_at')
                     ->label('Date Updated')

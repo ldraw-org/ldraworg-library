@@ -6,7 +6,6 @@
                 <p class="text-2xl font-bold">Parts Tracker Activity Log</p>
             </div>
             <div class="justify-self-end">
-                <p class="text-right">Server Time: {{date('Y-m-d H:i:s')}}</p>
                 <x-part.unofficial-part-count />
             </div>
         </div>

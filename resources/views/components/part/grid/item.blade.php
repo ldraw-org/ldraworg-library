@@ -14,7 +14,7 @@
                 </div>
                 @if(stripos($part->description, "obsolete") === false || $show_obsolete)
                     <img class="p-2 object-scale-down max-h-[150px]" src="{{$part->getFirstMediaUrl('image')}}" title="{{$part->description}}" alt="{{$part->description}}" loading="lazy">
-                    <p class="text-sm p-2">{{$part->description}}</p>
+                    <p class="text-sm p-2 font-mono whitespace-pre-wrap">{{$part->description}}</p>
                     @if($part->isUnofficial())
                         <div class="p-2">
                             <x-part.status :$part show-my-vote />

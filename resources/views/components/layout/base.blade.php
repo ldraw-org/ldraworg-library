@@ -25,28 +25,52 @@
         @endenv
       
         {{ $messages ?? '' }}
-      
-        <div class="flex flex-col lg:flex-row space-y-2 lg:space-x-2 justify-items-end">
-            <div class="w-fit order-first flex-none">
-                <a href="{{route('index')}}">
-                    <img id="main-logo" src="{{asset('/images/banners/'. $logo . '.png')}}">
-                </a>
-            </div>
-            <div class="flex flex-row space-x-2 items-end w-full">
-                <div class="md:grow">
-                    <x-dynamic-component component="{{ 'menu.' . $menu }}"  />
-                </div>
-                <div class="self-center lg:self-end mb-1">
-                    @livewire('search.menu-item')
-                </div>
-                @auth
-                    <div class="self-center lg:self-end lg:mb-1">
-                        <x-menu.user-icon />
-                    </div>
-                @endauth
-            </div>
+
+<header class="w-full py-4 px-2">
+    <div class="flex flex-wrap items-center w-full">
+        
+        <!-- Logo -->
+        <div class="flex-none order-1">
+            <a href="{{ route('index') }}" class="block">
+                <img
+                    src="{{ asset('/images/banners/' . $logo . '.png') }}"
+                    class="w-auto h-auto max-h-12 md:max-h-14"
+                    alt="{{ config('app.name') }} logo"
+                >
+            </a>
         </div>
-      <div class="main-content rounded-lg bg-white p-2">
+
+        <!-- Right icons -->
+        <div class="flex items-center space-x-3 flex-shrink-0 order-3 ml-auto">
+            @livewire('search.menu-item')
+            @auth
+                <x-menu.user-icon />
+            @endauth
+        </div>
+
+        <!-- Menu -->
+        <nav
+            class="
+                order-4
+                basis-full
+                mt-4
+                flex
+                justify-start
+
+                xl:order-2
+                xl:basis-auto
+                xl:mt-0
+                xl:justify-center
+                xl:px-4
+            "
+            aria-label="Primary navigation"
+        >
+            <x-menu :type="$menu" />
+        </nav>
+
+    </div>
+</header>
+          <div class="main-content rounded-lg bg-white p-2">
          {{ $slot ?? '' }}
       </div>
 
