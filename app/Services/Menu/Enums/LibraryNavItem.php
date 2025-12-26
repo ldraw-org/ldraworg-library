@@ -39,7 +39,7 @@ enum LibraryNavItem implements Navigable
             self::LdrawOrg => 'https://www.ldraw.org',
             self::Library => route('index'),
             self::PartTracker => route('tracker.main'),
-            self::LatestUpdate => route('update.latest'),
+            self::LatestUpdate => route('part-update.index', ['latest']),
             self::Updates => route('part-update.index'),
             self::Omr => route('omr.main'),
             self::PbgGenerator => route('pbg'),
