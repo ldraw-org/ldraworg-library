@@ -26,7 +26,7 @@ class DeployUpdate extends Command
     /**
      * Execute the console command.
      */
-    public function handle(PartManager $manager): void
+    public function handle(): void
     {
         $partIds = collect();
         PartKeyword::whereLike('keyword', '{"id":%')
