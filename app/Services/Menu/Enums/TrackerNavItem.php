@@ -61,8 +61,8 @@ enum TrackerNavItem implements Navigable
     {
         $user = Auth::user();
         return match ($this) {
-            self::Submit => $user?->can(Part::class, 'create') ?? false,
-            self::TorsoHelper => $user?->can(Part::class, 'create') ?? false,
+            self::Submit => $user?->can('create', Part::class) ?? false,
+            self::TorsoHelper => $user?->can('create', Part::class) ?? false,
             default => true,
         };
     }
