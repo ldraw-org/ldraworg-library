@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Events\PartRenamed;
 use App\Models\Part\Part;
-use App\Models\User;
-use App\Services\LDraw\Managers\Part\PartManager;
+use App\Models\Part\PartKeyword;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 
 class DeployUpdate extends Command
 {
