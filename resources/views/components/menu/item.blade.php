@@ -1,6 +1,7 @@
 <li class="relative list-none" 
-    x-data="{ open: false }" 
-    @mouseenter="if(window.innerWidth >= 768) open = true" 
+    x-data="{ open: false }"
+    @if($isTopLevel) @click="if(window.innerWidth >= 768) open = true" @endif
+    @if(!$isTopLevel) @mouseenter="if(window.innerWidth >= 768) open = true" @endif
     @mouseleave="if(window.innerWidth >= 768) open = false"
     @click.away="open = false">
     
@@ -8,7 +9,7 @@
         'flex items-center justify-between w-full transition-colors cursor-pointer',
         'md:h-10 px-4' => $isTopLevel,
         'py-2 px-4 hover:bg-gray-100' => !$isTopLevel,
-        'bg-blue-50 text-blue-700' => $isActive(), {{-- Method call to the class --}}
+        'bg-blue-50 text-blue-700' => $isActive(),
     ])>
         <a href="{{ $link }}" 
            @if($hasChildren) @click.prevent="open = !open" @endif

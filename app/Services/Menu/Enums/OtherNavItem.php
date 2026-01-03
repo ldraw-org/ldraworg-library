@@ -16,7 +16,7 @@ enum OtherNavItem implements Navigable
     public function label(): string
     {
         return match ($this) {
-            self::UnofficialPartZip => 'Download All Unofficial PArts',
+            self::UnofficialPartZip => 'Download All Unofficial Parts',
             self::DailySubmitsZip => 'Download Last 24 of Submits',
             self::SetList => 'Sets List',
         };

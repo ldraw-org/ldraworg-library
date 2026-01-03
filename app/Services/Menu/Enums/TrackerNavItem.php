@@ -34,7 +34,7 @@ enum TrackerNavItem implements Navigable
             self::WeeklyParts => 'Parts by Week',
             self::TorsoHelper => 'Torso Shortcut Helper',
             self::ReviewSummaries => 'Review Summaries',
-            self::NextUpdate => 'Part in Next Update',
+            self::NextUpdate => 'Parts in Next Update',
             self::TrackerHistory => 'Tracker History Graph',
         };
     }
