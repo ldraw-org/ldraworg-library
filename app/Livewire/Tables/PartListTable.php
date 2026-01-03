@@ -162,6 +162,8 @@ class PartListTable extends BasicTable
                         ->multiple(),
                     SelectConstraint::make('part_errors')
                         ->options(PartError::class)
+                        ->searchable()
+                        ->optionsLimit(100)
                         ->icon(LibraryIcon::Error->value)
                         ->multiple()
                         ->operators([
