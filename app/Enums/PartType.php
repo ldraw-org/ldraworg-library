@@ -124,6 +124,26 @@ enum PartType: string
         ];
     }
 
+    /** @return array<self> */
+    public static function primitiveTypes(): array
+    {
+        return [
+            PartType::Primitive,
+            PartType::LowResPrimitive,
+            PartType::HighResPrimitive,
+        ];
+    }
+
+    public function isPrimitive(): bool
+    {
+        return in_array($this, self::primitiveTypes());
+    }
+
+    public function isNotPrimitive(): bool
+    {
+        return !$this->isPrimitive();
+    }
+
     public function isImageFormat(): bool
     {
         return in_array($this, self::imageFormat());

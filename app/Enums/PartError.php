@@ -3,7 +3,6 @@
 namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
-use Illuminate\Support\Str;
 use Filament\Support\Contracts\HasLabel;
 
 enum PartError: string implements HasLabel
@@ -74,4 +73,5 @@ enum PartError: string implements HasLabel
     case WarningStickerColor = 'warning.stickercolor';
     case WarningLicense = 'warning.license';
     case WarningDescriptionNumberSpaces = 'warning.descriptionnumbers';
+    case WarningDecimalPrecision = 'warning.decimalprecision';
 }
