@@ -17,3 +17,4 @@ phpstan.neon
 _ide_helper_models.php
 .devdbrc
 app/Console/Commands/Benchmark.php
+/.ddev
