@@ -504,6 +504,62 @@ class Part extends Model implements HasMedia
         );
     }
 
+    public function determineStatus(): PartStatus
+    {
+        if ($this->isOfficial()) {
+            return PartStatus::Official;
+        }
+
+        $data = $this->voteTypeCount();
+
+        if (($data[VoteType::Hold->value] ?? 0) > 0) {
+            return PartStatus::ErrorsFound;
+        }
+
+        $cert = ($data[VoteType::Certify->value] ?? 0)
+            + ($data[VoteType::AdminReview->value] ?? 0);
+
+        if ($data[VoteType::AdminFastTrack->value] == 0 && $cert < 1) {
+            return PartStatus::Needs2MoreVotes;
+        }
+
+        if ($data[VoteType::AdminFastTrack->value] == 0 && $cert < 2) {
+            return PartStatus::Needs1MoreVote;
+        }
+
+        if (
+            $data[VoteType::AdminFastTrack->value] == 0 &&
+            $data[VoteType::AdminReview->value] == 0 &&
+            $cert >= 2
+        ) {
+            return PartStatus::AwaitingAdminReview;
+        }
+
+        return PartStatus::Certified;
+    }
+
+    public function shouldBeReadyForAdmin(): bool
+    {
+        if ($this->isOfficial()) {
+            return true;
+        }
+
+        if (!in_array($this->part_status, [
+            PartStatus::Certified,
+            PartStatus::AwaitingAdminReview,
+        ])) {
+            return false;
+        }
+
+        return !$this->descendants()
+            ->whereIn('part_status', [
+                PartStatus::Needs1MoreVote,
+                PartStatus::Needs2MoreVotes,
+                PartStatus::ErrorsFound,
+            ])
+            ->exists();
+    }
+/*
     public function updatePartStatus(): void
     {
         if ($this->isOfficial()) {
@@ -558,6 +614,7 @@ class Part extends Model implements HasMedia
             });
         }
     }
+*/
 
     public function setKeywords(array|Collection $keywords): void
     {

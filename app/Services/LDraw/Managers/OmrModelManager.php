@@ -4,35 +4,35 @@ namespace App\Services\LDraw\Managers;
 
 use App\Enums\License;
 use App\Jobs\UpdateImage;
-use App\Services\LDraw\Render\LDView;
 use App\Models\Mybb\MybbAttachment;
 use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
 use App\Models\User;
+use App\Services\Render\LDView as RenderLDView;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Spatie\Image\Image;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class OmrModelManager
 {
     public function __construct(
-        public LDView $render,
+        public RenderLDView $render,
         protected LibrarySettings $settings
     ) {
     }
 
-    public function updateImage(OmrModel $model): void
+    public function updateImage(OmrModel $model, bool $async = true): void
     {
-        $image = $this->render->render($model);
-        $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
-        $imagePath = $dir->path(substr($model->filename(), 0, -4) . '.png');
-        imagepng($image, $imagePath);
-        Image::load($imagePath)->optimize()->save($imagePath);
-        $model->clearMediaCollection('image');
-        $model->addMedia($imagePath)
-            ->toMediaCollection('image');
+        $image = $this->render->render($model, $async);
+        if (!is_null($image)) {
+            $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
+            $imagePath = $dir->path(substr($model->filename(), 0, -4) . '.png');
+            imagepng($image, $imagePath);
+            $model->clearMediaCollection('image');
+            $model->addMedia($imagePath)
+                ->toMediaCollection('image');
+        }
     }
 
     public function addModelFromMybbAttachment(MybbAttachment $file, Set $set, array $data = []): void

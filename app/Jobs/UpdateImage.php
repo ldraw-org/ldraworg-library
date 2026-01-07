@@ -33,9 +33,9 @@ class UpdateImage implements ShouldQueue
     public function handle(): void
     {
         if ($this->m instanceof Part) {
-            app(PartManager::class)->updateImage($this->m);
+            app(PartManager::class)->updateImage($this->m, false);
         } elseif ($this->m instanceof OmrModel) {
-            app(OmrModelManager::class)->updateImage($this->m);
+            app(OmrModelManager::class)->updateImage($this->m, false);
         }
 
     }

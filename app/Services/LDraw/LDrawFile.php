@@ -2,13 +2,14 @@
 
 namespace App\Services\LDraw;
 
+use App\Enums\LdrawFileType;
 use App\Models\Part\Part;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class LDrawFile
 {
     private function __construct(
-        public ?string $mimetype,
+        public LdrawFileType $filetype,
         public string $filename,
         public string $contents,
     ) {
@@ -17,7 +18,7 @@ class LDrawFile
     public static function fromArray(array $file): self
     {
         return new self(
-            $file['mimetype'],
+            $file['filetype'],
             $file['filename'],
             $file['contents']
         );
@@ -27,19 +28,14 @@ class LDrawFile
     {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimetype = finfo_file($finfo, $file->getPath() . '/' . $file->getFilename());
-        switch ($mimetype) {
-            case 'text/plain':
-                break;
-            case 'image/png':
-                if (!$img = @imagecreatefrompng($file->getPath() . '/' . $file->getFilename())) {
-                    $mimetype = null;
-                }
-                break;
-            default:
-                $mimetype = null;
+
+        $filetype = LdrawFileType::tryFrom($mimetype);
+        if ($filetype == LdrawFileType::Image) {
+            // Check if the image is valid
+            imagecreatefrompng($file->getPath() . '/' . $file->getFilename());
         }
         return new self(
-            $mimetype,
+            $filetype,
             $file->getClientOriginalName(),
             $file->get()
         );
@@ -48,7 +44,7 @@ class LDrawFile
     public static function fromPart(Part $part): self
     {
         return new self(
-            $part->isTexmap() ? 'image/png' : 'text/plain',
+            $part->isTexmap() ? LdrawFileType::Image : LdrawFileType::TextFile,
             basename($part->filename),
             $part->get()
         );

@@ -10,16 +10,15 @@ use App\Jobs\UpdateParentParts;
 use App\Jobs\UpdateZip;
 use App\Services\LDraw\LDrawFile;
 use App\Services\LDraw\Managers\StickerSheetManager;
-use App\Services\LDraw\Render\LDView;
 use App\Models\Part\Part;
 use App\Models\Part\UnknownPartNumber;
-use App\Models\RebrickablePart;
 use App\Models\User;
 use App\Services\Check\CheckMessageCollection;
 use App\Services\Check\PartChecker;
 use App\Services\LDraw\Managers\RebrickablePartManager;
 use App\Services\LDraw\Rebrickable;
 use App\Services\Parser\ParsedPartCollection;
+use App\Services\Render\LDView as RenderLDView;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -33,7 +32,7 @@ use Spatie\TemporaryDirectory\TemporaryDirectory;
 class PartManager
 {
     public function __construct(
-        public LDView $render,
+        public RenderLDView $render,
         protected LibrarySettings $settings,
         protected PartChecker $checker,
         protected Rebrickable $rebrickable,
@@ -224,20 +223,25 @@ class PartManager
         }
     }
 
-    public function updateImage(Part $part): void
+    public function updateImage(Part $part, bool $async = true): void
     {
-        if ($part->isTexmap()) {
-            $image = imagecreatefromstring($part->get());
-        } else {
-            $image = $this->render->render($part);
-        }
         $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
         $imagePath = $dir->path(substr($part->filename, 0, -4) . '.png');
-        imagepng($image, $imagePath);
-        $this->imageOptimize($imagePath);
-        $part->clearMediaCollection('image');
-        $part->addMedia($imagePath)
-            ->toMediaCollection('image');
+
+        if ($part->isTexmap()) {
+            $image = imagecreatefromstring($part->get());
+            imagepng($image, $imagePath);
+            $this->imageOptimize($imagePath);
+            return;
+        }
+        
+        $image = $this->render->render($part, $async);
+        if (!is_null($image)) {
+            imagepng($image, $imagePath);
+            $part->clearMediaCollection('image');
+            $part->addMedia($imagePath)
+                ->toMediaCollection('image');
+        }
     }
 
     protected function updateMissing(string $name): void
@@ -393,7 +397,7 @@ class PartManager
             $part->check_messages = new CheckMessageCollection();
         }
         $part->can_release = $part->isOfficial() || ($part->check_messages->doesntHaveHoldableIssues());
-        $part->updateReadyForAdmin();
+        //$part->updateReadyForAdmin();
         $part->save();
     }
 

@@ -173,7 +173,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('updateImage')
                 ->action(function () {
-                    app(PartManager::class)->updateImage($this->part);
+                    app(PartManager::class)->updateImage($this->part, false);
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Image Updated')

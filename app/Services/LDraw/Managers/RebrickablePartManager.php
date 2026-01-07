@@ -60,4 +60,13 @@ class RebrickablePartManager
 
         return $rb;
     }
+
+    public function validate(RebrickablePart $rbPart)
+    {
+        $remotePart = $this->rebrickable->getPart($rbPart->number);
+        if ($remotePart->isEmpty()) {
+            $rbPart->is_local = true;
+            $rbPart->save();
+        }
+    }
 }

@@ -55,25 +55,24 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         if ($part->isDirty('preview') && trim($part->preview) === '') {
             $part->preview = null;
         }
-        /*
-                if ($part->isDirty([
-                    'description',
-                    'filename',
-                    'user_id',
-                    'type',
-                    'type_qualifier',
-                    'part_release_id',
-                    'help',
-                    'category',
-                    'part_release_id',
-                    'bfc',
-                    'cmdline',
-                    'license',
-                    'preview'
-                ])) {
-                    $part->generateHeader(false);
-                }
-        */
+        
+        if ($part->isDirty([
+            'description',
+            'filename',
+            'user_id',
+            'type',
+            'type_qualifier',
+            'part_release_id',
+            'help',
+            'category',
+            'part_release_id',
+            'bfc',
+            'cmdline',
+            'license',
+            'preview'
+        ])) {
+            //$part->generateHeader(false);
+        }
     }
 
     /*
@@ -93,19 +92,19 @@ class PartObserver implements ShouldHandleEventsAfterCommit
                 Log::debug("Retrieved part {$part->id} ({$part->filename})");
             }
         }
-
+    */
         public function pivotAttached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
         {
-            if (config('ldraw.library_debug')) {
-                Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
+            if ($relationName == 'keywords') {
+                $part->generateHeader();
             }
         }
 
         public function pivotDetached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
         {
-            if (config('ldraw.library_debug')) {
-                Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
+            if ($relationName == 'keywords') {
+                $part->generateHeader();
             }
         }
-    */
+
 }

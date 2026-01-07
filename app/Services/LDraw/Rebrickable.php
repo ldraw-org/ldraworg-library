@@ -95,7 +95,6 @@ class Rebrickable
             }
 
             return $response->json();
-
         } catch (Exception $e) {
             Log::error('Rebrickable request exception', [
                 'url' => $url,
@@ -103,6 +102,7 @@ class Rebrickable
             ]);
             return null;
         }
+
     }
 
 

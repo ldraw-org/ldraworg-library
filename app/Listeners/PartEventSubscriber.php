@@ -6,20 +6,29 @@ use App\Enums\EventType;
 use App\Events\PartComment;
 use App\Events\PartDeleted;
 use App\Events\PartHeaderEdited;
+use App\Events\PartMissingSubpartsResolved;
 use App\Events\PartReleased;
 use App\Events\PartRenamed;
 use App\Events\PartReviewed;
 use App\Events\PartSubmitted;
 use App\Events\PartUpdateProcessingComplete;
+use App\Jobs\CheckPart;
+use App\Jobs\UpdateImage;
+use App\Jobs\UpdateRebrickable;
 use App\Models\Part\PartEvent;
+use App\Services\Part\PartAdminReadinessService;
 use Illuminate\Events\Dispatcher;
 
 class PartEventSubscriber
 {
+    public function __construct(
+        protected PartAdminReadinessService $adminReadiness
+    ) {}
+    
     public function storeSubmitPartEvent(PartSubmitted $event): void
     {
         $init_submit = is_null(PartEvent::unofficial()->firstWhere('part_id', $event->part->id));
-        PartEvent::create([
+        $this->storeEvent([
             'event_type' => EventType::Submit,
             'initial_submit' => $init_submit,
             'user_id' => $event->user->id,
@@ -30,7 +39,7 @@ class PartEventSubscriber
 
     public function storeRenamePartEvent(PartRenamed $event): void
     {
-        PartEvent::create([
+        $this->storeEvent([
             'event_type' => EventType::Rename,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
@@ -41,7 +50,7 @@ class PartEventSubscriber
 
     public function storePartHeaderEditEvent(PartHeaderEdited $event): void
     {
-        PartEvent::create([
+        $this->storeEvent([
             'event_type' => EventType::HeaderEdit,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
@@ -52,7 +61,7 @@ class PartEventSubscriber
 
     public function storePartReleaseEvent(PartReleased $event): void
     {
-        PartEvent::create([
+        $this->storeEvent([
             'event_type' => EventType::Release,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
@@ -63,7 +72,7 @@ class PartEventSubscriber
 
     public function storePartReviewEvent(PartReviewed $event): void
     {
-        PartEvent::create([
+        $this->storeEvent([
             'event_type' => EventType::Review,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
@@ -74,7 +83,7 @@ class PartEventSubscriber
 
     public function storePartCommentEvent(PartComment $event): void
     {
-        PartEvent::create([
+        $this->storeEvent([
             'event_type' => EventType::Comment,
             'user_id' => $event->user->id,
             'part_id' => $event->part->id,
@@ -84,7 +93,7 @@ class PartEventSubscriber
 
     public function storePartDeletedEvent(PartDeleted $event): void
     {
-        PartEvent::create([
+       $this->storeEvent([
             'event_type' => EventType::Delete,
             'user_id' => $event->user->id,
             'deleted_filename' => $event->deleted_filename,
@@ -92,9 +101,9 @@ class PartEventSubscriber
         ]);
     }
 
-    public function emailPartUpdateComplete(PartUpdateProcessingComplete $event): void
+    protected function storeEvent(array $data): void
     {
-        // Nothing yet
+        PartEvent::create($data);
     }
 
     public function subscribe(Dispatcher $events): array
@@ -107,7 +116,6 @@ class PartEventSubscriber
             PartReviewed::class => 'storePartReviewEvent',
             PartComment::class => 'storePartCommentEvent',
             PartDeleted::class => 'storePartDeletedEvent',
-            PartUpdateProcessingComplete::class => 'emailPartUpdateComplete',
         ];
     }
 }
