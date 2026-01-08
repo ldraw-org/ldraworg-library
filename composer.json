@@ -21,6 +21,7 @@
         "laravel/framework": "^12.0",
         "laravel/pulse": "^1.4",
         "laravel/tinker": "^2.10.1",
+        "league/flysystem-aws-s3-v3": "^3.0",
         "livewire/livewire": "^3.6.0",
         "mailgun/mailgun-php": "^4.3",
         "markrogoyski/math-php": "^2.11",
