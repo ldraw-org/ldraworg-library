@@ -6,55 +6,75 @@ use App\Models\Omr\Set;
 use App\Models\Part\Part;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class MenuItem extends Component
 {
     public ?string $tableSearch = '';
-    public array $results = [];
 
     #[On('doSearch')]
-    public function doSearch()
+    public function performSearch(): void
     {
-        $settings = app(LibrarySettings::class);
-        $this->results = [];
-        if (is_null($this->tableSearch) || $this->tableSearch == '') {
-            return;
+        // This just triggers a re-render. 
+        // The #[Computed] property will handle the actual logic.
+    }
+
+    #[Computed]
+    public function results(): array
+    {
+        if (empty(trim($this->tableSearch))) {
+            return [];
         }
-        $limit = $settings->quick_search_limit;
-        $uparts = Part::select(['id', 'filename', 'description'])->unofficial()->searchHeader($this->tableSearch)->orderBy('filename')->take($limit)->get();
-        $oparts = Part::select(['id', 'filename', 'description'])->official()->searchHeader($this->tableSearch)->orderBy('filename')->take($limit)->get();
-        if ($uparts->isNotEmpty()) {
-            foreach ($uparts as $part) {
-                $this->results['Unofficial Parts'][$part->id] = ['name' => $part->meta_name, 'description' => $part->description];
-            }
-        }
-        if ($oparts->isNotEmpty()) {
-            foreach ($oparts as $part) {
-                $this->results['Official Parts'][$part->id] = ['name' => $part->meta_name, 'description' => $part->description];
-            }
-        }
-        $sets = Set::query()
+
+        $limit = app(LibrarySettings::class)->quick_search_limit;
+
+        return array_filter([
+            'Unofficial Parts' => $this->getPartsSearch(Part::unofficial(), $limit),
+            'Official Parts'   => $this->getPartsSearch(Part::official(), $limit),
+            'OMR Models'       => $this->getSetsSearch($limit),
+        ]);
+    }
+
+    private function getPartsSearch(Builder $query, int $limit): array
+    {
+        return $query->select(['id', 'filename', 'description'])
+            ->searchHeader($this->tableSearch)
+            ->orderBy('filename')
+            ->take($limit)
+            ->get()
+            ->mapWithKeys(fn ($part) => [
+                $part->id => [
+                    'name' => $part->meta_name, 
+                    'description' => $part->description,
+                    'image_url' => $part->getFirstMediaUrl('image','thumb'),
+                ]
+            ])->toArray();
+    }
+
+    private function getSetsSearch(int $limit): array
+    {
+        return Set::query()
             ->select(['sets.id', 'sets.name', 'sets.number'])
             ->has('models')
             ->where(function (Builder $q) {
                 $search = "%{$this->tableSearch}%";
-
                 $q->orWhereLike('sets.number', $search)
-                ->orWhereLike('sets.name', $search)
-                ->orWhereRelation('models', 'alt_model_name', 'LIKE', $search)
-                ->orWhereRelation('theme', 'name', 'LIKE', $search);
+                    ->orWhereLike('sets.name', $search)
+                    ->orWhereRelation('models', 'alt_model_name', 'LIKE', $search)
+                    ->orWhereRelation('theme', 'name', 'LIKE', $search);
             })
             ->orderBy('sets.name')
             ->take($limit)
-            ->get();
-
-        if ($sets->isNotEmpty()) {
-            foreach ($sets as $set) {
-                $this->results['OMR Models'][$set->id] = ['name' => $set->name, 'description' => $set->number];
-            }
-        }
+            ->get()
+            ->mapWithKeys(fn ($set) => [
+                $set->id => [
+                    'name' => $set->name, 
+                    'description' => $set->number,
+                    'image_url' => $set->models->first()?->getFirstMediaUrl('image','thumb'),
+                ]
+            ])->toArray();
     }
 
     public function render()
