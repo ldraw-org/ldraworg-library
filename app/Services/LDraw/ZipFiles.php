@@ -38,21 +38,21 @@ class ZipFiles
     public function unofficialZip(?Part $part = null, ?string $oldfilename = null): void
     {
         $zip = new ZipArchive();
-        if (Storage::disk('library')->exists('unofficial/ldrawunf.zip')) {
-            $zip->open(Storage::disk('library')->path('unofficial/ldrawunf.zip'));
+        if (Storage::exists('library/unofficial/ldrawunf.zip')) {
+            $zip->open(Storage::path('library/unofficial/ldrawunf.zip'));
             if (!is_null($oldfilename)) {
                 $zip->deleteName($oldfilename);
             }
             self::addPartToZip($zip, $part);
             $zip->close();
         } else {
-            $zip->open(Storage::disk('library')->path('unofficial/ldrawunf.zip'), ZipArchive::CREATE | ZipArchive::OVERWRITE);
-            $zip->addFile(Storage::disk('library')->path('official/CAreadme.txt'), 'CAreadme.txt');
-            $zip->addFile(Storage::disk('library')->path('official/CAlicense.txt'), 'CAlicense.txt');
-            $zip->addFile(Storage::disk('library')->path('official/CAlicense4.txt'), 'CAlicense4.txt');
+            $zip->open(Storage::path('library/unofficial/ldrawunf.zip'), ZipArchive::CREATE | ZipArchive::OVERWRITE);
+            $zip->addFile(Storage::path('library/official/CAreadme.txt'), 'CAreadme.txt');
+            $zip->addFile(Storage::dpath('library/official/CAlicense.txt'), 'CAlicense.txt');
+            $zip->addFile(Storage::path('library/official/CAlicense4.txt'), 'CAlicense4.txt');
             $zip->close();
             Part::unofficial()->chunk(500, function (Collection $parts) use ($zip) {
-                $zip->open(Storage::disk('library')->path('unofficial/ldrawunf.zip'));
+                $zip->open(Storage::path('library/unofficial/ldrawunf.zip'));
                 $parts->each(fn (Part $part) => self::addPartToZip($zip, $part));
                 $zip->close();
             });
@@ -70,11 +70,11 @@ class ZipFiles
         $completeZip = new ZipArchive();
         $completeZip->open($completeZipName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-        foreach (Storage::disk('library')->allFiles('official') as $file) {
+        foreach (Storage::allFiles('library/official') as $file) {
             $filename = str_replace('official/', 'ldraw/', $file);
-            $completeZip->addFromString($filename, Storage::disk('library')->get($file));
+            $completeZip->addFromString($filename, Storage::get("library/{$file}"));
             if (($file == 'official/LDConfig.ldr' || $file == 'official/LDCfgalt.ldr') && $includeLDConfig) {
-                $updateZip->addFromString($filename, Storage::disk('library')->get($file));
+                $updateZip->addFromString($filename, Storage::get("library/{$file}"));
             };
         }
 
@@ -108,10 +108,10 @@ class ZipFiles
     {
         $filename = $prefix . $part->filename;
         $timestamp = $part->lastChange()->getTimestamp();
-        
+
         $flags = $part->isTexmap() ? ZipArchive::FL_ENC_RAW : 0;
         $zip->addFromString($filename, $part->get(), flags: $flags);
         $zip->setMtimeName($filename, $timestamp);
     }
-  
+
 }

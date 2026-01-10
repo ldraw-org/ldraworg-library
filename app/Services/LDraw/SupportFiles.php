@@ -36,7 +36,7 @@ class SupportFiles
                     . ',' . $media?->created_at->format('Y-m-d') ?? $part->created_at->format('Y-m-d');
             })
             ->implode("\n");
-        Storage::disk('library')->put('library.csv', $csv);
+        Storage::put('library/library.csv', $csv);
     }
 
     public static function ptReleases(string $output = "xml"): string
@@ -91,7 +91,7 @@ class SupportFiles
                 'BASE',
                 'ARJ',
                 '0.27',
-                date('Y-m-d', Storage::disk('library')->lastModified("updates/ldraw027.exe")),
+                date('Y-m-d', Storage::lastModified("library/updates/ldraw027.exe")),
                 "updates/ldraw027.exe",
                 $output
             );
@@ -100,7 +100,7 @@ class SupportFiles
                 'BASE',
                 'ZIP',
                 '0.27',
-                date('Y-m-d', Storage::disk('library')->lastModified("updates/ldraw027.zip")),
+                date('Y-m-d', Storage::lastModified("library/updates/ldraw027.zip")),
                 "updates/ldraw027.zip",
                 $output
             );
@@ -112,10 +112,10 @@ class SupportFiles
 
     protected static function ptReleaseEntry(string $type, string $format, string $name, string $date, string $file, string $output = "xml"): string
     {
-        if (Storage::disk('library')->exists($file)) {
-            $url = Storage::disk('library')->url($file);
-            $size = Storage::disk('library')->size($file);
-            $checksum = Storage::disk('library')->checksum($file);
+        if (Storage::exists("library/{$file}")) {
+            $url = Storage::url("library/{$file}");
+            $size = Storage::size("library/{$file}");
+            $checksum = Storage::checksum("library/{$file}");
             if ($output === 'tab') {
                 return "{$type}\t{$name}\t{$date}\t{$format}\t{$url}\t{$size}\t{$checksum}\n";
             }

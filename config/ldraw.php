@@ -12,6 +12,9 @@ return [
     // Enable Part library debug logging
     'library_debug' => env('LIBRARY_DEBUG', false),
 
+    // Choose between cloudflare disk or local storage
+    'archive_disk' => env('ARCHIVE_DISK', 'local'),
+
     // These are groups for Part Author/Reviewer tags
     'mybb-groups' => [
         'Administrators' => 4,

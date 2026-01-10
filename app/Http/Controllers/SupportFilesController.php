@@ -29,10 +29,10 @@ class SupportFilesController extends Controller
 
     public function librarycsv(): Response
     {
-        if (!Storage::disk('library')->exists('library.csv')) {
+        if (!Storage::exists('library/library.csv')) {
             SupportFiles::setLibraryCsv();
         }
-        return response(Storage::disk('library')->get('library.csv'))->header('Content-Type', 'text/plain; charset=utf-8');
+        return response(Storage::get('library/library.csv'))->header('Content-Type', 'text/plain; charset=utf-8');
     }
 
     public function ptreleases(string $output): Response

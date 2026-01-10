@@ -51,7 +51,7 @@ class LDrawModelMaker
             ->whereIn('id', $subpartIds)
             ->get();
     }
-  
+
     public function modelMpd(string|OmrModel $model): string
     {
         if ($model instanceof OmrModel) {
@@ -68,7 +68,7 @@ class LDrawModelMaker
                     ->each(function (Part $p) use (&$allLibraryIds) {
                         $allLibraryIds[$p->id] = true;
                     });
-            }); 
+            });
         $lines = [];
         Part::with('body')
           ->select('id', 'filename', 'type', 'header')
@@ -90,21 +90,21 @@ class LDrawModelMaker
         $lines1 = collect(explode("\n", $part1->body->body))
             ->filter(fn($line) => $line !== '' && $line[0] !== '0')
             ->values();
-    
+
         $lines2 = collect(explode("\n", $part2->body->body))
             ->filter(fn($line) => $line !== '' && $line[0] !== '0')
             ->values();
-    
+
         $delcolor   = ['1'=>'36','2'=>'12','3'=>'36','4'=>'36','5'=>'12'];
         $addcolor   = ['1'=>'2','2'=>'10','3'=>'2','4'=>'2','5'=>'10'];
         $matchcolor = ['1'=>'15','2'=>'8','3'=>'15','4'=>'15','5'=>'8'];
-    
+
         $m = $lines1->count();
         $n = $lines2->count();
-    
+
         $prev = array_fill(0, $n + 1, 0);
         $curr = array_fill(0, $n + 1, 0);
-    
+
         for ($i = 0; $i < $m; $i++) {
             for ($j = 0; $j < $n; $j++) {
                 $curr[$j+1] = ($lines1[$i] === $lines2[$j])
@@ -113,7 +113,7 @@ class LDrawModelMaker
             }
             [$prev, $curr] = [$curr, $prev];
         }
-    
+
         $diffLines = collect();
         $backtrack = function($i, $j) use (&$lines1, &$lines2, &$delcolor, &$addcolor, &$matchcolor, &$prev, &$diffLines, &$backtrack) {
             if ($i > 0 && $j > 0 && $lines1[$i-1] === $lines2[$j-1]) {
@@ -133,9 +133,9 @@ class LDrawModelMaker
                 );
             }
         };
-    
+
         $backtrack($m, $n);
-    
+
         return $diffLines->implode("\n");
     }
 
@@ -165,7 +165,7 @@ class LDrawModelMaker
             }
             $webgl['model.ldr'] = 'data:text/plain;base64,' . base64_encode($this->modelMpd($model));
         }
-        $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::disk('library')->get('official/LDConfig.ldr'));
+        $webgl['ldconfig.ldr'] = 'data:text/plain;base64,' . base64_encode(Storage::get('library/official/LDConfig.ldr'));
         return $webgl;
     }
 

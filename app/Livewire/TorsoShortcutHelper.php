@@ -347,8 +347,8 @@ class TorsoShortcutHelper extends Component implements HasSchemas
     #[Computed]
     protected function colors(): array
     {
-        if (Storage::disk('library')->exists('official/LDConfig.ldr')) {
-            $ldconfig = Storage::disk('library')->get('official/LDConfig.ldr');
+        if (Storage::exists('library/official/LDConfig.ldr')) {
+            $ldconfig = Storage::get('library/official/LDConfig.ldr');
             $ldconfig = preg_replace("#\R#", "\n", $ldconfig);
             $colour_pattern = "/^\h*0\h+!COLOUR\h+(?<name>[A-Za-z_]+)\h+CODE\h+(?<code>\d+)\h+VALUE\h+(?<value>(?:#|0x)[A-Fa-f\d]{6})\h+EDGE\h+(?<edge>\d+|(?:#|0x)[A-Fa-f\d]{6})(?:\h+ALPHA\h+(?<alpha>\d{1,3}))?(?:\h+LUMINANCE\h+(?<luminance>\d+))?(?:\h+(?<material>CHROME|METAL|PEARLESCENT|RUBBER|MATERIAL\h+.*))?\h*$/im";
             if (preg_match_all($colour_pattern, $ldconfig, $colours, PREG_SET_ORDER)) {

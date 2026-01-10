@@ -2,10 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Settings\LibrarySettings;
+use App\Enums\License;
+use App\Models\User;
 use App\Enums\Permission;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission as PermissionModel;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,34 +17,25 @@ class DatabaseSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
-        /*
-                $ls = app(LibrarySettings::class);
-                $ls->allowed_header_metas = [
-                        'Name:',
-                        'Author:',
-                        '!LDRAW_ORG',
-                        '!LICENSE',
-                        '!HELP',
-                        'BFC',
-                        '!CATEGORY',
-                        '!KEYWORDS',
-                        '!CMDLINE',
-                        '!HISTORY'
-                    ];
-                $ls->allowed_body_metas = [
-                        '!TEXMAP',
-                        '!:',
-                        'BFC',
-                        '//',
-                    ];
-
-                $ls->save();
-        */
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         foreach (Permission::cases() as $permission) {
             PermissionModel::findOrCreate($permission->value);
         }
+        Role::findOrCreate('Super Admin');
+        $user = User::updateOrCreate(
+            [
+                'name' => 'admin',
+            ],
+            [
+                'realname' => 'admin',
+                'password' => Str::random(32),
+                'email' => 'admin@admin.com',
+                'license' => License::CC_BY_4,
+                'ca_confirm' => true,
+            ]
+        );
+        $user->assignRole('Super Admin');
     }
 }

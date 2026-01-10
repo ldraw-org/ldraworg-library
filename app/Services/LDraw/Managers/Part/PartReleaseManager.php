@@ -137,7 +137,7 @@ class PartReleaseManager
                 ->count();
             $data['new_of_type'][$type->value] = $count;
         }
-        $data['new_of_type'][PartType::Part->value] = 
+        $data['new_of_type'][PartType::Part->value] =
             $data['new_of_type'][PartType::Part->value] + $data['new_of_type'][PartType::Shortcut->value];
         unset($data['new_of_type'][PartType::Shortcut->value]);
         $data['moved_parts'] = [];
@@ -179,7 +179,7 @@ class PartReleaseManager
                     foreach ($value as $type => $count) {
                         if ($count > 0) {
                             $notes .= "   New {$type}s: {$count}\n";
-                        }    
+                        }
                     }
                     break;
                 case 'moved_parts':
@@ -324,22 +324,22 @@ class PartReleaseManager
         $previousRelease = PartRelease::where('id', '<>', $this->release->id)->latest()->first();
 
         // Archive the previous complete zip and exe
-        Storage::disk('library')->move('updates/complete.zip', "updates/complete-{$previousRelease->short}.zip");
-        Storage::disk('library')->move('updates/LDrawParts.exe', "updates/LDraw{$previousRelease->short}.exe");
+        Storage::move('library/updates/complete.zip', "updates/complete-{$previousRelease->short}.zip");
+        Storage::move('library/updates/LDrawParts.exe', "updates/LDraw{$previousRelease->short}.exe");
 
         // Make and copy the new archives to the library
         Log::debug('Making Zips');
         $this->zipfiles->releaseZips($this->release, $this->extraFiles, file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt")), $this->includeLdconfig, $this->tempDir);
-        Storage::disk('library')->put("updates/lcad{$this->release->short}.zip", file_get_contents($this->tempDir->path("lcad{$this->release->short}.zip")));
-        Storage::disk('library')->put("updates/complete.zip", file_get_contents($this->tempDir->path("complete.zip")));
+        Storage::put("library/updates/lcad{$this->release->short}.zip", file_get_contents($this->tempDir->path("lcad{$this->release->short}.zip")));
+        Storage::put("library/updates/complete.zip", file_get_contents($this->tempDir->path("complete.zip")));
 
         //Copy release notes
         $notes = file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt"));
-        Storage::disk('library')->put("official/models/Note{$this->release->short}CA.txt", $notes);
+        Storage::put("library/official/models/Note{$this->release->short}CA.txt", $notes);
 
         // Copy the new non-Part files to the library
         foreach ($this->extraFiles as $filename => $contents) {
-            Storage::disk('library')->put("official/ldraw/{$filename}", $contents);
+            Storage::put("library/official/ldraw/{$filename}", $contents);
         }
 
         $this->release->enabled = true;
@@ -369,7 +369,7 @@ class PartReleaseManager
         ]);
 
         // Reset the unofficial zip file
-        Storage::disk('library')->delete('unofficial/ldrawunf.zip');
+        Storage::delete('library/unofficial/ldrawunf.zip');
         $this->zipfiles->unofficialZip(Part::unofficial()->first());
 
         //Recheck and regenerate affected parts

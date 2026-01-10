@@ -142,7 +142,7 @@ class Part extends Model implements HasMedia
             ],
         ];
     }
-  
+
     public function newCollection(array $models = []): PartCollection
     {
         return new PartCollection($models);
@@ -399,22 +399,22 @@ class Part extends Model implements HasMedia
                 return Str::of($kw->keyword)->lower()
                     ->startsWith(strtolower($external->value) . ' ');
             });
-    
+
             if (!$match) {
                 return null;
             }
-    
+
             $num = trim(Str::after(
                 strtolower($match->keyword),
                 strtolower($external->value . ' ')
             ));
-    
+
             return $num === '' ? null : $num;
         }
         if ($external === ExternalSite::Rebrickable) {
             return $rbPart->number;
         }
-      
+
         $name = $rbPart->ldraw_number ?? basename($this->filename, '.dat');
         $siteList = ($rbPart->{$external->value}) ?? [];
         $number = collect($siteList)->first(function (string $siteNumber) use ($name) {
@@ -562,14 +562,14 @@ class Part extends Model implements HasMedia
     public function setKeywords(array|Collection $keywords): void
     {
         $keywords = collect($keywords);
-    
+
         $keywordIds = $keywords
             ->filter()
             ->map(fn (string $kw) => Str::of($kw)->trim()->squish()->toString())
             ->filter()
             ->map(function (string $kw): int {
                 $stored = Str::of($kw)->ucfirst()->toString();
-    
+
                 return PartKeyword::firstOrCreate(
                     ['keyword' => $stored],
                 )->id;
@@ -578,13 +578,13 @@ class Part extends Model implements HasMedia
             ->values();
         $this->keywords()->sync($keywordIds->all());
     }
-  
+
     public function setExternalSiteKeywords(bool $updateOfficial = false): void
     {
         $rbPart = $this->rebrickable_part;
-        if (is_null($rbPart) || 
+        if (is_null($rbPart) ||
             $rbPart->is_local ||
-            ($this->isOfficial() && !$updateOfficial) || 
+            ($this->isOfficial() && !$updateOfficial) ||
             $this->category->isInactive() ||
             ($rbPart->rb_part_category_id == 58 && $this->category == PartCategory::StickerShortcut)
         ) {
@@ -606,7 +606,7 @@ class Part extends Model implements HasMedia
             $this->keywords()->detach($idsToRemove->all());
             $this->load('keywords');
         }
-        
+
         $keywords = $this->keywords->pluck('keyword')->all();
         $kwSet = false;
 
@@ -626,11 +626,11 @@ class Part extends Model implements HasMedia
                 $kwSet = true;
             }
         }
-        
+
         if ($this->isOfficial() && $kwSet) {
             $this->has_minor_edit = true;
         }
-        
+
         $this->setKeywords($keywords);
         $this->load('keywords');
         $this->generateHeader();
@@ -639,9 +639,9 @@ class Part extends Model implements HasMedia
     public function setHistory(array|SupportCollection $history): void
     {
         $this->history()->delete();
-    
+
         $history = collect($history);
-    
+
         if ($history->first() instanceof PartHistory) {
             $history = $history->map(fn (PartHistory $h): array => [
                 'username' => $h->user->name,
@@ -650,12 +650,12 @@ class Part extends Model implements HasMedia
                 'comment'  => $h->comment,
             ]);
         }
-    
+
         $history->each(function (array $hist): void {
             $userId = $hist['username']
                 ? User::where('name', $hist['username'])->firstOrFail()->id
                 : User::where('realname', $hist['realname'])->firstOrFail()->id;
-    
+
             $this->history()->create([
                 'user_id'    => $userId,
                 'created_at' => $hist['date'],
@@ -663,18 +663,18 @@ class Part extends Model implements HasMedia
             ]);
         });
     }
-  
+
     public function setSubparts(array|Collection $subparts): void
     {
         $currentPartId   = $this->id;
         $currentFilename = $this->filename;
-    
+
         if ($subparts instanceof Collection) {
             $partIds = $subparts
                 ->pluck('id')
                 ->filter(fn ($id) => $id !== $currentPartId)
                 ->all();
-    
+
             $this->subparts()->sync($partIds);
             $this->missing_parts = [];
             $this->save();
@@ -689,11 +689,11 @@ class Part extends Model implements HasMedia
             $this->save();
             return;
         }
-    
+
         $foundParts = Part::whereIn('filename', $subparts)->get();
         $partIds = [];
         $missing = [];
-    
+
         $missingMap = [];
         foreach ($subparts as $filename) {
             $logicalName = preg_replace('#^(p/|parts/|p/textures/|parts/textures/)#', '', $filename);
@@ -708,12 +708,12 @@ class Part extends Model implements HasMedia
                     break;
                 }
             }
-    
+
             if (!$found) {
                 $missing[] = $logicalName;
             }
         }
-    
+
         $this->subparts()->sync($foundParts->pluck('id'));
         $this->missing_parts = $missing;
         $this->save();
@@ -778,7 +778,7 @@ class Part extends Model implements HasMedia
             }
         });
         $keywords .= $line !== '' ? "\n0 !KEYWORDS {$line}" : '';
-      
+
         $preview = !is_null($this->preview) && $this->preview !== '' ? "0 !PREVIEW {$this->preview}" : '';
         $cmdline = !is_null($this->cmdline) && $this->cmdline !== '' ? "0 !CMDLINE {$this->cmdline}" : '';
         $history = $this->history
@@ -803,8 +803,8 @@ class Part extends Model implements HasMedia
     public function putDeletedBackup(): void
     {
         $t = time();
-        Storage::disk('local')->put("deleted/library/{$this->filename}.{$t}", $this->get());
-        Storage::disk('local')->put('deleted/library/' . str_replace(['.png', '.dat'], '.evt', $this->filename). ".{$t}", $this->events->toJson());
+        Storage::put("deleted/library/{$this->filename}.{$t}", $this->get());
+        Storage::put('deleted/library/' . str_replace(['.png', '.dat'], '.evt', $this->filename). ".{$t}", $this->events->toJson());
     }
 
     public function statusCode(): string

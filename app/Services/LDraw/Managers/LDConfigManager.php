@@ -15,12 +15,12 @@ class LDConfigManager
     public function __construct(
         protected Rebrickable $rb
     ) {
-        
+
     }
-  
+
     public function getLDConfig(): ParsedPartCollection
     {
-        $ldconfig = Storage::disk('library')->get('official/LDConfig.ldr');
+        $ldconfig = Storage::get('library/official/LDConfig.ldr');
         return new ParsedPartCollection($ldconfig)->where('invalid', false);
     }
 
@@ -49,9 +49,9 @@ class LDConfigManager
                     'rubber' => $color['material'] == 'RUBBER',
                     'matte_metallic' => $color['material'] == 'MATTE_METALLIC',
                     'metal' => $color['material'] == 'METAL',
-                    'glitter' => Arr::get($params, 'material_type') == 'GLITTER', 
-                    'speckle' => Arr::get($params, 'material_type') == 'SPECKLE', 
-                    'fabric' => Arr::get($params, 'material_type') == 'FABRIC', 
+                    'glitter' => Arr::get($params, 'material_type') == 'GLITTER',
+                    'speckle' => Arr::get($params, 'material_type') == 'SPECKLE',
+                    'fabric' => Arr::get($params, 'material_type') == 'FABRIC',
                     'material_fabric_type' => Arr::get($params, 'fabric_type'),
                     'material_value' => Arr::get($params, 'value'),
                     'material_alpha' => Arr::get($params, 'alpha'),
@@ -79,7 +79,7 @@ class LDConfigManager
                     'category' => $avatar['category'],
                     'description' => $avatar['description'],
                     'part' => $avatar['file'],
-                    'matrix' => "{$avatar['a']} {$avatar['b']} {$avatar['c']} " . 
+                    'matrix' => "{$avatar['a']} {$avatar['b']} {$avatar['c']} " .
                                 "{$avatar['d']} {$avatar['e']} {$avatar['f']} " .
                                 "{$avatar['g']} {$avatar['h']} {$avatar['i']}"
                 ];

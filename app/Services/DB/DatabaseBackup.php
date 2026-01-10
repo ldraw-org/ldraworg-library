@@ -31,7 +31,7 @@ class DatabaseBackup
     public function backup(): void
     {
         $db = config('database.connections.mysql.database');
-        $dump_path = Storage::disk('local')->path('backup') . '/backup.sql';
+        $dump_path = Storage::path('backup') . '/backup.sql';
         $dumpcommand = "mysqldump --defaults-extra-file=\"{$this->setConfigFile()}\" --add-drop-table --single-transaction --set-gtid-purged=off --no-tablespaces {$db} > {$dump_path}";
         Process::forever()->run($dumpcommand);
     }
@@ -39,7 +39,7 @@ class DatabaseBackup
     public function restore(): void
     {
         $db = config('database.connections.mysql.database');
-        $dump_path = Storage::disk('local')->path('backup') . '/backup.sql';
+        $dump_path = Storage::path('backup') . '/backup.sql';
         $import_command = "mysql --defaults-extra-file=\"{$this->setConfigFile()}\" {$db} < {$dump_path}";
         Process::forever()->run($import_command);
     }

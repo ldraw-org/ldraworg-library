@@ -32,8 +32,8 @@ class LDView
     public function render(string|Part|OmrModel $part): GDImage
     {
         $tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
-        $ldconfigPath = Storage::disk('library')->path('official/LDConfig.ldr');
-        
+        $ldconfigPath = Storage::path('library/official/LDConfig.ldr');
+
         // LDview requires a p and parts directory
         $ldrawdir = $tempDir->path("ldraw");
         $tempDir->path("ldraw/parts");
@@ -49,7 +49,7 @@ class LDView
         $height = $part instanceof Part ? $this->settings->max_part_render_height : $this->settings->max_model_render_height;
 
         $imagepath = $tempDir->path("part.png");
-      
+
         $options = [
             'ProcessLDConfig' => '1',
             'LDConfig' => $ldconfigPath,
@@ -78,11 +78,11 @@ class LDView
             'ShowHighlightLines' => '1',
             'ConditionalHighlights' => '1',
         ];
-      
+
         $cmdOptions = collect($options)
             ->map(fn (string $value, string $command) => "-{$command}={$value}")
             ->implode(' ');
-      
+
         // Run LDView
         $ldviewcmd = "ldview {$filename} {$cmdOptions}";
         if ($this->debug) {
@@ -95,7 +95,7 @@ class LDView
             Log::debug($result->errorOutput());
             Storage::put("/debug/part.mpd", file_get_contents($filename));
         }
-      
+
         if (!file_exists($imagepath)) {
             file_put_contents($imagepath, base64_decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII="));
         } else {
@@ -104,7 +104,7 @@ class LDView
                 ->optimize($this->optimizer)
                 ->save();
         }
-      
+
         $png = imagecreatefrompng($imagepath);
         imagesavealpha($png, true);
 

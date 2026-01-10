@@ -101,9 +101,9 @@ class PartRelease extends Model implements HasMedia
 
     public function notes_url(): ?string
     {
-        if (Storage::disk('library')->exists("official/models/Note{$this->short}CA.txt")) {
+        if (Storage::exists("library/official/models/Note{$this->short}CA.txt")) {
             return asset("library/official/models/Note{$this->short}CA.txt");
-        } elseif (Storage::disk('library')->exists("official/models/note{$this->short}.txt")) {
+        } elseif (Storage::exists("library/official/models/note{$this->short}.txt")) {
             return asset("library/official/models/note{$this->short}.txt");
         }
         return null;
