@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Mybb\MybbUser;
+use App\Models\User;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -43,7 +44,11 @@ class LDrawServiceProvider extends ServiceProvider
             return (string) (new Stringable($string))->initials();
         });
         Auth::viaRequest('mybb', function (Request $request) {
-            return MybbUser::findFromCookie($request)?->library_user;
+            $user = MybbUser::findFromCookie($request)?->library_user;
+            if (is_null($user && app()->environment('local'))) {
+                return User::first();
+            }
+            return $user;
         });
     }
 }
