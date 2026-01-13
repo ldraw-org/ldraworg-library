@@ -48,7 +48,7 @@ class ZipFiles
         } else {
             $zip->open(Storage::path('library/unofficial/ldrawunf.zip'), ZipArchive::CREATE | ZipArchive::OVERWRITE);
             $zip->addFile(Storage::path('library/official/CAreadme.txt'), 'CAreadme.txt');
-            $zip->addFile(Storage::dpath('library/official/CAlicense.txt'), 'CAlicense.txt');
+            $zip->addFile(Storage::path('library/official/CAlicense.txt'), 'CAlicense.txt');
             $zip->addFile(Storage::path('library/official/CAlicense4.txt'), 'CAlicense4.txt');
             $zip->close();
             Part::unofficial()->chunk(500, function (Collection $parts) use ($zip) {
