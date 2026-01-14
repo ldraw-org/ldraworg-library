@@ -202,6 +202,7 @@ class Submit extends Component implements HasSchemas
             return;
         }
         $errors = new CheckMessageCollection();
+        $warnings = new CheckMessageCollection();
         $mimeType = $this->getMimeType($file);
         switch($mimeType) {
             case 'text/plain':
@@ -214,7 +215,7 @@ class Submit extends Component implements HasSchemas
                 $pc = app(PartChecker::class);
                 $checkmessages = $pc->run($part, $file->getClientOriginalName());
                 $errors = $errors->merge($checkmessages->filter(fn (CheckMessage $message) => $message->checkType == CheckType::Error));
-                $warnings = $errors->merge($checkmessages->filter(fn (CheckMessage $message) => $message->checkType == CheckType::Warning));
+                $warnings = $warnings->merge($checkmessages->filter(fn (CheckMessage $message) => $message->checkType == CheckType::Warning));
 
                 if ($part->type() == PartType::Primitive || $part->type()?->inPartsFolder()) {
                     $searchFolder = $part->type() == PartType::Primitive ? 'parts/' : 'p/';
