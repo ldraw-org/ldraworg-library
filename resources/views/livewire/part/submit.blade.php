@@ -31,6 +31,31 @@
         @empty
             {{-- Do nothing --}}
         @endforelse
+            @forelse($part_warnings as $part => $warnings_list)
+                <x-message icon type="warning">
+                    <x-slot:header>{{ $part }}</x-slot>
+                    <ul>
+                        @foreach($warnings_list as $warning)
+                            <li>
+                                @if (!is_null($warning->text))
+                                    <x-accordion id="partWarning{{$loop->iteration}}">
+                                        <x-slot name="header">
+                                            <div>{{$warning->message()}}</div>
+                                        </x-slot>
+                                        <div class="px-4 text-black">
+                                            Line text: {{ $warning->text }}
+                                        </div>
+                                    </x-accordion>
+                                @else
+                                    {{ $warning->message() }}
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </x-message>
+            @empty
+                {{-- Do nothing --}}
+            @endforelse
     </div>
     <form wire:submit="create">
         {{ $this->form }}
@@ -48,7 +73,7 @@
             The following files passed validation checks and have been submitted to the Parts Tracker
         </p>
         <livewire:tables.submitted-parts-table :parts="$submitted_parts" />
-{{--  
+{{--
         <table class="border border-gray-200 rounded-lg w-full">
             <thead class="border-b-2 border-b-black">
                 <tr class="*:bg-gray-200 *:font-bold *:justify-self-start *:p-2">
@@ -68,7 +93,7 @@
                             <a href="{{$p['route']}}">{{$p['description']}}</a>
                         </td>
                     </tr>
-                @endforeach 
+                @endforeach
             </tbody>
         </table>
 --}}
@@ -89,10 +114,10 @@
     @script
         <script type="text/javascript">
             $wire.on('FilePond:processfile', (e) => {
-                $wire.checkFile(e.file.filename, e.file.id);              
+                $wire.checkFile(e.file.filename, e.file.id);
             });
             $wire.on('FilePond:removefile', (e) => {
-                $wire.removeFile(e.file.filename);              
+                $wire.removeFile(e.file.filename);
             });
             $wire.on('failFile', (filename) => {
                 const files = document.querySelectorAll('.filepond--file-info-main');

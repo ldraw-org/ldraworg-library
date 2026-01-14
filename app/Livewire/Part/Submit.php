@@ -44,7 +44,10 @@ class Submit extends Component implements HasSchemas
 
     #[Locked]
     public array $part_errors = [];
-  
+
+    #[Locked]
+    public array $part_warnings = [];
+
     #[Locked]
     public array $submitted_parts = [];
 
@@ -74,7 +77,7 @@ class Submit extends Component implements HasSchemas
                             if (count($this->part_errors) >= count($this->data['partfiles'])) {
                                 $fail('There are no files without errors');
                             }
-                        },                
+                        },
                     ]),
                 Toggle::make('replace')
                     ->label('Replace existing file(s)')
@@ -161,7 +164,7 @@ class Submit extends Component implements HasSchemas
 
         return $type;
     }
-    
+
     protected function removeError(PartError $error): void
     {
         foreach ($this->part_errors as $file => &$errors) {
@@ -187,7 +190,7 @@ class Submit extends Component implements HasSchemas
             $this->checkFile($file->getClientOriginalName());
         }
     }
-  
+
     public function checkFile(string $filename): void
     {
         foreach($this->data['partfiles'] as $file) {
@@ -209,8 +212,10 @@ class Submit extends Component implements HasSchemas
                 $unofficial_exists = $pparts->unofficial()->isNotEmpty();
                 $official_exists = $pparts->official()->isNotEmpty();
                 $pc = app(PartChecker::class);
-                $errors = $errors->merge($pc->run($part, $file->getClientOriginalName()));
-                
+                $checkmessages = $pc->run($part, $file->getClientOriginalName());
+                $errors = $errors->merge($checkmessages->filter(fn (CheckMessage $message) => $message->checkType == CheckType::Error));
+                $warnings = $errors->merge($checkmessages->filter(fn (CheckMessage $message) => $message->checkType == CheckType::Warning));
+
                 if ($part->type() == PartType::Primitive || $part->type()?->inPartsFolder()) {
                     $searchFolder = $part->type() == PartType::Primitive ? 'parts/' : 'p/';
                     if ($pparts->where('filename', "{$searchFolder}{$partname}")->isNotEmpty()) {
@@ -246,8 +251,12 @@ class Submit extends Component implements HasSchemas
             $this->part_errors[$file->getClientOriginalName()] = $errors->values()->all();
             $this->dispatch('failFile', $filename);
         }
+        if ($warnings->isNotEmpty()) {
+            $this->part_warnings[$file->getClientOriginalName()] = $warnings->values()->all();
+            $this->dispatch('failFile', $filename);
+        }
     }
-  
+
     #[Layout('components.layout.tracker')]
     public function render(): View
     {
