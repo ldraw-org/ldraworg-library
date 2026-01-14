@@ -17,7 +17,7 @@ enum OtherNavItem implements Navigable
     {
         return match ($this) {
             self::UnofficialPartZip => 'Download All Unofficial Parts',
-            self::DailySubmitsZip => 'Download Last 24 of Submits',
+            self::DailySubmitsZip => 'Download Last 24 Hours of Submits',
             self::SetList => 'Sets List',
         };
     }
