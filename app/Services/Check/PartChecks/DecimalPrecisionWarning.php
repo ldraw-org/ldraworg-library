@@ -13,10 +13,16 @@ class DecimalPrecisionWarning extends BaseCheck
         $body = $this->part->bodyLines()->pluck('text')->implode("\n");
         $decimalAbove4 = preg_match('~^[1-5]\h+.*?\d*\.\d{5,}~um', $body, $matches);
         $decimalAbove5 = preg_match('~^[1-5]\h+.*?\d*\.\d{6,}~um', $body, $matches);
-        $primitiveAbove5 = $this->part->type()->isPrimitive() && $decimalAbove5;
         $partAbove4 = $this->part->type()->isNotPrimitive() && $decimalAbove4;
-        if ($primitiveAbove5 || $partAbove4) {
-            yield $this->error(CheckType::Warning, PartError::WarningDecimalPrecision);
+        if ($decimalAbove5) {
+            yield $this->error(CheckType::Error, PartError::DecimalPrecision);
+        }
+        else if ($partAbove4) {
+//            yield $this->error(CheckType::Warning, PartError::WarningDecimalPrecision);
+        }
+        $trailingZeros = preg_match('~^[1-5]\h+.*?\.\d*?0(\h|$)~um', $body, $matches);
+        if ($trailingZeros) {
+            yield $this->error(CheckType::Error, PartError::TrailingZeros);
         }
     }
 }

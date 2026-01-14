@@ -36,11 +36,25 @@ class ValidLines extends BaseCheck
                 $line['line']['line_number'] = $line['line_number'];
                 $line = $line['line'];
             }
-            try {
+            if ($line['linetype'] != 0) {
+                if (preg_match('~\d*\.\d{5,}~', $line['text'], $matches)) {
+                    $decimalCount = strlen(substr(strrchr($matches[0], "."), 1));
+                    if ($decimalCount >= 6) {
+                        yield $this->error(CheckType::Error, error: PartError::DecimalPrecision, lineNumber: $line['line_number'], text: $line['text']);
+                    } elseif ($decimalCount > 3 && $this->part->type()->isNotPrimitive() || $decimalCount > 4 && $this->part->type()->isPrimitive()) {
+                        yield $this->error(CheckType::Warning, error: PartError::WarningDecimalPrecision, lineNumber: $line['line_number'], type: $this->part->type()->value, value: $decimalCount, text: $line['text']);
+                    }
+                }
+                if (preg_match('~\.\d*?0(\h|$)~', $line['text'])) {
+                    yield $this->error(CheckType::Error, PartError::TrailingZeros, lineNumber: $line['line_number'], text: $line['text']);
+                }
+                if (preg_match('~(?<=\h|^)-?00+\.?\d*|(?<=\h|^)-?0\d+\.\d*~', $line['text'])) {
+                    yield $this->error(CheckType::Error, PartError::LeadingZeros, lineNumber: $line['line_number'], text: $line['text']);
+                }
+            }
             if (Str::doesntStartWith($line['color'], '0x') && !in_array($line['color'], $codes)) {
                 yield $this->error(CheckType::Error, error: PartError::InvalidLineColor, lineNumber: $line['line_number'], text: $line['text']);
             }
-        } catch (\Exception $e) { dd($line); }
             switch ($line['linetype']) {
                 case '1':
                     if ($line['color'] == '24') {

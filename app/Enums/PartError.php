@@ -60,6 +60,10 @@ enum PartError: string implements HasLabel
 
     case NoSetKeywordForPattern = 'keywords.patternset';
 
+    case DecimalPrecision = 'numbers.decimalprecision';
+    case TrailingZeros = 'numbers.trailingzeros';
+    case LeadingZeros = 'numbers.leadingzeros';
+
     case HistoryInvalid = 'history.invalid';
     case HistoryAuthorNotRegistered = 'history.authorregistered';
 
