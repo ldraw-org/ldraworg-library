@@ -22,7 +22,7 @@ class ValidLines extends BaseCheck
 
     public function check(): iterable
     {
-        
+
         foreach($this->part->invalidLines() as $line) {
              yield $this->error(CheckType::Error, error: PartError::LineInvalid, lineNumber: $line['line_number'], text: $line['text']);
         }
@@ -48,7 +48,7 @@ class ValidLines extends BaseCheck
                 if (preg_match('~\.\d*?0(\h|$)~', $line['text'])) {
                     yield $this->error(CheckType::Error, PartError::TrailingZeros, lineNumber: $line['line_number'], text: $line['text']);
                 }
-                if (preg_match('~(?<=\h|^)-?00+\.?\d*|(?<=\h|^)-?0\d+\.\d*~', $line['text'])) {
+                if (preg_match('~(?<=\h|^)-?0\d+\.?\d*(?=\h)~', $line['text'])) {
                     yield $this->error(CheckType::Error, PartError::LeadingZeros, lineNumber: $line['line_number'], text: $line['text']);
                 }
             }
@@ -157,6 +157,6 @@ class ValidLines extends BaseCheck
                     }
                     break;
             }
-        }  
+        }
     }
 }
