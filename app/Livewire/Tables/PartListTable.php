@@ -169,10 +169,17 @@ class PartListTable extends BasicTable
                         ->operators([
                             IsOperator::make('error')
                                 ->query(function (Builder $query, bool $isInverse, IsOperator $operator) {
-                                    $values = $operator->getSettings()['values'];
+                                    $values = $operator->getSettings()['values'] ?? [];
+
                                     $query->where(function (Builder $query_inner) use ($values, $isInverse) {
                                         foreach ($values as $value) {
-                                            $query_inner->{$isInverse ? 'orDoesntHaveMessage' : 'orHasMessage'}($value);
+                                            // If isInverse is true, we want parts that don't have ANY of these (AND)
+                                            // If false, we want parts that have AT LEAST one of these (OR)
+                                            if ($isInverse) {
+                                                $query_inner->doesntHaveMessage($value);
+                                            } else {
+                                                $query_inner->orHasMessage($value);
+                                            }
                                         }
                                     });
                                 })

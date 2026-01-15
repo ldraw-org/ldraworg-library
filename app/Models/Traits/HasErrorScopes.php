@@ -64,19 +64,14 @@ trait HasErrorScopes
     ): void {
         $value = $error instanceof PartError ? $error->value : $error;
 
-        $query->where(function (Builder $q) use ($value, $useOr, $negate) {
-            foreach (CheckType::cases() as $type) {
-                $method = match (true) {
-                    $useOr && $negate => 'orWhereJsonDoesntContain',
-                    $useOr => 'orWhereJsonContains',
-                    $negate => 'whereJsonDoesntContain',
-                    default => 'whereJsonContains',
-                };
+        // Use the appropriate Laravel JSON method directly
+        $method = match (true) {
+            $useOr && $negate => 'orWhereJsonDoesntContain',
+            $useOr => 'orWhereJsonContains',
+            $negate => 'whereJsonDoesntContain',
+            default => 'whereJsonContains',
+        };
 
-                $q->{$method}('check_messages', [
-                    'error' => $value,
-                ]);
-            }
-        });
+        $query->{$method}('check_messages', ['error' => $value]);
     }
 }
