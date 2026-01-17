@@ -286,7 +286,7 @@ class Part extends Model implements HasMedia
             [$normalized]
         );
     }
-  
+
     #[Scope]
     protected function partsFolderOnly(Builder $query): void
     {
@@ -752,9 +752,9 @@ class Part extends Model implements HasMedia
         $keywords = $this->keywords->pluck('keyword')->map(fn($k) => $this->prepareNumericText($k))->implode(' | ');
         $hist = $this->history->pluck('comment')->map(fn($c) => $this->prepareNumericText($c))->implode(' | ');
         $help = collect($this->help ?? [])->map(fn($h) => $this->prepareNumericText($h))->implode(' | ');
-      
+
         $search_text = [
-            $baseName, 
+            $baseName,
             $baseName,
             $filename,
             $description,
@@ -762,22 +762,22 @@ class Part extends Model implements HasMedia
             $hist,
             $help
         ];
-      
+
         $finalString = implode(" | ", array_filter($search_text));
         $this->search_text = str_replace(['"', "'"], '', $finalString);
-        $this->save();
+        $this->saveQuietly();
     }
 
     private function prepareNumericText(?string $text): string
     {
         if (!$text) return '';
-    
+
         $text = preg_replace('/(\d+)\s*x\s*(\d+)/i', '$1x$2', $text);
         $text = preg_replace('/(\d+)\.(\d+)/', '$1.$2 $1p$2', $text);
-    
+
         return Str::squish($text);
     }
-  
+
     public function generateHeader(bool $save = true): void
     {
         $this->load('user', 'history', 'keywords', 'release');
@@ -838,7 +838,7 @@ class Part extends Model implements HasMedia
 
         $this->header = trim(preg_replace('#\n{3,}#us', "\n\n", $header));
         if ($save) {
-            $this->saveQuietly();
+            $this->setSearchText();
         }
         if (config('ldraw.library_debug')) {
             Log::debug("Generated header for {$this->id} ({$this->filename})\n{$this->header}");
