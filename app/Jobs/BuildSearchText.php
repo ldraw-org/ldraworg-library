@@ -10,6 +10,8 @@ class BuildSearchText implements ShouldQueue
 {
     use Queueable;
 
+    public $timeout = 1800;
+  
     public function handle(): void
     {
         Part::with(['history', 'keywords'])->cursor()->each(fn (Part $p) => $p->setSearchText());
