@@ -9,7 +9,7 @@
         </x-slot>
 
         <div class="h-[60vh] flex flex-col gap-4">
-            <form action="{{ route('parts.list') }}" method="get">
+            <form wire:submit="submitToTable">
                 <x-filament::input.wrapper>
                     <x-filament::input 
                         id="tableSearch" 

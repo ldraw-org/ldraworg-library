@@ -46,9 +46,17 @@ class PartListTable extends BasicTable
     /**
      * @var ?string
      */
-    #[Url]
     public $tableSearch = '';
 
+    public function mount()
+    {
+        // Try getting it directly from the Request
+        // If this has quotes but $this->search doesn't, 
+        // then the #[Url] attribute logic is the culprit.
+        //parent::mount();
+        $this->tableSearch = request()->query('tableSearch', '');
+    }
+  
     public function table(Table $table): Table
     {
         return $table
@@ -72,7 +80,7 @@ class PartListTable extends BasicTable
     protected function applySearchToTableQuery(Builder $query): Builder
     {
         if (filled($search = $this->getTableSearch())) {
-            $query->searchHeader($search);
+            $query->searchFull($search);
         }
 
         return $query;

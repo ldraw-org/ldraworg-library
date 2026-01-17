@@ -40,7 +40,7 @@ class MenuItem extends Component
     private function getPartsSearch(Builder $query, int $limit): array
     {
         return $query->select(['id', 'filename', 'description'])
-            ->searchHeader($this->tableSearch)
+            ->searchFull($this->tableSearch)
             ->orderBy('filename')
             ->take($limit)
             ->get()
@@ -77,6 +77,11 @@ class MenuItem extends Component
             ])->toArray();
     }
 
+    public function submitToTable()
+    {
+        return  redirect()->route('parts.list', ['tableSearch' => $this->tableSearch]);
+    }
+    
     public function render()
     {
         return view('livewire.search.menu-item');
