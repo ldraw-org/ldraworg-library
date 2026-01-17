@@ -7,13 +7,16 @@ xdebug_enabled: false
 additional_hostnames: []
 additional_fqdns: []
 database:
-    type: mariadb
-    version: "10.11"
+    type: mysql
+    version: "8.4"
+webimage_extra_packages: [optipng, imagemagick, jpegoptim, pngquant, gifsicle, libavif-bin, php8.5-imap, php8.5-imagick, php8.5-sqlite3]
 use_dns_when_possible: true
 composer_version: "2"
 web_environment: []
 corepack_enable: false
-webimage_extra_packages: [optipng, imagemagick, jpegoptim, pngquant, gifsicle, libavif-bin, php8.5-imap, php8.5-imagick, php8.5-sqlite3]
+xhgui_https_port: "8142"
+xhgui_http_port: "8143"
+
 # Key features of DDEV's config.yaml:
 
 # name: <projectname> # Name of the project, automatically provides

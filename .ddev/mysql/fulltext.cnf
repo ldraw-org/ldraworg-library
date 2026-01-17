@@ -1,0 +1,3 @@
+[mysqld]
+ngram_token_size=2
+innodb_ft_enable_stopword=OFF
