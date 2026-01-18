@@ -13,7 +13,7 @@ use Livewire\Component;
 class MenuItem extends Component
 {
     public ?string $tableSearch = '';
-
+  
     #[On('doSearch')]
     public function performSearch(): void
     {

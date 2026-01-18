@@ -23,7 +23,7 @@ class SearchNormalizer
 
         $tokens = [];
         $pattern = '/
-            ("[^"]+"|\S+)   # match quoted phrases OR non-space sequences
+            (\([^(]+\)|"[^"]+"|\S+)   # match quoted phrases OR non-space sequences
         /x';
 
         preg_match_all($pattern, $input, $matches);
