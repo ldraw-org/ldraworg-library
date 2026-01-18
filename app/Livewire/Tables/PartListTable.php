@@ -47,13 +47,9 @@ class PartListTable extends BasicTable
      * @var ?string
      */
     public $tableSearch = '';
-
+  
     public function mount()
     {
-        // Try getting it directly from the Request
-        // If this has quotes but $this->search doesn't, 
-        // then the #[Url] attribute logic is the culprit.
-        //parent::mount();
         $this->tableSearch = request()->query('tableSearch', '');
     }
   
@@ -74,16 +70,8 @@ class PartListTable extends BasicTable
                     ->slideOver()
             )
             ->filtersFormWidth(Width::FourExtraLarge)
+            ->searchUsing(fn (Builder $query, string $search) => $query->searchFull($search))
             ->recordUrl(fn (Part $p) => route('parts.show', ['part' => $p]));
-    }
-
-    protected function applySearchToTableQuery(Builder $query): Builder
-    {
-        if (filled($search = $this->getTableSearch())) {
-            $query->searchFull($search);
-        }
-
-        return $query;
     }
 
     protected function filters(): array
