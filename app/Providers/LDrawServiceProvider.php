@@ -44,10 +44,11 @@ class LDrawServiceProvider extends ServiceProvider
             return (string) (new Stringable($string))->initials();
         });
         Auth::viaRequest('mybb', function (Request $request) {
-            $user = MybbUser::findFromCookie($request)?->library_user;
-            if (is_null($user && app()->environment('local'))) {
-                return User::first();
+            if(app()->environment('local'))
+            {
+                return null;
             }
+            $user = MybbUser::findFromCookie($request)?->library_user;
             return $user;
         });
     }

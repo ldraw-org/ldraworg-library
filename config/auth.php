@@ -37,6 +37,10 @@ return [
 
     'guards' => [
         'web' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'mybb-cookie' => [
             'driver' => 'mybb',
             'provider' => 'users',
         ],
