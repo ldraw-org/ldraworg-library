@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('part_messages', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->ForeignFor(Part::class);
+            $table->foreignIdFor(Part::class);
             $table->string('check');
             $table->string('check_type');
             $table->integer('line_number');
