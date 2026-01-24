@@ -745,8 +745,9 @@ class Part extends Model implements HasMedia
 
     public function setSearchText(): void
     {
-        $filename = basename($this->filename);
-        $baseName = basename($this->filename, '.dat');
+        $file = str_replace('-', 'd', $this->filename);
+        $filename = basename($file);
+        $baseName = basename($file, '.dat');
         $description = $this->prepareNumericText($this->description);
 
         $keywords = $this->keywords->pluck('keyword')->map(fn($k) => $this->prepareNumericText($k))->implode(' | ');

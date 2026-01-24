@@ -67,6 +67,8 @@ class SearchNormalizer
 
         $token = trim($token);
 
+        $token = preg_replace('/(?<!^)-/', 'd', $token);
+
         // Example: collapse multiple spaces
         $token = preg_replace('/\s+/', ' ', $token);
 
