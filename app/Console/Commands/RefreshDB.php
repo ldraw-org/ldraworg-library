@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\DB\DatabaseBackup;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
@@ -25,25 +26,10 @@ class RefreshDB extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(DatabaseBackup $databaseBackup): void
     {
         if (app()->environment('local')) {
-            $this->info('Copying production db backup');
-            $db = config('database.connections.mysql.database');
-            $prod_db = config('database.connections.mysql.prod_db');
-            $db_port = config('database.connections.mysql.port');
-            $db_host = config('database.connections.mysql.host');
-            $db_user = config('database.connections.mysql.username');
-            $db_pw = config('database.connections.mysql.password');
-            $tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
-            $file = "[client]\nhost={$db_host}\nuser={$db_user}\npassword={$db_pw}\nport={$db_port}";
-            $path = $tempDir->path(".my.cnf");
-            file_put_contents($path, $file);
-            $dumpcommand = "mysqldump --defaults-extra-file=\"{$path}\" --add-drop-table --single-transaction --set-gtid-purged=off --no-tablespaces {$prod_db}";
-            $import_command = "mysql --defaults-extra-file=\"{$path}\" {$db}";
-            $result = Process::forever()->run("{$dumpcommand} | {$import_command}");
-            $this->info($result->output());
-            $this->info($result->errorOutput());
+            $databaseBackup->restore();
             $this->call('migrate');
         } else {
             $this->info('This command cannot be run the the production environment');
