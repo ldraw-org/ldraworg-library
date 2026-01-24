@@ -37,11 +37,7 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-        'mybb-cookie' => [
-            'driver' => 'mybb',
+            'driver' => env('AUTH_DRIVER', 'web'),
             'provider' => 'users',
         ],
     ],
