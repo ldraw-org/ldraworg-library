@@ -2,9 +2,12 @@ ARG BASE_IMAGE
 # Use the DDEV web image as the base
 FROM $BASE_IMAGE
 
-RUN apt install -y libosmesa6-dev libglu1-mesa  libpng-dev libjpeg-dev libminizip-dev
+# 1. Install build tools and dev libraries
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libosmesa6 libglu1-mesa libminizip1 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ADD https://github.com/ldraw-org/ldview/releases/download/v4.6/ldview-linux-x86_64-osmesa-ldraw_library-4.6.tar.gz /tmp/
-RUN tar -xzf /tmp/ldview-linux-x86_64-osmesa-ldraw_library-4.6.tar.gz -C /tmp \
-    && install -D -m 755 /tmp/OSMesa/ldview /usr/bin/ldview \
-    && rm /tmp/ldview-linux-x86_64-osmesa-ldraw_library-4.6.tar.gz
+ADD https://github.com/ldraw-org/ldview/releases/download/v4.6/ldview-linux-debian-x86_64-osmesa-ldraw_library-4.6.tar.gz /tmp/
+RUN tar -xzf /tmp/ldview-linux-debian-x86_64-osmesa-ldraw_library-4.6.tar.gz -C /tmp \
+    && install -D -m 755 /tmp/ldview /usr/bin/ldview \
+    && rm /tmp/ldview-linux-debian-x86_64-osmesa-ldraw_library-4.6.tar.gz
