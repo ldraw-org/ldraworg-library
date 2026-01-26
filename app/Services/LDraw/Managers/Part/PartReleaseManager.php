@@ -308,7 +308,7 @@ class PartReleaseManager
         ];
         $opart->fill($values);
         $opart->setSubparts($upart->subparts);
-        $opart->setKeywords($upart->keywords);
+        $opart->setKeywords($upart->keywords->pluck('keyword')->values()->all());
         $opart->setHistory($upart->history);
         $opart->setBody($upart->body);
         $opart->save();

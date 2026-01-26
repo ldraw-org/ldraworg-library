@@ -27,7 +27,6 @@
         "markrogoyski/math-php": "^2.11",
         "panphp/pan": "^0.1.8",
         "postare/blade-mdi": "^1.1",
-        "saade/filament-adjacency-list": "^4.0",
         "sentry/sentry-laravel": "^4.18",
         "spatie/image": "^3.8.0",
         "spatie/laravel-backup": "^9.2.7",
@@ -41,7 +40,7 @@
         "symfony/mailgun-mailer": "^8.0"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.15.2",
+        "barryvdh/laravel-debugbar": "^4.0",
         "barryvdh/laravel-ide-helper": ">=3.5.5",
         "fakerphp/faker": "^1.24.1",
         "larastan/larastan": "^3.1",
