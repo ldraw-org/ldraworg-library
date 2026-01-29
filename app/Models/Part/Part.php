@@ -280,7 +280,7 @@ class Part extends Model implements HasMedia
     #[Scope]
     protected function searchFull(Builder $query, string $search): void
     {
-        $normalized = \App\Services\SearchNormalizer::booleanMode($search);
+        $normalized = \App\Services\SearchNormalizer::booleanMode(Str::limit($search, 100, '', preserveWords: true));
         $query->whereRaw(
             "MATCH(search_text) AGAINST (? IN BOOLEAN MODE)",
             [$normalized]
