@@ -59,10 +59,10 @@ class ZipFiles
         }
     }
 
-    public function releaseZips(PartRelease $release, array $extraFiles, string $notes, bool $includeLDConfig, TemporaryDirectory $tempDir): void
+    public function releaseZips(PartRelease $release, array $extraFiles, string $notes, bool $includeLDConfig, string $path): void
     {
-        $updateZipName = $tempDir->path("lcad{$release->short}.zip");
-        $completeZipName = $tempDir->path("complete.zip");
+        $updateZipName = "{$path}/lcad{$release->short}.zip");
+        $completeZipName = "{$path}/complete.zip");
 
         $updateZip = new ZipArchive();
         $updateZip->open($updateZipName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
@@ -72,9 +72,9 @@ class ZipFiles
 
         foreach (Storage::allFiles('library/official') as $file) {
             $filename = str_replace('official/', 'ldraw/', $file);
-            $completeZip->addFromString($filename, Storage::get("library/{$file}"));
-            if (($file == 'official/LDConfig.ldr' || $file == 'official/LDCfgalt.ldr') && $includeLDConfig) {
-                $updateZip->addFromString($filename, Storage::get("library/{$file}"));
+            $completeZip->addFromString($filename, Storage::get("library/oficial/{$file}"));
+            if (($file == 'library/official/LDConfig.ldr' || $file == 'library/official/LDCfgalt.ldr') && $includeLDConfig) {
+                $updateZip->addFromString($filename, Storage::get("library/official/{$file}"));
             };
         }
 

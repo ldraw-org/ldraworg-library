@@ -24,20 +24,21 @@ class PartReleaseManager
 {
     protected PartRelease $release;
     protected PartManager $manager;
-    protected TemporaryDirectory $tempDir;
     protected LibrarySettings $settings;
     protected ZipFiles $zipfiles;
-
+    protected string $stagingFolder = "release-staging";
+    protected Collection $parts;
+  
     public function __construct(
-        protected Collection $parts,
+        protected array $partIds,
         protected User $user,
         protected bool $includeLdconfig = false,
         protected array $extraFiles = []
     ) {
         $this->manager = app(PartManager::class);
-        $this->tempDir = TemporaryDirectory::make()->deleteWhenDestroyed();
         $this->settings = app(LibrarySettings::class);
         $this->zipfiles = app(ZipFiles::class);
+        $this->parts = Part::whereIn('id', $partIds)->get();
     }
 
     public function createNextRelease(): PartRelease
@@ -100,7 +101,7 @@ class PartReleaseManager
         ]);
         // Make notes
         $notes = $this->makeNotes($part_data);
-        $notesFile = $this->tempDir->path("Note{$this->release->short}CA.txt");
+        $notesFile = Storage::put("{$this->stagingFolder}/Note{$this->release->short}CA.txt");
         file_put_contents($notesFile, $notes);
         $this->release->save();
     }
@@ -253,7 +254,8 @@ class PartReleaseManager
             'comment' => "Official Update {$this->release->name}"
         ]);
 
-        $imagePath = $this->tempDir->path(substr($part->filename, 0, -4) . '.png');
+        $imagePath = "{$this->stagingFolder}/view/" . substr($part->filename, 0, -4) . '.png';
+        Storage::put($imagePath);
         file_put_contents($imagePath, file_get_contents($part->getFirstMediaPath('image')));
 
         PartEvent::unofficial()->where('part_id', $part->id)->update(['part_release_id' => $this->release->id]);
@@ -276,7 +278,7 @@ class PartReleaseManager
             $part->save();
             if ($part->type->inPartsFolder()) {
                 $this->release
-                    ->addMedia($imagePath, 'image')
+                    ->addMedia(Storage::path($imagePath), 'image')
                     ->withCustomProperties([
                         'description' => $part->description,
                         'filename' => $part->filename,
@@ -324,18 +326,17 @@ class PartReleaseManager
         $previousRelease = PartRelease::where('id', '<>', $this->release->id)->latest()->first();
 
         // Archive the previous complete zip and exe
-        Storage::move('library/updates/complete.zip', "updates/complete-{$previousRelease->short}.zip");
-        Storage::move('library/updates/LDrawParts.exe', "updates/LDraw{$previousRelease->short}.exe");
+        Storage::move('library/updates/complete.zip', "library/updates/complete-{$previousRelease->short}.zip");
+        Storage::move('library/updates/LDrawParts.exe', "library/updates/LDraw{$previousRelease->short}.exe");
 
         // Make and copy the new archives to the library
         Log::debug('Making Zips');
-        $this->zipfiles->releaseZips($this->release, $this->extraFiles, file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt")), $this->includeLdconfig, $this->tempDir);
-        Storage::put("library/updates/lcad{$this->release->short}.zip", file_get_contents($this->tempDir->path("lcad{$this->release->short}.zip")));
-        Storage::put("library/updates/complete.zip", file_get_contents($this->tempDir->path("complete.zip")));
+        $this->zipfiles->releaseZips($this->release, $this->extraFiles, Storage::path("{$this->stagingFolder}/Note{$this->release->short}CA.txt")), $this->includeLdconfig, Storage::path($this->stagingFolder));
+        Storage::move("{$this->stagingFolder}/lcad{$this->release->short}.zip", "library/updates/lcad{$this->release->short}.zip");
+        Storage::move("{$this->stagingFolder}/complete.zip", "library/updates/complete.zip");
 
         //Copy release notes
-        $notes = file_get_contents($this->tempDir->path("Note{$this->release->short}CA.txt"));
-        Storage::put("library/official/models/Note{$this->release->short}CA.txt", $notes);
+        Storage::move("{$this->stagingFolder}/Note{$this->release->short}CA.txt", "library/official/models/Note{$this->release->short}CA.txt");
 
         // Copy the new non-Part files to the library
         foreach ($this->extraFiles as $filename => $contents) {
