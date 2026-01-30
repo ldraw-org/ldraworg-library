@@ -113,7 +113,7 @@ class SupportFiles
     protected static function ptReleaseEntry(string $type, string $format, string $name, string $date, string $file, string $output = "xml"): string
     {
         if (Storage::exists("library/{$file}")) {
-            $url = Storage::url("library/{$file}");
+            $url = Storage::disk('library')->url("{$file}");
             $size = Storage::size("library/{$file}");
             $checksum = Storage::checksum("library/{$file}");
             if ($output === 'tab') {
