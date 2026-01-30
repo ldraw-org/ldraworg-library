@@ -61,8 +61,8 @@ class ZipFiles
 
     public function releaseZips(PartRelease $release, array $extraFiles, string $notes, bool $includeLDConfig, string $path): void
     {
-        $updateZipName = "{$path}/lcad{$release->short}.zip");
-        $completeZipName = "{$path}/complete.zip");
+        $updateZipName = "{$path}/lcad{$release->short}.zip";
+        $completeZipName = "{$path}/complete.zip";
 
         $updateZip = new ZipArchive();
         $updateZip->open($updateZipName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
