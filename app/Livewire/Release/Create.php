@@ -121,8 +121,7 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                 $addFiles[$afile->getClientOriginalName()] = $afile->get();
             }
         }
-        $parts = Part::unofficial()->where('marked_for_release', true)->get();
-        MakePartRelease::dispatch($parts, Auth::user(), $data['include-ldconfig'] ?? false, $addFiles);
+        MakePartRelease::dispatch(Auth::user(), $data['include-ldconfig'] ?? false, $addFiles);
         $this->redirectRoute('tracker.activity');
     }
     #[Layout('components.layout.tracker')]

@@ -38,7 +38,7 @@ class PartReleaseManager
         $this->manager = app(PartManager::class);
         $this->settings = app(LibrarySettings::class);
         $this->zipfiles = app(ZipFiles::class);
-        $this->parts = Part::whereIn('id', $partIds)->get();
+        $this->parts = Part::where('marked_for_release', true)->get();
     }
 
     public function createNextRelease(): PartRelease

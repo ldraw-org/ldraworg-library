@@ -30,7 +30,6 @@ class MakePartRelease implements ShouldQueue, ShouldBeUnique
      * @return void
      */
     public function __construct(
-        public Collection $parts,
         public User $user,
         public bool $includeLdconfig = false,
         public array $extraFiles = []
@@ -44,7 +43,7 @@ class MakePartRelease implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        $updater = new PartReleaseManager($this->parts, $this->user, $this->includeLdconfig, $this->extraFiles);
+        $updater = new PartReleaseManager($this->user, $this->includeLdconfig, $this->extraFiles);
         $updater->createRelease();
     }
 }
