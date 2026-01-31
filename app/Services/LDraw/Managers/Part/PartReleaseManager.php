@@ -8,7 +8,10 @@ use App\Enums\PartType;
 use App\Events\PartReleased;
 use App\Jobs\CheckPart;
 use App\Jobs\UpdateImage;
+use App\Models\Vote;
 use App\Services\LDraw\ZipFiles;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\Part\PartRelease;
@@ -18,7 +21,6 @@ use App\Models\Part\PartHistory;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Facades\Log;
-use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class PartReleaseManager
 {
@@ -27,10 +29,8 @@ class PartReleaseManager
     protected LibrarySettings $settings;
     protected ZipFiles $zipfiles;
     protected string $stagingFolder = "release-staging";
-    protected Collection $parts;
-  
+
     public function __construct(
-        protected array $partIds,
         protected User $user,
         protected bool $includeLdconfig = false,
         protected array $extraFiles = []
@@ -38,29 +38,7 @@ class PartReleaseManager
         $this->manager = app(PartManager::class);
         $this->settings = app(LibrarySettings::class);
         $this->zipfiles = app(ZipFiles::class);
-        $this->parts = Part::where('marked_for_release', true)->get();
     }
-
-    public function createNextRelease(): PartRelease
-    {
-        $current = PartRelease::latest()->first();
-        $now = now();
-        if ($now->format('Y') !== $current->created_at->format('Y')) {
-            $update = '01';
-        } else {
-            $num = (int) substr($current->name, -2) + 1;
-            if ((int) $num <= 9) {
-                $update = "0{$num}";
-            } else {
-                $update = $num;
-            }
-        }
-        return PartRelease::create([
-            'name' => $now->format('Y')."-{$update}",
-            'short' => $now->format('y')."{$update}",
-        ]);
-    }
-
 
     public function createRelease(): void
     {
@@ -101,8 +79,7 @@ class PartReleaseManager
         ]);
         // Make notes
         $notes = $this->makeNotes($part_data);
-        $notesFile = Storage::put("{$this->stagingFolder}/Note{$this->release->short}CA.txt");
-        file_put_contents($notesFile, $notes);
+        Storage::put("{$this->stagingFolder}/Note{$this->release->short}CA.txt", $notes);
         $this->release->save();
     }
 
@@ -128,12 +105,12 @@ class PartReleaseManager
     protected function getReleaseData(): array
     {
         $data = [];
-        $data['total'] = $this->parts->count();
-        $data['new'] = $this->parts->whereNull('official_part')->count();
+        $data['total'] =  Part::where('marked_for_release', true)->count();
+        $data['new'] =  Part::where('marked_for_release', true)->doesntHave('official_part')->count();
         $data['new_of_type'] = [];
         foreach (PartType::cases() as $type) {
-            $count = $this->parts
-                ->whereNull('official_part')
+            $count =  Part::where('marked_for_release', true)
+                ->doesntHave('official_part')
                 ->where('type', $type)
                 ->count();
             $data['new_of_type'][$type->value] = $count;
@@ -142,16 +119,17 @@ class PartReleaseManager
             $data['new_of_type'][PartType::Part->value] + $data['new_of_type'][PartType::Shortcut->value];
         unset($data['new_of_type'][PartType::Shortcut->value]);
         $data['moved_parts'] = [];
-        $moved = $this->parts->where('category', PartCategory::Moved);
+        $moved =  Part::where('marked_for_release', true)->where('category', PartCategory::Moved)->get();
         foreach ($moved as $part) {
             /** @var Part $part */
             $data['moved_parts'][] = ['name' => $part->meta_name,  'movedto' => $part->description];
         }
         $data['fixes'] = [];
         $data['rename'] = [];
-        $notMoved = $this->parts
-            ->whereNotNull('official_part')
-            ->where('category', '!=', PartCategory::Moved);
+        $notMoved =  Part::where('marked_for_release', true)
+            ->has('official_part')
+            ->where('category', '!=', PartCategory::Moved)
+            ->get();
         foreach ($notMoved as $part) {
             /** @var Part $part */
             if ($part->description != $part->official_part->description) {
@@ -214,7 +192,8 @@ class PartReleaseManager
     protected function releaseParts(): void
     {
         // Release marked parts
-        $this->parts
+        Part::where('marked_for_release', true)
+            ->lazy()
             ->each(fn (Part $part) => $this->releasePart($part));
 
         // Release minor edits
@@ -254,9 +233,13 @@ class PartReleaseManager
             'comment' => "Official Update {$this->release->name}"
         ]);
 
-        $imagePath = "{$this->stagingFolder}/view/" . substr($part->filename, 0, -4) . '.png';
-        Storage::put($imagePath);
-        file_put_contents($imagePath, file_get_contents($part->getFirstMediaPath('image')));
+        $viewImagePath = "{$this->stagingFolder}/view/" . substr($part->filename, 0, -4) . '.png';
+        $partImagePath = $part->getFirstMediaPath('image');
+        if (!file_exists($partImagePath)) {
+            $partImagePath = asset('images/blank.png');
+        }
+        $partImage = file_get_contents($partImagePath);
+        Storage::put($viewImagePath, $partImage);
 
         PartEvent::unofficial()->where('part_id', $part->id)->update(['part_release_id' => $this->release->id]);
 
@@ -278,7 +261,7 @@ class PartReleaseManager
             $part->save();
             if ($part->type->inPartsFolder()) {
                 $this->release
-                    ->addMedia(Storage::path($imagePath), 'image')
+                    ->addMedia(Storage::path($viewImagePath), 'image')
                     ->withCustomProperties([
                         'description' => $part->description,
                         'filename' => $part->filename,
@@ -331,7 +314,13 @@ class PartReleaseManager
 
         // Make and copy the new archives to the library
         Log::debug('Making Zips');
-        $this->zipfiles->releaseZips($this->release, $this->extraFiles, Storage::path("{$this->stagingFolder}/Note{$this->release->short}CA.txt")), $this->includeLdconfig, Storage::path($this->stagingFolder));
+        $this->zipfiles->releaseZips(
+            $this->release,
+            $this->extraFiles,
+            Storage::path("{$this->stagingFolder}/Note{$this->release->short}CA.txt"),
+            $this->includeLdconfig,
+            Storage::path($this->stagingFolder)
+        );
         Storage::move("{$this->stagingFolder}/lcad{$this->release->short}.zip", "library/updates/lcad{$this->release->short}.zip");
         Storage::move("{$this->stagingFolder}/complete.zip", "library/updates/complete.zip");
 
@@ -358,10 +347,16 @@ class PartReleaseManager
             'manual_hold_flag' => 0,
             'marked_for_release' => false
         ]);
-        Part::official()->each(function (Part $p) {
-            $p->votes()->delete();
-            $p->notification_users()->sync([]);
-        });
+        $officialIds = Part::official()->pluck('id');
+
+        // 1 Query instead of 10,000
+        Vote::whereIn('part_id', $officialIds)->delete();
+
+        // 1 Query to clear the pivot table
+        DB::table('part_notification_user')
+            ->whereIn('part_id', $officialIds)
+            ->delete();
+
         Part::unofficial()->where('part_status', PartStatus::Certified)->where('can_release', true)->update([
             'marked_for_release' => true
         ]);
@@ -374,18 +369,20 @@ class PartReleaseManager
         $this->zipfiles->unofficialZip(Part::unofficial()->first());
 
         //Recheck and regenerate affected parts
-        $affectedParts = new Collection();
-        $this->release
-            ->load('parts')
-            ->parts
-            ->load('ancestorsAndSelf')
-            ->each(function (Part $p) use (&$affectedParts) {
-                $affectedParts = $affectedParts->concat($p->ancestorsAndSelf->unique())->unique();
-            });
-        $affectedParts->each(function (Part $p) {
-            UpdateImage::dispatch($p);
-            $this->manager->loadSubparts($p);
+        $affectedIds = [];
+        $this->release->parts()->with('ancestorsAndSelf')->each(function (Part $p) use (&$affectedIds) {
+            $affectedIds = array_merge($affectedIds, $p->ancestorsAndSelf->pluck('id')->toArray());
         });
-        CheckPart::dispatch($affectedParts);
+        $affectedIds = array_unique($affectedIds);
+
+        // Dispatch jobs in small batches
+        Part::whereIn('id', $affectedIds)->chunk(500, function($parts) {
+            $parts->each(function (Part $p) {
+                UpdateImage::dispatch($p);
+                CheckPart::dispatch($p);
+                $this->manager->loadSubparts($p);
+            });
+        });
+
     }
 }
