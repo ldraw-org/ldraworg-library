@@ -4,8 +4,6 @@ namespace App\Console\Commands;
 
 use App\Services\DB\DatabaseBackup;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Process;
-use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class RefreshDB extends Command
 {
