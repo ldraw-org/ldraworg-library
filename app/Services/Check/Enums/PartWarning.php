@@ -2,7 +2,7 @@
 
 namespace App\Services\Check\Enums;
 
-enum PartError: string
+enum PartWarning: string
 {
     case WarningMinifigCategory = 'warning.minifigcategory';
     case WarningNotCoplanar = 'warning.notcoplaner';
