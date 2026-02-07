@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace App\Services\Check\Enums;
 
 enum CheckType: string
 {

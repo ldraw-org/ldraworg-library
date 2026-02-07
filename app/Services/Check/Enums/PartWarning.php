@@ -25,6 +25,6 @@ enum PartError: string
             self::WarningLicense => App\Services\Check\PartChecks\LibraryLicenseWarning::class,
             self::WarningDescriptionNumberSpaces => App\Services\Check\PartChecks\DescriptionNumberWarning::class,
             self::WarningDecimalPrecision => App\Services\Check\PartChecks\ValidLines::class,
-        }
+        };
     }
 }

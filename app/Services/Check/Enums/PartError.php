@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace App\Services\Check\Enums;
 
 use App\Enums\Traits\CanBeOption;
 use Filament\Support\Contracts\HasLabel;
@@ -14,7 +14,7 @@ enum PartError: string implements HasLabel
 
     case ReplaceNotSelected = 'replace';
     case FixNotSelected = 'fix.checked';
-    
+
     case MissingHeaderMeta = 'missing';
     case AuthorInvalid = 'authorinvalid';
 
