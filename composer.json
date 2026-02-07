@@ -10,20 +10,20 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.4.0",
+        "php": "^8.5.0",
         "blade-ui-kit/blade-icons": "^1.8",
         "fico7489/laravel-pivot": "^3.0",
-        "filament/filament": "^4.0",
-        "filament/spatie-laravel-media-library-plugin": "^4.0",
+        "filament/filament": "^5.0",
+        "filament/spatie-laravel-media-library-plugin": "^5.0",
         "http-interop/http-factory-guzzle": ">=1.2",
         "icehouse-ventures/laravel-chartjs": "^4.2",
-        "lara-zeus/quantity": "^2.0",
+        "lara-zeus/quantity": "^3.0",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.43",
         "laravel/pulse": "^1.4",
         "laravel/tinker": "^2.10.1",
         "league/flysystem-aws-s3-v3": "^3.0",
-        "livewire/livewire": "^3.6.0",
+        "livewire/livewire": "^4.0",
         "mailgun/mailgun-php": "^4.3",
         "markrogoyski/math-php": "^2.11",
         "panphp/pan": "^0.1.8",
@@ -42,11 +42,9 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.0",
-        "barryvdh/laravel-ide-helper": ">=3.5.5",
         "fakerphp/faker": "^1.24.1",
         "larastan/larastan": "^3.1",
         "laravel/pint": "^1.21.0",
-        "laravel/sail": "^1.41.0",
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.6.1",
         "pestphp/pest": "^4.0",
@@ -75,8 +73,7 @@
             "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php artisan ide-helper:generate"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
