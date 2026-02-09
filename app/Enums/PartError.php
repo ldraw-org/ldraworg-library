@@ -4,6 +4,7 @@ namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
 use Filament\Support\Contracts\HasLabel;
+use Illuminate\Support\Str;
 
 enum PartError: string implements HasLabel
 {
@@ -14,7 +15,7 @@ enum PartError: string implements HasLabel
 
     case ReplaceNotSelected = 'replace';
     case FixNotSelected = 'fix.checked';
-    
+
     case MissingHeaderMeta = 'missing';
     case AuthorInvalid = 'authorinvalid';
 
@@ -78,4 +79,55 @@ enum PartError: string implements HasLabel
     case WarningLicense = 'warning.license';
     case WarningDescriptionNumberSpaces = 'warning.descriptionnumbers';
     case WarningDecimalPrecision = 'warning.decimalprecision';
+
+    public function isMultiLine(): bool
+    {
+        return match($this) {
+            self::LineInvalid,
+            self::InvalidLineType0,
+            self::InvalidLineColor,
+            self::InvalidColoredLines,
+            self::InvalidColor16,
+            self::InvalidColor24,
+            self::InvalidLineNumbers,
+            self::RotationMatrixIsSingular,
+            self::IdenticalPoints,
+            self::PointsColinear,
+            self::QuadNotConvex,
+            self::QuadNotCoplanar,
+            self::DecimalPrecision,
+            self::TrailingZeros,
+            self::LeadingZeros,
+            self::WarningNotCoplanar,
+            self::WarningDecimalPrecision => true,
+            default => false,
+        };
+    }
+
+    public function multiLineHeader(): ?string
+    {
+        if (!$this->isMultiLine()) {
+            return null;
+        }
+
+        return match($this) {
+            self::LineInvalid => 'Invalid Line',
+            self::InvalidLineType0 => 'Invalid META command or comment without //',
+            self::InvalidLineColor => 'Color code not in LDConfig.ldr',
+            self::InvalidColoredLines => 'Linetypes 2 and 5 should only be color 24',
+            self::InvalidColor16 => 'Color code 16 not allowed for linetypes 2, 5',
+            self::InvalidColor24 => 'Color code 24 not allowed for linetypes 1, 3, 4',
+            self::InvalidLineNumbers => 'Invalid number format',
+            self::RotationMatrixIsSingular => 'Singular rotation matrix',
+            self::IdenticalPoints => 'Identical points',
+            self::PointsColinear => 'Points are colinear',
+            self::QuadNotConvex => 'Quad is concave or bowtie',
+            self::QuadNotCoplanar,
+            self::WarningNotCoplanar => 'Quad is not coplanar',
+            self::DecimalPrecision,
+            self::TrailingZeros,
+            self::LeadingZeros => __('partcheck.' . $this->value),
+            self::WarningDecimalPrecision => 'Decimal precision exceeds library recommendation'
+        };
+    }
 }
