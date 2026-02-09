@@ -17,9 +17,9 @@ enum CheckType: string
     public function statusMessage(): string
     {
         return match ($this) {
-            CheckType::Error => __('This part has the following errors'),
-            CheckType::Warning => __('This part has the following warnings'),
-            CheckType::TrackerHold => __('This part has the following automated holds from the Parts Tracker'),
+            CheckType::Error => 'This part has the following errors',
+            CheckType::Warning => 'This part has the following warnings',
+            CheckType::TrackerHold => 'This part has the following automated holds from the Parts Tracker',
         };
     }
 }

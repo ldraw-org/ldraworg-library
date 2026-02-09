@@ -1,9 +1,9 @@
 @forelse($messages as $type => $reportable)
     @php($type = \App\Enums\CheckType::from($type))
-    <x-slot:header>
-        {{$type->statusMessage()}}
-    </x-slot:header>
     <x-message compact icon type="{{$type == \App\Enums\CheckType::Warning ? 'warning' : 'error'}}">
+        <x-slot:header>
+            {{$type->statusMessage()}}
+        </x-slot:header>
         <ul>
             @foreach($reportable as $check => $checkMessage)
                 @php($check = \App\Enums\PartError::from($check))

@@ -17,7 +17,7 @@ class NotReleaseable extends Component
 
     public ?Collection $messages;
 
-    public function __construct(Part $part) {
+    public function __construct(public Part $part) {
         $this->messages = $part
             ->check_messages
             ->map(fn (CheckMessage $m) => [
