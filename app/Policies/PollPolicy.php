@@ -23,8 +23,7 @@ class PollPolicy
         if ($poll->ends_on < now()) {
             return Response::deny('This poll has ended.');
         }
-
-        if (!$poll->items()->whereHas(
+        if ($poll->items()->whereHas(
             'votes',
             fn (Builder $query) => $query->where('user_id', $user->id)
         )->exists()) {

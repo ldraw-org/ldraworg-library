@@ -95,9 +95,9 @@ class PollIndex extends BasicTable implements HasActions
                 ->maxValue(10)
                 ->minValue(1)
                 ->required()
-                ->disabled(fn (Poll $p) => $p->has_been_enabled),
+                ->disabled(fn (?Poll $p) => $p->has_been_enabled ?? false),
             Repeater::make('items')
-                ->disabled(fn (Poll $p) => $p->has_been_enabled)
+                ->disabled(fn (?Poll $p) => $p->has_been_enabled ?? false)
                 ->relationship()
                 ->simple(
                     Textarea::make('item')
