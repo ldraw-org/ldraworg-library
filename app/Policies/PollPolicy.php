@@ -38,7 +38,7 @@ class PollPolicy
         return $user->can(Permission::PollVote) ? Response::allow() : Response::deny('You do not have permission to vote in polls.');
     }
 
-    public function manage(User $user, Poll $poll): bool
+    public function manage(User $user): bool
     {
         return $user->can(Permission::PollManage);
     }
