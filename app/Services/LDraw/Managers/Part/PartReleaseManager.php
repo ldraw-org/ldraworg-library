@@ -10,10 +10,8 @@ use App\Jobs\CheckPart;
 use App\Jobs\UpdateImage;
 use App\Models\Vote;
 use App\Services\LDraw\ZipFiles;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Collection;
 use App\Models\Part\PartRelease;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
@@ -85,21 +83,18 @@ class PartReleaseManager
 
     protected function getNextUpdateNumber(): array
     {
-        $current = PartRelease::latest()->first();
         $now = now();
-        if ($now->format('Y') !== $current->created_at->format('Y')) {
-            $update = '01';
-        } else {
-            $num = (int) substr($current->name, -2) + 1;
-            if ((int) $num <= 9) {
-                $update = "0{$num}";
-            } else {
-                $update = $num;
-            }
-        }
-        $name = $now->format('Y')."-{$update}";
-        $short = $now->format('y')."{$update}";
-        return compact('name', 'short');
+        $year = $now->year;
+
+        $num = (PartRelease::whereYear('created_at', $year)
+                ->max(DB::raw('CAST(RIGHT(name,2) AS UNSIGNED)')) ?? 0) + 1;
+
+        $update = str_pad($num, 2, '0', STR_PAD_LEFT);
+
+        return [
+            'name'  => "{$year}-{$update}",
+            'short' => $now->format('y') . $update,
+        ];
     }
 
     protected function getReleaseData(): array
@@ -317,7 +312,7 @@ class PartReleaseManager
         $this->zipfiles->releaseZips(
             $this->release,
             $this->extraFiles,
-            Storage::path("{$this->stagingFolder}/Note{$this->release->short}CA.txt"),
+            "{$this->stagingFolder}/Note{$this->release->short}CA.txt",
             $this->includeLdconfig,
             Storage::path($this->stagingFolder)
         );
@@ -349,11 +344,9 @@ class PartReleaseManager
         ]);
         $officialIds = Part::official()->pluck('id');
 
-        // 1 Query instead of 10,000
         Vote::whereIn('part_id', $officialIds)->delete();
 
-        // 1 Query to clear the pivot table
-        DB::table('part_notification_user')
+        DB::table('user_part_notifications')
             ->whereIn('part_id', $officialIds)
             ->delete();
 

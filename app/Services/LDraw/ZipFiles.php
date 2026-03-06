@@ -46,6 +46,7 @@ class ZipFiles
             self::addPartToZip($zip, $part);
             $zip->close();
         } else {
+            Storage::put('library/unofficial/ldrawunf.zip', '');
             $zip->open(Storage::path('library/unofficial/ldrawunf.zip'), ZipArchive::CREATE | ZipArchive::OVERWRITE);
             $zip->addFile(Storage::path('library/official/CAreadme.txt'), 'CAreadme.txt');
             $zip->addFile(Storage::path('library/official/CAlicense.txt'), 'CAlicense.txt');
@@ -84,8 +85,8 @@ class ZipFiles
             $completeZip->addFromString($filename, $contents);
         }
 
-        $completeZip->addFromString("ldraw/models/Note{$release->short}CA.txt", $notes);
-        $updateZip->addFromString("ldraw/models/Note{$release->short}CA.txt", $notes);
+        $completeZip->addFromString("ldraw/models/Note{$release->short}CA.txt", Storage::get($notes));
+        $updateZip->addFromString("ldraw/models/Note{$release->short}CA.txt", Storage::get($notes));
 
         $updateZip->close();
         $completeZip->close();
