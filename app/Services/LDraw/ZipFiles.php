@@ -3,6 +3,7 @@
 namespace App\Services\LDraw;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
@@ -51,17 +52,23 @@ class ZipFiles
             $zip->addFile(Storage::path('library/official/CAreadme.txt'), 'CAreadme.txt');
             $zip->addFile(Storage::path('library/official/CAlicense.txt'), 'CAlicense.txt');
             $zip->addFile(Storage::path('library/official/CAlicense4.txt'), 'CAlicense4.txt');
-            $zip->close();
-            Part::unofficial()->chunk(500, function (Collection $parts) use ($zip) {
-                $zip->open(Storage::path('library/unofficial/ldrawunf.zip'));
-                $parts->each(fn (Part $part) => self::addPartToZip($zip, $part));
-                $zip->close();
-            });
+            Part::with('body')
+                ->select(['id', 'created_at', 'type', 'filename', 'header'])
+                ->unofficial()
+                ->orderBy('filename')
+                ->chunk(
+                    500,
+                    function (Collection $parts) use ($zip) {
+                        $parts->each(fn (Part $part) => self::addPartToZip($zip, $part));
+                    });
         }
     }
 
     public function releaseZips(PartRelease $release, array $extraFiles, string $notes, bool $includeLDConfig, string $path): void
     {
+
+        $root = 'ldraw/';
+
         $updateZipName = "{$path}/lcad{$release->short}.zip";
         $completeZipName = "{$path}/complete.zip";
 
@@ -72,37 +79,73 @@ class ZipFiles
         $completeZip->open($completeZipName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
         foreach (Storage::allFiles('library/official') as $file) {
-            $filename = str_replace('library/official/', 'ldraw/', $file);
-            $completeZip->addFromString($filename, Storage::get("library/oficial/{$file}"));
-            if (($file == 'library/official/LDConfig.ldr' || $file == 'library/official/LDCfgalt.ldr') && $includeLDConfig) {
-                $updateZip->addFromString($filename, Storage::get("library/official/{$file}"));
-            };
+
+            $filename = Str::replaceFirst('library/official/', $root, $file);
+            $diskPath = Storage::path($file);
+
+            $completeZip->addFile($diskPath, $filename);
+
+            if (
+                $includeLDConfig &&
+                in_array($file, [
+                    'library/official/LDConfig.ldr',
+                    'library/official/LDCfgalt.ldr',
+                ])
+            ) {
+                $updateZip->addFile($diskPath, $filename);
+            }
         }
 
         foreach ($extraFiles as $filename => $contents) {
-            $filename = "ldraw/{$filename}";
-            $updateZip->addFromString($filename, $contents);
+
+            $filename = "{$root}{$filename}";
+
             $completeZip->addFromString($filename, $contents);
+            $updateZip->addFromString($filename, $contents);
         }
 
-        $completeZip->addFromString("ldraw/models/Note{$release->short}CA.txt", Storage::get($notes));
-        $updateZip->addFromString("ldraw/models/Note{$release->short}CA.txt", Storage::get($notes));
+        $noteFile = "{$root}models/Note{$release->short}CA.txt";
+        $notePath = Storage::path($notes);
 
-        $updateZip->close();
+        $completeZip->addFile($notePath, $noteFile);
+        $updateZip->addFile($notePath, $noteFile);
+
+        Part::with('body')
+            ->select(['id', 'created_at', 'type', 'filename', 'header'])
+            ->official()
+            ->orderBy('filename')
+            ->chunk(
+                500,
+                function (Collection $parts) use ($completeZip, $updateZip, $release, $root) {
+                    foreach ($parts as $part) {
+                        $filename = $root . $part->filename;
+                        $timestamp = $part->lastChange()->getTimestamp();
+                        $flags = $part->isTexmap() ? ZipArchive::FL_ENC_RAW : 0;
+
+                        $contents = $part->get();
+
+                        $this->addStringToZip($completeZip, $filename, $contents, $timestamp, $flags);
+
+                        if ($part->part_release_id === $release->id || $part->has_minor_edit) {
+                            $this->addStringToZip($updateZip, $filename, $contents, $timestamp, $flags);
+                        }
+                    }
+
+                });
+
         $completeZip->close();
+        $updateZip->close();
+    }
 
-        Part::official()->chunk(100, function (Collection $parts) use ($updateZip, $completeZip, $updateZipName, $completeZipName, $release) {
-            $updateZip->open($updateZipName);
-            $completeZip->open($completeZipName);
-            $parts->each(function (Part $part) use ($updateZip, $completeZip, $release) {
-                self::addPartToZip($completeZip, $part, 'ldraw/');
-                if ($part->part_release_id == $release->id || $part->has_minor_edit) {
-                    self::addPartToZip($updateZip, $part, 'ldraw/');
-                }
-            });
-            $updateZip->close();
-            $completeZip->close();
-        });
+    protected function addStringToZip(
+        ZipArchive $zip,
+        string $filename,
+        string $contents,
+        int $timestamp,
+        int $flags = 0
+    ): void {
+        $zip->addFromString($filename, $contents, flags: $flags);
+        $zip->setMtimeName($filename, $timestamp);
     }
 
     protected function addPartToZip(ZipArchive $zip, Part $part, string $prefix = ''): void
