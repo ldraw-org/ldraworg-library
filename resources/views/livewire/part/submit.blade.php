@@ -5,58 +5,17 @@
     <div class="text-2xl font-bold">
         Parts Tracker File Submit Form
     </div>
-    <div>
-        @forelse($part_errors as $part => $error_list)
-            <x-message icon type="error">
-                <x-slot:header>{{ $part }}</x-slot>
-                <ul>
-                    @foreach($error_list as $error)
-                        <li>
-                            @if (!is_null($error->text))
-                                <x-accordion id="partError{{$loop->iteration}}">
-                                    <x-slot name="header">
-                                        <div>{{$error->message()}}</div>
-                                    </x-slot>
-                                    <div class="px-4 text-black">
-                                        Line text: {{ $error->text }}
-                                    </div>
-                                </x-accordion>
-                            @else
-                                {{ $error->message() }}
-                            @endif
-                        </li>
-                    @endforeach
-                </ul>
-           </x-message>
-        @empty
-            {{-- Do nothing --}}
-        @endforelse
-            @forelse($part_warnings as $part => $warnings_list)
-                <x-message icon type="warning">
-                    <x-slot:header>{{ $part }}</x-slot>
-                    <ul>
-                        @foreach($warnings_list as $warning)
-                            <li>
-                                @if (!is_null($warning->text))
-                                    <x-accordion id="partWarning{{$loop->iteration}}">
-                                        <x-slot name="header">
-                                            <div>{{$warning->message()}}</div>
-                                        </x-slot>
-                                        <div class="px-4 text-black">
-                                            Line text: {{ $warning->text }}
-                                        </div>
-                                    </x-accordion>
-                                @else
-                                    {{ $warning->message() }}
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                </x-message>
-            @empty
-                {{-- Do nothing --}}
-            @endforelse
-    </div>
+    @if($part_messages->isNotEmpty())
+        <div class="flex flex-col relative p-2 my-2 space-y-2 border border-gray-200 rounded-lg">
+            <h2 class="absolute top-0 left-2 transform -translate-y-1/2 bg-white px-2 text-md font-semibold text-gray-700">
+                There were file errors/warnings
+            </h2>
+            @foreach($part_messages as $filename => $messages)
+                <div class="font-bold">{{ $filename }}</div>
+                <x-message.submit-validation filename="{{$filename}}" :$messages />
+            @endforeach
+        </div>
+    @endif
     <form wire:submit="create">
         {{ $this->form }}
 
@@ -73,30 +32,6 @@
             The following files passed validation checks and have been submitted to the Parts Tracker
         </p>
         <livewire:tables.submitted-parts-table :parts="$submitted_parts" />
-{{--
-        <table class="border border-gray-200 rounded-lg w-full">
-            <thead class="border-b-2 border-b-black">
-                <tr class="*:bg-gray-200 *:font-bold *:justify-self-start *:p-2">
-                    <th>Image</th>
-                    <th>Part</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y">
-                @foreach ($submitted_parts as $p)
-                    <tr class="*:p-2">
-                        <td>
-                            <img class="object-scale-down w-[35px] max-h-[75px]" src="{{$p['image']}}" alt='part thumb image' title="part_thumb">
-                        </td>
-                        <td>{{$p['filename']}}</td>
-                        <td>
-                            <a href="{{$p['route']}}">{{$p['description']}}</a>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
---}}
         <p>
             The following files were rejected:
         </p>
@@ -112,31 +47,34 @@
         </x-filament::button>
     </x-filament::modal>
     @script
-        <script type="text/javascript">
-            $wire.on('FilePond:processfile', (e) => {
-                $wire.checkFile(e.file.filename, e.file.id);
-            });
-            $wire.on('FilePond:removefile', (e) => {
-                $wire.removeFile(e.file.filename);
-            });
-            $wire.on('failFile', (filename) => {
-                const files = document.querySelectorAll('.filepond--file-info-main');
-                files.forEach(element => {
-                    if (element.textContent == filename) {
-                        const fileinput = element.closest('.filepond--item');
-                        fileinput.dataset.filepondItemState = "error";
-                    }
-                });
-            });
-            $wire.on('passFile', (filename) => {
-                const files = document.querySelectorAll('.filepond--file-info-main');
-                files.forEach(element => {
-                    if (element.textContent == filename) {
-                        const fileinput = element.closest('.filepond--item');
-                        fileinput.dataset.filepondItemState = "processing-complete";
-                    }
-                });
-            });
-        </script>
+    <script type="text/javascript">
+        $wire.on('FilePond:processfile', (e) => {
+            $wire.checkFile(e.file.filename, e.file.id);
+        });
+        $wire.on('FilePond:removefile', (e) => {
+            $wire.removeFile(e.file.filename);
+        });
+
+        $wire.on('setFileState', ({ state = true, fileId = null, filename = null }) => {
+            let fileInput = null;
+            const status = state ? 'processing-complete' : 'error';
+            if (fileId) {
+                fileInput = document.getElementById(`filepond--item-${fileId}`);
+            }
+
+            if (!fileInput && filename) {
+                const el = [...document.querySelectorAll('.filepond--file-info-main')]
+                    .find(e => e.textContent.trim() === filename);
+
+                if (el) {
+                    fileInput = el.closest('.filepond--item');
+                }
+            }
+
+            if (fileInput) {
+                fileInput.dataset.filepondItemState = status;
+            }
+        });
+    </script>
     @endscript
 </div>

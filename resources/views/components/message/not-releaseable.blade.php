@@ -7,7 +7,7 @@
         <ul>
             @foreach($reportable as $check => $checkMessage)
                 @php($check = \App\Enums\PartError::from($check))
-                @if ($check == \App\Enums\PartError::TrackerHasUncertifiedSubfiles)
+                @if ($check == \App\Enums\PartError::TrackerHasUncertifiedSubfiles && isset($part))
                     <li wire:key="part-{{$check->value}}-{{$loop->iteration}}">
                         <x-accordion id="partTrackerHoldsUncertSubparts">
                             <x-slot name="header">

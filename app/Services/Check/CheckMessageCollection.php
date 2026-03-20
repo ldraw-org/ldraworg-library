@@ -11,8 +11,8 @@ class CheckMessageCollection extends Collection
     {
         return new self(
             array_map(
-                fn($message) => $message instanceof CheckMessage 
-                    ? $message 
+                fn($message) => $message instanceof CheckMessage
+                    ? $message
                     : CheckMessage::fromArray($message),
                 $messages
             )
@@ -38,7 +38,7 @@ class CheckMessageCollection extends Collection
     {
         return $this->filter(fn (CheckMessage $message)=> $message->checkType == $checkType);
     }
-  
+
     public function hasErrors(): bool
     {
         return $this->hasCheckType(CheckType::Error);
@@ -94,4 +94,16 @@ class CheckMessageCollection extends Collection
         return $this->contains(fn (CheckMessage $message)=> $message->checkType == $checkType);
     }
 
+    public function arrayByType(): Collection
+    {
+        return $this
+            ->map(fn (CheckMessage $m) => [
+                'checkType' => $m->checkType->value,
+                'error' => $m->error->value,
+                'message' => $m->message(),
+                'lineNumber' => $m->lineNumber,
+                'text' => $m->text,
+            ])
+            ->groupBy(['checkType', 'error']);
+    }
 }
