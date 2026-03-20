@@ -63,7 +63,7 @@ class PartRelease extends Model implements HasMedia
                 $parts = 'no';
                 foreach (json_decode($attributes['new_of_type'], true) ?? [] as $type => $count) {
                     $t = PartType::tryFrom($type);
-                    if (Str::startsWith($t->folder(), 'p/') && $t->isDatFormat()) {
+                    if ($t->isPrimitive()) {
                         $prims += $count;
                     }
                     if ($t == PartType::Part) {
