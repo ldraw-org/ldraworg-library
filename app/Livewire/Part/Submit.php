@@ -68,7 +68,11 @@ class Submit extends Component implements HasSchemas
                     ->required()
                     ->rules([
                         fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                            if ($this->part_messages->count() >= count($this->data['partfiles'])) {
+                            $errorCount = collect($this->part_messages)
+                                ->filter(fn (CheckMessageCollection $m) => $m->hasErrors())
+                                ->count();
+
+                            if ($errorCount >= count($this->data['partfiles'])) {
                                 $fail('There are no files without errors');
                             }
                         },
@@ -139,7 +143,7 @@ class Submit extends Component implements HasSchemas
             ->values()
             ->all();
         $this->form->fill();
-        $this->part_errors = [];
+        $this->part_errors = collect();
         $this->dispatch('open-modal', id: 'post-submit');
     }
 
