@@ -23,8 +23,12 @@ class LatestUpdate extends Component
     /**
      * Get the view / contents that represent the component.
      */
-    public function render(): View|Closure|string
+    public function render(): View|Closure|string|null
     {
+        if (is_null($this->update)) {
+            return null;
+        }
+
         return view('components.card.latest-update');
     }
 }
