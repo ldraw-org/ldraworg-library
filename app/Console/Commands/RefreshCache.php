@@ -2,7 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\PartType;
+use App\Models\Part\Part;
+use App\Models\Part\PartRelease;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
 class RefreshCache extends Command
 {
@@ -28,8 +32,22 @@ class RefreshCache extends Command
         $this->call('down');
         try {
             $this->call('optimize:clear');
+            Cache::remember(
+                'part_release_current',
+                now()->addDays(30),
+                fn () => PartRelease::current()
+            );
+            Cache::remember(
+                'current_official_part_count',
+                now()->addDays(30),
+                fn () => Part::official()
+                    ->where('type', PartType::Part)
+                    ->whereNull('type_qualifier')
+                    ->activeParts()
+                    ->count()
+            );
+            $this->call('lib:update-ldconfig');
             $this->call('optimize');
-          
         } finally {
             $this->call('up');
         }
