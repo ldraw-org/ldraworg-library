@@ -4,6 +4,7 @@ namespace App\View\Components\Part;
 
 use Illuminate\Contracts\View\View;
 use Closure;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\Component;
 use App\Models\Part\Part;
 use App\Models\User;
@@ -11,28 +12,18 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Attribution extends Component
 {
-    /**
-       * Create a new component instance.
-       *
-       * @return void
-       */
+    public User $copyuser;
+    public Collection $editusers;
+
     public function __construct(
-        protected Part $part
+        Part $part
     ) {
+        $this->copyuser = $part->user;
+        $this->editusers = $part->attributionEditors();
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     *
-     * @return View|Closure|string
-     */
-    public function render()
+    public function render(): View|Closure|string
     {
-        $editusers = User::where('id', '<>', $this->part->user->id)
-            ->whereAll(['is_ptadmin', 'is_synthetic'], false)
-            ->whereHas('part_history', fn (Builder $q) => $q->where('part_id', $this->part->id))
-            ->get();
-        $copyuser = $this->part->user;
-        return view('components.part.attribution', compact('copyuser', 'editusers'));
+        return view('components.part.attribution');
     }
 }

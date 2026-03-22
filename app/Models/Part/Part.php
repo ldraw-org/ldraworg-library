@@ -338,6 +338,17 @@ class Part extends Model implements HasMedia
             ->get();
     }
 
+    public function attributionEditors(): Collection
+    {
+        return User::whereKeyNot($this->user_id)
+            ->whereAll(['is_ptadmin', 'is_synthetic'], false)
+            ->whereHas(
+                'part_history',
+                fn ($q) => $q->where('part_id', $this->id)
+            )
+            ->get();
+    }
+
     public function isText(): bool
     {
         return $this->type->isDatFormat();
