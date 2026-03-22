@@ -4,5 +4,5 @@
     link="{{route('part-update.index', ['latest'])}}"
     image="{{asset('/images/cards/updates.png')}}"
 >
-    {{$update->blurb}}
+    {{$update->blurb}}. As of this update, the LDraw.org Parts Library contains {{ $officialCount }} unique shapes or patterned parts.
 </x-card>
