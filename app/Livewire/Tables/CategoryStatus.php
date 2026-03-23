@@ -4,6 +4,7 @@ namespace App\Livewire\Tables;
 
 use App\Enums\PartCategory;
 use App\Enums\PartStatus;
+use App\Services\LDraw\Managers\LDConfigManager;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\Part\Part;
@@ -66,7 +67,7 @@ class CategoryStatus extends BasicTable implements HasActions
     #[Computed]
     public function categoryArray(): Collection
     {
-        $parts = Cache::get('avatar_parts', []);
+        $parts = app(LDConfigManager::class)->avatarParts();
         return collect(PartCategory::cases())
             ->map(
                 function (PartCategory $cat) use ($parts): array {

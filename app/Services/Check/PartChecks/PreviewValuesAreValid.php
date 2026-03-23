@@ -6,6 +6,7 @@ use App\Enums\CheckType;
 use App\Enums\PartError;
 use App\Models\LdrawColour;
 use App\Services\Check\BaseCheck;
+use App\Services\LDraw\Managers\LDConfigManager;
 use Illuminate\Support\Facades\Cache;
 use MathPHP\LinearAlgebra\MatrixFactory;
 
@@ -17,7 +18,7 @@ class PreviewValuesAreValid extends BaseCheck
             return;
         }
         $preview = $this->part->preview();
-        $codes = Cache::get('ldraw_colour_codes', LdrawColour::pluck('code')->all());
+        $codes = app(LDConfigManager::class)->ldrawColourCodes();
         if (!in_array($preview['color'], $codes)) {
             yield $this->error(CheckType::Error, PartError::PreviewInvalid);
             return;

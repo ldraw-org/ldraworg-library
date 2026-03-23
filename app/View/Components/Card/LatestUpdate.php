@@ -3,6 +3,8 @@
 namespace App\View\Components\Card;
 
 use App\Models\Part\PartRelease;
+use App\Services\LibraryStatisticsService;
+use App\Services\PartReleaseService;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Cache;
@@ -17,10 +19,13 @@ class LatestUpdate extends Component
     public PartRelease $update;
     public int $officialCount;
 
-    public function __construct()
+    public function __construct(
+        protected PartReleaseService $releaseService,
+        protected LibraryStatisticsService $statistics,
+    )
     {
-        $this->update = PartRelease::current();
-        $this->officialCount = Cache::get('current_official_part_count', 0);
+        $this->update = $this->releaseService->currentRelease();
+        $this->officialCount = $this->statistics->officialPartCount();
     }
 
     /**

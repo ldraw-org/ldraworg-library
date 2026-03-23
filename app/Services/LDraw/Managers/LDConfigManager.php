@@ -4,6 +4,8 @@ namespace App\Services\LDraw\Managers;
 
 use App\Models\Avatar;
 use App\Models\LdrawColour;
+use App\Services\Cache\CacheKey;
+use App\Services\Cache\CacheService;
 use App\Services\LDraw\Rebrickable;
 use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Support\Arr;
@@ -13,7 +15,8 @@ use Illuminate\Support\Facades\Storage;
 class LDConfigManager
 {
     public function __construct(
-        protected Rebrickable $rb
+        protected Rebrickable $rb,
+        protected CacheService $cache
     ) {
 
     }
@@ -66,8 +69,26 @@ class LDConfigManager
                 ];
                 LdrawColour::updateOrCreate(['code' => $color['code']], $color);
             });
-        Cache::put('ldraw_colour_codes', LdrawColour::pluck('code')->all());
-        Cache::put('ldraw_colour_codes_to_rebrickable', LdrawColour::pluck('rebrickable_id', 'code')->all());
+        $this->cache->reset(CacheKey::LdrawColourCodes);
+        $this->cache->warm(CacheKey::LdrawColourCodes);
+        $this->cache->reset(CacheKey::LdrawColourCodesToRebrickable);
+        $this->cache->warm(CacheKey::LdrawColourCodesToRebrickable);
+    }
+
+    public function ldrawColourCodes(): array
+    {
+        return $this->cache->remember(
+            CacheKey::LdrawColourCodes,
+            fn() => LdrawColour::pluck('code')->all()
+        );
+    }
+
+    public function ldrawColourCodesToRebrickable(): array
+    {
+        return $this->cache->remember(
+            CacheKey::LdrawColourCodesToRebrickable,
+            fn () => LdrawColour::pluck('rebrickable_id', 'code')->all()
+        );
     }
 
     public function importAvatars(): void
@@ -86,6 +107,15 @@ class LDConfigManager
             })
             ->all();
         Avatar::upsert($avatars, uniqueBy: 'category', update: ['part', 'matrix', 'description']);
-        Cache::put('avatar_parts', Arr::mapWithKeys($avatars, fn (array $a, int $key) => [$a['category'] => $a['part']]));
+        CacheKey::AvatarParts->reset();
+        CacheKey::AvatarParts->warm();
+    }
+
+    public function avatarParts(): array
+    {
+        return $this->cache->remember(
+            CacheKey::AvatarParts,
+            fn() => Avatar::pluck('part', 'category')->all()
+        );
     }
 }

@@ -6,6 +6,7 @@ use App\Enums\PartCategory;
 use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
 use App\Models\RebrickablePart;
+use App\Services\LDraw\Managers\LDConfigManager;
 use App\Services\LDraw\Managers\StickerSheetManager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
@@ -15,12 +16,16 @@ class ImprovedSetPbg
 {
     protected array $parts = [];
     protected array $set = [];
+    protected Collection $ldrawColorToRebrickable;
 
     public function __construct(
         public MessageBag $messages,
         protected Rebrickable $rb,
         protected StickerSheetManager $stickerManager,
-    ) {}
+        protected LDConfigManager $configManager,
+    ) {
+        $this->ldrawColorToRebrickable = collect($this->configManager->ldrawColourCodesToRebrickable());
+    }
 
     public function pbg(string $set_number): string|false
     {
@@ -159,9 +164,9 @@ class ImprovedSetPbg
     protected function resolveColor(array $part, ?int $fallback = null): int
     {
         $rbId = $part['color']['id'];
-        $colorId = collect(Cache::get('ldraw_colour_codes_to_rebrickable', []))
-          ->search(fn($value, $key) => $value === $rbId); 
-        
+        $colorId = $this->ldrawColorToRebrickable
+          ->search(fn($value, $key) => $value === $rbId);
+
         if ($colorId !== null) {
             return $colorId;
         }
@@ -205,7 +210,7 @@ class ImprovedSetPbg
         $url = $this->getPartUrl($part);
         $partNum = $this->getPartNumber($part);
         $name = $this->getPartName($part);
-        
+
         $message = "<a class=\"underline decoration-dotted hover:decoration-solid\" href=\"{$url}\">{$partNum} ({$name})</a>";
         $this->messages->add('missing', $message);
     }

@@ -8,17 +8,20 @@ use App\Enums\PartType;
 use App\Events\PartReleased;
 use App\Jobs\CheckPart;
 use App\Jobs\UpdateImage;
-use App\Models\Vote;
-use App\Services\LDraw\ZipFiles;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Part\PartRelease;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
+use App\Models\Part\PartRelease;
 use App\Models\User;
+use App\Models\Vote;
+use App\Services\Cache\CacheKey;
+use App\Services\Cache\CacheService;
+use App\Services\LDraw\ZipFiles;
 use App\Settings\LibrarySettings;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PartReleaseManager
 {
@@ -26,6 +29,8 @@ class PartReleaseManager
     protected PartManager $manager;
     protected LibrarySettings $settings;
     protected ZipFiles $zipfiles;
+    protected CacheService $cache;
+
     protected string $stagingFolder = "release-staging";
 
     public function __construct(
@@ -36,6 +41,7 @@ class PartReleaseManager
         $this->manager = app(PartManager::class);
         $this->settings = app(LibrarySettings::class);
         $this->zipfiles = app(ZipFiles::class);
+        $this->cache = app(CacheService::class);
     }
 
     public function createRelease(): void
@@ -377,5 +383,9 @@ class PartReleaseManager
             });
         });
 
+        $this->cache->reset(CacheKey::OfficialPartCount);
+        $this->cache->warm(CacheKey::OfficialPartCount);
+        $this->cache->reset(CacheKey::PartReleaseCurrent);
+        $this->cache->warm(CacheKey::PartReleaseCurrent);;
     }
 }

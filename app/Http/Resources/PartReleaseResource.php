@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\LibraryStatisticsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Cache;
@@ -21,7 +22,7 @@ class PartReleaseResource extends JsonResource
             'total' => $this->total,
             'new' => $this->new,
             'blurb' => $this->blurb,
-            'official_count' => Cache::get('current_official_part_count'),
+            'official_count' => app(LibraryStatisticsService::class)->officialPartCount(),
             'image' => file_exists(public_path('images/updates/' . $this->short . '.png'))
                 ? asset('images/updates/' .  $this->short . '.png')
                 : asset('images/updates/default.png'),
