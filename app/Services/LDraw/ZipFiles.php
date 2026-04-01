@@ -111,7 +111,7 @@ class ZipFiles
         $updateZip->addFile($notePath, $noteFile);
 
         Part::with('body')
-            ->select(['id', 'created_at', 'type', 'filename', 'header'])
+            ->select(['id', 'created_at', 'type', 'filename', 'header', 'part_release_id'])
             ->official()
             ->orderBy('filename')
             ->chunk(
@@ -126,7 +126,7 @@ class ZipFiles
 
                         $this->addStringToZip($completeZip, $filename, $contents, $timestamp, $flags);
 
-                        if ($part->part_release_id === $release->id || $part->has_minor_edit) {
+                        if ($part->part_release_id === $release->id) {
                             $this->addStringToZip($updateZip, $filename, $contents, $timestamp, $flags);
                         }
                     }
