@@ -38,7 +38,10 @@
         "staudenmeir/belongs-to-through": "^2.17",
         "staudenmeir/laravel-adjacency-list": "^1.23.3",
         "symfony/http-client": "^8.0",
-        "symfony/mailgun-mailer": "^8.0"
+        "symfony/mailgun-mailer": "^8.0",
+        "ext-gd": "*",
+        "ext-fileinfo": "*",
+        "ext-zip": "*"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.0",
