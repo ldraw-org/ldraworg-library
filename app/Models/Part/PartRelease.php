@@ -72,7 +72,7 @@ class PartRelease extends Model implements HasMedia
 
                 }
                 $prims = $prims > 0 ? $prims : 'no';
-                return "This update adds {$attributes['new']} new files to the core library, including {$parts} new parts and {$prims} new primitives.";
+                return "This update adds {$attributes['new']} new files to the core library, including {$parts} new parts and {$prims} new primitives";
             }
         );
     }
