@@ -5,14 +5,16 @@
     <div class="text-2xl font-bold">
         Parts Tracker File Submit Form
     </div>
-    @if($part_messages->isNotEmpty())
+    @if(count($fileStates) > 0)
         <div class="flex flex-col relative p-2 my-2 space-y-2 border border-gray-200 rounded-lg">
             <h2 class="absolute top-0 left-2 transform -translate-y-1/2 bg-white px-2 text-md font-semibold text-gray-700">
                 There were file errors/warnings
             </h2>
-            @foreach($part_messages as $filename => $messages)
-                <div class="font-bold">{{ $filename }}</div>
-                <x-message.submit-validation filename="{{$filename}}" :$messages />
+            @foreach($fileStates as $filename => $state)
+                <div wire:key="file-errors-{{ $filename }}">
+                    <div class="font-bold">{{ $filename }}</div>
+                    <x-message.submit-validation filename="{{$filename}}" :messages="$state['messages']" />
+                </div>
             @endforeach
         </div>
     @endif
@@ -46,29 +48,24 @@
             Ok
         </x-filament::button>
     </x-filament::modal>
+
     @script
     <script type="text/javascript">
         $wire.on('FilePond:processfile', (e) => {
-            $wire.checkFile(e.file.filename, e.file.id);
+            $wire.checkFile(e.file.filename);
         });
         $wire.on('FilePond:removefile', (e) => {
             $wire.removeFile(e.file.filename);
         });
 
-        $wire.on('setFileState', ({ state = true, fileId = null, filename = null }) => {
+        $wire.on('setFileState', (params) => {
             let fileInput = null;
-            const status = state ? 'processing-complete' : 'error';
-            if (fileId) {
-                fileInput = document.getElementById(`filepond--item-${fileId}`);
-            }
+            const status = params.state ? 'processing-complete' : 'error';
+            const el = [...document.querySelectorAll('.filepond--file-info-main')]
+                .find(e => e.textContent.trim() === params.filename);
 
-            if (!fileInput && filename) {
-                const el = [...document.querySelectorAll('.filepond--file-info-main')]
-                    .find(e => e.textContent.trim() === filename);
-
-                if (el) {
-                    fileInput = el.closest('.filepond--item');
-                }
+            if (el) {
+                fileInput = el.closest('.filepond--item');
             }
 
             if (fileInput) {

@@ -4,6 +4,7 @@ namespace App\Livewire\Part;
 
 use App\Enums\CheckType;
 use App\Enums\PartError;
+use App\Services\Submit\SubmitFileValidator;
 use Filament\Schemas\Schema;
 use App\Enums\PartType;
 use App\Enums\Permission;
@@ -23,6 +24,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +42,7 @@ class Submit extends Component implements HasSchemas
 
     public ?array $data = [];
 
-    public Collection $part_messages;
+    public array $fileStates = [];
 
     #[Locked]
     public array $submitted_parts = [];
@@ -51,7 +54,6 @@ class Submit extends Component implements HasSchemas
     {
         $this->authorize('create', Part::class);
         $this->form->fill();
-        $this->part_messages = collect();
     }
 
     public function form(Schema $schema): Schema
@@ -68,11 +70,17 @@ class Submit extends Component implements HasSchemas
                     ->required()
                     ->rules([
                         fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                            $errorCount = collect($this->part_messages)
-                                ->filter(fn (CheckMessageCollection $m) => $m->hasErrors())
+                            $totalFiles = count($this->data['partfiles'] ?? []);
+
+                            if ($totalFiles === 0) {
+                                return;
+                            }
+
+                            $filesWithErrors = collect($this->fileStates)
+                                ->filter(fn ($state) => $state['hasErrors'] ?? false)
                                 ->count();
 
-                            if ($errorCount >= count($this->data['partfiles'])) {
+                            if ($filesWithErrors >= $totalFiles) {
                                 $fail('There are no files without errors');
                             }
                         },
@@ -80,11 +88,23 @@ class Submit extends Component implements HasSchemas
                 Toggle::make('replace')
                     ->label('Replace existing file(s)')
                     ->live()
-                    ->afterStateUpdated(fn (?bool $state) => $state === true ? $this->removeError(PartError::ReplaceNotSelected) : $this->checkFiles()),
+                    ->afterStateUpdated(function (?bool $state) {
+                        if ($state) {
+                            $this->removeErrorFromAllFiles(PartError::ReplaceNotSelected);
+                        } else {
+                            $this->checkFiles();
+                        }
+                    }),
                 Toggle::make('official_fix')
                     ->label('Official File Fix')
                     ->live()
-                    ->afterStateUpdated(fn (?bool $state) => $state === true ? $this->removeError(PartError::FixNotSelected) : $this->checkFiles()),
+                    ->afterStateUpdated(function (?bool $state) {
+                        if ($state) {
+                            $this->removeErrorFromAllFiles(PartError::FixNotSelected);
+                        } else {
+                            $this->checkFiles();
+                        }
+                    }),
               Select::make('user_id')
                     ->relationship(name: 'user')
                     ->getOptionLabelFromRecordUsing(fn (User $u) => "{$u->realname} [{$u->name}]")
@@ -103,171 +123,164 @@ class Submit extends Component implements HasSchemas
             ->model(Part::class);
     }
 
+    protected function findUploadedFile(string $filename): ?TemporaryUploadedFile
+    {
+        return collect($this->data['partfiles'])
+            ->first(fn ($file) =>
+                $file->getClientOriginalName() === $filename
+            );
+    }
+
+    protected function storeFileValidationState(string $filename, CheckMessageCollection $collection): void
+    {
+        // store back as array (Livewire-friendly)
+        $this->fileStates[$filename]['messages'] = $collection->map->toArray()->all();
+
+        // recalc derived flags
+        $this->fileStates[$filename]['hasErrors'] = $collection->hasErrors();
+        $this->fileStates[$filename]['hasWarnings'] = $collection->hasWarnings();
+        $this->fileStates[$filename]['hasTrackerHolds'] = $collection->hasTrackerHolds();
+        // notify frontend
+        $this->dispatch('setFileState',
+            state: ! $collection->hasErrors(),
+            filename: $filename
+        );
+    }
+
+    public function checkFile(string $filename, SubmitFileValidator $submitFileValidator): void
+    {
+        $uploaded = $this->findUploadedFile($filename);
+
+        if (! $uploaded) {
+            return;
+        }
+
+        $ldrawFile = LDrawFile::fromUploadedFile($uploaded);
+
+        $messages = $submitFileValidator->validate(
+            file: $ldrawFile,
+            replace: $this->data['replace'] ?? false,
+            officialFix: $this->data['official_fix'] ?? false,
+        );
+
+        $this->storeFileValidationState($filename, $messages);
+    }
+
+    protected function checkFiles(): void
+    {
+        foreach ($this->data['partfiles'] as $file) {
+            $this->checkFile($file, app(SubmitFileValidator::class));
+        }
+    }
+
+    protected function removeErrorFromFile(
+        string $filename,
+        PartError $error
+    ): void {
+
+        if (! isset($this->fileStates[$filename])) {
+            return;
+        }
+
+        $collection = CheckMessageCollection::fromArray(
+            $this->fileStates[$filename]['messages']
+        );
+
+        $collection = $collection
+            ->reject(fn (CheckMessage $message) =>
+                $message->error === $error
+            );
+
+        $this->storeFileValidationState(
+            $filename,
+            $collection
+        );
+    }
+
+    protected function removeErrorFromAllFiles(
+        PartError $error
+    ): void {
+
+        foreach (array_keys($this->fileStates) as $filename) {
+
+            $this->removeErrorFromFile(
+                $filename,
+                $error
+            );
+        }
+    }
+
     public function create(): void
     {
         $this->rejected_files = null;
         $this->submitted_parts = [];
         $manager = app(PartManager::class);
         $data = $this->form->getState();
-        if (array_key_exists('user_id', $data) && Auth::user()->can(Permission::PartSubmitProxy)) {
+
+        if (
+            array_key_exists('user_id', $data)
+            && Auth::user()->can(Permission::PartSubmitProxy)
+        ) {
             $user = User::find($data['user_id']);
         } else {
             $user = Auth::user();
         }
-        $files = collect($data['partfiles'])
+
+        $files = collect($data['partfiles'] ?? [])
             ->reject(function (TemporaryUploadedFile $file) {
+
                 $filename = $file->getClientOriginalName();
-                return isset($this->part_errors[$filename]) || !$file->get();
+
+                return
+                    ! isset($this->fileStates[$filename])
+                    || ($this->fileStates[$filename]['hasErrors'] ?? true)
+                    || ! $file->get();
             })
-            ->map(fn (TemporaryUploadedFile $file) => LDrawFile::fromUploadedFile($file))
-            ->values()
-            ->all();
-        $parts = $manager->submit($files, $user, $data['comments']);
-        $partnames = $parts
-            ->pluck('filename')
-            ->map(fn (string $filename) => basename($filename))
-            ->values()
-            ->all();
-        $this->rejected_files = collect($data['partfiles'])
-            ->map(fn (TemporaryUploadedFile $file) => $file->getClientOriginalName())
-            ->reject(fn (string $file) => in_array($file, $partnames))
-            ->implode(', ');
-        $this->submitted_parts = $parts
-            ->map(fn (Part $p) => [
-                    'image' => $p->getFirstMediaUrl('image', 'thumb'),
-                    'description' => $p->description,
-                    'filename' => $p->filename,
-                    'route' => route('parts.show', $p)
-                ]
+            ->map(fn (TemporaryUploadedFile $file) =>
+            LDrawFile::fromUploadedFile($file)
             )
             ->values()
             ->all();
+
+        $parts = $manager->submit($files, $user, $data['comments']);
+
+        $submittedNames = $parts
+            ->pluck('filename')
+            ->map(fn (string $filename) =>
+            basename($filename)
+            )
+            ->values()
+            ->all();
+
+        $this->rejected_files = collect($data['partfiles'] ?? [])
+            ->map(fn (TemporaryUploadedFile $file) =>
+            $file->getClientOriginalName()
+            )
+            ->reject(fn (string $filename) =>
+            in_array($filename, $submittedNames)
+            )
+            ->implode(', ');
+
+        $this->submitted_parts = $parts
+            ->map(fn (Part $p) => [
+                'image' => $p->getFirstMediaUrl('image', 'thumb'),
+                'description' => $p->description,
+                'filename' => $p->filename,
+                'route' => route('parts.show', $p),
+            ])
+            ->values()
+            ->all();
+
         $this->form->fill();
-        $this->part_errors = collect();
+        $this->fileStates = [];
         $this->dispatch('open-modal', id: 'post-submit');
-    }
-
-    public function getMimeType(TemporaryUploadedFile $file): ?string
-    {
-        $path = $file->getPath() . '/' . $file->getFilename();
-
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $type = finfo_file($finfo, $path);
-
-        if ($type === 'text/plain') {
-            return $type;
-        }
-
-        if ($type === 'image/png') {
-            return @imagecreatefrompng($path) ? $type : null;
-        }
-
-        return $type;
-    }
-
-    protected function removeError(PartError $error): void
-    {
-        foreach ($this->part_messages as $file => $messages) {
-
-            $filtered = $messages
-                ->reject(fn (CheckMessage $m) => $m->error === $error);
-
-            if ($filtered->isEmpty()) {
-                unset($this->part_messages[$file]);
-                $this->dispatch('setFileState', state: true, filename: $file);
-                continue;
-            }
-
-            $this->part_messages[$file] = $filtered;
-        }
     }
 
     public function removeFile(string $filename): void
     {
-        unset($this->part_messages[$filename]);
-    }
-
-    public function checkFiles(): void
-    {
-        collect($this->data['partfiles'])
-            ->each(fn ($file) => $this->checkFile($file->getClientOriginalName()));
-    }
-
-    public function checkFile(string $filename, ?string $fileId = null): void
-    {
-        $file = collect($this->data['partfiles'])
-            ->first(fn ($f) => $f->getClientOriginalName() === $filename);
-
-        if (!$file) {
-            return;
-        }
-
-        $filename = $file->getClientOriginalName();
-        $mimeType = $this->getMimeType($file);
-        $checkmessages = new CheckMessageCollection();
-        $unofficialExists = false;
-        $officialExists = false;
-
-        if ($mimeType === 'text/plain') {
-
-            $content = $file->get();
-            $part = new ParsedPartCollection($content);
-
-            $partname = $part->name() ?? '';
-            $parts = Part::query()->byName($partname)->get();
-
-            $unofficialExists = $parts->unofficial()->isNotEmpty();
-            $officialExists   = $parts->official()->isNotEmpty();
-
-            $checkmessages = app(PartChecker::class)->run($part, $filename);
-
-            if ($part->type() === PartType::Primitive || $part->type()?->inPartsFolder()) {
-                $folder = $part->type() === PartType::Primitive ? 'parts/' : 'p/';
-
-                if ($parts->where('filename', "{$folder}{$partname}")->isNotEmpty()) {
-                    $checkmessages->push(CheckMessage::fromArray([
-                        'checkType' => CheckType::Error,
-                        'error' => PartError::DuplicateFile,
-                        'value' => $part->type() === PartType::Primitive ? 'Parts' : 'Primitive',
-                    ]));
-                }
-            }
-        }
-
-        elseif ($mimeType === 'image/png') {
-
-            $parts = Part::query()
-                ->whereLike('filename', "%{$filename}")
-                ->get();
-
-            $unofficialExists = $parts->unofficial()->isNotEmpty();
-            $officialExists   = $parts->official()->isNotEmpty();
-        }
-
-        else {
-            $checkmessages->push(
-                CheckMessage::fromPartError(PartError::InvalidFileFormat)
-            );
-        }
-
-        if ($unofficialExists && !($this->data['replace'] ?? false)) {
-            $checkmessages->push(CheckMessage::fromPartError(PartError::ReplaceNotSelected));
-        }
-
-        if ($officialExists && !$unofficialExists && !($this->data['official_fix'] ?? false)) {
-            $checkmessages->push(CheckMessage::fromPartError(PartError::FixNotSelected));
-        }
-
-        // --- Store result ---
-        if ($checkmessages->isNotEmpty()) {
-            $this->part_messages[$filename] = $checkmessages;
-            $this->dispatch('setFileState', state: false, filename: $filename, fileId: $fileId);
-            return;
-        }
-
-        // Success path (optional but cleaner symmetry)
-        unset($this->part_messages[$filename]);
-        $this->dispatch('setFileState', state: true, filename: $filename, fileId: $fileId);
+        $this->fileStates = collect($this->fileStates)
+            ->forget($filename)
+            ->all();
     }
 
     #[Layout('components.layout.tracker')]

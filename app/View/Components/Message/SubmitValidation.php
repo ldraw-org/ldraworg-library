@@ -19,10 +19,10 @@ class SubmitValidation extends Component
     public string $filename;
     public function __construct(
         string $filename,
-        Collection $messages
+        array $messages
     ) {
         $this->filename = $filename;
-        $this->messages = $messages
+        $this->messages = CheckMessageCollection::fromArray($messages)
             ->arrayByType();
     }
 

@@ -5,17 +5,22 @@ namespace App\Services\Check;
 use App\Enums\CheckType;
 use Illuminate\Support\Collection;
 
+/**
+ * @extends Collection<int, CheckMessage>
+ */
 class CheckMessageCollection extends Collection
 {
     public static function fromArray(array $messages): self
     {
-        return new self(
-            array_map(
-                fn($message) => $message instanceof CheckMessage
+        return static::make(
+            collect($messages)
+                ->filter()
+                ->map(fn ($message) =>
+                $message instanceof CheckMessage
                     ? $message
-                    : CheckMessage::fromArray($message),
-                $messages
-            )
+                    : CheckMessage::fromArray($message)
+                )
+                ->values()
         );
     }
 
