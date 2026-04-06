@@ -100,23 +100,6 @@ class User extends Authenticatable
     {
         return $this->belongsTo(MybbUser::class, 'forum_user_id', 'uid');
     }
-
-    /** @return Attribute<string, never> */
-    protected function authorString(): Attribute
-    {
-        return Attribute::make(
-            get: function (mixed $value, array $attributes) {
-                if ($attributes['is_legacy'] === 1) {
-                    return $attributes['realname'];
-                } elseif ($attributes['is_ptadmin'] === 1) {
-                    return "[{$attributes['name']}]";
-                } else {
-                    return "{$attributes['realname']} [{$attributes['name']}]";
-                }
-            }
-        );
-    }
-
     #[Scope]
     protected function fromAuthor(Builder $query, string $username, ?string $realname = null): void
     {

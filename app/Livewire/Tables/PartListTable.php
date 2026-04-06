@@ -47,12 +47,12 @@ class PartListTable extends BasicTable
      * @var ?string
      */
     public $tableSearch = '';
-  
+
     public function mount()
     {
         $this->tableSearch = request()->query('tableSearch', '');
     }
-  
+
     public function table(Table $table): Table
     {
         return $table
@@ -124,8 +124,7 @@ class PartListTable extends BasicTable
                         ->icon(LibraryIcon::AuthorConstraint->value)
                         ->selectable(
                             IsRelatedToOperator::make()
-                                ->titleAttribute('name')
-                                ->getOptionLabelFromRecordUsing(fn (User $u) => $u->authorString)
+                                ->titleAttribute('author_string')
                                 ->preload()
                                 ->searchable()
                                 ->multiple(),

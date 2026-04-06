@@ -382,7 +382,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         $text = "0 {$this->data['description']}\n";
         $text .= "0 Name: {$this->data['name']}\n";
         $u = Auth::user();
-        $text .= "0 Author: {$u->authorString}\n";
+        $text .= "0 Author: {$u->author_string}\n";
         $text .= "0 !LDRAW_ORG Unofficial_Shortcut\n";
         $text .= $u->license->ldrawString() . "\n\n";
         $kws = explode(', ', $this->data['keywords']);
