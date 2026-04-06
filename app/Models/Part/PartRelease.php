@@ -58,21 +58,37 @@ class PartRelease extends Model implements HasMedia
     protected function blurb(): Attribute
     {
         return Attribute::make(
-            get: function (mixed $value, array $attributes) {
+            get: function () {
+
                 $prims = 0;
-                $parts = 'no';
-                foreach (json_decode($attributes['new_of_type'], true) ?? [] as $type => $count) {
+                $parts = 0;
+
+                foreach ($this->new_of_type ?? [] as $type => $count) {
+
                     $t = PartType::tryFrom($type);
+
+                    if (! $t) {
+                        continue;
+                    }
+
                     if ($t->isPrimitive()) {
                         $prims += $count;
                     }
-                    if ($t == PartType::Part) {
+
+                    if ($t === PartType::Part) {
                         $parts = $count;
                     }
-
                 }
-                $prims = $prims > 0 ? $prims : 'no';
-                return "This update adds {$attributes['new']} new files to the core library, including {$parts} new parts and {$prims} new primitives";
+
+                $format = fn (int $count, string $word) =>
+                    ($count ?: 'no') . ' new ' . Str::plural($word, $count);
+
+                return "This update adds "
+                    . $format($this->new, 'file')
+                    . " to the core library, including "
+                    . $format($parts, 'part')
+                    . " and "
+                    . $format($prims, 'primitive');
             }
         );
     }
