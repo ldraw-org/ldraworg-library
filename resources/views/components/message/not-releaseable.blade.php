@@ -44,5 +44,5 @@
         </ul>
     </x-message>
 @empty
-    //Do Nothing
+{{-- Do Nothing --}}
 @endforelse
