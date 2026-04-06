@@ -33,7 +33,7 @@ class EditHeaderAction
     public static function make(Part $part, ?string $name = null): EditAction
     {
         $headerEditor = app(PartHeaderEdit::class);
-      
+
         return EditAction::make($name)
             ->label('Edit Header')
             ->record($part)
@@ -99,7 +99,7 @@ class EditHeaderAction
                 ->preload()
                 ->selectablePlaceholder(false)
                 ->in(PartCategory::cases()),
-                Textarea::make('keywords')
+            Textarea::make('keywords')
                 ->helperText(
                     fn (Part $p) =>
                     'Note: keyword order' .
