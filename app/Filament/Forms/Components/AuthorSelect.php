@@ -13,7 +13,6 @@ class AuthorSelect
         return Select::make('user_id')
             ->relationship('user', 'author_string')
             ->searchable()
-            ->preload(false)
             ->selectablePlaceholder(false)
             ->label('Author')
             ->rules(['exists:App\Models\User,id']);

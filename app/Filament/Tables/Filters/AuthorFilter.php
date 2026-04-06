@@ -10,7 +10,8 @@ class AuthorFilter
     public static function make(?string $name = null): SelectFilter
     {
         return SelectFilter::make($name)
-            ->options(User::all()->sortBy('authorString')->pluck('authorString', 'id'))
+            ->relationship('user', 'author_string')
+            ->preload()
             ->searchable()
             ->label('Author');
     }
