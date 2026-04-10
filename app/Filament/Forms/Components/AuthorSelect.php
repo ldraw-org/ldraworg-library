@@ -2,19 +2,18 @@
 
 namespace App\Filament\Forms\Components;
 
-use App\Models\User;
+use App\Filament\Traits\HasAuthorComponentSetup;
 use Filament\Forms\Components\Select;
-use Illuminate\Support\Facades\DB;
 
 class AuthorSelect
 {
+    use HasAuthorComponentSetup;
     public static function make(): Select
     {
-        return Select::make('user_id')
-            ->relationship('user', 'author_string')
-            ->searchable()
+        return static::configureAuthorComponent(
+            Select::make('user_id')
+        )
             ->selectablePlaceholder(false)
-            ->label('Author')
             ->rules(['exists:App\Models\User,id']);
     }
 }
