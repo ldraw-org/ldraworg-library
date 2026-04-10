@@ -5,19 +5,21 @@
     <div class="text-2xl font-bold">
         Parts Tracker File Submit Form
     </div>
-    @if(count($fileStates) > 0)
-        <div class="flex flex-col relative p-2 my-2 space-y-2 border border-gray-200 rounded-lg">
-            <h2 class="absolute top-0 left-2 transform -translate-y-1/2 bg-white px-2 text-md font-semibold text-gray-700">
-                There were file errors/warnings
-            </h2>
-            @foreach($fileStates as $filename => $state)
-                <div wire:key="file-errors-{{ $filename }}">
-                    <div class="font-bold">{{ $filename }}</div>
-                    <x-message.submit-validation filename="{{$filename}}" :messages="$state['messages']" />
-                </div>
-            @endforeach
-        </div>
-    @endif
+    <div wire:key="fileStates-wrapper">
+        @if(count($fileStates) > 0)
+            <div wire:key='fileStates-list' class="flex flex-col relative p-2 my-2 space-y-2 border border-gray-200 rounded-lg">
+                <h2 class="absolute top-0 left-2 transform -translate-y-1/2 bg-white px-2 text-md font-semibold text-gray-700">
+                    There were file errors/warnings
+                </h2>
+                @foreach($fileStates as $filename => $state)
+                    <div wire:key="file-errors-{{ $filename }}">
+                        <div class="font-bold">{{ $filename }}</div>
+                        <x-message.submit-validation filename="{{$filename}}" :$state />
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
     <form wire:submit="create">
         {{ $this->form }}
 
@@ -60,12 +62,14 @@
 
         $wire.on('setFileState', (params) => {
             let fileInput = null;
+            console.log(params);
             const status = params.state ? 'processing-complete' : 'error';
             const el = [...document.querySelectorAll('.filepond--file-info-main')]
                 .find(e => e.textContent.trim() === params.filename);
-
+            console.log(el);
             if (el) {
                 fileInput = el.closest('.filepond--item');
+                console.log(fileInput);
             }
 
             if (fileInput) {

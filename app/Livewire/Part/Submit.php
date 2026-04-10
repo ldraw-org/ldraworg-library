@@ -71,11 +71,6 @@ class Submit extends Component implements HasSchemas
                     ->rules([
                         fn (): Closure => function (string $attribute, $value, Closure $fail) {
                             $totalFiles = count($this->data['partfiles'] ?? []);
-
-                            if ($totalFiles === 0) {
-                                return;
-                            }
-
                             $filesWithErrors = collect($this->fileStates)
                                 ->filter(fn ($state) => $state['hasErrors'] ?? false)
                                 ->count();
@@ -116,8 +111,7 @@ class Submit extends Component implements HasSchemas
                     ->visible(Auth::user()->can(Permission::PartSubmitProxy)),
                 Textarea::make('comments')
                     ->rows(5)
-                    ->nullable()
-                    ->string()
+                    ->nullable(),
             ])
             ->statePath('data')
             ->model(Part::class);
@@ -133,14 +127,21 @@ class Submit extends Component implements HasSchemas
 
     protected function storeFileValidationState(string $filename, CheckMessageCollection $collection): void
     {
-        // store back as array (Livewire-friendly)
+        if ($collection->isEmpty()) {
+            $this->removeFile($filename);
+            $this->dispatch('setFileState',
+                state: true,
+                filename: $filename
+            );
+            return;
+        }
+
         $this->fileStates[$filename]['messages'] = $collection->map->toArray()->all();
 
-        // recalc derived flags
         $this->fileStates[$filename]['hasErrors'] = $collection->hasErrors();
         $this->fileStates[$filename]['hasWarnings'] = $collection->hasWarnings();
         $this->fileStates[$filename]['hasTrackerHolds'] = $collection->hasTrackerHolds();
-        // notify frontend
+
         $this->dispatch('setFileState',
             state: ! $collection->hasErrors(),
             filename: $filename
@@ -156,7 +157,6 @@ class Submit extends Component implements HasSchemas
         }
 
         $ldrawFile = LDrawFile::fromUploadedFile($uploaded);
-
         $messages = $submitFileValidator->validate(
             file: $ldrawFile,
             replace: $this->data['replace'] ?? false,
@@ -168,8 +168,10 @@ class Submit extends Component implements HasSchemas
 
     protected function checkFiles(): void
     {
+        $submitFileValidator = app(SubmitFileValidator::class);
         foreach ($this->data['partfiles'] as $file) {
-            $this->checkFile($file, app(SubmitFileValidator::class));
+            $fileName = $file->getClientOriginalName();
+            $this->checkFile($fileName, $submitFileValidator);
         }
     }
 
@@ -278,9 +280,7 @@ class Submit extends Component implements HasSchemas
 
     public function removeFile(string $filename): void
     {
-        $this->fileStates = collect($this->fileStates)
-            ->forget($filename)
-            ->all();
+        unset($this->fileStates[$filename]);
     }
 
     #[Layout('components.layout.tracker')]
