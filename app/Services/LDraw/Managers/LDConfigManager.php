@@ -83,6 +83,21 @@ class LDConfigManager
         );
     }
 
+    public function ldrawColourOptions(): array
+    {
+        return $this->cache->remember(
+            CacheKey::LdrawColourOptions,
+            fn() => LdrawColour::select('id','code','name', 'value')
+                ->orderBy('code')
+                ->get()
+                ->mapWithKeys(
+                    fn (LdrawColour $color) =>
+                    [$color->code => "<span class=\"{$color->labelTextColor()} rounded px-2 py-1\" style=\"background-color: {$color->value}\">{$color->code} - {$color->name}</span>"]
+                )
+                ->all()
+        );
+    }
+
     public function ldrawColourCodesToRebrickable(): array
     {
         return $this->cache->remember(

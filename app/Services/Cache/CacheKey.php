@@ -12,6 +12,7 @@ enum CacheKey: string
     case PartReleaseCurrent = 'part_release_current';
     case OfficialPartCount = 'official_part_count';
     case LdrawColourCodes = 'ldraw_colour_codes';
+    case LdrawColourOptions = 'ldraw_colour_options';
     case LdrawColourCodesToRebrickable = 'ldraw_colour_codes_to_rebrickable';
     case AvatarParts = 'avatar_parts';
 
@@ -31,6 +32,9 @@ enum CacheKey: string
 
             self::LdrawColourCodes =>
             app(LDConfigManager::class)->ldrawColourCodes(),
+
+            self::LdrawColourOptions =>
+            app(LDConfigManager::class)->ldrawColourOptions(),
 
             self::LdrawColourCodesToRebrickable =>
             app(LDConfigManager::class)->ldrawColourCodesToRebrickable(),
