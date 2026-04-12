@@ -2,28 +2,20 @@
 
 namespace App\Filament\Forms\Components;
 
-use App\Rules\PreviewIsValid;
+use App\Enums\PreviewRotation;
 use Filament\Forms\Components\Select;
+use Illuminate\Validation\Rule;
 
 class PreviewSelect
 {
-    public static function make(): Select
+    public static function make(string $name = 'preview_rotation'): Select
     {
-        return Select::make('preview_rotation')
+        return Select::make($name)
             ->extraAttributes(['class' => 'font-mono'])
-            ->options([
-                '1 0 0 0 1 0 0 0 1' => 'Default (No Rotation)',
-                '1 0 0 0 0 1 0 -1 0' => 'Rotated -90 around X',
-                '1 0 0 0 -1 0 0 0 -1' => 'Rotated 180 around X',
-                '1 0 0 0 0 -1 0 1 0' => 'Rotated 90 around X',
-                '0 0 1 0 1 0 -1 0 0' => 'Rotated -90 around Y',
-                '-1 0 0 0 1 0 0 0 -1' => 'Rotated 180 around Y',
-                '0 0 -1 0 1 0 1 0 0' => 'Rotated 90 around Y',
-                '0 -1 0 1 0 0 0 0 1' => 'Rotated -90 around Z',
-                '-1 0 0 0 -1 0 0 0 1' => 'Rotated 180 around Z',
-                '0 1 0 -1 0 0 0 0 1' => 'Rotated 90 around Z',
-            ])
+            ->options(PreviewRotation::class)
             ->required()
-            ->rules([new PreviewIsValid()]);
+            ->rules([
+                Rule::enum(PreviewRotation::class),
+            ]);
     }
 }

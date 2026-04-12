@@ -10,6 +10,7 @@ use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
+use App\Enums\PreviewRotation;
 use App\Enums\VoteType;
 use App\Models\RebrickablePart;
 use App\Models\Traits\HasErrorScopes;
@@ -83,7 +84,8 @@ class Part extends Model implements HasMedia
     *     'is_dual_mould': 'boolean',
     *     'ready_for_admin': 'boolean',
     *     'rebrickable': 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
-    *     'help': 'array'
+    *     'help': 'array',
+    *     'preview': 'App\\Enums\\PreviewRotation',
     * }
     */
     protected function casts(): array
@@ -106,6 +108,7 @@ class Part extends Model implements HasMedia
             'ready_for_admin' => 'boolean',
             'rebrickable' => AsArrayObject::class,
             'help' => 'array',
+            'preview' => PreviewRotation::class,
         ];
     }
 
@@ -481,19 +484,6 @@ class Part extends Model implements HasMedia
         ]);
     }
 
-    public function previewValues(): array
-    {
-        $preview = is_null($this->preview) ? '16 0 0 0 1 0 0 0 1 0 0 0 1' : $this->preview;
-        preg_match('/([0-9.-]+) ([0-9.-]+) ([0-9.-]+) ([0-9.-]+) ((?:[0-9.-]+ ){8}[0-9.-]+)/u', $preview, $matrix);
-        return [
-            'color' => $matrix[1],
-            'x' => $matrix[2],
-            'y' => $matrix[3],
-            'z' => $matrix[4],
-            'rotation' => $matrix[5]
-        ];
-    }
-
     public function get(bool $dos = true, bool $dataFile = false): string
     {
         if ($this->isTexmap()) {
@@ -836,7 +826,7 @@ class Part extends Model implements HasMedia
         });
         $keywords .= $line !== '' ? "\n0 !KEYWORDS {$line}" : '';
 
-        $preview = !is_null($this->preview) && $this->preview !== '' ? "0 !PREVIEW {$this->preview}" : '';
+        $preview = $this->preview->ldrawString();
         $cmdline = !is_null($this->cmdline) && $this->cmdline !== '' ? "0 !CMDLINE {$this->cmdline}" : '';
         $history = $this->history
               ->map(fn (PartHistory $h): string => $h->toString())

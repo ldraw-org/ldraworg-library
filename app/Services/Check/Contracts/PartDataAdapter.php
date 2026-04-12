@@ -6,6 +6,7 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\License;
 use App\Enums\PartCategory;
+use App\Enums\PreviewRotation;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -23,7 +24,7 @@ interface PartDataAdapter
     public function bfc(): ?string;
     public function category(): ?PartCategory;
     public function keywords(): array;
-    public function preview(): ?array;
+    public function previewRotation(): ?PreviewRotation;
     public function history(): array;
     public function invalidLines(): Collection;
     public function bodyLines(): Collection;

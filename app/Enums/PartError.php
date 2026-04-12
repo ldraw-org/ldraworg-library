@@ -21,7 +21,6 @@ enum PartError: string implements HasLabel
 
     case CircularReference = 'circularreference';
     case BfcNotCcw = 'bfc';
-    case PreviewInvalid = 'previewinvalid';
 
     case LineInvalid = 'line.invalid';
     case InvalidLineType0 = 'line.invalidmeta';
@@ -79,6 +78,7 @@ enum PartError: string implements HasLabel
     case WarningLicense = 'warning.license';
     case WarningDescriptionNumberSpaces = 'warning.descriptionnumbers';
     case WarningDecimalPrecision = 'warning.decimalprecision';
+    case WarningPreviewInvalid = 'warning.previewinvalid';
 
     public function isMultiLine(): bool
     {

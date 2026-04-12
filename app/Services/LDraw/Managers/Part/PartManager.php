@@ -84,7 +84,7 @@ class PartManager
             $type = $p->type();
             return is_null($type) ? PartType::PartTexmap : PartType::tryfrom($type->value . '_Texmap');
         }
-        
+
         return PartType::PartTexmap;
     }
 
@@ -110,7 +110,6 @@ class PartManager
 
         $user = $part->authorUser();
         $filename = $part->type()->folder() . '/' . basename(str_replace('\\', '/', $part->name()));
-        $preview = $part->preview() == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $part->preview();
         $values = [
             'description' => $part->description(),
             'filename' => $filename,
@@ -121,21 +120,11 @@ class PartManager
             'bfc' => $part->headerBfc(),
             'category' => $part->category(),
             'cmdline' => $part->cmdline(),
-            'preview' => $preview,
+            'preview' => $part->previewRotation(),
             'help' => $part->help(),
             'header' => ''
         ];
         $upart = $this->makePart($values);
-        $preview_vals = $upart->previewValues();
-        if ($preview_vals['color'] != 16 ||
-            $preview_vals['x'] != 0 ||
-            $preview_vals['y'] != 0 ||
-            $preview_vals['z'] != 0
-        ) {
-            $upart->preview = '16 0 0 0 ' . $preview_vals['rotation'];
-            $upart->preview = $upart->preview == '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $upart->preview;
-            $upart->save();
-        }
         $upart->setKeywords($part->keywords() ?? []);
         $upart->setHistory($part->history() ?? []);
         $upart->setBody($part->bodyText());

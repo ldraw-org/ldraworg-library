@@ -6,6 +6,7 @@ use App\Enums\License;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
+use App\Enums\PreviewRotation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -32,7 +33,7 @@ class ParsedPartCollection extends Collection
             ->where('meta', $meta)
             ->sortBy('line_number')->first();
     }
-  
+
     public function description(): ?string
     {
         return Arr::get($this->getFirstMeta('description') ?? [], 'description');
@@ -59,17 +60,17 @@ class ParsedPartCollection extends Collection
         if (is_null($author)) {
             return null;
         }
-      
+
         $username = Arr::get($author, 'username');
         $realname = Arr::get($author, 'realname');
 
         $username = $username == '' ? null : $username;
         $realname = $realname == '' ? null : $realname;
-      
+
         if (is_null($username) && is_null($realname)) {
             return null;
-        }        
-        return compact('realname', 'username');        
+        }
+        return compact('realname', 'username');
     }
 
     public function authorUser(): ?User
@@ -84,12 +85,12 @@ class ParsedPartCollection extends Collection
 
     public function type(): ?PartType
     {
-        return PartType::tryFrom(Arr::get($this->getFirstMeta('ldraworg') ?? [], 'type', ''));  
+        return PartType::tryFrom(Arr::get($this->getFirstMeta('ldraworg') ?? [], 'type', ''));
     }
 
     public function type_qualifier(): ?PartTypeQualifier
     {
-        return PartTypeQualifier::tryFrom(Arr::get($this->getFirstMeta('ldraworg') ?? [], 'type_qualifier', ''));  
+        return PartTypeQualifier::tryFrom(Arr::get($this->getFirstMeta('ldraworg') ?? [], 'type_qualifier', ''));
     }
 
     public function license(): ?License
@@ -176,12 +177,22 @@ class ParsedPartCollection extends Collection
         if (is_null($preview)) {
             return null;
         }
-        
+
         return "{$preview['color']} " .
             "{$preview['x1']} {$preview['y1']} {$preview['z1']} " .
-            "{$preview['a']} {$preview['b']} {$preview['c']} " . 
+            "{$preview['a']} {$preview['b']} {$preview['c']} " .
             "{$preview['d']} {$preview['e']} {$preview['f']} " .
             "{$preview['g']} {$preview['h']} {$preview['i']}";
+    }
+
+    public function previewRotation(): ?PreviewRotation
+    {
+        $preview = $this->getFirstMeta('preview');
+        if (is_null($preview)) {
+            return null;
+        }
+
+        return PreviewRotation::tryFrom($preview['rotation_matrix']);
     }
 
     public function history(): ?array
@@ -211,7 +222,7 @@ class ParsedPartCollection extends Collection
             ->unique()
             ->sort();
     }
-  
+
     public function subparts(): ?array
     {
         $subparts = $this
@@ -228,7 +239,7 @@ class ParsedPartCollection extends Collection
             ->map(function (string $subpart) {
                 $subpart = str_replace('\\', '/', $subpart);
                 $isTexture = pathinfo($subpart, PATHINFO_EXTENSION) === 'png';
-            
+
                 return [
                     $isTexture ? 'parts/textures/' . $subpart : 'parts/' . $subpart,
                     $isTexture ? 'p/textures/'     . $subpart : 'p/'     . $subpart,
@@ -236,9 +247,9 @@ class ParsedPartCollection extends Collection
             })
             ->flatMap(fn($paths) => $paths)
             ->all();
-        return count($subparts) ? $subparts : null; 
+        return count($subparts) ? $subparts : null;
     }
-  
+
     public function hasInvalidLines(): bool
     {
         return $this->isNotEmpty() &&
@@ -249,7 +260,7 @@ class ParsedPartCollection extends Collection
     {
         return $this->where('invalid', true)->isEmpty();
     }
-  
+
     public function invalidLineNumbers(): array
     {
         return $this
@@ -334,9 +345,9 @@ class ParsedPartCollection extends Collection
         } elseif (Str::startsWith($suffixes[$suffix_num-1], '-')) {
             return Str::startsWith($suffixes[$suffix_num-2], $letter);
         }
-        return  Str::startsWith($suffixes[$suffix_num-1], $letter);    
+        return  Str::startsWith($suffixes[$suffix_num-1], $letter);
     }
-  
+
     public function isPattern(): bool
     {
         return $this->type()?->inPartsFolder() && $this->lastSuffixStartsWith('p');

@@ -51,7 +51,6 @@ class PartChecker
         \App\Services\Check\PartChecks\BfcIsCcw::class,
         \App\Services\Check\PartChecks\ObsoletePartIsValid::class,
         \App\Services\Check\PartChecks\PatternHasSetKeyword::class,
-        \App\Services\Check\PartChecks\PreviewValuesAreValid::class,
         \App\Services\Check\PartChecks\TrackerHolds::class,
         \App\Services\Check\PartChecks\MinifigCategoryWarning::class,
         \App\Services\Check\PartChecks\LibraryLicenseWarning::class,
@@ -84,7 +83,7 @@ class PartChecker
             if ($check instanceof FilenameAwareCheck) {
                 $check->setFilename($filename);
             }
-          
+
             $results->push(...$check->run($subject));
 
             if ($check->stopOnError && $results->isNotEmpty()) {

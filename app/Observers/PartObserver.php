@@ -52,9 +52,6 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         if ($part->isDirty('cmdline') && trim($part->cmdline) === '') {
             $part->cmdline = null;
         }
-        if ($part->isDirty('preview') && trim($part->preview) === '') {
-            $part->preview = null;
-        }
         /*
                 if ($part->isDirty([
                     'description',

@@ -6,6 +6,7 @@ use App\Enums\PartType;
 use App\Enums\License;
 use App\Enums\PartCategory;
 use App\Enums\PartTypeQualifier;
+use App\Enums\PreviewRotation;
 use App\Models\User;
 use App\Services\Parser\ParsedPartCollection;
 use App\Services\Check\Contracts\PartDataAdapter;
@@ -47,7 +48,7 @@ class ParsedPartAdapter implements PartDataAdapter
     {
         return $this->part->authorUser();
     }
-    
+
     public function type(): ?PartType
     {
         return $this->part->type();
@@ -61,7 +62,7 @@ class ParsedPartAdapter implements PartDataAdapter
     public function license(): ?License
     {
         return $this->part->license();
-    }    
+    }
 
     public function bfc(): ?string
     {
@@ -71,7 +72,7 @@ class ParsedPartAdapter implements PartDataAdapter
     public function category(): ?PartCategory
     {
         return $this->part->category();
-    }    
+    }
 
     public function keywords(): array
     {
@@ -83,9 +84,9 @@ class ParsedPartAdapter implements PartDataAdapter
         return $this->part->hasInvalidPreview();
     }
 
-    public function preview(): ?array
+    public function previewRotation(): ?PreviewRotation
     {
-        return $this->part->where('meta', 'preview')->where('invalid', false)->first();
+        return $this->part->previewRotation();
     }
 
     public function invalidLines(): Collection

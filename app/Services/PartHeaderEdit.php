@@ -6,6 +6,7 @@ use App\Enums\ExternalSite;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
+use App\Enums\PreviewRotation;
 use App\Events\PartHeaderEdited;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
@@ -29,9 +30,8 @@ class PartHeaderEdit
     {
         $data['help'] = implode("\n", $part->help ?? []);
         $data['keywords'] = $this->getPartKeywords($part);
-        $preview = $part->previewValues();
-        $data['preview_rotation'] = $preview['rotation'];
         $data['history'] = $this->getPartHistory($part);
+        $data['preview_rotation'] = $part->preview->value;
         return $data;
     }
 
@@ -42,37 +42,37 @@ class PartHeaderEdit
     {
         $manager = app(PartManager::class);
         $changes = ['old' => [], 'new' => []];
-    
+
         // Merge description and category changes
         $changes = $this->mergeChanges($changes, $this->updateDescriptionAndCategory($part, $data));
-    
+
         // Merge category changes
         $changes = $this->mergeChanges($changes, $this->updateCategory($part, $data));
-    
+
         // Merge type changes
         $changes = $this->mergeChanges($changes, $this->updateType($part, $data));
-    
+
         // Merge type qualifier changes
         $changes = $this->mergeChanges($changes, $this->updateTypeQualifier($part, $data));
-    
+
         // Merge help changes
         $changes = $this->mergeChanges($changes, $this->updateHelp($part, $data));
-    
+
         // Merge keywords changes
         $changes = $this->mergeChanges($changes, $this->updateKeywords($part, $data));
-    
+
         // Merge history changes
         $changes = $this->mergeChanges($changes, $this->updateHistory($part, $data));
-    
+
         // Merge cmdline changes
         $changes = $this->mergeChanges($changes, $this->updateCmdline($part, $data));
-    
+
         // Merge preview changes
         list($part, $previewChanged, $previewChanges) = $this->updatePreview($part, $data);
         if ($previewChanged) {
             $changes = $this->mergeChanges($changes, $previewChanges);
         }
-    
+
         if (count($changes['new']) > 0) {
             $part->save();
             $part->refresh();
@@ -81,13 +81,13 @@ class PartHeaderEdit
                 $manager->updateImage($part);
             }
             $manager->checkPart($part);
-    
+
             // Post an event
             PartHeaderEdited::dispatch($part, Auth::user(), $changes, $data['editcomment'] ?? null);
             Auth::user()->notification_parts()->syncWithoutDetaching([$part->id]);
             UpdateZip::dispatch($part);
         }
-    
+
         return $part;
     }
 
@@ -103,7 +103,7 @@ class PartHeaderEdit
         $currentChanges['new'] = array_merge($currentChanges['new'], $newChanges['new']);
         return $currentChanges;
     }
-    
+
       private function getPartKeywords(Part $part): string
     {
         if (is_null($part->rebrickable_part)) {
@@ -136,7 +136,7 @@ class PartHeaderEdit
             $changes['old']['description'] = $part->description;
             $changes['new']['description'] = $data['description'];
             $part->description = $data['description'];
-            
+
             if ($part->type->inPartsFolder()) {
                 $cat = (new ParsedPartCollection($part->description))->category();
                 if ($cat && $part->category !== $cat) {
@@ -214,10 +214,10 @@ class PartHeaderEdit
     private function updateHelp(Part $part, array $data): array
     {
         $changes = ['old' => [], 'new' => []];
-    
+
         // Get the current help value from the part model, or set to an empty array
         $oldHelp = $part->help ?? [];
-    
+
         // Normalize the incoming help data
         $newHelp = [];
         if (filled($data['help'] ?? null)) {
@@ -226,18 +226,18 @@ class PartHeaderEdit
             $prefixed = "0 !HELP " . str_replace("\n", "\n0 !HELP ", $normalized);
             $newHelp = (new ParsedPartCollection($prefixed))->help() ?? [];
         }
-    
+
         // Compare the old and new help data after trimming and removing excess whitespace
         $normalizedOldHelp = implode("\n", array_map('trim', $oldHelp));
         $normalizedNewHelp = implode("\n", array_map('trim', $newHelp));
-    
+
         // Only consider changes if there is an actual difference in the trimmed/normalized help
         if ($normalizedOldHelp !== $normalizedNewHelp) {
             $changes['old']['help'] = $oldHelp ? "0 !HELP " . implode("\n0 !HELP ", $oldHelp) : '';
             $changes['new']['help'] = $newHelp ? "0 !HELP " . implode("\n0 !HELP ", $newHelp) : '';
             $part->help = $newHelp;  // Update the part's help
         }
-    
+
         return $changes;
     }
 
@@ -325,12 +325,11 @@ class PartHeaderEdit
         $changes = ['old' => [], 'new' => []];
         $previewChanged = false;
 
-        $preview = '16 0 0 0 ' . Str::of(Arr::get($data, 'preview_rotation'))->squish();
-        $preview = $preview === '16 0 0 0 1 0 0 0 1 0 0 0 1' ? null : $preview;
+        $preview = $data['preview_rotation'];
 
         if ($part->preview !== $preview) {
-            $changes['old']['preview'] = $part->preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
-            $changes['new']['preview'] = $preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
+            $changes['old']['preview'] = $part->preview->ldrawString();
+            $changes['new']['preview'] = $preview->ldrawString();
             $part->preview = $preview;
             $previewChanged = true;
         }

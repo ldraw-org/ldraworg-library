@@ -100,99 +100,99 @@ describe('part check', function () {
     })->with([
         'subpart, no tilde' => [
             "0 Brick Test Description\n" .
-            "0 Name: s\\1test.dat\n" . 
+            "0 Name: s\\1test.dat\n" .
             PartType::Subpart->ldrawString(true),
             false
         ],
         'subpart, tilde not first' => [
             "0 =~Brick Test Description\n" .
-            "0 Name: s\\1test.dat\n" . 
+            "0 Name: s\\1test.dat\n" .
             PartType::Subpart->ldrawString(true),
             false
         ],
         'subpart, tilde only' => [
             "0 ~Brick Test Description\n" .
-            "0 Name: s\\1test.dat\n" . 
+            "0 Name: s\\1test.dat\n" .
             PartType::Subpart->ldrawString(true),
             true
         ],
         'subpart, tilde first' => [
             "0 ~|Brick Test Description\n" .
-            "0 Name: s\\1test.dat\n" . 
+            "0 Name: s\\1test.dat\n" .
             PartType::Subpart->ldrawString(true),
             true
         ],
         'alias, no equals' => [
             "0 Brick Test Description\n" .
-            "0 Name: 1test.dat\n" . 
+            "0 Name: 1test.dat\n" .
             PartType::Part->ldrawString(true) . ' ' . PartTypeQualifier::Alias->value,
             false
         ],
         'alias, equals' => [
             "0 =Brick Test Description\n" .
-            "0 Name: 1test.dat\n" . 
+            "0 Name: 1test.dat\n" .
             PartType::Part->ldrawString(true) . ' ' . PartTypeQualifier::Alias->value,
             true
         ],
         'alias, equals with tilde' => [
             "0 ~=Brick Test Description\n" .
-            "0 Name: 1test.dat\n" . 
+            "0 Name: 1test.dat\n" .
             PartType::Part->ldrawString(true) . ' ' . PartTypeQualifier::Alias->value,
             true
         ],
         'moved, no tilde' => [
             "0 Moved to 123\n" .
-            "0 Name: s\\1test.dat\n" . 
+            "0 Name: s\\1test.dat\n" .
             PartType::Part->ldrawString(true),
             false
         ],
         'moved, tilde not first' => [
             "0 =~Moved to 123\n" .
-            "0 Name: s\\1test.dat\n" . 
+            "0 Name: s\\1test.dat\n" .
             PartType::Part->ldrawString(true),
             false
         ],
         'moved, tilde' => [
             "0 ~Moved to 123\n" .
-            "0 Name: s\\1test.dat\n" . 
+            "0 Name: s\\1test.dat\n" .
             PartType::Part->ldrawString(true),
             true
         ],
         'obsolete, no tilde' => [
             "0 Brick Test Description (Obsolete)\n" .
-            "0 Name: s\\1test.dat\n" . 
+            "0 Name: s\\1test.dat\n" .
             PartType::Part->ldrawString(true) . "\n" .
             PartCategory::Obsolete->ldrawString(),
             false
         ],
         'obsolete, tilde' => [
             "0 ~Brick Test Description (Obsolete)\n" .
-            "0 Name: s\\1test.dat\n" . 
+            "0 Name: s\\1test.dat\n" .
             PartType::Part->ldrawString(true) . "\n" .
             PartCategory::Obsolete->ldrawString(),
             true
         ],
         'third party, no pipe' => [
             "0 Brick Test Description\n" .
-            "0 Name: t1000.dat\n" . 
+            "0 Name: t1000.dat\n" .
             PartType::Part->ldrawString(true),
             false
         ],
         'third party, pipe' => [
             "0 |Brick Test Description\n" .
-            "0 Name: t1000.dat\n" . 
+            "0 Name: t1000.dat\n" .
             PartType::Part->ldrawString(true),
             true
         ],
         'third party, pipe with tilde' => [
             "0 ~|Brick Test Description\n" .
-            "0 Name: t1000.dat\n" . 
+            "0 Name: t1000.dat\n" .
             PartType::Part->ldrawString(true),
             true
         ],
         'space after the prefix' => [
             "0 | Brick Test Description\n" .
-            "0 Name: t1000.dat\n" . 
+            "0 Name: t1000.dat\n" .
             PartType::Part->ldrawString(true),
             true
         ],
@@ -291,23 +291,6 @@ describe('part check', function () {
         'valid history username, multi line' => ["0 Test\n0 !HISTORY 2023-03-03 [TestUser] Comment\n0 !HISTORY 2023-03-03 [TestUser2] Comment2", true],
         'valid history realname, one line' => ["0 Test\n0 !HISTORY 2023-03-03 {Test User} Comment\n", true],
         'valid history realname, multi line' => ["0 Test\n0 !HISTORY 2023-03-03 {Test User} Comment\n0 !HISTORY 2023-03-03 {Test User 2} Comment2", true],
-    ]);
-
-    test('check PreviewIsValid', function (?string $input, bool $expected) {
-        expect($input)->toHaveCheckResult($expected, 'PreviewIsValid');
-    })->with([
-        'valid, default' => ["0 Test\n0 !PREVIEW 16 0 0 0 1 0 0 0 1 0 0 0 1", true],
-        'valid, rotation' => ["0 Test\n0 !PREVIEW 16 0 0 0 0.70711 0 -0.70711 0.5 0.70711 0.5 0.5 -0.70711 0.5", true],
-        'valid, missing' => ["0 Test\n0 Name: 3001.dat", true],
-        'invalid color' => ["0 Test\n0 !PREVIEW 123456 0 0 0 1 0 0 0 1 0 0 0 1", false],
-        'invalid, not enough arguments' => ["0 Test\n0 !PREVIEW 0 0 0 1 0 0 0 1 0 0 0 1", false],
-        'invalid, non-number arguments' => ["0 Test\n0 !PREVIEW 16 0 a 0 1 0 0 0 1 0 0 0 1", false],
-        'invalid, malformed number arguments' => ["0 Test\n0 !PREVIEW 16 0 0 .0-1 1 0 0 0 1 0 0 0 1", false],
-        'invalid, singular matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 0 0 0 0 1 0 0 0 1", false],
-        'invalid, negative matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 -1 0 0 0 -1 0 0 0 -1", false],
-        'invalid, mirror matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 0 0 1 0 1 0 1 0 0", false],
-        'invalid, shear matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 1 0 1 0 1 0 0 0 1", false],
-        'invalid, scale matrix' => ["0 Test\n0 !PREVIEW 16 0 0 0 6 0 0 0 1 0 0 0 6", false],
     ]);
 
     test('check LibraryApprovedName', function (string $input, bool $expected) {

@@ -7,7 +7,6 @@ return [
     'authorinvalid' => 'Author line invalid or listed author is not registered',
     'circularreference' => 'Has a self referring Type 1 line',
     'bfc' => 'All parts must be BFC CERTIFY CCW',
-    'previewinvalid' => 'Invalid PREVIEW line or singular/negative matrix',
 
     'obsoleteimproper' => 'An obsolete part must have the category Obsolete and ~Obsolete file or (Obsolete) in the description',
 
@@ -72,7 +71,7 @@ return [
         'trailingzeros' => 'Numbers cannot have trailing zeros',
         'leadingzeros' => 'Numbers cannot have leading zeros (except immediately before the decimal point)',
     ],
-  
+
     'fix' => [
         'checked' => '"New version of official file(s)" must be checked to submit official part updates',
     ],
@@ -94,6 +93,7 @@ return [
         'stickercolor' => 'Ensure stickers that are not color 16 are applied to defined transparent surfaces',
         'license' => 'Parts without CC BY 4.0 license may not be released',
         'descriptionnumbers' => 'Number in description may need a leading space',
-        'decimalprecision' => ':value decimal places exceeds the recommendation for :type in the library specification '
+        'decimalprecision' => ':value decimal places exceeds the recommendation for :type in the library specification',
+        'previewinvalid' => 'PREVIEW line uses non-standard values, reverting to default',
     ]
 ];

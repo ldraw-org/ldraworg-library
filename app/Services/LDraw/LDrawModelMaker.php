@@ -20,9 +20,8 @@ class LDrawModelMaker
         }
         $file = [];
         $topModelName = basename($part->filename, '.dat') . '.ldr';
-        $preview = $part->preview ?? '16 0 0 0 1 0 0 0 1 0 0 0 1';
         $file[] = "0 FILE {$topModelName}";
-        $file[] = "1 {$preview} {$part->meta_name}";
+        $file[] = $part->preview->commandString() . " {$part->meta_name}";
         $file[] = "0 FILE {$part->meta_name}";
         $file[] = $part->get();
         $this->getPartSubparts($part)
