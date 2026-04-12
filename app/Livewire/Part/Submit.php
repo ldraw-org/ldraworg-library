@@ -233,33 +233,30 @@ class Submit extends Component implements HasSchemas
 
                 $filename = $file->getClientOriginalName();
 
-                return
-                    ! isset($this->fileStates[$filename])
-                    || ($this->fileStates[$filename]['hasErrors'] ?? true)
+                return ($this->fileStates[$filename]['hasErrors'] ?? false)
                     || ! $file->get();
             })
             ->map(fn (TemporaryUploadedFile $file) =>
-            LDrawFile::fromUploadedFile($file)
+                LDrawFile::fromUploadedFile($file)
             )
             ->values()
             ->all();
-
         $parts = $manager->submit($files, $user, $data['comments']);
 
         $submittedNames = $parts
             ->pluck('filename')
             ->map(fn (string $filename) =>
-            basename($filename)
+                basename($filename)
             )
             ->values()
             ->all();
 
         $this->rejected_files = collect($data['partfiles'] ?? [])
             ->map(fn (TemporaryUploadedFile $file) =>
-            $file->getClientOriginalName()
+                $file->getClientOriginalName()
             )
             ->reject(fn (string $filename) =>
-            in_array($filename, $submittedNames)
+                in_array($filename, $submittedNames)
             )
             ->implode(', ');
 
