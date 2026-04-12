@@ -47,6 +47,7 @@ class MenuRegistry
                 AdminNavItem::SiteSettings,
                 AdminNavItem::LdConfigEdit,
                 AdminNavItem::KeywordManage,
+                AdminNavItem::PartReleaseManage,
             ]],
             ['label' => 'Users', 'children' =>[
                 AdminNavItem::UsersManage,
@@ -84,7 +85,7 @@ class MenuRegistry
             ]],
         ];
     }
-    
+
     protected static function getSummaries(): array
     {
         return ReviewSummary::ordered()->get()->map(fn($s) => [

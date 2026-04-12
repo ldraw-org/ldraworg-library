@@ -3,6 +3,7 @@
 use App\Enums\PartType;
 use App\Http\Controllers\DocumentIndexController;
 use App\Http\Controllers\DocumentShowController;
+use App\Livewire\Dashboard\Admin\Pages\PartReleaseManagePage;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SupportFilesController;
 use App\Http\Controllers\Part\LastDayDownloadZipController;
@@ -140,6 +141,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/documents', DocumentManagePage::class)->name('documents.index');
     Route::get('/document-categories', DocumentCategoryManagePage::class)->name('document-categories.index');
     Route::get('/part-keywords', PartKeywordManagePage::class)->name('part-keywords.index');
+    Route::get('/part-releases', PartReleaseManagePage::class)->name('part-releases.index');
     Route::get('/settings', LibrarySettingsPage::class)->name('settings.index');
     Route::get('/ldconfig', LdconfigEdit::class)->name('ldconfig.index');
 });

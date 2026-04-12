@@ -10,6 +10,7 @@ enum AdminNavItem implements Navigable
     case SiteSettings;
     case LdConfigEdit;
     case KeywordManage;
+    case PartReleaseManage;
     case UsersManage;
     case RolesManage;
     case DocumentationManage;
@@ -22,6 +23,7 @@ enum AdminNavItem implements Navigable
             self::SiteSettings => 'General Site Settings',
             self::LdConfigEdit => 'Edit LDConfig',
             self::KeywordManage => 'View/Edit Part Keywords',
+            self::PartReleaseManage => 'View/Edit Part Releases',
             self::UsersManage => 'Add/Edit Users',
             self::RolesManage => 'Add/Edit Roles',
             self::DocumentationManage => 'Add/Edit Documentation',
@@ -36,6 +38,7 @@ enum AdminNavItem implements Navigable
             self::SiteSettings => route('admin.settings.index'),
             self::LdConfigEdit => route('admin.ldconfig.index'),
             self::KeywordManage => route('admin.part-keywords.index'),
+            self::PartReleaseManage => route('admin.part-releases.index'),
             self::UsersManage => route('admin.users.index'),
             self::RolesManage => route('admin.roles.index'),
             self::DocumentationManage => route('admin.documents.index'),
@@ -50,10 +53,10 @@ enum AdminNavItem implements Navigable
             self::SiteSettings => Auth::user()?->can(\App\Enums\Permission::SiteSettingsEdit) ?? false,
             self::LdConfigEdit => Auth::user()?->can(\App\Enums\Permission::LdconfigEdit) ?? false,
             self::KeywordManage => Auth::user()?->can('manage', \App\Models\Part\PartKeyword::class) ?? false,
+            self::PartReleaseManage => Auth::user()?->can('manage', \App\Models\Part\PartRelease::class) ?? false,
             self::UsersManage => Auth::user()?->can('add', \App\Models\User::class) ?? false,
             self::RolesManage => Auth::user()?->can('viewAny', \Spatie\Permission\Models\Role::class) ?? false,
-            self::DocumentationManage => Auth::user()?->can('manage', \App\Models\Document\Document::class) ?? false,
-            self::DocumentationCategoryManage => Auth::user()?->can('manage', \App\Models\Document\Document::class) ?? false,
+            self::DocumentationManage, self::DocumentationCategoryManage => Auth::user()?->can('manage', \App\Models\Document\Document::class) ?? false,
             self::ReviewSummariesManage => Auth::user()?->can('manage', \App\Models\ReviewSummary::class) ?? false,
         };
     }
