@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8da8c7c1440f94391afabdd6dbf82327",
+    "content-hash": "0b5a2a4a79da8a786a2aefe80ed9daea",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -6086,12 +6086,12 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/filaforms/blade-mdi.git",
+                "url": "https://github.com/ldraw-org/blade-mdi.git",
                 "reference": "f1e831158bcb997e5a0945193b3bc1914d181edd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filaforms/blade-mdi/zipball/f1e831158bcb997e5a0945193b3bc1914d181edd",
+                "url": "https://api.github.com/repos/ldraw-org/blade-mdi/zipball/f1e831158bcb997e5a0945193b3bc1914d181edd",
                 "reference": "f1e831158bcb997e5a0945193b3bc1914d181edd",
                 "shasum": ""
             },
@@ -6153,7 +6153,7 @@
                 "ui"
             ],
             "support": {
-                "source": "https://github.com/filaforms/blade-mdi/tree/feat/laravel-13-support"
+                "source": "https://github.com/ldraw-org/blade-mdi/tree/master"
             },
             "funding": [
                 {
