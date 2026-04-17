@@ -13,7 +13,7 @@ class PreviewIsValid extends BaseCheck
 
     public function check(): iterable
     {
-        if ($this->part->hasInvalidPreview() || $this->part->previewRotation() === null) {
+        if ($this->part->hasInvalidPreview() || ($this->part->preview() !== null && $this->part->previewRotation() === null)) {
             yield $this->error(CheckType::Warning, PartError::WarningPreviewInvalid);
         }
     }

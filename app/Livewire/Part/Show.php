@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Part;
 
+use App\Services\Part\PartRebrickableService;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use App\Enums\ExternalSite;
@@ -187,7 +188,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('updateRebrickableData')
                 ->action(function () {
-                    app(PartManager::class)->updateRebrickable($this->part);
+                    app(PartRebrickableService::class)->syncRebrickablePart($this->part);
                     Notification::make()
                         ->title('Rebrickable data refreshed')
                         ->success()

@@ -84,6 +84,11 @@ class ParsedPartAdapter implements PartDataAdapter
         return $this->part->hasInvalidPreview();
     }
 
+    public function preview(): ?string
+    {
+        return $this->part->preview();
+    }
+
     public function previewRotation(): ?PreviewRotation
     {
         return $this->part->previewRotation();

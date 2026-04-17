@@ -4,6 +4,7 @@ namespace App\Services\LDraw\Managers\Part;
 
 use App\Enums\PartCategory;
 use App\Enums\PartType;
+use App\Enums\PreviewRotation;
 use App\Events\PartSubmitted;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateParentParts;
@@ -120,7 +121,7 @@ class PartManager
             'bfc' => $part->headerBfc(),
             'category' => $part->category(),
             'cmdline' => $part->cmdline(),
-            'preview' => $part->previewRotation(),
+            'preview' => $part->previewRotation() ?? PreviewRotation::Default,
             'help' => $part->help(),
             'header' => ''
         ];
@@ -166,6 +167,7 @@ class PartManager
             'cmdline' => $part->cmdline,
             'help' => $part->help,
             'header' => $part->header,
+            'preview' => $part->preview,
         ];
         $upart = Part::create($values);
         $upart->setKeywords($part->keywords);
@@ -400,21 +402,6 @@ class PartManager
             $p->unknown_part_number_id = null;
         }
         $p->save();
-    }
-
-    public function updateRebrickable(Part $part, bool $updateOfficial = false): void
-    {
-        if ($part->canSetRebrickablePart()) {
-            if ($part->category == PartCategory::Sticker || $part->category == PartCategory::StickerShortcut) {
-                $rbPart = $this->stickerManager->getStickerPart($part);
-                $part->rebrickable_part()->associate($rbPart);
-                $part->setExternalSiteKeywords($updateOfficial);
-                $part->save();
-                return;
-            }
-            $this->rebrickablePartManager->findOrCreateFromPart($part, $this->rebrickable);
-            $part->setExternalSiteKeywords($updateOfficial);
-        }
     }
 
 }

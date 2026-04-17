@@ -24,6 +24,8 @@ interface PartDataAdapter
     public function bfc(): ?string;
     public function category(): ?PartCategory;
     public function keywords(): array;
+
+    public function preview(): ?string;
     public function previewRotation(): ?PreviewRotation;
     public function history(): array;
     public function invalidLines(): Collection;

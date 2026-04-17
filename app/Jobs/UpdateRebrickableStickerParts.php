@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Part\Part;
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Services\LDraw\Managers\StickerSheetManager;
+use App\Services\Part\PartRebrickableService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -23,10 +24,10 @@ class UpdateRebrickableStickerParts implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(StickerSheetManager $stickerManager, PartManager $partManager): void
+    public function handle(StickerSheetManager $stickerManager, PartRebrickableService $partRebrickableService): void
     {
         $stickerManager->refreshStickerParts();
         Part::whereRelation('rebrickable_part', 'is_local', 'true')
-            ->each(fn (Part $part) => $partManager->updateRebrickable($part));
+            ->each(fn (Part $part) => $partRebrickableService->syncRebrickablePart($part));
     }
 }

@@ -44,6 +44,9 @@ enum PreviewRotation: string implements HasLabel {
     }
 
     public function ldrawString(): string {
+        if ($this === self::Default) {
+            return '';
+        }
         return "0 !PREVIEW {$this->previewString()}";
     }
 }

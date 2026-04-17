@@ -188,6 +188,7 @@ class ParsedPartCollection extends Collection
     public function previewRotation(): ?PreviewRotation
     {
         $preview = $this->getFirstMeta('preview');
+
         if (is_null($preview)) {
             return null;
         }

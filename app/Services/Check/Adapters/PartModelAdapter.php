@@ -97,6 +97,11 @@ class PartModelAdapter implements PartDataAdapter
             ->all();
     }
 
+    public function preview(): ?string
+    {
+        return $this->part->preview->commandString();
+    }
+
     public function previewRotation(): ?PreviewRotation
     {
         return $this->part->preview;

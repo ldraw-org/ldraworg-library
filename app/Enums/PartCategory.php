@@ -123,4 +123,12 @@ enum PartCategory: string
         return in_array($this, $this->inactiveCategories());
     }
 
+    public function isSticker(): bool
+    {
+        return match ($this) {
+            self::Sticker,
+            self::StickerShortcut => true,
+            default => false,
+        };
+    }
 }
