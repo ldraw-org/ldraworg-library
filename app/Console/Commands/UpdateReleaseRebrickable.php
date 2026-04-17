@@ -54,9 +54,9 @@ class UpdateReleaseRebrickable extends Command
             $this->info("All existing RB information is correct");
         } else {
             $parts->whereIn('rebrickable_part.number', $rb_part_nums->diff($rb_nums)->all())
-                ->each(fn (Part $p, int $id): mixed => UpdateRebrickable::dispatch($p, true));
+                ->each(fn (Part $p, int $id): mixed => UpdateRebrickable::dispatch($p->id, true));
             $parts->whereIn('sticker_rebrickable_part.number', $rb_part_nums->diff($rb_nums)->all())
-                ->each(fn (Part $p, int $id): mixed => UpdateRebrickable::dispatch($p, true));
+                ->each(fn (Part $p, int $id): mixed => UpdateRebrickable::dispatch($p->id, true));
         }
         $reject_list = [
             '973.dat',
@@ -71,6 +71,6 @@ class UpdateReleaseRebrickable extends Command
         ];
         $parts->filter(fn (Part $p, int $id): bool => is_null($p->rebrickable_part))
             ->reject(fn (Part $p, int $id): bool => in_array(basename($p?->base_part->filename ?? ''), $reject_list))
-            ->each(fn (Part $p, int $id): mixed => UpdateRebrickable::dispatch($p, true));
+            ->each(fn (Part $p, int $id): mixed => UpdateRebrickable::dispatch($p->id, true));
     }
 }

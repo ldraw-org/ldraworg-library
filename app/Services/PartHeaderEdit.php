@@ -264,7 +264,7 @@ class PartHeaderEdit
             $changes['old']['keywords'] = implode(", ", $partKeywords->all());
             $changes['new']['keywords'] = implode(", ", $new_kws->all());
             $part->setKeywords($new_kws->all());
-            UpdateRebrickable::dispatch($part);
+            UpdateRebrickable::dispatch($part->id);
         }
 
         return $changes;

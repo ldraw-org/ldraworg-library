@@ -199,7 +199,7 @@ class PartManager
             $p->updateReadyForAdmin();
             $this->addUnknownNumber($p);
             UpdateParentParts::dispatch($p);
-            UpdateRebrickable::dispatch($p);
+            UpdateRebrickable::dispatch($p->id);
         });
     }
 
@@ -357,7 +357,7 @@ class PartManager
         $this->addUnknownNumber($part);
         $this->updateBasePart($part);
         UpdateParentParts::dispatch($part);
-        UpdateRebrickable::dispatch($part);
+        UpdateRebrickable::dispatch($part->id);
         return true;
     }
 
@@ -369,7 +369,7 @@ class PartManager
             $part->refresh();
             $this->updateImage($part);
             $this->checkPart($part);
-            UpdateRebrickable::dispatch($part);
+            UpdateRebrickable::dispatch($part->id);
             $part->updateReadyForAdmin();
         }
     }
