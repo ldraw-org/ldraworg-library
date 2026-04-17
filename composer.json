@@ -12,7 +12,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/filaforms/blade-mdi.git"
+            "url": "https://github.com/ldraw-org/blade-mdi.git"
         },
         {
             "type": "vcs",
