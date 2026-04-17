@@ -1,6 +1,7 @@
 <x-mail::message>
 # Parts Tracker Daily Summary for {{$date->format('Y-m-d')}}
 @foreach($parts as $part)
+<x-mail::panel>
 ![{{$part->description}}]({{$message->embed($part->getFirstMediaPath('image', 'feed-image'))}})
 ## [{{$part->filename}} - {{$part->description}}]({{route('parts.show', $part)}})
 @foreach ($part->events->whereBetween('created_at', [$date, $next]) as $event)
@@ -30,6 +31,6 @@ The part was moved/renamed
 
 See [{{route('parts.show', $part)}}]({{route('parts.show', $part)}})
 
----
+</x-mail::panel>
 @endforeach
 </x-mail::message>
