@@ -5,6 +5,8 @@ namespace App\Observers;
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Events\PartDeleted;
 use App\Jobs\UpdateLibraryCsv;
+use App\Services\Part\SubpartSync;
+use App\Services\Part\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Part\Part;
 use App\Models\User;
@@ -21,10 +23,11 @@ class PartObserver implements ShouldHandleEventsAfterCommit
 
     public function deleted(Part $part): void
     {
-        $pm = app(PartManager::class);
-        $part->parents->each(function (Part $p) use ($pm) {
-            $pm->loadSubparts($p);
-            $pm->checkPart($p);
+        $subpartSync = app(SubpartSync::class);
+        $validator = app(Validator::class);
+        $part->parents->each(function (Part $p) use ($subpartSync, $validator) {
+            $subpartSync->loadSubparts($p);
+            $validator->checkPart($p);
         });
         PartDeleted::dispatch(Auth::user() ?? User::find(1), $part->filename, $part->description);
     }

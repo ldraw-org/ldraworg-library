@@ -6,7 +6,7 @@ use App\Models\Part\Part;
 use App\Services\LDraw\Managers\RebrickablePartManager;
 use App\Services\LDraw\Managers\StickerSheetManager;
 
-class PartRebrickableService
+class RebrickableSync
 {
     public function __construct(
         protected StickerSheetManager $stickerSheetManager,

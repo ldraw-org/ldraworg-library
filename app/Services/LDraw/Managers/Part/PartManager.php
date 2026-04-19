@@ -14,13 +14,15 @@ use App\Services\LDraw\Managers\StickerSheetManager;
 use App\Services\LDraw\Render\LDView;
 use App\Models\Part\Part;
 use App\Models\Part\UnknownPartNumber;
-use App\Models\RebrickablePart;
 use App\Models\User;
 use App\Services\Check\CheckMessageCollection;
 use App\Services\Check\PartChecker;
 use App\Services\LDraw\Managers\RebrickablePartManager;
 use App\Services\LDraw\Rebrickable;
 use App\Services\Parser\ParsedPartCollection;
+use App\Services\Part\ImageGenerator;
+use App\Services\Part\SubpartSync;
+use App\Services\Part\Validator;
 use App\Settings\LibrarySettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -36,10 +38,12 @@ class PartManager
     public function __construct(
         public LDView $render,
         protected LibrarySettings $settings,
-        protected PartChecker $checker,
         protected Rebrickable $rebrickable,
         protected StickerSheetManager $stickerManager,
         protected RebrickablePartManager $rebrickablePartManager,
+        protected SubpartSync $subpartSync,
+        protected ImageGenerator $imageGenerator,
+        protected Validator $validator,
     ) {
     }
 
@@ -186,7 +190,7 @@ class PartManager
         }
         $parts->loadMissing('keywords', 'history', 'body', 'user');
         $parts->each(function (Part $p) {
-            $this->loadSubparts($p);
+            $this->subpartSync->loadSubparts($p);
             $p->generateHeader();
         });
         $parts->load('official_part');
@@ -196,39 +200,13 @@ class PartManager
                 $this->updateUnofficialWithOfficialFix($p->official_part);
             };
             $this->updateBasePart($p);
-            $this->updateImage($p);
-            $this->checkPart($p);
+            $this->imageGenerator->regenerateImage($p);
+            $this->validator->checkPart($p);
             $p->updateReadyForAdmin();
             $this->addUnknownNumber($p);
-            UpdateParentParts::dispatch($p);
+            UpdateParentParts::dispatch($p->id);
             UpdateRebrickable::dispatch($p->id);
         });
-    }
-
-    protected function imageOptimize(string $path, string $newPath = ''): void
-    {
-        $optimizerChain = (new OptimizerChain())->addOptimizer(new Optipng([]));
-        if ($newPath !== '') {
-            $optimizerChain->optimize($path, $newPath);
-        } else {
-            $optimizerChain->optimize($path);
-        }
-    }
-
-    public function updateImage(Part $part): void
-    {
-        if ($part->isTexmap()) {
-            $image = imagecreatefromstring($part->get());
-        } else {
-            $image = $this->render->render($part);
-        }
-        $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
-        $imagePath = $dir->path(substr($part->filename, 0, -4) . '.png');
-        imagepng($image, $imagePath);
-        $this->imageOptimize($imagePath);
-        $part->clearMediaCollection('image');
-        $part->addMedia($imagePath)
-            ->toMediaCollection('image');
     }
 
     protected function updateMissing(string $name): void
@@ -236,7 +214,7 @@ class PartManager
         Part::unofficial()
             ->whereJsonContains('missing_parts', $name)
             ->each(function (Part $p) {
-                $this->loadSubparts($p);
+                $this->subpartSync->loadSubparts($p);
             });
     }
 
@@ -245,7 +223,7 @@ class PartManager
         Part::unofficial()->whereHas('subparts', function (Builder $query) use ($officialPart) {
             return $query->where('id', $officialPart->id);
         })->each(function (Part $p) {
-            $this->loadSubparts($p);
+            $this->subpartSync->loadSubparts($p);
         });
     }
 
@@ -338,7 +316,7 @@ class PartManager
         $part->save();
         $part->generateHeader();
         $this->updateBasePart($part);
-        $this->updateImage($part);
+        $this->imageGenerator->regenerateImage($part);
         foreach ($part->parents()->unofficial()->get() as $p) {
             if ($part->type->inPartsFolder() && $p->category === PartCategory::Moved) {
                 $p->description = str_replace($oldname, $part->meta_name, $p->description);
@@ -354,38 +332,13 @@ class PartManager
             $p->body->save();
         }
         $this->updateMissing($part->meta_name);
-        $this->checkPart($part);
+        $this->validator->checkPart($part);
         $part->updateReadyForAdmin();
         $this->addUnknownNumber($part);
         $this->updateBasePart($part);
-        UpdateParentParts::dispatch($part);
+        UpdateParentParts::dispatch($part->id);
         UpdateRebrickable::dispatch($part->id);
         return true;
-    }
-
-    public function loadSubparts(Part $part): void
-    {
-        $hadMissing = is_array($part->missing_parts) && count($part->missing_parts) > 0;
-        $part->setSubparts((new ParsedPartCollection($part->body->body))->subpartFilenames() ?? []);
-        if ($hadMissing) {
-            $part->refresh();
-            $this->updateImage($part);
-            $this->checkPart($part);
-            UpdateRebrickable::dispatch($part->id);
-            $part->updateReadyForAdmin();
-        }
-    }
-
-    public function checkPart(Part $part, ?string $filename = null): void
-    {
-        if ($part->isText()) {
-            $part->check_messages = $this->checker->run($part);
-        } else {
-            $part->check_messages = new CheckMessageCollection();
-        }
-        $part->can_release = $part->isOfficial() || ($part->check_messages->doesntHaveHoldableIssues());
-        $part->updateReadyForAdmin();
-        $part->save();
     }
 
     protected function addUnknownNumber(Part $p): void

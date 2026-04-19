@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdateImage;
+use App\Jobs\GeneratePartImage;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,7 +48,7 @@ class RenderParts extends Command
             ->lazy()
             ->each(function (Part $p) use (&$count, $onlyMissing) {
                 if (!$onlyMissing || !file_exists($p->getFirstMediaPath('image'))) {
-                    UpdateImage::dispatch($p)->onQueue('maintenance');
+                    GeneratePartImage::dispatch($p->id)->onQueue('maintenance');
                     $count++;
                 }
             });

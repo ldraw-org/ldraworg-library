@@ -16,6 +16,8 @@ use App\Models\Part\PartHistory;
 use App\Models\Part\PartKeyword;
 use App\Models\User;
 use App\Services\Parser\ParsedPartCollection;
+use App\Services\Part\ImageGenerator;
+use App\Services\Part\Validator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -40,7 +42,8 @@ class PartHeaderEdit
      */
     public function storeHeaderData(Part $part, array $data): Part
     {
-        $manager = app(PartManager::class);
+        $validator = app(Validator::class);
+        $imageGenerator = app(ImageGenerator::class);
         $changes = ['old' => [], 'new' => []];
 
         // Merge description and category changes
@@ -78,9 +81,9 @@ class PartHeaderEdit
             $part->refresh();
             $part->generateHeader();
             if ($previewChanged) {
-                $manager->updateImage($part);
+                $imageGenerator->updateImage($part);
             }
-            $manager->checkPart($part);
+            $validator->checkPart($part);
 
             // Post an event
             PartHeaderEdited::dispatch($part, Auth::user(), $changes, $data['editcomment'] ?? null);

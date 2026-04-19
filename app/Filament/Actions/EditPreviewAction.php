@@ -5,7 +5,7 @@ namespace App\Filament\Actions;
 use App\Filament\Forms\Components\PreviewSelect;
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
-use App\Services\Part\PartPreviewService;
+use App\Services\Part\PreviewSync;
 use Filament\Actions\EditAction;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +26,7 @@ class EditPreviewAction
                 return $data;
             })
             ->using(function (Part $part, array $data) {
-                app(PartPreviewService::class)->updatePartPreview($part, $data['preview_rotation']);
+                app(PreviewSync::class)->updatePartPreview($part, $data['preview_rotation']);
             })
             ->successNotificationTitle('Header updated')
             ->visible(!$part->isUnofficial() && (Auth::user()?->can('updatePreview', $part) ?? false));

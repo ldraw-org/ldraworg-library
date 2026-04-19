@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdateImage;
+use App\Jobs\GenerateOmrModelImage;
 use App\Models\Omr\OmrModel;
 use Illuminate\Console\Command;
 
@@ -41,7 +41,7 @@ class RenderModels extends Command
             ->lazy()
             ->each(function (OmrModel $m) use (&$count, $onlyMissing) {
                 if (!$onlyMissing || !file_exists($m->getFirstMediaPath('image'))) {
-                    UpdateImage::dispatch($m)->onQueue('maintenance');
+                    GenerateOmrModelImage::dispatch($m->id)->onQueue('maintenance');
                     $count++;
                 }
             });

@@ -2,6 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Services\Cache\CacheService;
+use App\Services\Part\ImageGenerator;
+use App\Services\Part\SubpartSync;
+use App\Services\Part\Validator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,39 +21,33 @@ class UpdateParentParts implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
     public function __construct(
-        protected Part $part
+        protected int $partId
     ) {
     }
 
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
-    public function handle()
+    public function handle(SubpartSync $subpartSync, ImageGenerator $imageGenerator, Validator $validator): void
     {
-        $pm = app(PartManager::class);
-        if (!is_null($this->part->official_part)) {
-            $this->part->official_part->parents()->official()->each(
-                fn (Part $p) => $pm->loadSubparts($p)
+        $part = Part::find($this->partId);
+        if (!$part) {
+            return;
+        }
+
+        if (!is_null($part->official_part)) {
+            $part->official_part->parents()->official()->each(
+                fn (Part $p) => $subpartSync->loadSubparts($p)
             );
         }
         Part::unofficial()
-            ->whereJsonContains('missing_parts', $this->part->meta_name)
-            ->each(function (Part $p) use ($pm) {
-                $pm->loadSubparts($p);
-                $pm->updateImage($p);
+            ->whereJsonContains('missing_parts', $part->meta_name)
+            ->each(function (Part $p) use ($subpartSync, $imageGenerator) {
+                $subpartSync->loadSubparts($p);
+                $imageGenerator->regenerateImage($p);
             });
-        $this->part->ancestors()->each(
-            function (Part $p) use ($pm) {
-                $pm->updateImage($p);
-                $pm->checkPart($p);
+        $part->ancestors()->each(
+            function (Part $p) use ($validator, $imageGenerator) {
+                $imageGenerator->regenerateImage($p);
+                $validator->checkPart($p);
             }
         );
     }

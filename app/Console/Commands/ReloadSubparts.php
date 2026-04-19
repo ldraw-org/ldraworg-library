@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
+use App\Services\Part\SubpartSync;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -39,7 +40,7 @@ class ReloadSubparts extends Command
                 $this->option('official-only') && !$this->option('unofficial-only'),
                 fn (Builder $query) => $query->official()
             )
-            ->each(fn (Part $p) => app(PartManager::class)->loadSubparts($p));
+            ->each(fn (Part $p) => app(SubpartSync::class)->loadSubparts($p));
         $this->info('Subpart reload complete');
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Services\LDraw\Managers;
 
 use App\Enums\License;
-use App\Jobs\UpdateImage;
+use App\Jobs\GenerateOmrModelImage;
 use App\Services\LDraw\Render\LDView;
 use App\Models\Mybb\MybbAttachment;
 use App\Models\Omr\OmrModel;
@@ -70,7 +70,7 @@ class OmrModelManager
         $model->addMediaFromString($modeltext)
             ->usingFilename($model->filename())
             ->toMediaCollection('file');
-        UpdateImage::dispatch($model);
+        GenerateOmrModelImage::dispatch($model->id);
         $file->posthash = true;
         $file->save();
     }

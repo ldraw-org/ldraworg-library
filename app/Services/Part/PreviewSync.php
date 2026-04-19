@@ -6,10 +6,10 @@ use App\Enums\PreviewRotation;
 use App\Models\Part\Part;
 use App\Services\LDraw\Managers\Part\PartManager;
 
-class PartPreviewService
+class PreviewSync
 {
     public function __construct(
-        protected PartManager $partManager,
+        protected ImageGenerator $imageGenerator,
     ) {}
 
     public function updatePartPreview(Part $part, ?PreviewRotation $preview): void
@@ -21,6 +21,6 @@ class PartPreviewService
         $part->has_minor_edit = true;
         $part->save();
         $part->generateHeader();
-        $this->partManager->updateImage($part);
+        $this->imageGenerator->regenerateImage($part);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
-use App\Services\Part\PartRebrickableService;
+use App\Services\Part\RebrickableSync;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -24,7 +24,7 @@ class UpdateRebrickable implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(PartRebrickableService $partRebrickableService): void
+    public function handle(RebrickableSync $partRebrickableService): void
     {
         $part = Part::find($this->partId);
 

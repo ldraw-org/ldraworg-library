@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Part;
 
-use App\Services\Part\PartRebrickableService;
+use App\Services\Part\ImageGenerator;
+use App\Services\Part\RebrickableSync;
+use App\Services\Part\SubpartSync;
+use App\Services\Part\Validator;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use App\Enums\ExternalSite;
@@ -174,7 +177,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('updateImage')
                 ->action(function () {
-                    app(PartManager::class)->updateImage($this->part);
+                    app(ImageGenerator::class)->regenerateImage($this->part);
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Image Updated')
@@ -188,7 +191,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('updateRebrickableData')
                 ->action(function () {
-                    app(PartRebrickableService::class)->syncRebrickablePart($this->part);
+                    app(RebrickableSync::class)->syncRebrickablePart($this->part);
                     Notification::make()
                         ->title('Rebrickable data refreshed')
                         ->success()
@@ -201,7 +204,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('recheckPart')
                 ->action(function () {
-                    app(PartManager::class)->checkPart($this->part);
+                    app(Validator::class)->checkPart($this->part);
                     //$this->part->updatePartStatus();
                     $this->dispatch('subparts-updated');
                     Notification::make()
@@ -216,7 +219,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('updateSubparts')
                 ->action(function () {
-                    app(PartManager::class)->loadSubparts($this->part);
+                    app(SubpartSync::class)->loadSubparts($this->part);
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Subparts Reloaded')

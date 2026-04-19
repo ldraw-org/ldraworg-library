@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
+use App\Services\Part\Validator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,26 +19,14 @@ class CheckPart implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
-        protected Part|Collection $p
+        protected array $partIds
     ) {
     }
 
-    /**
-     * Execute the job.
-     */
-    public function handle(): void
+    public function handle(Validator $validator): void
     {
-        $pm = app(PartManager::class);
-
-        if ($this->p instanceof Part) {
-            $pm->checkPart($this->p);
-        } else {
-            $this->p->load('user', 'history', 'body');
-            $this->p->each(fn (Part $part) => $pm->checkPart($part));
-        }
+        $parts = Part::with(['user', 'history', 'body'])->whereIn('id', $this->partIds)->get();
+        $parts->each(fn (Part $part) => $validator->checkPart($part));
     }
 }

@@ -10,6 +10,7 @@ use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
 use App\Models\Vote;
+use App\Services\Part\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
@@ -61,12 +62,13 @@ class VoteManager
         $part->updatePartStatus();
 
         // Admin vote status changed
+        $validator = app(Validator::class);
         if (($oldVoteIsAdminCert && $vt === VoteType::CancelVote) || $newVoteIsAdminCert) {
             $part
                 ->parentsAndSelf
                 ->merge($part->descendants->unique())
                 ->unofficial()
-                ->each(fn (Part $p) => app(PartManager::class)->checkPart($p));
+                ->each(fn (Part $p) => $validator->checkPart($p));
         }
 
         // Add user to notifications list
@@ -82,7 +84,8 @@ class VoteManager
         $parts->each(fn (Part $p) => $this->castVote($p, $user, VoteType::AdminReview));
 
         // Have to recheck parts since sometimes, based on processing order, subfiles status is missed
-        $parts->each(fn (Part $p) => app(PartManager::class)->checkPart($p));
+        $validator = app(Validator::class);
+        $parts->each(fn (Part $p) => $validator->checkPart($p));
 
     }
 
