@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Part;
 
+use App\Services\Part\BasePartSync;
 use App\Services\Part\ImageGenerator;
 use App\Services\Part\RebrickableSync;
 use App\Services\Part\SubpartSync;
@@ -418,7 +419,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('editBasePart')
             ->label('Refresh Base Part/Meta Data')
-            ->action(fn () => app(PartManager::class)->updateBasePart($this->part))
+            ->action(fn () => app(BasePartSync::class)->syncBasePart($this->part))
             ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 

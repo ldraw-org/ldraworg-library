@@ -15,11 +15,10 @@ use App\Services\LDraw\Render\LDView;
 use App\Models\Part\Part;
 use App\Models\Part\UnknownPartNumber;
 use App\Models\User;
-use App\Services\Check\CheckMessageCollection;
-use App\Services\Check\PartChecker;
 use App\Services\LDraw\Managers\RebrickablePartManager;
 use App\Services\LDraw\Rebrickable;
 use App\Services\Parser\ParsedPartCollection;
+use App\Services\Part\BasePartSync;
 use App\Services\Part\ImageGenerator;
 use App\Services\Part\SubpartSync;
 use App\Services\Part\Validator;
@@ -29,9 +28,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
-use Spatie\ImageOptimizer\OptimizerChain;
-use Spatie\ImageOptimizer\Optimizers\Optipng;
-use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class PartManager
 {
@@ -44,6 +40,7 @@ class PartManager
         protected SubpartSync $subpartSync,
         protected ImageGenerator $imageGenerator,
         protected Validator $validator,
+        protected BasePartSync $basePartSync,
     ) {
     }
 
@@ -199,7 +196,7 @@ class PartManager
             if (!is_null($p->official_part)) {
                 $this->updateUnofficialWithOfficialFix($p->official_part);
             };
-            $this->updateBasePart($p);
+            $this->basePartSync->syncBasePart($p);
             $this->imageGenerator->regenerateImage($p);
             $this->validator->checkPart($p);
             $p->updateReadyForAdmin();
@@ -225,40 +222,6 @@ class PartManager
         })->each(function (Part $p) {
             $this->subpartSync->loadSubparts($p);
         });
-    }
-
-    public function updateBasePart(Part $part): void
-    {
-        if (!$part->type->inPartsFolder() || $part->category == PartCategory::Moved || $part->isObsolete()) {
-            return;
-        }
-        $name = new ParsedPartCollection("0 Name: {$part->meta_name}\n" . $part->type->ldrawString(true));
-        $base = $name->basepart();
-        if (is_null($base) || ("{$base}.dat" == $part->meta_name || "{$base}-f1.dat" == $part->meta_name)) {
-            $part->base_part()->disassociate();
-            $part->is_pattern = false;
-            $part->is_composite = false;
-            $part->save();
-            return;
-        }
-
-        $bp = Part::doesntHave('official_part')
-            ->where(
-                fn ($q) => $q
-                    ->orWhere('filename', "parts/{$base}.dat")
-                    ->orWhere('filename', "parts/{$base}-f1.dat")
-            )
-            ->first();
-
-        if (!is_null($bp)) {
-            $part->base_part()->associate($bp);
-        }
-
-        $part->is_pattern = $name->isPattern();
-        $part->is_composite = $name->isComposite();
-        if ($part->isDirty()) {
-            $part->save();
-        }
     }
 
     public function addMovedTo(Part $oldPart, Part $newPart): ?Part
@@ -315,7 +278,7 @@ class PartManager
         $part->filename = $newName;
         $part->save();
         $part->generateHeader();
-        $this->updateBasePart($part);
+        $this->basePartSync->syncBasePart($part);
         $this->imageGenerator->regenerateImage($part);
         foreach ($part->parents()->unofficial()->get() as $p) {
             if ($part->type->inPartsFolder() && $p->category === PartCategory::Moved) {
@@ -335,7 +298,7 @@ class PartManager
         $this->validator->checkPart($part);
         $part->updateReadyForAdmin();
         $this->addUnknownNumber($part);
-        $this->updateBasePart($part);
+        $this->basePartSync->syncBasePart($part);
         UpdateParentParts::dispatch($part->id);
         UpdateRebrickable::dispatch($part->id);
         return true;
