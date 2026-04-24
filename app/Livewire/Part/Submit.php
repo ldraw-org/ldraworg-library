@@ -4,7 +4,7 @@ namespace App\Livewire\Part;
 
 use App\Enums\CheckType;
 use App\Enums\PartError;
-use App\Services\Submit\SubmitFileValidator;
+use App\Services\Submit\Validator;
 use Filament\Schemas\Schema;
 use App\Enums\PartType;
 use App\Enums\Permission;
@@ -148,7 +148,7 @@ class Submit extends Component implements HasSchemas
         );
     }
 
-    public function checkFile(string $filename, SubmitFileValidator $submitFileValidator): void
+    public function checkFile(string $filename, Validator $submitFileValidator): void
     {
         $uploaded = $this->findUploadedFile($filename);
 
@@ -168,7 +168,7 @@ class Submit extends Component implements HasSchemas
 
     protected function checkFiles(): void
     {
-        $submitFileValidator = app(SubmitFileValidator::class);
+        $submitFileValidator = app(Validator::class);
         foreach ($this->data['partfiles'] as $file) {
             $fileName = $file->getClientOriginalName();
             $this->checkFile($fileName, $submitFileValidator);

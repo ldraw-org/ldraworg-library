@@ -12,7 +12,7 @@ use App\Services\Check\PartChecker;
 use App\Services\LDraw\LDrawFile;
 use App\Services\Parser\ParsedPartCollection;
 
-class SubmitFileValidator
+class Validator
 {
     public function validate(LDrawFile $file, bool $replace, bool $officialFix): CheckMessageCollection
     {

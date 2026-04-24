@@ -5,6 +5,7 @@ namespace App\Services\Part;
 use App\Jobs\UpdateRebrickable;
 use App\Models\Part\Part;
 use App\Services\Parser\ParsedPartCollection;
+use Illuminate\Database\Eloquent\Builder;
 
 class SubpartSync
 {
@@ -36,4 +37,23 @@ class SubpartSync
             ->values()
             ->all();
     }
+
+    public function updateMissing(string $name): void
+    {
+        Part::unofficial()
+            ->whereJsonContains('missing_parts', $name)
+            ->each(function (Part $p) {
+                $this->loadSubparts($p);
+            });
+    }
+
+    public function updateUnofficialWithOfficialFix(Part $officialPart): void
+    {
+        Part::unofficial()->whereHas('subparts', function (Builder $query) use ($officialPart) {
+            return $query->where('id', $officialPart->id);
+        })->each(function (Part $p) {
+            $this->loadSubparts($p);
+        });
+    }
+
 }

@@ -158,4 +158,9 @@ enum PartType: string
     {
         return $this->isDatFormat() ? 'dat' : 'png';
     }
+
+    public function extension(): string
+    {
+        return ".{$this->format()}";
+    }
 }
