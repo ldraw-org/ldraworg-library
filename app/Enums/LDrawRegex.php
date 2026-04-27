@@ -54,7 +54,7 @@ enum LDrawRegex: string {
 
     public function type(): string
     {
-        return Str::snake($this->value);
+        return Str::snake($this->name);
     }
 
     public function hasMatches(string $line): bool
@@ -65,5 +65,12 @@ enum LDrawRegex: string {
     public function match(string $line, &$matches = null): bool
     {
         return (bool) preg_match($this->value, $line, $matches, PREG_UNMATCHED_AS_NULL);
+    }
+
+    public function findIn(string $text, &$matches = null): bool
+    {
+        return collect(explode("\n", $text))->contains(function ($line) use (&$matches) {
+            return $this->match(trim($line), $matches);
+        });
     }
 }

@@ -35,20 +35,4 @@ class PartManager
     ) {
     }
 
-    protected function addUnknownNumber(Part $p): void
-    {
-        $result = preg_match('/parts\/u([0-9]{4}).*\.dat/', $p->filename, $matches);
-        if ($result) {
-            $number = $matches[1];
-            $unk = UnknownPartNumber::firstOrCreate(
-                ['number' => $number],
-                ['user_id' => $p->user->id]
-            );
-            $p->unknown_part_number()->associate($unk);
-        } else {
-            $p->unknown_part_number_id = null;
-        }
-        $p->save();
-    }
-
 }

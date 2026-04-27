@@ -2,10 +2,12 @@
 
 namespace App\Observers;
 
+use App\Events\PartSubmitted;
 use App\Services\LDraw\Managers\Part\PartManager;
 use App\Events\PartDeleted;
 use App\Jobs\UpdateLibraryCsv;
 use App\Services\Part\SubpartSync;
+use App\Services\Part\SyncUnknownPartNumber;
 use App\Services\Part\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Part\Part;
@@ -15,6 +17,15 @@ use Illuminate\Support\Facades\Log;
 
 class PartObserver implements ShouldHandleEventsAfterCommit
 {
+    public function __construct(
+        protected SyncUnknownPartNumber $syncUnknownNumber
+    ) {}
+
+    public function creating(Part $part): void
+    {
+        PartSubmitted::dispatch($part, Auth::user());
+    }
+
     public function deleting(Part $part): void
     {
         $part->putDeletedBackup();
@@ -54,6 +65,10 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         }
         if ($part->isDirty('cmdline') && trim($part->cmdline) === '') {
             $part->cmdline = null;
+        }
+
+        if ($part->isDirty('filename')) {
+            $this->syncUnknownNumber->handle($part);
         }
         /*
                 if ($part->isDirty([

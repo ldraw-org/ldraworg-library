@@ -36,7 +36,6 @@ class Finalizer
             $this->imageGenerator->regenerateImage($p);
             $this->validator->checkPart($p);
             $p->updateReadyForAdmin();
-            $this->addUnknownNumber($p);
             UpdateParentParts::dispatch($p->id);
             UpdateRebrickable::dispatch($p->id);
         });

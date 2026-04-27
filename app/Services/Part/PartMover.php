@@ -95,6 +95,8 @@ class PartMover
 
         if (!$part->type->inPartsFolder() && $newPartType->inPartsFolder()) {
             $part->category = (new ParsedPartCollection($part->header))->category();
+        } else {
+            $part->category = null;
         }
         if ($part->type->folder() !== $newPartType->folder()) {
             $part->type = $newPartType;
@@ -110,7 +112,6 @@ class PartMover
         $this->subpartSync->updateMissing($part->meta_name);
         $this->validator->checkPart($part);
         $part->updateReadyForAdmin();
-        $this->addUnknownNumber($part);
         UpdateParentParts::dispatch($part->id);
         UpdateRebrickable::dispatch($part->id);
 
