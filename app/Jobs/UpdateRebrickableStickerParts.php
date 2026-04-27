@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\Part\Part;
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Services\LDraw\Managers\StickerSheetManager;
 use App\Services\Part\RebrickableSync;
 use Illuminate\Contracts\Queue\ShouldQueue;

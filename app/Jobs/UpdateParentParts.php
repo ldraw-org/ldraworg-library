@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Services\Cache\CacheService;
 use App\Services\Part\ImageGenerator;
 use App\Services\Part\SubpartSync;
 use App\Services\Part\Validator;
@@ -12,7 +11,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Part\Part;
-use App\Services\LDraw\Managers\Part\PartManager;
 
 class UpdateParentParts implements ShouldQueue
 {

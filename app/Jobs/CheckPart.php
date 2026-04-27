@@ -2,12 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Services\Part\Validator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;

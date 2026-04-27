@@ -2,20 +2,16 @@
 
 namespace App\Livewire\Part;
 
-use App\Enums\CheckType;
 use App\Enums\PartError;
+use App\Services\Part\Submit\Registrar;
 use App\Services\Submit\Validator;
 use Filament\Schemas\Schema;
-use App\Enums\PartType;
 use App\Enums\Permission;
 use App\Services\LDraw\LDrawFile;
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
 use App\Services\Check\CheckMessage;
 use App\Services\Check\CheckMessageCollection;
-use App\Services\Check\PartChecker;
-use App\Services\Parser\ParsedPartCollection;
 use Closure;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -23,9 +19,6 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Illuminate\Support\Collection;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
 use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -216,7 +209,7 @@ class Submit extends Component implements HasSchemas
     {
         $this->rejected_files = null;
         $this->submitted_parts = [];
-        $manager = app(PartManager::class);
+        $registrar = app(Registrar::class);
         $data = $this->form->getState();
 
         if (
@@ -241,7 +234,7 @@ class Submit extends Component implements HasSchemas
             )
             ->values()
             ->all();
-        $parts = $manager->submit($files, $user, $data['comments']);
+        $parts = $registrar->submit($files, $user, $data['comments']);
 
         $submittedNames = $parts
             ->pluck('filename')

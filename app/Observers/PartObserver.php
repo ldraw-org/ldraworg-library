@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Events\PartSubmitted;
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Events\PartDeleted;
 use App\Jobs\UpdateLibraryCsv;
 use App\Services\Part\SubpartSync;

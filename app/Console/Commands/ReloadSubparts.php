@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Services\Part\SubpartSync;
 use Illuminate\Console\Command;
