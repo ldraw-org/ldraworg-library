@@ -5,11 +5,18 @@ namespace App\Observers;
 use App\Jobs\MassHeaderGenerate;
 use App\Models\Part\Part;
 use App\Models\User;
+use App\Services\Cache\CacheKey;
+use App\Services\Cache\CacheService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 
 class UserObserver
 {
+    public function __construct(
+        protected CacheService $cacheService
+    )
+    {}
+
     public function saved(User $user): void
     {
         if ($user->wasChanged(['name', 'realname', 'license'])) {
@@ -24,6 +31,9 @@ class UserObserver
                 Part::official()->whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))->update(['has_minor_edit' => true]);
                 MassHeaderGenerate::dispatch(Part::whereHas('history', fn (Builder $q) => $q->where('user_id', $user->id))->get());
             }
+
+            $this->cacheService->reset(CacheKey::UserOptions);
+            $this->cacheService->warm(CacheKey::UserOptions);
         }
         if (app()->environment() == 'production') {
             $user->forum_user->username = $user->realname;
@@ -38,6 +48,7 @@ class UserObserver
         } else {
             Log::debug("User update job run for {$user->name}");
         }
+
     }
 
 }
