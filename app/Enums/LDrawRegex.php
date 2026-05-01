@@ -52,6 +52,11 @@ enum LDrawRegex: string {
         );
     }
 
+    public function regex(): string
+    {
+        return $this === self::Ldraworg ? self::ldrawOrg() : $this->value;
+    }
+
     public function type(): string
     {
         return Str::snake($this->name);
@@ -59,12 +64,12 @@ enum LDrawRegex: string {
 
     public function hasMatches(string $line): bool
     {
-        return preg_match($this->value, $line) === 1;
+        return preg_match($this->regex(), $line) === 1;
     }
 
     public function match(string $line, &$matches = null): bool
     {
-        return (bool) preg_match($this->value, $line, $matches, PREG_UNMATCHED_AS_NULL);
+        return (bool) preg_match($this->regex(), $line, $matches, PREG_UNMATCHED_AS_NULL);
     }
 
     public function findIn(string $text, &$matches = null): bool

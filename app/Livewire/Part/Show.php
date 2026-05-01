@@ -5,7 +5,7 @@ namespace App\Livewire\Part;
 use App\Services\Part\BasePartSync;
 use App\Services\Part\ImageGenerator;
 use App\Services\Part\RebrickableSync;
-use App\Services\Part\SubpartSync;
+use App\Services\Part\SyncSubparts;
 use App\Services\Part\Validator;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
@@ -218,7 +218,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('updateSubparts')
                 ->action(function () {
-                    app(SubpartSync::class)->loadSubparts($this->part);
+                    app(SyncSubparts::class)->loadSubparts($this->part);
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Subparts Reloaded')

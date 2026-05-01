@@ -18,7 +18,7 @@ class SyncUnknownPartNumber
             );
             $p->unknown_part_number->associate($unk);
         } else {
-            $p->unknown_part_number->dissociate();
+            $p->unknown_part_number?->dissociate();
         }
     }
 

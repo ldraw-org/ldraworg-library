@@ -5,7 +5,7 @@ namespace App\Observers;
 use App\Events\PartSubmitted;
 use App\Events\PartDeleted;
 use App\Jobs\UpdateLibraryCsv;
-use App\Services\Part\SubpartSync;
+use App\Services\Part\SyncSubparts;
 use App\Services\Part\SyncUnknownPartNumber;
 use App\Services\Part\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -20,11 +20,6 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         protected SyncUnknownPartNumber $syncUnknownNumber
     ) {}
 
-    public function creating(Part $part): void
-    {
-        PartSubmitted::dispatch($part, Auth::user());
-    }
-
     public function deleting(Part $part): void
     {
         $part->putDeletedBackup();
@@ -33,7 +28,7 @@ class PartObserver implements ShouldHandleEventsAfterCommit
 
     public function deleted(Part $part): void
     {
-        $subpartSync = app(SubpartSync::class);
+        $subpartSync = app(SyncSubparts::class);
         $validator = app(Validator::class);
         $part->parents->each(function (Part $p) use ($subpartSync, $validator) {
             $subpartSync->loadSubparts($p);

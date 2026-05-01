@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Submit;
+namespace App\Services\Part\Submit;
 
 use App\Enums\CheckType;
 use App\Enums\PartError;

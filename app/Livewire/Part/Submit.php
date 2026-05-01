@@ -4,7 +4,7 @@ namespace App\Livewire\Part;
 
 use App\Enums\PartError;
 use App\Services\Part\Submit\Registrar;
-use App\Services\Submit\Validator;
+use App\Services\Part\Submit\Validator;
 use Filament\Schemas\Schema;
 use App\Enums\Permission;
 use App\Services\LDraw\LDrawFile;

@@ -4,6 +4,7 @@ namespace App\Services\Part\Submit;
 
 use App\Enums\PartType;
 use App\Enums\PreviewRotation;
+use App\Events\PartSubmitted;
 use App\Jobs\UpdateZip;
 use App\Models\Part\Part;
 use App\Models\User;
@@ -12,8 +13,9 @@ use App\Services\Parser\ParsedPartCollection;
 use App\Services\Part\BasePartSync;
 use App\Services\Part\Finalizer;
 use App\Services\Part\ImageGenerator;
-use App\Services\Part\SubpartSync;
+use App\Services\Part\SyncSubparts;
 use App\Services\Part\Validator;
+use App\Services\Part\Writer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Str;
@@ -21,11 +23,12 @@ use Illuminate\Support\Str;
 class Registrar
 {
     public function __construct(
-        protected SubpartSync $subpartSync,
+        protected SyncSubparts   $subpartSync,
         protected ImageGenerator $imageGenerator,
-        protected Validator $validator,
-        protected BasePartSync $basePartSync,
-        protected Finalizer $finalizer,
+        protected Validator      $validator,
+        protected BasePartSync   $basePartSync,
+        protected Finalizer      $finalizer,
+        protected Writer $writer,
     ) {}
 
     public function submit(LDrawFile|SupportCollection|array $files, User $user, ?string $comments = null): Collection
@@ -47,6 +50,7 @@ class Registrar
         $parts->each(function (Part $part) use ($user, $comments) {
             $user->notification_parts()->syncWithoutDetaching([$part->id]);
             UpdateZip::dispatch($part);
+            PartSubmitted::dispatch($part, $user);
         });
 
         return $parts;
@@ -83,10 +87,12 @@ class Registrar
             'description' => "{$type->description()} {$filename}",
             'type' => $type,
             'header' => '',
+            'missing_parts' => [],
         ];
-        $upart = $this->makePart($attributes);
-        $upart->setBody(base64_encode($file->contents));
-        return $upart;
+        return $this->writer->createOrUpdate(
+            $attributes,
+            base64_encode($file->contents),
+        );
     }
 
     protected function makePartFromText(LDrawFile $file): Part
@@ -107,14 +113,15 @@ class Registrar
             'cmdline' => $part->cmdline(),
             'preview' => $part->previewRotation() ?? PreviewRotation::Default,
             'help' => $part->help(),
-            'header' => ''
+            'header' => '',
+            'missing_parts' => [],
         ];
-        $upart = $this->makePart($values);
-        $upart->setKeywords($part->keywords() ?? []);
-        $upart->setHistory($part->history() ?? []);
-        $upart->setBody($part->bodyText());
-        $upart->refresh();
-        return $upart;
+        return $this->writer->createOrUpdate(
+            $values,
+            $part->bodyText(),
+            $part->keywords() ?? [],
+            $part->history() ?? []
+        );
     }
 
 

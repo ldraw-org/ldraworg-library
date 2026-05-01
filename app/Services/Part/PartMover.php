@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\Auth;
 class PartMover
 {
     public function __construct(
-        protected SubpartSync $subpartSync,
-        protected Validator $validator,
+        protected SyncSubparts $subpartSync,
+        protected Validator    $validator,
         protected BasePartSync $basePartSync,
-        protected Registrar $registrar,
-        protected Finalizer $finalizer,
+        protected Registrar    $registrar,
+        protected Finalizer    $finalizer,
     ) {}
 
     protected function currentUserId(): int

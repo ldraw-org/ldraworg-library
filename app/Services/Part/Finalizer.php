@@ -10,10 +10,10 @@ use Illuminate\Database\Eloquent\Collection;
 class Finalizer
 {
     public function __construct(
-        protected SubpartSync $subpartSync,
+        protected SyncSubparts   $subpartSync,
         protected ImageGenerator $imageGenerator,
-        protected Validator $validator,
-        protected BasePartSync $basePartSync,
+        protected Validator      $validator,
+        protected BasePartSync   $basePartSync,
     ) {}
 
     public function handle(Part|Collection $parts): void
@@ -23,7 +23,7 @@ class Finalizer
         }
         $parts->loadMissing('keywords', 'history', 'body', 'user');
         $parts->each(function (Part $p) {
-            $this->subpartSync->loadSubparts($p);
+//            $this->subpartSync->loadSubparts($p);
             $p->generateHeader();
         });
         $parts->load('official_part');
@@ -33,7 +33,7 @@ class Finalizer
                 $this->subpartSync->updateUnofficialWithOfficialFix($p->official_part);
             };
             $this->basePartSync->syncBasePart($p);
-            $this->imageGenerator->regenerateImage($p);
+//            $this->imageGenerator->regenerateImage($p);
             $this->validator->checkPart($p);
             $p->updateReadyForAdmin();
             UpdateParentParts::dispatch($p->id);

@@ -17,7 +17,7 @@ use App\Models\Vote;
 use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
 use App\Services\LDraw\ZipFiles;
-use App\Services\Part\SubpartSync;
+use App\Services\Part\SyncSubparts;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Storage;
 class PartReleaseManager
 {
     protected PartRelease $release;
-    protected SubpartSync $subpartSync;
+    protected SyncSubparts $subpartSync;
     protected LibrarySettings $settings;
     protected ZipFiles $zipfiles;
     protected CacheService $cache;
@@ -38,7 +38,7 @@ class PartReleaseManager
         protected bool $includeLdconfig = false,
         protected array $extraFiles = []
     ) {
-        $this->subpartSync = app(SubpartSync::class);
+        $this->subpartSync = app(SyncSubparts::class);
         $this->settings = app(LibrarySettings::class);
         $this->zipfiles = app(ZipFiles::class);
         $this->cache = app(CacheService::class);

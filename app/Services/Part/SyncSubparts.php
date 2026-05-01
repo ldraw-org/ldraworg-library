@@ -7,7 +7,7 @@ use App\Models\Part\Part;
 use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Database\Eloquent\Builder;
 
-class SubpartSync
+class SyncSubparts
 {
     public function __construct(
         protected ImageGenerator $partImageService,
@@ -23,7 +23,6 @@ class SubpartSync
         $missingAfter = $this->normalizeMissingParts($part->missing_parts);
         if ($missingBefore !== $missingAfter) {
             $part->refresh();
-            $this->partImageService->regenerateImage($part);
             $this->partCheckService->checkPart($part);
             UpdateRebrickable::dispatch($part->id);
             $part->updateReadyForAdmin();

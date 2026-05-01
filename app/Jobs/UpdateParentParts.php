@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Services\Part\ImageGenerator;
-use App\Services\Part\SubpartSync;
+use App\Services\Part\SyncSubparts;
 use App\Services\Part\Validator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,7 +24,7 @@ class UpdateParentParts implements ShouldQueue
     ) {
     }
 
-    public function handle(SubpartSync $subpartSync, ImageGenerator $imageGenerator, Validator $validator): void
+    public function handle(SyncSubparts $subpartSync, ImageGenerator $imageGenerator, Validator $validator): void
     {
         $part = Part::find($this->partId);
         if (!$part) {
