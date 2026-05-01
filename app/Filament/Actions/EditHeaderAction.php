@@ -2,11 +2,11 @@
 
 namespace App\Filament\Actions;
 
+use App\Models\User;
 use Filament\Schemas\Components\Utilities\Get;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
-use App\Filament\Forms\Components\AuthorSelect;
 use App\Filament\Forms\Components\PreviewSelect;
 use App\Models\Part\Part;
 use App\Rules\HistoryEditIsValid;
@@ -37,15 +37,15 @@ class EditHeaderAction
         return EditAction::make($name)
             ->label('Edit Header')
             ->record($part)
-            ->schema(self::formSchema($part))
-            ->mutateRecordDataUsing(fn (array $data) => $headerEditor->setupHeaderData($part, $data))
+            ->schema(self::formSchema())
+            ->mutateRecordDataUsing(fn (Part $p, array $data) => $headerEditor->setupHeaderData($p, $data))
             ->using(fn (Part $p, array $data): Part => $headerEditor->storeHeaderData($p, $data))
             ->successNotificationTitle('Header updated')
-            ->visible($part->isUnofficial() && (Auth::user()?->can('update', $part) ?? false));
+            ->visible(fn (Part $p) => $p->isUnofficial() && (Auth::user()?->can('update', $p) ?? false));
     }
 
     /** @return array<Filament\Forms\Components\Component> */
-    protected static function formSchema(Part $part): array
+    protected static function formSchema(): array
     {
         return [
             TextInput::make('description')
@@ -53,10 +53,10 @@ class EditHeaderAction
                 ->required()
                 ->string()
                 ->rules([
-                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($part, $get) {
+                    fn (Part $p, Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($p, $get) {
                         $check_part = [
                             'description' => "0 {$value}",
-                            'name' => "0 Name: {$part->metaName}",
+                            'name' => "0 Name: {$p->metaName}",
                             'type' => PartType::tryFrom($get('type'))?->ldrawString(true),
                             'category' => PartCategory::tryFrom($get('category') ?? '')?->ldrawString(),
                             'keywords' => '0 !KEYWORDS ' . collect(explode(',', Str::of($get('keywords'))->trim()->squish()->replace(["/n", ', ',' ,'], ',')->toString()))->filter()->implode(', ')
@@ -75,15 +75,15 @@ class EditHeaderAction
                 ]),
             Select::make('type')
                 ->options(PartType::options(PartType::partsFolderTypes()))
-                ->hidden(!$part->type->inPartsFolder())
-                ->disabled(!$part->type->inPartsFolder())
+                ->hidden(fn (Part $p) => !$p->type->inPartsFolder())
+                ->disabled(fn (Part $p) => !$p->type->inPartsFolder())
                 ->selectablePlaceholder(false)
                 ->in(PartType::partsFolderTypes()),
             Select::make('type_qualifier')
                 ->options(PartTypeQualifier::options())
                 ->nullable()
-                ->hidden(!$part->type->inPartsFolder())
-                ->disabled(!$part->type->inPartsFolder())
+                ->hidden(fn (Part $p) => !$p->type->inPartsFolder())
+                ->disabled(fn (Part $p) => !$p->type->inPartsFolder())
                 ->in(PartTypeQualifier::cases()),
             Textarea::make('help')
                 ->extraAttributes(['class' => 'font-mono'])
@@ -93,8 +93,8 @@ class EditHeaderAction
             Select::make('category')
                 ->options(PartCategory::options())
                 ->helperText('A !CATEGORY meta will be added only if this differs from the first word in the description')
-                ->hidden(!$part->type->inPartsFolder())
-                ->disabled(!$part->type->inPartsFolder())
+                ->hidden(fn (Part $p) => !$p->type->inPartsFolder())
+                ->disabled(fn (Part $p) => !$p->type->inPartsFolder())
                 ->searchable()
                 ->preload()
                 ->selectablePlaceholder(false)
@@ -103,23 +103,23 @@ class EditHeaderAction
                 ->helperText(
                     fn (Part $p) =>
                     'Note: keyword order' .
-                    (!is_null($part->rebrickable_part) ? ' and external site keywords' : '') .
+                    (!is_null($p->rebrickable_part) ? ' and external site keywords' : '') .
                     ' will not be preserved'
                 )
                 ->extraAttributes(['class' => 'font-mono'])
                 ->nullable()
                 ->string()
                 ->rows(3)
-                ->hidden(!$part->type->inPartsFolder())
-                ->disabled(!$part->type->inPartsFolder())
+                ->hidden(fn (Part $p) => !$p->type->inPartsFolder())
+                ->disabled(fn (Part $p) => !$p->type->inPartsFolder())
                 ->rules([
                     new PatternHasSet(),
                 ]),
             TextInput::make('cmdline')
                 ->nullable()
                 ->extraAttributes(['class' => 'font-mono'])
-                ->hidden(!$part->type->inPartsFolder())
-                ->disabled(!$part->type->inPartsFolder())
+                ->hidden(fn (Part $p) => !$p->type->inPartsFolder())
+                ->disabled(fn (Part $p) => !$p->type->inPartsFolder())
                 ->string(),
             PreviewSelect::make(),
             Repeater::make('history')
@@ -139,7 +139,11 @@ class EditHeaderAction
                         ])
                         ->grow(false)
                         ->required(),
-                    AuthorSelect::make()
+                    Select::make('user_id')
+                        ->options(User::pluck('author_string', 'id')->all())
+                        ->rules(['exists:App\Models\User,id'])
+                        ->searchable()
+                        ->placeholder(false)
                         ->required(),
                     TextInput::make('comment')
                         ->extraAttributes(['class' => 'font-mono'])
