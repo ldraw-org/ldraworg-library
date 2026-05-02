@@ -15,7 +15,7 @@ class MassHeaderGenerate implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        public Collection $parts
+        public array $partIds
     ) {
     }
 
@@ -24,6 +24,11 @@ class MassHeaderGenerate implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->parts->each(fn (Part $p) => $p->generateHeader());
+        Part::whereIn('id', $this->partIds)
+            ->chunkById(100, function ($parts) {
+                foreach ($parts as $part) {
+                    $part->generateHeader();
+                }
+            });
     }
 }
