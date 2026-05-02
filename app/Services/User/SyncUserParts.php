@@ -10,6 +10,11 @@ class SyncUserParts
 {
     public function handle(User $user, array $changes): void
     {
+        $relevantFields = ['name', 'real_name', 'license'];
+        if (empty(array_intersect($relevantFields, array_keys($changes)))) {
+            return;
+        }
+
         if (in_array('license', $changes)) {
             $user->parts()->update(['license' => $user->license]);
         }
