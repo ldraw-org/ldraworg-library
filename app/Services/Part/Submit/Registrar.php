@@ -31,21 +31,22 @@ class Registrar
         protected Writer $writer,
     ) {}
 
-    public function submit(LDrawFile|SupportCollection|array $files, User $user, ?string $comments = null): Collection
+    public function submit(SupportCollection $files, User $user, ?string $comments = null): Collection
     {
-        if (!$files instanceof SupportCollection) {
-            $files = is_array($files) ? $files : [$files];
-            $files = collect($files);
-        }
         // Parse each part into the tracker
-        $parts = new Collection($files->map(function (LDrawFile $file, int $key) use ($files, $user) {
-            if ($file->mimetype == 'image/png') {
-                return $this->makePartFromImage($file, $user, $this->guessPartType($file->filename, $files));
-            } elseif ($file->mimetype == 'text/plain') {
-                return $this->makePartFromText($file);
+        $parts = Part::make()->newCollection();
+
+        foreach ($files as $file) {
+            $part = match($file->mimetype) {
+                'image/png'  => $this->makePartFromImage($file, $user, $this->guessPartType($file->filename, $files)),
+                'text/plain' => $this->makePartFromText($file),
+                default => null,
+            };
+
+            if ($part) {
+                $parts->push($part);
             }
-            return null;
-        })->all());
+        }
         $this->finalizer->handle($parts);
         $parts->each(function (Part $part) use ($user, $comments) {
             $user->notification_parts()->syncWithoutDetaching([$part->id]);

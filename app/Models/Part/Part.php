@@ -847,13 +847,6 @@ class Part extends Model implements HasMedia
         }
     }
 
-    public function putDeletedBackup(): void
-    {
-        $t = time();
-        Storage::put("deleted/library/{$this->filename}.{$t}", $this->get());
-        Storage::put('deleted/library/' . str_replace(['.png', '.dat'], '.evt', $this->filename). ".{$t}", $this->events->toJson());
-    }
-
     public function statusCode(): string
     {
         if ($this->isUnofficial()) {

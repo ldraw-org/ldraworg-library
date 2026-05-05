@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Events\PartSubmitted;
 use App\Events\PartDeleted;
 use App\Jobs\UpdateLibraryCsv;
+use App\Services\Part\Remover;
 use App\Services\Part\SyncSubparts;
 use App\Services\Part\SyncUnknownPartNumber;
 use App\Services\Part\Validator;
@@ -17,35 +18,28 @@ use Illuminate\Support\Facades\Log;
 class PartObserver implements ShouldHandleEventsAfterCommit
 {
     public function __construct(
-        protected SyncUnknownPartNumber $syncUnknownNumber
+        protected SyncUnknownPartNumber $syncUnknownNumber,
+        protected SyncSubparts $syncSubparts,
+        protected Validator $validator,
+        protected Remover $remover,
     ) {}
 
     public function deleting(Part $part): void
     {
-        $part->putDeletedBackup();
-        $part->load('parents');
+        $this->remover->putDeletedBackup($part);
     }
 
     public function deleted(Part $part): void
     {
-        $subpartSync = app(SyncSubparts::class);
-        $validator = app(Validator::class);
-        $part->parents->each(function (Part $p) use ($subpartSync, $validator) {
-            $subpartSync->loadSubparts($p);
-            $validator->checkPart($p);
+        $part->parents->each(function (Part $p) {
+            $this->syncSubparts->loadSubparts($p);
+            $this->validator->checkPart($p);
         });
         PartDeleted::dispatch(Auth::user() ?? User::find(1), $part->filename, $part->description);
     }
 
-
     public function saving(Part $part): void
     {
-        if (config('ldraw.library_debug')) {
-            Log::debug("Saving part {$part->id} ({$part->filename})");
-            if ($part->isDirty('part_status')) {
-                Log::debug("and status changed");
-            }
-        }
         if ($part->isDirty(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
             UpdateLibraryCsv::dispatch();
             if (config('ldraw.library_debug')) {
@@ -64,25 +58,25 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         if ($part->isDirty('filename')) {
             $this->syncUnknownNumber->handle($part);
         }
-        /*
-                if ($part->isDirty([
-                    'description',
-                    'filename',
-                    'user_id',
-                    'type',
-                    'type_qualifier',
-                    'part_release_id',
-                    'help',
-                    'category',
-                    'part_release_id',
-                    'bfc',
-                    'cmdline',
-                    'license',
-                    'preview'
-                ])) {
-                    $part->generateHeader(false);
-                }
-        */
+
+        $headerRelevant = [
+            'description',
+            'filename',
+            'user_id',
+            'type',
+            'type_qualifier',
+            'part_release_id',
+            'help',
+            'category',
+            'part_release_id',
+            'bfc',
+            'cmdline',
+            'license',
+            'preview'
+        ];
+        if ($part->wasChanged($headerRelevant)) {
+            $part->generateHeader();
+        }
     }
 
     /*
@@ -102,6 +96,7 @@ class PartObserver implements ShouldHandleEventsAfterCommit
                 Log::debug("Retrieved part {$part->id} ({$part->filename})");
             }
         }
+    */
 
         public function pivotAttached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
         {
@@ -116,5 +111,4 @@ class PartObserver implements ShouldHandleEventsAfterCommit
                 Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
             }
         }
-    */
 }

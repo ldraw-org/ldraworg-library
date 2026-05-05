@@ -2,10 +2,10 @@
 
 namespace App\Services\Part;
 
+use App\Collections\PartCollection;
 use App\Jobs\UpdateParentParts;
 use App\Jobs\UpdateRebrickable;
 use App\Models\Part\Part;
-use Illuminate\Database\Eloquent\Collection;
 
 class Finalizer
 {
@@ -16,11 +16,8 @@ class Finalizer
         protected BasePartSync   $basePartSync,
     ) {}
 
-    public function handle(Part|Collection $parts): void
+    public function handle(PartCollection $parts): void
     {
-        if ($parts instanceof Part) {
-            $parts = new Collection()->add($parts);
-        }
         $parts->loadMissing('keywords', 'history', 'body', 'user');
         $parts->each(function (Part $p) {
 //            $this->subpartSync->loadSubparts($p);
