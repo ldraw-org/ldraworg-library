@@ -23,6 +23,7 @@ class PartRebrickableService
         if ($part->category->isSticker()) {
             $rbPart = $this->stickerSheetManager->getStickerPart($part);
             $part->rebrickable_part()->associate($rbPart);
+            $part->save();
         } else {
             $this->rebrickablePartManager->findOrCreateFromPart($part);
         }
