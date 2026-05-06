@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Part\Part;
+use App\Services\Part\GenerateHeader;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Queue\Queueable;
@@ -22,12 +23,13 @@ class MassHeaderGenerate implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(GenerateHeader $generateHeader): void
     {
         Part::whereIn('id', $this->partIds)
-            ->chunkById(100, function ($parts) {
+            ->chunkById(100, function ($parts) use ($generateHeader) {
                 foreach ($parts as $part) {
-                    $part->generateHeader();
+                    $generateHeader->updatePartHeader($part);
+                    $part->saveQuietly();
                 }
             });
     }

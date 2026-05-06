@@ -33,7 +33,6 @@ class Registrar
 
     public function submit(SupportCollection $files, User $user, ?string $comments = null): Collection
     {
-        // Parse each part into the tracker
         $parts = Part::make()->newCollection();
 
         foreach ($files as $file) {
@@ -47,6 +46,7 @@ class Registrar
                 $parts->push($part);
             }
         }
+
         $this->finalizer->handle($parts);
         $parts->each(function (Part $part) use ($user, $comments) {
             $user->notification_parts()->syncWithoutDetaching([$part->id]);

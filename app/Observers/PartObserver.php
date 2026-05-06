@@ -2,9 +2,11 @@
 
 namespace App\Observers;
 
+use App\Enums\PreviewRotation;
 use App\Events\PartSubmitted;
 use App\Events\PartDeleted;
 use App\Jobs\UpdateLibraryCsv;
+use App\Services\Part\GenerateHeader;
 use App\Services\Part\Remover;
 use App\Services\Part\SyncSubparts;
 use App\Services\Part\SyncUnknownPartNumber;
@@ -22,6 +24,7 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         protected SyncSubparts $syncSubparts,
         protected Validator $validator,
         protected Remover $remover,
+        protected GenerateHeader $generateHeader,
     ) {}
 
     public function deleting(Part $part): void
@@ -40,23 +43,14 @@ class PartObserver implements ShouldHandleEventsAfterCommit
 
     public function saving(Part $part): void
     {
-        if ($part->isDirty(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
-            UpdateLibraryCsv::dispatch();
-            if (config('ldraw.library_debug')) {
-                Log::debug("Updated library.csv while saving {$part->id} ({$part->filename})");
-            }
-        }
-
-        // Null out empty attributes
-        if ($part->isDirty('help') && !is_null($part->help) && trim(implode('', $part->help)) === '') {
+        if ($part->isDirty('help') && $part->help !== null && trim(implode('', $part->help)) === '') {
             $part->help = null;
         }
-        if ($part->isDirty('cmdline') && trim($part->cmdline) === '') {
+        if ($part->isDirty('cmdline') && $part->cmdline !== null && trim($part->cmdline) === '') {
             $part->cmdline = null;
         }
-
-        if ($part->isDirty('filename')) {
-            $this->syncUnknownNumber->handle($part);
+        if ($part->isDirty('preview') && $part->preview == null) {
+            $part->preview = PreviewRotation::Default;
         }
 
         $headerRelevant = [
@@ -74,41 +68,35 @@ class PartObserver implements ShouldHandleEventsAfterCommit
             'license',
             'preview'
         ];
-        if ($part->wasChanged($headerRelevant)) {
-            $part->generateHeader();
+        if ($part->isDirty($headerRelevant)) {
+            $this->generateHeader->updatePartHeader($part);
         }
     }
 
-    /*
-        public function updating(Part $part): void
-        {
-            if ($part->isDirty()) {
-                $part->generateHeader(false);
-            }
-            if (config('ldraw.library_debug')) {
-                Log::debug("Updated part {$part->id} ({$part->filename})");
-            }
+    public function saved(Part $part): void
+    {
+        if ($part->wasChanged(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
+            UpdateLibraryCsv::dispatch();
         }
 
-        public function retrieved(Part $part): void
-        {
-            if (config('ldraw.library_debug')) {
-                Log::debug("Retrieved part {$part->id} ({$part->filename})");
-            }
+        if ($part->wasChanged('filename')) {
+            $this->syncUnknownNumber->handle($part);
         }
-    */
+    }
 
-        public function pivotAttached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
-        {
-            if (config('ldraw.library_debug')) {
-                Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
-            }
+    public function pivotAttached(Part $part, $relationName): void
+    {
+        if ($relationName === 'keywords') {
+            $this->generateHeader->updatePartHeader($part);
+            $part->saveQuietly();
         }
+    }
 
-        public function pivotDetached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
-        {
-            if (config('ldraw.library_debug')) {
-                Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
-            }
+    public function pivotDetached(Part $part, $relationName): void
+    {
+        if ($relationName === 'keywords') {
+            $this->generateHeader->updatePartHeader($part);
+            $part->saveQuietly();
         }
+    }
 }
