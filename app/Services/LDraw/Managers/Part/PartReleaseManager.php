@@ -17,6 +17,7 @@ use App\Models\Vote;
 use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
 use App\Services\LDraw\ZipFiles;
+use App\Services\Part\BasePartSync;
 use App\Services\Part\SyncSubparts;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Facades\DB;
@@ -216,9 +217,6 @@ class PartReleaseManager
                 $part->part_release_id = $this->release->id;
                 $part->has_minor_edit = false;
                 $part->save();
-                $part->refresh();
-                $part->generateHeader();
-                $part->save();
             });
     }
 
@@ -257,9 +255,6 @@ class PartReleaseManager
             $part->part_release_id = $this->release->id;
             $part->clearMediaCollection('image');
             $part->save();
-            $part->refresh();
-            $part->generateHeader();
-            $part->save();
             if ($part->type->inPartsFolder()) {
                 $this->release
                     ->addMedia(Storage::path($viewImagePath), 'image')
@@ -297,10 +292,7 @@ class PartReleaseManager
         $opart->setKeywords($upart->keywords->pluck('keyword')->values()->all());
         $opart->setHistory($upart->history);
         $opart->setBody($upart->body);
-        $opart->save();
-        $opart->refresh();
-        $opart->generateHeader();
-        $this->manager->updateBasePart($opart);
+        app(BasePartSync::class)->syncBasePart($opart);
         $opart->save();
         return $opart;
     }

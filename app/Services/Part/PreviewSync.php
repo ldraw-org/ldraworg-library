@@ -19,7 +19,5 @@ class PreviewSync
         $part->preview = $preview;
         $part->has_minor_edit = true;
         $part->save();
-        $part->generateHeader();
-        $this->imageGenerator->regenerateImage($part);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Part;
 
 use App\Services\Part\BasePartSync;
+use App\Services\Part\GenerateHeader;
 use App\Services\Part\ImageGenerator;
 use App\Services\Part\RebrickableSync;
 use App\Services\Part\SyncSubparts;
@@ -259,7 +260,8 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('regenerateHeader')
             ->action(function() {
-                $this->part->generateHeader();
+                app(GenerateHeader::class)->updatePartHeader($this->part);
+                $this->part->saveQuietly();
                 Notification::make()
                     ->title('Header Regenerated')
                     ->success()

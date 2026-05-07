@@ -5,6 +5,8 @@ namespace App\Observers;
 use App\Enums\PreviewRotation;
 use App\Events\PartSubmitted;
 use App\Events\PartDeleted;
+use App\Jobs\GeneratePartImage;
+use App\Jobs\UpdateImage;
 use App\Jobs\UpdateLibraryCsv;
 use App\Services\Part\GenerateHeader;
 use App\Services\Part\Remover;
@@ -81,6 +83,10 @@ class PartObserver implements ShouldHandleEventsAfterCommit
 
         if ($part->wasChanged('filename')) {
             $this->syncUnknownNumber->handle($part);
+        }
+
+        if($part->wasChanged('preview')) {
+            GeneratePartImage::dispatch($part->id);
         }
     }
 

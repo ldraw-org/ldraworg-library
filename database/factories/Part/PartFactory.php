@@ -32,14 +32,4 @@ class PartFactory extends Factory
             'header' => '',
         ];
     }
-
-    public function configure(): static
-    {
-        return $this->afterMaking(function (Part $part) {
-            $part->generateHeader(false);
-        })->afterCreating(function (Part $part) {
-            $part->generateHeader(true);
-        });
-    }
-
 }

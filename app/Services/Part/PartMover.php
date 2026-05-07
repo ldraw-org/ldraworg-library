@@ -103,7 +103,7 @@ class PartMover
         }
 
         $part->filename = $newPartName;
-        $part->generateHeader();
+        $part->save();
         if ($part->type->inPartsFolder()) {
             $this->basePartSync->syncBasePart($part);
         }

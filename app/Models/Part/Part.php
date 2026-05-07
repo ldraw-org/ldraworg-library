@@ -644,7 +644,6 @@ class Part extends Model implements HasMedia
 
         $this->setKeywords($keywords);
         $this->load('keywords');
-        $this->generateHeader();
     }
 
     public function setHistory(array|SupportCollection $history): void

@@ -14,6 +14,7 @@ use App\Models\Part\PartHistory;
 use App\Models\Part\PartKeyword;
 use App\Models\User;
 use App\Services\Parser\ParsedPartCollection;
+use App\Services\Part\GenerateHeader;
 use App\Services\Part\ImageGenerator;
 use App\Services\Part\Validator;
 use Illuminate\Support\Arr;
@@ -23,9 +24,11 @@ use Illuminate\Support\Str;
 
 class PartHeaderEdit
 {
-    /**
-     * Setup data for storing header info
-     */
+    public function __construct(
+        protected GenerateHeader $generateHeader,
+    )
+    {}
+
     public function setupHeaderData(Part $part, array $data): array
     {
         $data['help'] = implode("\n", $part->help ?? []);
@@ -76,8 +79,6 @@ class PartHeaderEdit
 
         if (count($changes['new']) > 0) {
             $part->save();
-            $part->refresh();
-            $part->generateHeader();
             if ($previewChanged) {
                 $imageGenerator->updateImage($part);
             }
