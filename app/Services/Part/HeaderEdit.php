@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Part;
 
 use App\Enums\ExternalSite;
 use App\Enums\PartCategory;
@@ -22,7 +22,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class PartHeaderEdit
+class HeaderEdit
 {
     public function __construct(
         protected GenerateHeader $generateHeader,
@@ -79,9 +79,6 @@ class PartHeaderEdit
 
         if (count($changes['new']) > 0) {
             $part->save();
-            if ($previewChanged) {
-                $imageGenerator->updateImage($part);
-            }
             $validator->checkPart($part);
 
             // Post an event

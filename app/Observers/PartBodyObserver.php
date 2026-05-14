@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\CheckPart;
 use App\Jobs\GeneratePartImage;
 use App\Jobs\UpdateImage;
 use App\Models\Part\Part;
@@ -23,6 +24,7 @@ class PartBodyObserver
             $this->subpartSync->loadSubparts($body->part);
             $this->imageGenerator->regenerateImage($body->part);
             $body->part->ancestors->each(fn (Part $part) => GeneratePartImage::dispatch($part->id));
+            CheckPart::dispatch($body->part->id);
         }
     }
 }

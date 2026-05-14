@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\PreviewRotation;
 use App\Events\PartSubmitted;
 use App\Events\PartDeleted;
+use App\Jobs\CheckPart;
 use App\Jobs\GeneratePartImage;
 use App\Jobs\UpdateImage;
 use App\Jobs\UpdateLibraryCsv;
@@ -38,7 +39,7 @@ class PartObserver implements ShouldHandleEventsAfterCommit
     {
         $part->parents->each(function (Part $p) {
             $this->syncSubparts->loadSubparts($p);
-            $this->validator->checkPart($p);
+            CheckPart::dispatch($p->id);
         });
         PartDeleted::dispatch(Auth::user() ?? User::find(1), $part->filename, $part->description);
     }
@@ -54,8 +55,48 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         if ($part->isDirty('preview') && $part->preview == null) {
             $part->preview = PreviewRotation::Default;
         }
+        if ($part->isDirty($this->headerRelevantAttributes())) {
+            $this->generateHeader->updatePartHeader($part);
+        }
+    }
 
-        $headerRelevant = [
+    public function saved(Part $part): void
+    {
+        if ($part->wasChanged($this->headerRelevantAttributes())) {
+            CheckPart::dispatch($part->id);
+        }
+        if ($part->wasChanged(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
+            UpdateLibraryCsv::dispatch();
+        }
+        if ($part->wasChanged('filename')) {
+            $this->syncUnknownNumber->handle($part);
+        }
+        if($part->wasChanged('preview')) {
+            GeneratePartImage::dispatch($part->id);
+        }
+    }
+
+    public function pivotAttached(Part $part, $relationName): void
+    {
+        if ($relationName === 'keywords') {
+            $this->generateHeader->updatePartHeader($part);
+            $part->saveQuietly();
+            CheckPart::dispatch($part->id);
+        }
+    }
+
+    public function pivotDetached(Part $part, $relationName): void
+    {
+        if ($relationName === 'keywords') {
+            $this->generateHeader->updatePartHeader($part);
+            $part->saveQuietly();
+            CheckPart::dispatch($part->id);
+        }
+    }
+
+    protected function headerRelevantAttributes(): array
+    {
+        return [
             'description',
             'filename',
             'user_id',
@@ -70,39 +111,5 @@ class PartObserver implements ShouldHandleEventsAfterCommit
             'license',
             'preview'
         ];
-        if ($part->isDirty($headerRelevant)) {
-            $this->generateHeader->updatePartHeader($part);
-        }
-    }
-
-    public function saved(Part $part): void
-    {
-        if ($part->wasChanged(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
-            UpdateLibraryCsv::dispatch();
-        }
-
-        if ($part->wasChanged('filename')) {
-            $this->syncUnknownNumber->handle($part);
-        }
-
-        if($part->wasChanged('preview')) {
-            GeneratePartImage::dispatch($part->id);
-        }
-    }
-
-    public function pivotAttached(Part $part, $relationName): void
-    {
-        if ($relationName === 'keywords') {
-            $this->generateHeader->updatePartHeader($part);
-            $part->saveQuietly();
-        }
-    }
-
-    public function pivotDetached(Part $part, $relationName): void
-    {
-        if ($relationName === 'keywords') {
-            $this->generateHeader->updatePartHeader($part);
-            $part->saveQuietly();
-        }
     }
 }

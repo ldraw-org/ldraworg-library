@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use function PHPUnit\Framework\isInt;
 
 class CheckPart implements ShouldQueue
 {
@@ -18,8 +19,11 @@ class CheckPart implements ShouldQueue
     use SerializesModels;
 
     public function __construct(
-        protected array $partIds
+        protected int|array $partIds
     ) {
+        if (isInt($this->partIds)) {
+            $this->partIds = [$this->partIds];
+        }
     }
 
     public function handle(Validator $validator): void

@@ -21,11 +21,11 @@ class Finalizer
        $parts->load('official_part');
         $parts->each(function (Part $p) {
             $p->updatePartStatus();
-            if (!is_null($p->official_part)) {
+            if ($p->official_part !== null) {
                 $this->subpartSync->updateUnofficialWithOfficialFix($p->official_part);
             };
-            $this->basePartSync->syncBasePart($p);
-            $this->validator->checkPart($p);
+//            $this->basePartSync->syncBasePart($p);
+//            $this->validator->checkPart($p);
             $p->updateReadyForAdmin();
             UpdateParentParts::dispatch($p->id);
             UpdateRebrickable::dispatch($p->id);

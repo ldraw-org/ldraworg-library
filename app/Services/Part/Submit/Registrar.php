@@ -110,7 +110,7 @@ class Registrar
             'type_qualifier' => $part->type_qualifier(),
             'license' => $user->license,
             'bfc' => $part->headerBfc(),
-            'category' => $part->category(),
+            'category' => $part->type()?->inPartsFolder() ? $part->category() : null,
             'cmdline' => $part->cmdline(),
             'preview' => $part->previewRotation() ?? PreviewRotation::Default,
             'help' => $part->help(),

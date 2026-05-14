@@ -34,7 +34,7 @@ class GenerateHeader
 
 
         $catKeyLines = array_filter([
-            $part->category->ldrawString(),
+            $part->type->inPartsFolder() ? $part->category->ldrawString() : null,
             $this->getKeywordLines($part->keywords)
         ]);
 
