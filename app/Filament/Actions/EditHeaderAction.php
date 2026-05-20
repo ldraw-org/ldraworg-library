@@ -41,7 +41,7 @@ class EditHeaderAction extends EditAction
             ->mutateRecordDataUsing(fn (?Part $record, array $data) => $headerEditor->setupHeaderData($record, $data))
             ->using(fn (?Part $record, array $data): Part => $headerEditor->storeHeaderData($record, $data))
             ->successNotificationTitle('Header updated')
-            ->visible(fn (?Part $record) => $record->isUnofficial() && (Auth::user()?->can('update', $record) ?? false));
+            ->visible(fn (?Part $record) => $record?->isUnofficial() && (Auth::user()?->can('update', $record) ?? false));
     }
 
     protected function formSchema(): array
