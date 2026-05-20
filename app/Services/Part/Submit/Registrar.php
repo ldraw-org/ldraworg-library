@@ -8,6 +8,7 @@ use App\Events\PartSubmitted;
 use App\Jobs\UpdateZip;
 use App\Models\Part\Part;
 use App\Models\User;
+use App\Services\BackupFile;
 use App\Services\LDraw\LDrawFile;
 use App\Services\Parser\ParsedPartCollection;
 use App\Services\Part\BasePartSync;
@@ -131,7 +132,7 @@ class Registrar
         $upart = Part::unofficial()->firstWhere('filename', $values['filename']);
         $opart = Part::official()->firstWhere('filename', $values['filename']);
         if (!is_null($upart)) {
-            store_backup(str_replace('/', '-', $upart->filename), $upart->get());
+            app(BackupFile::class)->handle(str_replace('/', '-', $upart->filename), $upart->get());
             $upart->votes()->delete();
             $upart->fill($values);
             $upart->save();

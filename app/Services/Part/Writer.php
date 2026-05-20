@@ -3,6 +3,7 @@
 namespace App\Services\Part;
 
 use App\Models\Part\Part;
+use App\Services\BackupFile;
 
 class Writer
 {
@@ -11,7 +12,7 @@ class Writer
         $upart = Part::unofficial()->firstWhere('filename', $values['filename']);
         $opart = Part::official()->firstWhere('filename', $values['filename']);
         if ($upart) {
-            store_backup(str_replace('/', '-', $upart->filename), $upart->get());
+            app(BackupFile::class)->handle(str_replace('/', '-', $upart->filename), $upart->get());
             $upart->votes()->delete();
             $upart->fill($values);
         } elseif ($opart) {
