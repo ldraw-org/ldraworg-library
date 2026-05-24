@@ -3,6 +3,7 @@
 namespace App\Services\Check;
 
 use App\Enums\CheckType;
+use App\Services\Check\Traits\InteractsWithCheckMessages;
 use Illuminate\Support\Collection;
 
 /**
@@ -10,6 +11,8 @@ use Illuminate\Support\Collection;
  */
 class CheckMessageCollection extends Collection
 {
+    use InteractsWithCheckMessages;
+
     public static function fromArray(array $messages): self
     {
         return static::make(
@@ -22,93 +25,5 @@ class CheckMessageCollection extends Collection
                 )
                 ->values()
         );
-    }
-
-    public function getErrors(): self
-    {
-        return $this->getCheckType(CheckType::Error);
-    }
-
-    public function getWarnings(): self
-    {
-        return $this->getCheckType(CheckType::Warning);
-    }
-
-    public function getTrackerHolds(): self
-    {
-        return $this->getCheckType(CheckType::TrackerHold);
-    }
-
-    protected function getCheckType(CheckType $checkType): self
-    {
-        return $this->filter(fn (CheckMessage $message)=> $message->checkType == $checkType);
-    }
-
-    public function hasErrors(): bool
-    {
-        return $this->hasCheckType(CheckType::Error);
-    }
-
-    public function hasWarnings(): bool
-    {
-        return $this->hasCheckType(CheckType::Warning);
-    }
-
-    public function hasTrackerHolds(): bool
-    {
-        return $this->hasCheckType(CheckType::TrackerHold);
-    }
-
-    public function doesntHaveErrors(): bool
-    {
-        return !$this->hasErrors();
-    }
-
-    public function doesntHaveWarnings(): bool
-    {
-        return !$this->hasWarnings();
-    }
-
-    public function doesntHaveTrackerHolds(): bool
-    {
-        return !$this->hasTrackerHolds();
-    }
-
-    public function hasIssues(): bool
-    {
-        return $this->hasErrors() || $this->hasWarnings() || $this->hasTrackerHolds();
-    }
-
-    public function doesntHaveIssues(): bool
-    {
-        return !$this->hasIssues();
-    }
-
-    public function hasHoldableIssues(): bool
-    {
-        return $this->hasErrors() || $this->hasTrackerHolds();
-    }
-
-    public function doesntHaveHoldableIssues(): bool
-    {
-        return !$this->hasHoldableIssues();
-    }
-
-    protected function hasCheckType(CheckType $checkType): bool
-    {
-        return $this->contains(fn (CheckMessage $message)=> $message->checkType == $checkType);
-    }
-
-    public function arrayByType(): Collection
-    {
-        return $this
-            ->map(fn (CheckMessage $m) => [
-                'checkType' => $m->checkType->value,
-                'error' => $m->error->value,
-                'message' => $m->message(),
-                'lineNumber' => $m->lineNumber,
-                'text' => $m->text,
-            ])
-            ->groupBy(['checkType', 'error']);
     }
 }

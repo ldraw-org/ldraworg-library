@@ -21,6 +21,7 @@ class NotReleaseable extends Component
         $this->messages = $part
             ->check_messages
             ->arrayByType();
+//        dd($part->check_messages, $this->messages);
     }
 
     protected function makeMessageArray(Part $part): array

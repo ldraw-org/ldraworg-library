@@ -10,12 +10,12 @@ use Livewire\Wireable;
 class CheckMessage implements Wireable
 {
     private function __construct(
-        public CheckType $checkType,
-        public PartError $error,
-        public ?int $lineNumber = null,
-        public ?string $value = null,
-        public ?string $type = null,
-        public ?string $text = null,
+        public CheckType $check_type,
+        public PartError $check,
+        public ?int      $line_number = null,
+        public ?string   $value = null,
+        public ?string   $type = null,
+        public ?string   $text = null,
     ) {
     }
 
@@ -23,7 +23,7 @@ class CheckMessage implements Wireable
     {
         return $this->toArray();
     }
- 
+
     public static function fromLivewire($value)
     {
         return self::fromArray($value);
@@ -36,30 +36,30 @@ class CheckMessage implements Wireable
 
     public static function fromArray(array $checkmessage): self
     {
-        $checkType = Arr::get($checkmessage, 'checkType');
+        $checkType = Arr::get($checkmessage, 'check_type');
         if (! $checkType instanceof CheckType) {
             $checkType = CheckType::tryFrom($checkType);
         }
-        $error = Arr::get($checkmessage, 'error');
+        $error = Arr::get($checkmessage, 'check');
         if (! $error instanceof PartError) {
             $error = PartError::tryFrom($error);
         }
         return new self(
             $checkType,
             $error,
-            Arr::get($checkmessage, 'lineNumber'),
+            Arr::get($checkmessage, 'line_number'),
             Arr::get($checkmessage, 'value'),
             Arr::get($checkmessage, 'type'),
-            Arr::get($checkmessage, 'text'),           
+            Arr::get($checkmessage, 'text'),
         );
     }
 
     public function toArray(): array
     {
         return [
-            'checkType' => $this->checkType,
-            'error' => $this->error,
-            'lineNumber' => $this->lineNumber,
+            'check_type' => $this->check_type,
+            'check' => $this->check,
+            'line_number' => $this->line_number,
             'value' => $this->value,
             'type' => $this->type,
             'text' => $this->text,
@@ -68,6 +68,7 @@ class CheckMessage implements Wireable
 
     public function message(): string
     {
-       return __("partcheck.{$this->error->value}", ['line' => $this->lineNumber, 'value' => $this->value, 'type' => $this->type]);
+        return __("partcheck.{$this->check->value}", ['line' => $this->line_number, 'value' => $this->value, 'type' => $this->type]);
     }
+
 }

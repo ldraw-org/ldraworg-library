@@ -14,7 +14,7 @@ class LibraryApprovedLicense extends BaseCheck
     public function check(): iterable
     {
         if (is_null($this->part->license())) {
-            yield $this->error(CheckType::Error, error: PartError::LicenseNotLibraryApproved);
+            yield $this->error(CheckType::Error, check: PartError::LicenseNotLibraryApproved);
         }
     }
 }

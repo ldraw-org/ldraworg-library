@@ -13,6 +13,7 @@ use App\Enums\PartTypeQualifier;
 use App\Enums\PreviewRotation;
 use App\Enums\VoteType;
 use App\Models\RebrickablePart;
+use App\Models\Traits\HasCheckMessages;
 use App\Models\Traits\HasErrorScopes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -62,7 +63,7 @@ class Part extends Model implements HasMedia
     use HasPartRelease;
     use HasUser;
     use HasFactory;
-    use HasErrorScopes;
+    use HasCheckMessages;
 
     protected $guarded = [];
 
@@ -313,14 +314,6 @@ class Part extends Model implements HasMedia
     protected function activeParts(Builder $query): void
     {
         $query->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved]);
-    }
-
-    protected function checkMessages(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value) => CheckMessageCollection::fromArray(json_decode($value ?? '[]', true)),
-            set: fn (CheckMessageCollection $value) => json_encode($value->toArray())
-        );
     }
 
     protected function metaName(): Attribute

@@ -25,7 +25,7 @@ class ValidLines extends BaseCheck
     {
 
         foreach($this->part->invalidLines() as $line) {
-             yield $this->error(CheckType::Error, error: PartError::LineInvalid, lineNumber: $line['line_number'], text: $line['text']);
+             yield $this->error(CheckType::Error, check: PartError::LineInvalid, line_number: $line['line_number'], text: $line['text']);
         }
 
         $codes = app(LDConfigManager::class)->ldrawColourCodes();
@@ -41,25 +41,25 @@ class ValidLines extends BaseCheck
                 if (preg_match('~\d*\.\d{5,}~', $line['text'], $matches)) {
                     $decimalCount = strlen(substr(strrchr($matches[0], "."), 1));
                     if ($decimalCount >= 6) {
-                        yield $this->error(CheckType::Error, error: PartError::DecimalPrecision, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::DecimalPrecision, line_number: $line['line_number'], text: $line['text']);
                     } elseif ($decimalCount > 3 && $this->part->type()->isNotPrimitive() || $decimalCount > 4 && $this->part->type()->isPrimitive()) {
-                        yield $this->error(CheckType::Warning, error: PartError::WarningDecimalPrecision, lineNumber: $line['line_number'], type: $this->part->type()->value, value: $decimalCount, text: $line['text']);
+                        yield $this->error(CheckType::Warning, check: PartError::WarningDecimalPrecision, line_number: $line['line_number'], type: $this->part->type()->value, value: $decimalCount, text: $line['text']);
                     }
                 }
                 if (preg_match('~\.\d*?0(\h|$)~', $line['text'])) {
-                    yield $this->error(CheckType::Error, PartError::TrailingZeros, lineNumber: $line['line_number'], text: $line['text']);
+                    yield $this->error(CheckType::Error, PartError::TrailingZeros, line_number: $line['line_number'], text: $line['text']);
                 }
                 if (preg_match('~(?<=\h|^)-?0\d+\.?\d*(?=\h)~', $line['text'])) {
-                    yield $this->error(CheckType::Error, PartError::LeadingZeros, lineNumber: $line['line_number'], text: $line['text']);
+                    yield $this->error(CheckType::Error, PartError::LeadingZeros, line_number: $line['line_number'], text: $line['text']);
                 }
             }
             if (Str::doesntStartWith($line['color'], '0x') && !in_array($line['color'], $codes)) {
-                yield $this->error(CheckType::Error, error: PartError::InvalidLineColor, lineNumber: $line['line_number'], text: $line['text']);
+                yield $this->error(CheckType::Error, check: PartError::InvalidLineColor, line_number: $line['line_number'], text: $line['text']);
             }
             switch ($line['linetype']) {
                 case '1':
                     if ($line['color'] == '24') {
-                        yield $this->error(CheckType::Error, error: PartError::InvalidLineColor, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::InvalidLineColor, line_number: $line['line_number'], text: $line['text']);
                     }
                     $matrix = MatrixFactory::create([
                         [$line['a'], $line['b'], $line['c'], $line['x1']],
@@ -68,24 +68,24 @@ class ValidLines extends BaseCheck
                         [0, 0, 0, 1],
                     ]);
                     if ($matrix->isSingular()) {
-                        yield $this->error(CheckType::Error, error: PartError::RotationMatrixIsSingular, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::RotationMatrixIsSingular, line_number: $line['line_number'], text: $line['text']);
                     }
                     break;
                 case '2':
                     if ($line['color'] != '24') {
-                        yield $this->error(CheckType::Error, error: PartError::InvalidColoredLines, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::InvalidColoredLines, line_number: $line['line_number'], text: $line['text']);
                     }
                     $points = MatrixFactory::create([
                         [$line['x1'], $line['y1'], $line['z1']],
                         [$line['x2'], $line['y2'], $line['z2']]
                     ]);
                     if ($points[0] == $points[1]) {
-                        yield $this->error(CheckType::Error, error: PartError::IdenticalPoints, lineNumber: $line['line_number']);
+                        yield $this->error(CheckType::Error, check: PartError::IdenticalPoints, line_number: $line['line_number']);
                     }
                     break;
                 case '3':
                     if ($line['color'] == '24') {
-                        yield $this->error(CheckType::Error, error: PartError::InvalidColor24, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::InvalidColor24, line_number: $line['line_number'], text: $line['text']);
                     }
                     $points = [
                         [(float) $line['x1'], (float) $line['y1'], (float) $line['z1']],
@@ -96,17 +96,17 @@ class ValidLines extends BaseCheck
                         $points[1] == $points[2] ||
                         $points[2] == $points[0]
                     ) {
-                        yield $this->error(CheckType::Error, error: PartError::IdenticalPoints, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::IdenticalPoints, line_number: $line['line_number'], text: $line['text']);
                         break;
                     }
                     $angle = $this->vector->hasColinearPoints($points);
                     if ($angle !== false) {
-                        yield $this->error(CheckType::Error, error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle, text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::PointsColinear, line_number: $line['line_number'], value: $angle, text: $line['text']);
                     }
                     break;
                 case '4':
                     if ($line['color'] == '24') {
-                        yield $this->error(CheckType::Error, error: PartError::InvalidColor24, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::InvalidColor24, line_number: $line['line_number'], text: $line['text']);
                     }
                     $points = [
                         [(float) $line['x1'], (float) $line['y1'], (float) $line['z1']],
@@ -121,30 +121,30 @@ class ValidLines extends BaseCheck
                         $points[0] == $points[2] ||
                         $points[3] == $points[1]
                     ) {
-                        yield $this->error(CheckType::Error, error: PartError::IdenticalPoints, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::IdenticalPoints, line_number: $line['line_number'], text: $line['text']);
                         break;
                     }
                     $angle = $this->vector->hasColinearPoints($points);
                     if ($angle !== false) {
-                        yield $this->error(CheckType::Error, error: PartError::PointsColinear, lineNumber: $line['line_number'], value: $angle, text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::PointsColinear, line_number: $line['line_number'], value: $angle, text: $line['text']);
                         break;
                     }
 
                     if (!$this->vector->isConvexQuad($points)) {
-                        yield $this->error(CheckType::Error, error: PartError::QuadNotConvex, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::QuadNotConvex, line_number: $line['line_number'], text: $line['text']);
                         break;
                     }
 
                     $angle = $this->vector->getMaxCoplanarAngle($points);
                     if ($angle > config('ldraw.check.coplanar_angle_error')) {
-                        yield $this->error(CheckType::Error, error: PartError::QuadNotCoplanar, lineNumber: $line['line_number'], value: $angle, text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::QuadNotCoplanar, line_number: $line['line_number'], value: $angle, text: $line['text']);
                     } elseif ($angle > config('ldraw.check.coplanar_angle_warning')) {
-                        yield $this->error(CheckType::Warning, error: PartError::WarningNotCoplanar, lineNumber: $line['line_number'], value: $angle, text: $line['text']);
+                        yield $this->error(CheckType::Warning, check: PartError::WarningNotCoplanar, line_number: $line['line_number'], value: $angle, text: $line['text']);
                     }
                     break;
                 case '5':
                     if ($line['color'] != '24') {
-                        yield $this->error(CheckType::Error, error: PartError::InvalidColoredLines, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::InvalidColoredLines, line_number: $line['line_number'], text: $line['text']);
                     }
                     $points = MatrixFactory::create([
                         [$line['x1'], $line['y1'], $line['z1']],
@@ -154,7 +154,7 @@ class ValidLines extends BaseCheck
                     ]);
                     if ($points[0] == $points[1] ||
                         $points[2] == $points[3]) {
-                        yield $this->error(CheckType::Error, error: PartError::IdenticalPoints, lineNumber: $line['line_number'], text: $line['text']);
+                        yield $this->error(CheckType::Error, check: PartError::IdenticalPoints, line_number: $line['line_number'], text: $line['text']);
                     }
                     break;
             }

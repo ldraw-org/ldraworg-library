@@ -13,7 +13,7 @@ class NameAndPartType extends BaseCheck
         $name = str_replace('\\', '/', $this->part->name());
         $file = $this->part->type()?->nameFolder() == '' ? basename($name) : $this->part->type()?->nameFolder() . '\\' . basename($name);
         if ($file !== $this->part->name()) {
-            yield $this->error(CheckType::Error, error: PartError::NameTypeMismatch, value: $this->part->name(), type: $this->part->type()?->value);
+            yield $this->error(CheckType::Error, check: PartError::NameTypeMismatch, value: $this->part->name(), type: $this->part->type()?->value);
         }
     }
 }

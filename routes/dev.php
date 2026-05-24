@@ -22,7 +22,7 @@ Route::get('/local-login',  fn() => view('local-login'))->name('local-login');
 
 Route::post('/local-login', function (Request $request) {
     $credentials = $request->only('name', 'password');
-    if (auth()->attempt($credentials)) {
+    if (auth()->attempt($credentials, true)) {
         $request->session()->regenerate();
         return redirect()->intended('/');
     }

@@ -16,7 +16,7 @@ abstract class BaseCheck
 {
 
     public bool $stopOnError = false;
-  
+
     protected PartDataAdapter $part;
 
     protected function supports(): array
@@ -26,7 +26,7 @@ abstract class BaseCheck
             ParsedPartCollection::class,
         ];
     }
-  
+
     public function run(Part|ParsedPartCollection $subject): CheckMessageCollection
     {
         $this->part = $this->resolveAdapter($subject);
@@ -61,8 +61,8 @@ abstract class BaseCheck
         return $part;
     }
 
-    protected function error(CheckType $checkType, PartError $error, ?int $lineNumber = null, ?string $value = null, ?string $type = null, ?string $text = null): CheckMessage
+    protected function error(CheckType $check_type, PartError $check, ?int $line_number = null, ?string $value = null, ?string $type = null, ?string $text = null): CheckMessage
     {
-        return CheckMessage::fromArray(compact('checkType', 'error', 'lineNumber', 'value', 'type', 'text'));
+        return CheckMessage::fromArray(compact('check_type', 'check', 'line_number', 'value', 'type', 'text'));
     }
 }

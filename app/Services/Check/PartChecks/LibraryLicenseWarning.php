@@ -15,7 +15,7 @@ class LibraryLicenseWarning extends BaseCheck
     public function check(): iterable
     {
         if ($this->part->rawPart()->isUnofficial() && $this->part->license() != License::CC_BY_4) {
-            yield $this->error(CheckType::Warning, error: PartError::WarningLicense);
+            yield $this->error(CheckType::Warning, check: PartError::WarningLicense);
         }
     }
 }

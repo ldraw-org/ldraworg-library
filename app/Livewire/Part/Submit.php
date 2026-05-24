@@ -183,7 +183,7 @@ class Submit extends Component implements HasSchemas
 
         $collection = $collection
             ->reject(fn (CheckMessage $message) =>
-                $message->error === $error
+                $message->check === $error
             );
 
         $this->storeFileValidationState(

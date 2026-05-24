@@ -29,7 +29,7 @@
                             <div class="px-4">
                                 @foreach($checkMessage as $message)
                                     <div wire:key="part-{{$check->value}}-{{$message['error']}}-{{$loop->iteration}}">
-                                        Line {{$message['lineNumber']}}: {{$message['text']}}
+                                        Line {{$message['line_number']}}: {{$message['text']}}
                                     </div>
                                 @endforeach
                             </div>
