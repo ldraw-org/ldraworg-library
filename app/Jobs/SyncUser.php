@@ -23,7 +23,9 @@ class SyncUser implements ShouldQueue
         $user = User::find($this->userId);
         if ($user !== null) {
             $syncUserParts->handle($user, $this->changes);
-            $syncForumUser->handle($user);
+            if (app()->environment('production')) {
+                $syncForumUser->handle($user);
+            }
         }
     }
 }
