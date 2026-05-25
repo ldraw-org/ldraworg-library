@@ -7,6 +7,7 @@ use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
 use App\Models\Part\UnknownPartNumber;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -20,24 +21,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ObservedBy([UserObserver::class])]
+#[Fillable(['name', 'email', 'realname', 'password', 'license', 'forum_user_id', 'is_legacy', 'is_ptadmin', 'is_synthetic'])]
 class User extends Authenticatable
 {
     use HasFactory;
     use HasParts;
     use HasRoles;
     use Notifiable;
-
-    protected $fillable = [
-        'name',
-        'email',
-        'realname',
-        'password',
-        'license',
-        'forum_user_id',
-        'is_legacy',
-        'is_synthetic',
-        'is_ptadmin'
-    ];
 
     protected $hidden = [
         'password',

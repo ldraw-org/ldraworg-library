@@ -5,14 +5,14 @@ namespace App\Models;
 use App\Enums\VoteType;
 use App\Models\Traits\HasPart;
 use App\Models\Traits\HasUser;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 
+#[Unguarded]
 class Vote extends Model
 {
     use HasUser;
     use HasPart;
-
-    protected $guarded = [];
 
     /**
     * @return array{

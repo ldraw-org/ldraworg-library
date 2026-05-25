@@ -3,15 +3,15 @@
 namespace App\Models\Omr;
 
 use App\Models\RebrickablePart;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Unguarded]
 class Set extends Model
 {
-    protected $guarded = [];
-
     protected $with = [
         'theme',
     ];

@@ -4,16 +4,16 @@ namespace App\Models\Part;
 
 use App\Models\Traits\HasPart;
 use App\Models\Traits\HasUser;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[Unguarded]
 class PartHistory extends Model
 {
     use HasPart;
     use HasUser;
     use HasFactory;
-
-    protected $guarded = [];
 
     protected $touches = ['part'];
 

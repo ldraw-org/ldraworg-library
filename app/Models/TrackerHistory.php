@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 
+#[Unguarded]
 class TrackerHistory extends Model
 {
-    protected $guarded = [];
-
     /**
     * @return array{
     *     'history_data': 'Illuminate\\Database\\Eloquent\\Casts\\AsArrayObject',

@@ -4,6 +4,7 @@ namespace App\Models\Part;
 
 use App\Enums\PartType;
 use App\Models\Traits\HasParts;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,13 +16,12 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
+#[Unguarded]
 class PartRelease extends Model implements HasMedia
 {
     use InteractsWithMedia;
     use HasParts;
     use HasFactory;
-
-    protected $guarded = [];
 
     protected $with = ['media'];
 

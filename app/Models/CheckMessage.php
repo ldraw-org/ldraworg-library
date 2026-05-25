@@ -8,15 +8,15 @@ use App\Enums\PartError;
 use App\Models\Part\Part;
 use App\Models\Traits\HasPart;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[CollectedBy(CheckMessageCollection::class)]
+#[Unguarded]
 class CheckMessage extends Model
 {
     use HasPart;
-
-    protected $guarded = [];
 
     /**
      * @return array{

@@ -14,6 +14,7 @@ use App\Enums\PreviewRotation;
 use App\Enums\VoteType;
 use App\Models\RebrickablePart;
 use App\Models\Traits\HasCheckMessages;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -50,6 +51,7 @@ use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
  */
 #[ObservedBy([PartObserver::class])]
 #[CollectedBy(PartCollection::class)]
+#[Unguarded]
 class Part extends Model implements HasMedia
 {
     use InteractsWithMedia;
@@ -60,8 +62,6 @@ class Part extends Model implements HasMedia
     use HasUser;
     use HasFactory;
     use HasCheckMessages;
-
-    protected $guarded = [];
 
     /**
     * @return array{
