@@ -6,12 +6,10 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Fieldset;
 use App\Enums\License;
 use App\Enums\Permission;
 use App\Livewire\Dashboard\BasicResourceManagePage;
-use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Filament\Forms\Components\Checkbox;
@@ -43,7 +41,7 @@ class UserManagePage extends BasicResourceManagePage implements HasActions
     {
         return $table
             ->query(User::query())
-            ->defaultSort('realname', 'asc')
+            ->defaultSort('realname')
             ->heading('User Management')
             ->columns([
                 TextColumn::make('id')

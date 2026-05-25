@@ -8,23 +8,10 @@ use Illuminate\Console\Command;
 
 class RenderModels extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:render-models {model?*} {--missing}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Refresh Omr Model Images';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
 

@@ -5,28 +5,14 @@ namespace App\Console\Commands;
 use App\Jobs\UpdateRebrickable;
 use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
-use App\Models\RebrickablePart;
 use Illuminate\Console\Command;
 
 class DailyMaintenance extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:daily-maintenance';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Run Daily Maintenance';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         // None of these need to happen daily on the dev server

@@ -9,23 +9,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class FixInitialSubmit extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:fix-initial-submit';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Find unofficial parts with no initial submit and add a creation date submit';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         Part::unofficial()

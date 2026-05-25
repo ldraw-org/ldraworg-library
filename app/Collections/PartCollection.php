@@ -36,7 +36,7 @@ class PartCollection extends Collection
     }
 
     /**
-    * @return array<mixed>
+    * @return array
     */
     public function part_release_data(): array
     {

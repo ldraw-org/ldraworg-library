@@ -8,23 +8,10 @@ use Illuminate\Console\Command;
 
 class OfficialCleanup extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:official-cleanup';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Official Library Cleanup';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         Part::official()->update([

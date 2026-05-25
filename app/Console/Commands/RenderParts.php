@@ -9,23 +9,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RenderParts extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:render-parts {part?*} {--o|official-only} {--u|unofficial-only} {--M|missing}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Refresh Library Images';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         $this->info("Queueing part images");

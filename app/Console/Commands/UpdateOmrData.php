@@ -10,23 +10,10 @@ use Illuminate\Support\Arr;
 
 class UpdateOmrData extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:update-omr';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Command description';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         $rb = new Rebrickable();
@@ -35,12 +22,12 @@ class UpdateOmrData extends Command
         $themes->each(function (array $theme) {
             Theme::updateOrCreate(
                 [
-                'id' => $theme['id']
-            ],
+                    'id' => $theme['id']
+                ],
                 [
-                'parent_id' => $theme['parent_id'],
-                'name' => $theme['name']
-            ]
+                    'parent_id' => $theme['parent_id'],
+                    'name' => $theme['name']
+                ]
             );
         });
 

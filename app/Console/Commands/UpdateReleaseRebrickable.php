@@ -10,23 +10,10 @@ use Illuminate\Support\Collection;
 
 class UpdateReleaseRebrickable extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:release-rb';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Do a pre release RB update';
 
-    /**
-     * Execute the console command.
-     */
     public function handle():void
     {
         $parts = Part::where(
