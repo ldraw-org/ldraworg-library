@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\User;
-use App\Services\User\SyncForumUser;
 use App\Services\User\SyncUserParts;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -18,14 +17,11 @@ class SyncUser implements ShouldQueue
     )
     {}
 
-    public function handle(SyncUserParts $syncUserParts, SyncForumUser $syncForumUser): void
+    public function handle(SyncUserParts $syncUserParts): void
     {
         $user = User::find($this->userId);
         if ($user !== null) {
             $syncUserParts->handle($user, $this->changes);
-            if (app()->environment('production')) {
-                $syncForumUser->handle($user);
-            }
         }
     }
 }
