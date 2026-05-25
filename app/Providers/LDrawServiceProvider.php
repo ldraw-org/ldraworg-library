@@ -43,10 +43,5 @@ class LDrawServiceProvider extends ServiceProvider
         Str::macro('initials', function (string $string) {
             return (string) (new Stringable($string))->initials();
         });
-        Auth::viaRequest('mybb', function (Request $request) {
-            return app()->environment('local') ?
-                null :
-                MybbUser::findFromCookie($request)?->library_user;
-        });
     }
 }

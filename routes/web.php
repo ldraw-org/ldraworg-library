@@ -1,29 +1,34 @@
 <?php
 
 use App\Enums\PartType;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\DocumentIndexController;
 use App\Http\Controllers\DocumentShowController;
-use App\Livewire\Dashboard\Admin\Pages\PartReleaseManagePage;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SupportFilesController;
 use App\Http\Controllers\Part\LastDayDownloadZipController;
 use App\Http\Controllers\Part\LatestPartsController;
 use App\Http\Controllers\Part\LatestReleaseController;
-use App\Http\Controllers\Part\PartUpdateController;
 use App\Http\Controllers\Part\PartDownloadController;
+use App\Http\Controllers\Part\PartUpdateController;
 use App\Http\Controllers\Part\WeeklyPartsController;
 use App\Http\Controllers\ReviewSummaryController;
 use App\Http\Controllers\StickerSheetShowController;
+use App\Http\Controllers\SupportFilesController;
 use App\Http\Controllers\TrackerHistoryController;
+use App\Livewire\Auth\ForgotPassword;
+use App\Livewire\Auth\Login;
+use App\Livewire\Auth\PasswordReset;
 use App\Livewire\Dashboard\Admin\Index as AdminIndex;
 use App\Livewire\Dashboard\Admin\Pages\DocumentCategoryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\DocumentManagePage;
 use App\Livewire\Dashboard\Admin\Pages\LdconfigEdit;
+use App\Livewire\Dashboard\Admin\Pages\LibrarySettingsPage;
+use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
+use App\Livewire\Dashboard\Admin\Pages\PartReleaseManagePage;
 use App\Livewire\Dashboard\Admin\Pages\ReviewSummaryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\RoleManagePage;
 use App\Livewire\Dashboard\Admin\Pages\UserManagePage;
-use App\Livewire\Dashboard\Admin\Pages\LibrarySettingsPage;
-use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
 use App\Livewire\Dashboard\User\Index as UserIndex;
 use App\Livewire\JoinLdraw;
 use App\Livewire\LDrawModelViewer;
@@ -40,6 +45,7 @@ use App\Livewire\Release\Create;
 use App\Livewire\Search\Suffix;
 use App\Livewire\TorsoShortcutHelper;
 use App\Livewire\Tracker\ConfirmCA;
+use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'index')->name('index');
 
@@ -59,6 +65,12 @@ Route::middleware(['throttle:file'])->group(function () {
         ->where('filename', '(' . implode('|', PartType::folders()) . ')/[a-z0-9_-]+\.(dat|png|zip)')
         ->name('part.download');
 });
+
+// Login
+Route::get('/login', Login::class)->name('login');
+Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth');
+Route::get('/forgot-password', ForgotPassword::class)->middleware(['throttle:file'])->name('password.request');
+Route::get('/reset-password/{token}', PasswordReset::class)->middleware(['throttle:file'])->name('password.reset');
 
 // Tools
 Route::get('/model-viewer', LDrawModelViewer::class)->name('model-viewer');
@@ -151,14 +163,8 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('/', UserIndex::class)->name('index');
 });
 
-Route::middleware(['auth'])->get('/logout', function () {
-    auth()->logout();
-    return back();
-});
-
 // permanentRedirects
 Route::name('permanentRedirects.')->group(function () {
-    Route::permanentRedirect('/login', 'https://forums.ldraw.org/member.php?action=login')->name('login');
     Route::permanentRedirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
 
     Route::permanentRedirect('/official/search', '/parts/list')->name('official.search');
