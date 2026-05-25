@@ -95,26 +95,9 @@ class UserManagePage extends BasicResourceManagePage implements HasActions
     protected function formSchema(): array
     {
         return [
-            Select::make('forum_user_id')
-                ->label('Forum User Name')
-                ->options(
-                    MybbUser::whereNotIn('usergroup', [5,7])
-                        ->whereNotIn('uid', User::whereNotNull('forum_user_id')->pluck('forum_user_id')->all())
-                        ->orderBy('username')
-                        ->pluck('username', 'uid')
-                )
-                ->required()
-                ->live()
-                ->searchable()
-                ->afterStateUpdated(function (Set $set, int $state) {
-                    $user = MybbUser::find($state);
-                    if (!is_null($user)) {
-                        $set('realname', $user->username);
-                        $set('name', $user->loginname);
-                        $set('email', $user->email);
-                    }
-                })
-                ->hiddenOn('edit'),
+            TextInput::make('forum_user_id')
+                ->label('Forum User ID')
+                ->integer(),
             TextInput::make('name')
                 ->required()
                 ->maxLength(255),

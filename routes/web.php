@@ -78,7 +78,8 @@ Route::get('/pbg', PbgGenerator::class)->name('pbg');
 
 Route::view('/icons', 'icon-demo')->name('icon-demo');
 
-Route::get('/joinldraw', JoinLdraw::class)->name('joinldraw');
+// Temporarily disabled until a new join mechanism is developed
+// Route::get('/joinldraw', JoinLdraw::class)->name('joinldraw');
 
 Route::middleware(['ldrawmember'])->group(function () {
     Route::view('/polls', 'poll.index')->can('voteAny', App\Models\Poll\Poll::class)->name('poll.index');

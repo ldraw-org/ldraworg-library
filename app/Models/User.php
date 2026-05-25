@@ -96,10 +96,6 @@ class User extends Authenticatable
         return $this->belongsToMany(Part::class, 'user_part_notifications');
     }
 
-    public function forum_user(): BelongsTo
-    {
-        return $this->belongsTo(MybbUser::class, 'forum_user_id', 'uid');
-    }
     #[Scope]
     protected function fromAuthor(Builder $query, string $username, ?string $realname = null): void
     {

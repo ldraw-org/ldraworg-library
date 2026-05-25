@@ -43,10 +43,6 @@ class UserTable extends BasicTable implements HasActions
                     ->label('Last Library Action')
                     ->since()
                     ->sortable(),
-                TextColumn::make('forum_user.lastactive')
-                    ->label('Last Active on Forum')
-                    ->since()
-                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('roles')
