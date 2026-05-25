@@ -26,9 +26,6 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-/**
- * @property \Filament\Schemas\Schema $form
- */
 class Submit extends Component implements HasSchemas
 {
     use InteractsWithSchemas;
@@ -112,10 +109,12 @@ class Submit extends Component implements HasSchemas
 
     protected function findUploadedFile(string $filename): ?TemporaryUploadedFile
     {
-        return collect($this->data['partfiles'])
-            ->first(fn ($file) =>
-                $file->getClientOriginalName() === $filename
-            );
+        /** @var \Illuminate\Support\Collection<int, TemporaryUploadedFile> $files */
+        $files = collect($this->data['partfiles']);
+
+        return $files->first(fn (TemporaryUploadedFile $file) =>
+            $file->getClientOriginalName() === $filename
+        );
     }
 
     protected function storeFileValidationState(string $filename, CheckMessageCollection $collection): void

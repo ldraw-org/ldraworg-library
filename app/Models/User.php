@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\License;
-use App\Models\Mybb\MybbUser;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
@@ -16,8 +15,6 @@ use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

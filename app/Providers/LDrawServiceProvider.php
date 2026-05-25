@@ -2,11 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\Mybb\MybbUser;
-use App\Models\User;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 

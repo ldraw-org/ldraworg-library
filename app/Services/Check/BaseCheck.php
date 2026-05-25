@@ -9,6 +9,8 @@ use App\Services\Parser\ParsedPartCollection;
 use App\Services\Check\Contracts\PartDataAdapter;
 use App\Services\Check\Adapters\PartModelAdapter;
 use App\Services\Check\Adapters\ParsedPartAdapter;
+use InvalidArgumentException;
+use UnexpectedValueException;
 
 abstract class BaseCheck
 {
@@ -32,7 +34,7 @@ abstract class BaseCheck
 
         foreach ($this->check() as $result) {
             if (! $result instanceof CheckMessage) {
-                throw new \UnexpectedValueException(
+                throw new UnexpectedValueException(
                     sprintf('%s::check() must yield CheckMessage instances', static::class)
                 );
             }
@@ -48,15 +50,13 @@ abstract class BaseCheck
     protected function resolveAdapter(Part|ParsedPartCollection $subject): PartDataAdapter
     {
         if (! in_array($subject::class, $this->supports(), true)) {
-            throw new \InvalidArgumentException(class_basename(static::class) . " does not support " . $subject::class);
+            throw new InvalidArgumentException(class_basename(static::class) . " does not support " . $subject::class);
         }
 
-        $part = match (true) {
+        return match (true) {
             $subject instanceof Part => new PartModelAdapter($subject),
             $subject instanceof ParsedPartCollection => new ParsedPartAdapter($subject),
         };
-
-        return $part;
     }
 
     protected function error(CheckType $check_type, PartError $check, ?int $line_number = null, ?string $value = null, ?string $type = null, ?string $text = null): CheckMessage
