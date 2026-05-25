@@ -2,8 +2,6 @@
 
 use App\Enums\PartType;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\DocumentIndexController;
 use App\Http\Controllers\DocumentShowController;
 use App\Http\Controllers\Part\LastDayDownloadZipController;

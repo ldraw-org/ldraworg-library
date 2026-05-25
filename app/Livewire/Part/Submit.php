@@ -129,7 +129,7 @@ class Submit extends Component implements HasSchemas
             return;
         }
 
-        $this->fileStates[$filename]['messages'] = $collection->map->toArray()->all();
+        $this->fileStates[$filename]['messages'] = $collection->map->toArray();
 
         $this->fileStates[$filename]['hasErrors'] = $collection->hasErrors();
         $this->fileStates[$filename]['hasWarnings'] = $collection->hasWarnings();
