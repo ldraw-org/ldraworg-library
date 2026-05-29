@@ -25,6 +25,12 @@
 
                 <ul class="flex flex-col py-1 relative z-10 bg-white rounded-md">
                     <li>
+                        <a href="{{ route('dashboard.settings') }}"
+                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
+                            User Settings
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('dashboard.index') }}"
                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
                             User Dashboard

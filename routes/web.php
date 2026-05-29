@@ -43,6 +43,7 @@ use App\Livewire\Release\Create;
 use App\Livewire\Search\Suffix;
 use App\Livewire\TorsoShortcutHelper;
 use App\Livewire\Tracker\ConfirmCA;
+use App\Livewire\User\Settings;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'index')->name('index');
@@ -162,6 +163,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('/', UserIndex::class)->name('index');
+    Route::get('/settings', Settings::class )->name('settings');
 });
 
 // permanentRedirects

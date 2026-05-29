@@ -6,6 +6,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Fieldset;
 use App\Enums\License;
 use App\Enums\Permission;
@@ -109,6 +110,16 @@ class UserManagePage extends BasicResourceManagePage implements HasActions
             Select::make('license')
                 ->options(License::options())
                 ->default(app(LibrarySettings::class)->default_part_license)
+                ->required(),
+            Toggle::make('mail_daily_digest')
+                ->label('Receive daily digest of tracked parts')
+                ->default(true)
+                ->required(),
+            Select::make('timezone')
+                ->label('Timezone')
+                ->options(timezone_identifiers_list())
+                ->in(timezone_identifiers_list())
+                ->default('UTC')
                 ->required(),
             Select::make('roles')
                 ->relationship('roles', titleAttribute: 'name')
