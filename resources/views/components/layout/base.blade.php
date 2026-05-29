@@ -23,12 +23,12 @@
                 For the live version go here: <a class="underline decoration-dotted hover:decoration-solid hover:text-gray-500" href="https://library.ldraw.org">https://library.ldraw.org</a>
             </x-message>
         @endenv
-      
+
         {{ $messages ?? '' }}
 
 <header class="w-full py-4 px-2">
     <div class="flex flex-wrap items-center w-full">
-        
+
         <!-- Logo -->
         <div class="flex-none order-1">
             <a href="{{ route('index') }}" class="block">
@@ -45,6 +45,10 @@
             @livewire('search.menu-item')
             @auth
                 <x-menu.user-icon />
+            @else
+                <div class="border rounded-lg px-2 py-1 bg-white">
+                    <a href="{{ route('login') }}">Login</a>
+                </div>
             @endauth
         </div>
 

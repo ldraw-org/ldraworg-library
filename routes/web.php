@@ -65,10 +65,12 @@ Route::middleware(['throttle:file'])->group(function () {
 });
 
 // Login
-Route::get('/login', Login::class)->name('login');
-Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth');
-Route::get('/forgot-password', ForgotPassword::class)->middleware(['throttle:file'])->name('password.request');
-Route::get('/reset-password/{token}', PasswordReset::class)->middleware(['throttle:file'])->name('password.reset');
+Route::middleware(['throttle:login'])->group(function () {
+    Route::get('/login', Login::class)->name('login');
+    Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth');
+    Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
+    Route::get('/reset-password/{token}', PasswordReset::class)->name('password.reset');
+});
 
 // Tools
 Route::get('/model-viewer', LDrawModelViewer::class)->name('model-viewer');

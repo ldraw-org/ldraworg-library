@@ -75,6 +75,6 @@ class Login extends Component implements HasSchemas
     #[Layout('components.layout.base')]
     public function render()
     {
-        return view('livewire.forms.basic-form', ['submitRoute' => 'login']);
+        return view('livewire.auth.login');
     }
 }
