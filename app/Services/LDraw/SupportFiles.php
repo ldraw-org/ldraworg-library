@@ -16,8 +16,8 @@ class SupportFiles
 
     public static function setLibraryCsv(): void
     {
-        $csv = "part_number,part_description,part_url,image_url,image_last_modified\n";
-        $csv .= Part::select('id', 'filename', 'description', 'part_release_id')
+        $csv = "part_number,part_description,part_url,image_url,image_last_modified,category\n";
+        $csv .= Part::select('id', 'filename', 'description', 'part_release_id', 'category')
             ->with('media')
             ->doesntHave('official_part')
             ->partsFolderOnly()
@@ -32,8 +32,9 @@ class SupportFiles
                 return basename($part->filename)
                     . ',"' . str_replace('"', '""', $part->description) . '"'
                     . ',' . route('part.download', ['library' => is_null($part->part_release_id) ? 'unofficial' : 'official', 'filename' => $part->filename])
-                    . ',' . version('media/ldraw/' . $part->libFolder() . '/' . substr($part->filename, 0, -3) . 'png')
-                    . ',' . $media?->created_at->format('Y-m-d') ?? $part->created_at->format('Y-m-d');
+                    . ',' . $part->getFirstMediaUrl('image')
+                    . ',' . ($media?->created_at->format('Y-m-d') ?? $part->created_at->format('Y-m-d'))
+                    . ',' . $part->category->value;
             })
             ->implode("\n");
         Storage::put('library/library.csv', $csv);
