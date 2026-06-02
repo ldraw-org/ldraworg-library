@@ -3,7 +3,7 @@
 namespace App\Services\OmrModel;
 
 use App\Models\Omr\OmrModel;
-use App\Services\LDraw\Render\LDView;
+use App\Services\Render\LDView;
 use Spatie\Image\Image;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 

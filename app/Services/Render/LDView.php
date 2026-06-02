@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\LDraw\Render;
+namespace App\Services\Render;
 
 use App\Services\LDraw\LDrawModelMaker;
 use App\Models\Omr\OmrModel;

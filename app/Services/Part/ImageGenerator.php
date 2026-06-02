@@ -3,7 +3,7 @@
 namespace App\Services\Part;
 
 use App\Models\Part\Part;
-use App\Services\LDraw\Render\LDView;
+use App\Services\Render\LDView;
 use Spatie\ImageOptimizer\OptimizerChain;
 use Spatie\ImageOptimizer\Optimizers\Optipng;
 use Spatie\TemporaryDirectory\TemporaryDirectory;

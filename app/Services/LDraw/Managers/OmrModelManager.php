@@ -4,7 +4,7 @@ namespace App\Services\LDraw\Managers;
 
 use App\Enums\License;
 use App\Jobs\GenerateOmrModelImage;
-use App\Services\LDraw\Render\LDView;
+use App\Services\Render\LDView;
 use App\Models\Mybb\MybbAttachment;
 use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
