@@ -53,7 +53,7 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/webgl/part/{part}', [SupportFilesController::class, 'webglpart'])->name('webgl.part');
     Route::get('/webgl/omr/{omrmodel}', [SupportFilesController::class, 'webglmodel'])->name('webgl.model');
     Route::get('/categories.txt', [SupportFilesController::class, 'categories'])->name('categories-txt');
-    Route::get('/library.csv', [SupportFilesController::class, 'librarycsv'])->name('library-csv');
+    Route::get('/library.csv', [SupportFilesController::class, 'libraryCsv'])->name('library-csv');
     Route::get('/ptreleases/{output}', [SupportFilesController::class, 'ptreleases'])->name('ptreleases');
     Route::get('/tracker/latest-parts', LatestPartsController::class)->name('part.latest');
     Route::get('/tracker/weekly-parts', WeeklyPartsController::class)->name('part.weekly-api');
