@@ -15,7 +15,7 @@ use App\Services\LDraw\LDrawModelMaker;
 use App\Enums\PartCategory;
 use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Services\LDraw\LDrawFile;
-use App\Services\LDraw\Rebrickable;
+use App\Services\External\Rebrickable;
 use App\Models\Part\Part;
 use App\Services\Check\PartChecker;
 use App\Services\Check\PartChecks\PatternHasSetKeyword;

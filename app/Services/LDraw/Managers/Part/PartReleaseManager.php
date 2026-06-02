@@ -16,7 +16,7 @@ use App\Models\User;
 use App\Models\Vote;
 use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
-use App\Services\LDraw\ZipFiles;
+use App\Services\Support\ZipFiles;
 use App\Services\Part\BasePartSync;
 use App\Services\Part\SyncSubparts;
 use App\Settings\LibrarySettings;

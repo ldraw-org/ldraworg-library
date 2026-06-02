@@ -8,7 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Part\Part;
-use App\Services\LDraw\ZipFiles;
+use App\Services\Support\ZipFiles;
 
 class UpdateZip implements ShouldQueue
 {

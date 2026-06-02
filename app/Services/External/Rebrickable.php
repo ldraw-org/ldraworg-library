@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\LDraw;
+namespace App\Services\External;
 
 use Exception;
 use Illuminate\Support\Collection;
@@ -24,12 +24,12 @@ class Rebrickable
     {
         $lockKey = 'rebrickable_rate_limit_lock';
         $last = Cache::get($lockKey, 0);
-    
+
         $elapsed = microtime(true) - $last;
         if ($elapsed < $this->rateLimitSeconds) {
             usleep((int)(($this->rateLimitSeconds - $elapsed) * 1_000_000));
         }
-    
+
         Cache::put($lockKey, microtime(true), now()->addSeconds(10));
     }
 

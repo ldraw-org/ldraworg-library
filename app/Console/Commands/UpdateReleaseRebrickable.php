@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\UpdateRebrickable;
-use App\Services\LDraw\Rebrickable;
+use App\Services\External\Rebrickable;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;

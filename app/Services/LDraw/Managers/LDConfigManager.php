@@ -6,7 +6,7 @@ use App\Models\Avatar;
 use App\Models\LdrawColour;
 use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
-use App\Services\LDraw\Rebrickable;
+use App\Services\External\Rebrickable;
 use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;

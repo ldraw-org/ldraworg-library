@@ -5,7 +5,7 @@ namespace App\Services\LDraw\Managers;
 use App\Models\RebrickablePart;
 use App\Models\Omr\Set;
 use App\Services\Cache\CacheService;
-use App\Services\LDraw\Rebrickable;
+use App\Services\External\Rebrickable;
 use Illuminate\Support\Facades\Cache;
 
 class SetManager

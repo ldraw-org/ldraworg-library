@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Services\LDraw;
+namespace App\Services\Support;
 
 use App\Enums\PartCategory;
 use App\Enums\PartTypeQualifier;
 use App\Models\Part\Part;
 use App\Models\RebrickablePart;
+use App\Services\External\Rebrickable;
 use App\Services\LDraw\Managers\LDConfigManager;
 use App\Services\LDraw\Managers\StickerSheetManager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Cache;
 
-class ImprovedSetPbg
+class SetPbg
 {
     protected array $parts = [];
     protected array $set = [];
