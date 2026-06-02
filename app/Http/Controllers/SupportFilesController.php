@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Services\LDraw\LDrawModelMaker;
-use App\Services\LDraw\SupportFiles;
 use App\Models\Part\Part;
 use App\Models\Omr\OmrModel;
 use App\Services\Support\MakeCategoriesTxt;
