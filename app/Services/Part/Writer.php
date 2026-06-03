@@ -25,7 +25,7 @@ class Writer
 
         $upart->setKeywords($keywords);
         $upart->setHistory($history);
-        $upart->setBody($bodyText);
+        $upart->setBodyQuietly($bodyText);
         $upart->save();
 
         return $upart->refresh();    }

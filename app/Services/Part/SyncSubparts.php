@@ -15,13 +15,13 @@ class SyncSubparts
     )
     {}
 
-    public function loadSubparts(Part $part): void
+    public function loadSubparts(Part $part, bool $quiet = false): void
     {
         $missingBefore = $this->normalizeMissingParts($part->missing_parts);
         $parsed = new ParsedPartCollection($part->body->body);
         $part->setSubparts($parsed->subpartFilenames() ?? []);
         $missingAfter = $this->normalizeMissingParts($part->missing_parts);
-        if ($missingBefore !== $missingAfter) {
+        if (!$quiet  && $missingBefore !== $missingAfter) {
             $part->refresh();
             $this->partCheckService->checkPart($part);
             UpdateRebrickable::dispatch($part->id);

@@ -732,6 +732,18 @@ class Part extends Model implements HasMedia
         $this->body->save();
     }
 
+    public function setBodyQuietly(string|PartBody $body): void
+    {
+        $body = $body instanceof PartBody ? $body->body : $body;
+        if (is_null($this->body)) {
+            $partBody = $this->body()->make(['body' => $body]);
+            $partBody->saveQuietly();
+            $this->load('body');
+            return;
+        }
+        $this->body->body = $body;
+        $this->body->saveQuietly();
+    }
     public function setSearchText(): void
     {
         $file = str_replace('-', 'd', $this->filename);

@@ -71,7 +71,7 @@ class Registrar
                 $f->mimetype == 'text/plain' && Str::containsAll($f->contents, ['!TEXMAP', $filename])
         );
         if (!is_null($p)) {
-            $p = (new ParsedPartCollection($p->content));
+            $p = (new ParsedPartCollection($p->contents));
             $type = $p->type();
             return is_null($type) ? PartType::PartTexmap : PartType::tryfrom($type->value . '_Texmap');
         }

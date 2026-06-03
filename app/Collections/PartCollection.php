@@ -9,7 +9,7 @@ use App\Models\Part\Part;
 use App\Collections\Traits\HasRelease;
 
 /**
- * @extends \Staudenmeir\LaravelAdjacencyList\Eloquent\Graph\Collection<int|string, \App\Models\Part\Part>
+ * @extends Collection<int|string, Part>
  */
 class PartCollection extends Collection
 {

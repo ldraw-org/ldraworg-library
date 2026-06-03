@@ -65,7 +65,7 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         if ($part->wasChanged($this->headerRelevantAttributes())) {
             CheckPart::dispatch($part->id);
         }
-        if ($part->wasChanged(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
+        if (!$part->wasRecentlyCreated && $part->wasChanged(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
             UpdateLibraryCsv::dispatch();
         }
         if ($part->wasChanged('filename')) {
