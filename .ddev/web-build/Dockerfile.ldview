@@ -2,12 +2,37 @@ ARG BASE_IMAGE
 # Use the DDEV web image as the base
 FROM $BASE_IMAGE
 
-# 1. Install build tools and dev libraries
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libosmesa6 libglu1-mesa libminizip1 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+ARG LDVIEW_TAG=v4.6
 
-ADD https://github.com/ldraw-org/ldview/releases/download/v4.6/ldview-linux-debian-x86_64-osmesa-ldraw_library-4.6.tar.gz /tmp/
-RUN tar -xzf /tmp/ldview-linux-debian-x86_64-osmesa-ldraw_library-4.6.tar.gz -C /tmp \
-    && install -D -m 755 /tmp/ldview /usr/bin/ldview \
-    && rm /tmp/ldview-linux-debian-x86_64-osmesa-ldraw_library-4.6.tar.gz
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      git \
+      build-essential \
+      libosmesa6 \
+      libglu1-mesa \
+      libegl1 \
+      libegl-mesa0 \
+      libminizip1 \
+      libosmesa6-dev \
+      libpng-dev \
+      libjpeg-dev \
+      libminizip-dev \
+      libglu1-mesa-dev \
+      libegl-dev \
+      ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone pinned tag
+RUN git clone --depth 1 --branch ${LDVIEW_TAG} \
+      https://github.com/tcobbs/ldview.git /ldview
+
+# Apply modification — change clipRadius divisor in LDrawModelViewer.cpp
+RUN sed -i \
+      's|clipRadius = clipSize / 1\.45f|clipRadius = clipSize / 0.95f|' \
+      /ldview/LDLib/LDrawModelViewer.cpp
+
+# Verify the change was applied — build fails here if sed didn't match
+RUN grep -n 'clipRadius = clipSize' /ldview/LDLib/LDrawModelViewer.cpp
+
+RUN cd /ldview/OSMesa \
+    && make \
+    && make install
