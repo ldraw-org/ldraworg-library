@@ -53,11 +53,13 @@ class LDView
         $options = [
             'ProcessLDConfig' => '1',
             'LDConfig' => $ldconfigPath,
+            'LDrawDir' => $ldrawdir,
             'VerifyLDrawDir' => '0',
             'SaveWidth' => $width * 2,
             'SaveHeight' => $height * 2,
             'SaveAlpha' => '1',
             'SaveZoomToFit' => '1',
+            'SaveSnapshot' => $imagepath,
             'BFC' => '0',
             'FOV' => '0.1',
             'Texmaps' => '1',
@@ -76,16 +78,17 @@ class LDView
             'CheckPartTracker' => '0',
             'ShowHighlightLines' => '1',
             'ConditionalHighlights' => '1',
+            'IgnoreEGL' => '1',
         ];
 
         $cmdOptions = collect($options)
-            ->map(fn (string $value, string $command) => "-{$command}={$value}")
+            ->map(fn (string $value, string $command) => "{$command}={$value}")
             ->implode("\n");
         $iniPath = $tempDir->path("ldview.ini");
         file_put_contents($iniPath, "[General]\n{$cmdOptions}\n");
 
         // Run LDView
-        $ldviewcmd = "ldview {$filename} -IniFile={$iniPath} -LDrawDir={$ldrawdir} -SaveSnapshot={$imagepath}";
+        $ldviewcmd = "ldview {$filename} -IniFile={$iniPath}";
         if ($this->debug) {
             Log::debug($ldviewcmd);
         }
@@ -95,8 +98,12 @@ class LDView
             Log::debug($result->output());
             Log::debug($result->errorOutput());
             Storage::put("debug/part.mpd", file_get_contents($filename));
-            Storage::put("/debug/ldview.ini", file_get_contents($iniPath));
-            Log::debug("ldview " . Storage::path('debug/part.mpd') . " -IniFile=" . Storage::path('debug/ldview.ini'). " -LDrawDir=" . Storage::path('debug/ldraw') . " -SaveSnapshot=" . Storage::path('debug/part.png'));
+            $iniFile = file_get_contents($iniPath);
+            Storage::put("debug/ldview.ini", $iniFile);
+            $iniFileDebug = str_replace([$ldrawdir,$imagepath] , [Storage::path('debug/ldraw'), Storage::path('debug/part.png')], $iniFile);
+
+            Storage::put("debug/ldview_debug.ini", $iniFileDebug);
+            Log::debug("ldview " . Storage::path('debug/part.mpd') . " -IniFile=" . Storage::path('debug/ldview_debug.ini'));
             if (file_exists($imagepath)) {
                 Storage::put("/debug/part.png", file_get_contents($imagepath));
             } else {
