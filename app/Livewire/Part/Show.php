@@ -8,6 +8,7 @@ use App\Services\Part\ImageGenerator;
 use App\Services\Part\RebrickableSync;
 use App\Services\Part\SyncSubparts;
 use App\Services\Part\Validator;
+use Filament\Actions\ActionGroup;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use App\Enums\ExternalSite;
@@ -481,6 +482,28 @@ class Show extends Component implements HasSchemas, HasActions
                 return route('parts.show', $this->part->unofficial_part->id ?? 0);
             })
             ->visible(!is_null($this->part->unofficial_part) || !is_null($this->part->official_part));
+    }
+
+    public function adminToolsActionGroup(): ActionGroup
+    {
+        return ActionGroup::make([
+                $this->editHeaderAction(),
+                $this->editNumberAction(),
+                $this->editPreviewAction(),
+                $this->editBasePartAction(),
+                $this->regenerateHeaderAction(),
+                $this->updateImageAction(),
+                $this->recheckPartAction(),
+                $this->updateSubpartsAction(),
+                $this->updateRebrickableDataAction(),
+                $this->retieFixAction(),
+                $this->deleteAction()
+            ])
+            ->label('Admin Tools')
+            ->icon(LibraryIcon::MenuDown->value)
+            ->button()
+            ->color('gray')
+            ->outlined();
     }
 
     #[Layout('components.layout.tracker')]

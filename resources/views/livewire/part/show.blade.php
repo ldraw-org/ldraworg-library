@@ -38,41 +38,7 @@
                     3D View
                 </x-filament::button>
             @endif
-
-            @if ($this->editHeaderAction->isVisible() ||
-                $this->editNumberAction->isVisible() ||
-                $this->editPreviewAction->isVisible() ||
-                $this->editBasePartAction->isVisible() ||
-                $this->regenerateHeaderAction->isVisible() ||
-                $this->updateImageAction->isVisible() ||
-                $this->recheckPartAction->isVisible() ||
-                $this->updateSubpartsAction->isVisible() ||
-                $this->updateRebrickableDataAction->isVisible() ||
-                $this->retieFixAction->isVisible() ||
-                $this->deleteAction->isVisible()
-            )
-
-                <x-filament-actions::group
-                    :actions="[
-                        $this->editHeaderAction,
-                        $this->editNumberAction,
-                        $this->editPreviewAction,
-                        $this->editBasePartAction,
-                        $this->regenerateHeaderAction,
-                        $this->updateImageAction,
-                        $this->recheckPartAction,
-                        $this->updateSubpartsAction,
-                        $this->updateRebrickableDataAction,
-                        $this->retieFixAction,
-                        $this->deleteAction
-                    ]"
-                    label="Admin Tools"
-                    icon="{{ \App\Enums\LibraryIcon::MenuDown->value }}"
-                    button="true"
-                    color="gray"
-                    outlined="true"
-                />
-            @endif
+            <x-filament-action-group action-group="adminToolsActionGroup" />
         </div>
         <div @class([
                 'text-3xl font-bold py-2 px-3 w-fit rounded-lg',
