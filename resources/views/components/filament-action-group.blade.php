@@ -1,6 +1,4 @@
-@props(['actionGroup'])
-
-@php $group = $this->$actionGroup() @endphp
+@props(['group'])
 
 @if ($group->isVisible())
     <x-filament-actions::group

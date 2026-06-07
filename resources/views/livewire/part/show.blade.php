@@ -38,7 +38,7 @@
                     3D View
                 </x-filament::button>
             @endif
-            <x-filament-action-group action-group="adminToolsActionGroup" />
+            <x-filament-action-group :group="$this->adminToolsActionGroup()" />
         </div>
         <div @class([
                 'text-3xl font-bold py-2 px-3 w-fit rounded-lg',
