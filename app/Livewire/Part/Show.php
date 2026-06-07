@@ -125,18 +125,20 @@ class Show extends Component implements HasSchemas, HasActions
 
     public function editHeaderAction(): EditAction
     {
-        return EditHeaderAction::make($this->part, 'editHeader');
+        return EditHeaderAction::make('editHeader')
+            ->record($this->part);
     }
 
     public function editNumberAction(): EditAction
     {
-        return  EditNumberAction::make('editNumber')
+        return EditNumberAction::make('editNumber')
             ->record($this->part);
     }
 
     public function editPreviewAction(): EditAction
     {
-        return EditPreviewAction::make($this->part, 'editPreview');
+        return EditPreviewAction::make('editPreview')
+            ->record($this->part);
     }
 
     public function patternPartAction(): Action
