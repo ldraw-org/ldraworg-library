@@ -2,7 +2,7 @@ ARG BASE_IMAGE
 # Use the DDEV web image as the base
 FROM $BASE_IMAGE
 
-ARG LDVIEW_TAG=v4.6
+ARG LDVIEW_TAG=master
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git \
@@ -36,3 +36,5 @@ RUN grep -n 'clipRadius = clipSize' /ldview/LDLib/LDrawModelViewer.cpp
 RUN cd /ldview/OSMesa \
     && make \
     && make install
+
+RUN rm -rf /ldview
