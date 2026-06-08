@@ -23,12 +23,12 @@
 
     <div class="flex flex-col space-y-4 bg-white p-2 rounded-lg">
         <div class="flex flex-wrap gap-2">
-            <x-filament-action action="downloadAction" />
-            <x-filament-action action="downloadZipAction" />
-            <x-filament-action action="patternPartAction" />
-            <x-filament-action action="stickerSearchAction" />
-            <x-filament-action action="adminCertifyAllAction" />
-            <x-filament-action action="certifyAllAction" />
+            <x-filament-action :action="$this->downloadAction" />
+            <x-filament-action :action="$this->downloadZipAction" />
+            <x-filament-action :action="$this->patternPartAction" />
+            <x-filament-action :action="$this->stickerSearchAction" />
+            <x-filament-action :action="$this->adminCertifyAllAction" />
+            <x-filament-action :action="$this->certifyAllAction" />
             @if (!$part->isTexmap())
                 <x-filament::button
                     color="gray"
@@ -48,19 +48,16 @@
                 {{ucfirst($part->libFolder())}} File <span id="filename">{{ $part->filename }}</span>
         </div>
         <div>
-            <x-filament-action action="viewFixAction" />
+            <x-filament-action :action="$this->viewFixAction" />
             @if ($part->isUnofficial())
-                <x-filament-action action="toggleTrackedAction" />
-                <x-filament-action action="toggleDeleteFlagAction" />
-                @if($part->delete_flag && !$this->toggleDeleteFlagAction->isVisible())
-                    <x-filament::button
-                        icon="{{ \App\Enums\LibraryIcon::PartFlag->value }}"
-                        color="danger"
-                    >
-                        Flagged for Deletion
-                    </x-filament::button>
-                @endif
-                <x-filament-action action="toggleManualHoldAction" />
+                <x-filament-action :action="$this->toggleTrackedAction" />
+                <x-filament-action
+                    :action="$this->toggleDeleteFlagAction"
+                    @if($part->delete_flag) show-fallback @endif
+                    fallback-color="danger"
+                    fallback-label="Flagged For Deletion"
+                />
+                <x-filament-action :action="$this->toggleManualHoldAction" />
             @endif
         </div>
         @if ($this->part->type->inPartsFolder())
@@ -68,31 +65,25 @@
                 <span class="font-bold text-lg">
                     Part Attributes:
                 </span>
-                <x-filament-action action="viewBasePartAction" />
-                <x-filament-action action="toggleIsPatternAction" />
-                @if (!$this->toggleIsPatternAction->isVisible())
-                    <x-filament::button
-                        color="gray"
-                    >
-                    {{$this->part->is_pattern ? 'Printed' : 'Not Printed'}}
-                    </x-filament::button>
-                @endif
-                <x-filament-action action="toggleIsCompositeAction" />
-                @if (!$this->toggleIsCompositeAction->isVisible())
-                    <x-filament::button
-                        color="gray"
-                    >
-                        {{$this->part->is_composite ? 'Assembly' : 'Single Part'}}
-                    </x-filament::button>
-                @endif
-                <x-filament-action action="toggleIsDualMouldAction" />
-                @if (!$this->toggleIsDualMouldAction->isVisible())
-                    <x-filament::button
-                        color="gray"
-                    >
-                        {{$this->part->is_dual_mould ? 'Dual Moulded' : 'Single Mould'}}
-                    </x-filament::button>
-                @endif
+                <x-filament-action :action="$this->viewBasePartAction" />
+                <x-filament-action
+                    :action="$this->toggleIsPatternAction"
+                    show-fallback
+                    fallback-color="gray"
+                    fallback-label="{{$this->part->is_pattern ? 'Printed' : 'Not Printed'}}"
+                />
+                <x-filament-action
+                    :action="$this->toggleIsCompositeAction"
+                    show-fallback
+                    fallback-color="gray"
+                    fallback-label="{{$this->part->is_composite ? 'Assembly' : 'Single Part'}}"
+                />
+                <x-filament-action
+                    :action="$this->toggleIsDualMouldAction"
+                    show-fallback
+                    fallback-color="gray"
+                    fallback-label=" {{$this->part->is_dual_mould ? 'Dual Moulded' : 'Single Mould'}}"
+                />
             </div>
             @if ($this->viewRebrickableAction->isVisible() ||
                 $this->viewBrickLinkAction->isVisible() ||
@@ -108,10 +99,10 @@
                     @else
                         <x-library-icon icon="link-off" class="w-5" color="fill-red-300" title="External site data provided by part keywords" />
                     @endif
-                    <x-filament-action action="viewRebrickableAction" />
-                    <x-filament-action action="viewBrickLinkAction" />
-                    <x-filament-action action="viewBrickSetAction" />
-                    <x-filament-action action="viewBrickOwlAction" />
+                    <x-filament-action :action="$this->viewRebrickableAction" />
+                    <x-filament-action :action="$this->viewBrickLinkAction" />
+                    <x-filament-action :action="$this->viewBrickSetAction" />
+                    <x-filament-action :action="$this->viewBrickOwlAction" />
                 </div>
             @endif
         @endif

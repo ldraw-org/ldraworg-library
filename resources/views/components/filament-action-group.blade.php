@@ -5,9 +5,8 @@
         :actions="$group->getActions()"
         label="{{$group->getLabel()}}"
         icon="{{$group->getIcon()}}"
-        button="{{$group->isButton()}}"
         color="{{$group->getColor()}}"
-        outlined="{{$group->isOutlined()}}"
-
+        @if($group->isButton()) button @endif
+        @if($group->isOutlined()) outlined @endif
     />
 @endif

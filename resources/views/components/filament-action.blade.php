@@ -1,5 +1,12 @@
-@props(['action'])
+@props(['action', 'showFallback' => false, 'fallbackColor' => 'danger', 'fallbackLabel' => ''])
 
-@if ($this->$action->isVisible())
-    {{ $this->$action }}
+@if ($action->isVisible())
+    {{ $action }}
+@elseif ($showFallback)
+    <x-filament::button
+        icon="{{ $action->getIcon() }}"
+        color="{{ $fallbackColor }}"
+    >
+        {{ $fallbackLabel }}
+    </x-filament::button>
 @endif
