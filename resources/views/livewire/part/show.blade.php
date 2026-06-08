@@ -29,7 +29,7 @@
             <x-filament-action :action="$this->stickerSearchAction" />
             <x-filament-action :action="$this->adminCertifyAllAction" />
             <x-filament-action :action="$this->certifyAllAction" />
-            @if (!$part->isTexmap())
+            @if (!$part->isTexmap() && $webGlSupported)
                 <x-filament::button
                     color="gray"
                     outlined
@@ -53,7 +53,7 @@
                 <x-filament-action :action="$this->toggleTrackedAction" />
                 <x-filament-action
                     :action="$this->toggleDeleteFlagAction"
-                    @if($part->delete_flag) show-fallback @endif
+                    :show-fallback="$part->delete_flag"
                     fallback-color="danger"
                     fallback-label="Flagged For Deletion"
                 />
@@ -110,7 +110,7 @@
           <div class="flex flex-col md:flex-row-reverse w-full">
             <div class="flex w-full justify-center items-center md:w-1/3">
                 <img class = 'w-80 h-80 object-contain'
-                @if(!$part->isTexmap()) wire:click="$dispatch('open-modal', { id: 'ldbi' })" @endif
+                @if(!$part->isTexmap() && $webGlSupported) wire:click="$dispatch('open-modal', { id: 'ldbi' })" @endif
                 src="{{$part->getFirstMediaUrl('image')}}" alt="{{ $part->description }}" title="{{ $part->description }}">
             </div>
             <div class="w-full md:w-2/3">
@@ -220,7 +220,14 @@
     @push('scripts')
         @script
         <script>
-            $wire.on('open-modal', (modal) => {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+            if (gl && gl instanceof WebGLRenderingContext) {
+                $wire.set('webGlSupported', true);
+            }
+
+            $wire.on('open-modal', () => {
                 if (scene == null) {
                     $wire.dispatch('ldbi-render-model');
                 }

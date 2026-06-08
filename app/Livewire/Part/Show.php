@@ -54,6 +54,7 @@ class Show extends Component implements HasSchemas, HasActions
     public Part $part;
     public ?string $comment = null;
     public ?string $vote_type_code = null;
+    public bool $webGlSupported = false;
 
     public function form(Schema $schema): Schema
     {

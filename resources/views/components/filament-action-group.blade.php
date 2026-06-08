@@ -6,7 +6,7 @@
         label="{{$group->getLabel()}}"
         icon="{{$group->getIcon()}}"
         color="{{$group->getColor()}}"
-        @if($group->isButton()) button @endif
-        @if($group->isOutlined()) outlined @endif
+        :button="$group->isButton()"
+        :outlined="$group->isOutlined()"
     />
 @endif

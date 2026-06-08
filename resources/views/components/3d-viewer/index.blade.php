@@ -47,7 +47,7 @@
         var renderModel = function() {
             if (WEBGL.isWebGLAvailable()) {
                 scene = null;
-                if (modeltype == 'user') {
+                if (modeltype === 'user') {
                     LDR.Colors.load(() => {
                         scene = new LDrawOrg.Model(
                             document.getElementById('ldbi-canvas'),
@@ -57,7 +57,7 @@
                     },() => {},parts['ldconfig.ldr']);
                     addEventListener('resize', () => scene.onChange())
                 } else {
-                    if (modeltype == 'omr') {
+                    if (modeltype === 'omr') {
                         url = '/webgl/omr/';
                     } else {
                         url = '/webgl/part/';
