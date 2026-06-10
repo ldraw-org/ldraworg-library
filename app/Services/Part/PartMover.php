@@ -2,30 +2,21 @@
 
 namespace App\Services\Part;
 
+use App\Collections\PartCollection;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
-use App\Jobs\UpdateParentParts;
-use App\Jobs\UpdateRebrickable;
 use App\Models\Part\Part;
+use App\Models\User;
 use App\Services\Parser\ParsedPartCollection;
-use App\Services\Part\Submit\Registrar;
-use Illuminate\Support\Facades\Auth;
 
 class PartMover
 {
     public function __construct(
-        protected SyncSubparts $subpartSync,
-        protected Validator    $validator,
-        protected BasePartSync $basePartSync,
-        protected Registrar    $registrar,
         protected Finalizer    $finalizer,
+        protected Writer       $writer,
     ) {}
 
-    protected function currentUserId(): int
-    {
-        return Auth::id();
-    }
-    public function moveOfficialPart(Part $part, string $newName): Part
+    public function moveOfficialPart(Part $part, string $newName, User $actor): Part
     {
         if ($part->isUnofficial()) {
             throw new \Exception("Part {$part->id} is Unofficial");
@@ -45,14 +36,15 @@ class PartMover
             throw new \Exception("A fix for Part {$part->id} already exists");
         }
 
-        $upart = $this->copyOfficialToUnofficialPart($part);
+        $upart = $this->copyOfficialToUnofficialPart($part, $newPartName);
         $upart->history()->create([
             'part_id' => $upart->id,
-            'user_id' => $this->currentUserId(),
+            'user_id' => $actor->id,
             'comment' => 'Moved from ' . $part->meta_name,
         ]);
-        $this->moveUnofficialPart($upart, $part->type, $newPartName);
-        $mpart = $this->addMovedTo($part, $upart);
+        $this->updatePartReferences($upart, $part->meta_name);
+        $mpart = $this->addMovedTo($part, $upart, $actor);
+        $this->finalizer->handle(new PartCollection([$upart, $mpart]));
         $part->unofficial_part()->associate($mpart);
         $part->save();
 
@@ -104,16 +96,8 @@ class PartMover
 
         $part->filename = $newPartName;
         $part->save();
-        if ($part->type->inPartsFolder()) {
-            $this->basePartSync->syncBasePart($part);
-        }
         $this->updatePartReferences($part, $oldMetaName);
-
-        $this->subpartSync->updateMissing($part->meta_name);
-        $this->validator->checkPart($part);
-        $part->updateReadyForAdmin();
-        UpdateParentParts::dispatch($part->id);
-        UpdateRebrickable::dispatch($part->id);
+        $this->finalizer->handle(new PartCollection([$part]));
 
         return $part;
     }
@@ -157,39 +141,45 @@ class PartMover
             });
     }
 
-    protected function stripTexturePath(string $name): string
+    protected function copyOfficialToUnofficialPart(Part $part, ?string $newName = null): Part
     {
-        return str_replace('textures\\', '', $name);
-    }
-    protected function copyOfficialToUnofficialPart(Part $part): Part
-    {
-        $upart = $part->replicate();
-        $upart->save();
-        $upart->setKeywords($part->keywords);
-        $upart->setHistory($part->history);
-        $upart->setBody($part->body);
-        $upart->load('keywords', 'history', 'body');
-        $this->finalizer->handle($upart);
-        return $upart;
+        $attributes = [
+                'user_id' => $part->user_id,
+                'filename' => $part->filename,
+                'description' => $part->description,
+                'cmdline' => $part->cmdline,
+                'bfc' => $part->bfc,
+                'type' => $part->type,
+                'type_qualifier' => $part->type_qualifier,
+                'license' => $part->license,
+                'preview' => $part->preview,
+                'category' => $part->category,
+                'help' => $part->help,
+            ];
+        if ($newName !== null && $newName !== $part->filename) {
+            $attributes['filename'] = $newName;
+        }
+        $body = $part->body->body;
+        $keywords = $part->keywords->all();
+        $history = $part->history->all();
+        return $this->writer->createOrUpdate($attributes, $body, $keywords, $history);
     }
 
-    protected function addMovedTo(Part $oldPart, Part $newPart): Part
+    protected function addMovedTo(Part $oldPart, Part $newPart, User $user): Part
     {
         $values = [
             'description' => "~Moved to " . pathinfo($newPart->filename, PATHINFO_FILENAME),
             'filename' => $oldPart->filename,
-            'user_id' => $this->currentUserId(),
+            'user_id' => $user->id,
             'type' => $oldPart->type,
             'type_qualifier' => $oldPart->type_qualifier,
-            'license' => Auth::user()->license,
+            'license' => $user->license,
             'bfc' => $newPart->bfc,
             'category' => PartCategory::Moved,
             'header' => '',
+            'preview' => $oldPart->preview,
         ];
-        $upart = $this->registrar->makePart($values);
-        $upart->setBody("1 16 0 0 0 1 0 0 0 1 0 0 0 1 {$newPart->meta_name}\n");
-        $upart->refresh();
-        $this->finalizer->handle($upart);
-        return $upart;
+        $bodyText = "1 16 0 0 0 1 0 0 0 1 0 0 0 1 {$newPart->meta_name}\n";
+        return $this->writer->createOrUpdate($values, $bodyText);
     }
 }

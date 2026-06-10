@@ -52,7 +52,7 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         if ($part->isDirty('cmdline') && $part->cmdline !== null && trim($part->cmdline) === '') {
             $part->cmdline = null;
         }
-        if ($part->isDirty('preview') && $part->preview == null) {
+        if ($part->isDirty('preview') && $part->preview === null) {
             $part->preview = PreviewRotation::Default;
         }
         if ($part->isDirty($this->headerRelevantAttributes())) {

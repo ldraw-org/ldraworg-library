@@ -2,6 +2,8 @@
 
 namespace App\Filament\Actions;
 
+use App\Enums\PartCategory;
+use App\Events\PartSubmitted;
 use App\Services\Part\PartMover;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Utilities\Get;
@@ -82,7 +84,7 @@ class EditNumberAction extends EditAction
     {
         /** @var Part $part */
         $part = $this->getRecord();
-        $type = PartType::tryFrom($data['type']) ?? $part->type;
+        $type = PartType::tryFrom($data['type'] ?? null) ?? $part->type;
 
         $input = filled($data['newname']) ? $data['newname'] : $part->filename;
 
@@ -105,7 +107,10 @@ class EditNumberAction extends EditAction
             $mover->moveUnofficialPart($part, $type, $finalFilename);
             PartRenamed::dispatch($part, Auth::user(), $oldname, $part->filename);
         } else {
-            $mover->moveOfficialPart($part, $finalFilename);
+            $upart = $mover->moveOfficialPart($part, $finalFilename, Auth::user());
+            PartSubmitted::dispatch($upart, Auth::user());
+            $mpart = $upart->parents()->firstWhere('category', PartCategory::Moved);
+            PartSubmitted::dispatch($mpart, Auth::user());
         }
     }
 }

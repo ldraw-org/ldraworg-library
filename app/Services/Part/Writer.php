@@ -22,11 +22,11 @@ class Writer
         } else {
             $upart = Part::create($values);
         }
-
         $upart->setKeywords($keywords);
         $upart->setHistory($history);
         $upart->setBodyQuietly($bodyText);
         $upart->save();
 
-        return $upart->refresh();    }
+        return $upart->refresh();
+    }
 }

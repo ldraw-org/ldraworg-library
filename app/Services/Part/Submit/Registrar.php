@@ -127,25 +127,5 @@ class Registrar
     }
 
 
-    public function makePart(array $values): Part
-    {
-        $upart = Part::unofficial()->firstWhere('filename', $values['filename']);
-        $opart = Part::official()->firstWhere('filename', $values['filename']);
-        if (!is_null($upart)) {
-            app(BackupFile::class)->handle(str_replace('/', '-', $upart->filename), $upart->get());
-            $upart->votes()->delete();
-            $upart->fill($values);
-            $upart->save();
-        } elseif (!is_null($opart)) {
-            $upart = Part::create($values);
-            $opart->unofficial_part()->associate($upart);
-            $opart->save();
-        } else {
-            $upart = Part::create($values);
-        }
-        return $upart;
-    }
-
-
 
 }
