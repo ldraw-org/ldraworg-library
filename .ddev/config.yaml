@@ -20,7 +20,10 @@ web_environment: []
 corepack_enable: false
 xhgui_https_port: "8142"
 xhgui_http_port: "8143"
-
+hooks:
+  post-start:
+    - exec: mysql -uroot -proot -hdb -e "CREATE DATABASE IF NOT EXISTS library_testing_ldraw_org; GRANT
+        ALL ON library_testing_ldraw_org.* TO 'db'@'%';"
 # Key features of DDEV's config.yaml:
 
 # name: <projectname> # Name of the project, automatically provides
