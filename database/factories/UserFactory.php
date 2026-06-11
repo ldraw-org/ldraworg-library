@@ -25,7 +25,6 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'license' => License::CC_BY_4,
             'password' => bcrypt(Str::random(40)), // password
-            'remember_token' => Str::random(10),
         ];
     }
 }
