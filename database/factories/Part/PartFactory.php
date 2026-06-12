@@ -8,6 +8,7 @@ use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PreviewRotation;
 use App\Models\Part\Part;
+use App\Models\Part\PartBody;
 use App\Models\Part\PartRelease;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -40,6 +41,15 @@ class PartFactory extends Factory
             'preview' => PreviewRotation::Default,
             'header' => '',
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Part $part) {
+            PartBody::factory()->create([
+                'part_id' => $part->id,
+            ]);
+        });
     }
 
     public function unofficial(): static

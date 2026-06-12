@@ -39,4 +39,13 @@ enum VoteType: string
         };
     }
 
+    public static function storedVoteTypes(): array
+    {
+        return [
+            self::AdminReview,
+            self::Certify,
+            self::Hold,
+            self::AdminFastTrack,
+        ];
+    }
 }

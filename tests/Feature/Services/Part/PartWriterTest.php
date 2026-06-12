@@ -2,34 +2,42 @@
 
 // tests/Unit/Services/Part/WriterTest.php
 
+use App\Enums\License;
+use App\Enums\PartCategory;
+use App\Enums\PartType;
 use App\Models\Part\Part;
+use App\Models\User;
 use App\Services\BackupFile;
 use App\Services\Part\Writer;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+uses(RefreshDatabase::class, WithoutModelEvents::class);
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Minimal valid $values array.
- * Adjust keys to match your actual Part $fillable / factory columns.
- */
 function writerValues(array $overrides = []): array
 {
+    $user = User::factory()->create();
     return array_merge([
         'filename'    => 'parts/test.dat',
         'description' => 'Test Part',
-        // add other required fillable columns here
+        'category' => PartCategory::Brick,
+        'type' => PartType::Part,
+        'user_id' => $user->id,
+        'license' => License::CC_BY_4,
+        'bfc' => 'CCW',
+        'missing_parts' => [],
     ], $overrides);
 }
 
-/**
- * Bind a BackupFile mock into the service container and return it
- * so individual tests can add expectations.
- */
+function bodyText(?string $override = null): string
+{
+    return $override ?? '4 16 0 0 0 0 1 0 1 1 0 1 0 0';
+}
+
 function mockBackupFile(): Mockery\MockInterface
 {
     $mock = Mockery::mock(BackupFile::class);
@@ -53,9 +61,8 @@ describe('when an unofficial part already exists', function () {
         $backup->shouldReceive('handle')
             ->once()
             ->with($expectedSlug, $expectedContent);
-
         // Act
-        app(Writer::class)->createOrUpdate(writerValues());
+        app(Writer::class)->createOrUpdate(writerValues(), bodyText());
 
         // Assert — Mockery expectation above covers it
     });
@@ -64,7 +71,7 @@ describe('when an unofficial part already exists', function () {
         $existing = Part::factory()->unofficial()->hasVotes(3)->create(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle');
 
-        app(Writer::class)->createOrUpdate(writerValues());
+        app(Writer::class)->createOrUpdate(writerValues(), bodyText());
 
         expect($existing->votes()->count())->toBe(0);
     });
@@ -76,7 +83,7 @@ describe('when an unofficial part already exists', function () {
         ]);
         mockBackupFile()->shouldReceive('handle');
 
-        app(Writer::class)->createOrUpdate(writerValues(['description' => 'New Description']));
+        app(Writer::class)->createOrUpdate(writerValues(['description' => 'New Description']), bodyText());
 
         expect(Part::unofficial()->count())->toBe(1)        // no extra row
         ->and($existing->fresh()->description)->toBe('New Description');
@@ -87,7 +94,7 @@ describe('when an unofficial part already exists', function () {
         Part::factory()->unofficial()->create(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle');
 
-        app(Writer::class)->createOrUpdate(writerValues());
+        app(Writer::class)->createOrUpdate(writerValues(), bodyText());
 
         // Official record unchanged — unofficial_part association untouched
         expect($official->fresh()->unofficial_part_id)->toBeNull();
@@ -97,7 +104,7 @@ describe('when an unofficial part already exists', function () {
         $existing = Part::factory()->unofficial()->create(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle');
 
-        $result = app(Writer::class)->createOrUpdate(writerValues(['description' => 'Updated']));
+        $result = app(Writer::class)->createOrUpdate(writerValues(['description' => 'Updated']), bodyText());
 
         expect($result)->toBeInstanceOf(Part::class)
             ->and($result->id)->toBe($existing->id)
@@ -117,7 +124,7 @@ describe('when only an official part exists', function () {
 
         expect(Part::unofficial()->count())->toBe(0);
 
-        app(Writer::class)->createOrUpdate(writerValues());
+        app(Writer::class)->createOrUpdate(writerValues(), bodyText());
 
         expect(Part::unofficial()->count())->toBe(1);
     });
@@ -126,7 +133,7 @@ describe('when only an official part exists', function () {
         $official = Part::factory()->official()->create(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle')->never();
 
-        app(Writer::class)->createOrUpdate(writerValues());
+        app(Writer::class)->createOrUpdate(writerValues(), bodyText());
 
         $upart = Part::unofficial()->firstWhere('filename', 'parts/test.dat');
         expect($official->fresh()->unofficial_part_id)->toBe($upart->id);
@@ -136,7 +143,7 @@ describe('when only an official part exists', function () {
         Part::factory()->official()->create(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle')->never();
 
-        $result = app(Writer::class)->createOrUpdate(writerValues(['description' => 'Brand New']));
+        $result = app(Writer::class)->createOrUpdate(writerValues(['description' => 'Brand New']), bodyText());
 
         expect($result)->toBeInstanceOf(Part::class)
             ->and($result->description)->toBe('Brand New');
@@ -154,7 +161,7 @@ describe('when neither an unofficial nor official part exists', function () {
 
         expect(Part::count())->toBe(0);
 
-        app(Writer::class)->createOrUpdate(writerValues());
+        app(Writer::class)->createOrUpdate(writerValues(), bodyText());
 
         expect(Part::unofficial()->count())->toBe(1);
     });
@@ -163,7 +170,7 @@ describe('when neither an unofficial nor official part exists', function () {
         $backup = mockBackupFile();
         $backup->shouldReceive('handle')->never();
 
-        app(Writer::class)->createOrUpdate(writerValues());
+        app(Writer::class)->createOrUpdate(writerValues(), bodyText());
 
         // Mockery will assert 'never' on teardown
     });
@@ -171,7 +178,7 @@ describe('when neither an unofficial nor official part exists', function () {
     it('returns the new part', function () {
         mockBackupFile()->shouldReceive('handle')->never();
 
-        $result = app(Writer::class)->createOrUpdate(writerValues(['description' => 'Fresh']));
+        $result = app(Writer::class)->createOrUpdate(writerValues(['description' => 'Fresh']), bodyText());
 
         expect($result)->toBeInstanceOf(Part::class)
             ->and($result->description)->toBe('Fresh');
@@ -191,11 +198,7 @@ describe('post-save steps applied in all branches', function () {
     it('persists the provided keywords', function () {
         mockBackupFile()->shouldReceive('handle')->never();
 
-        app(Writer::class)->createOrUpdate(
-            values: writerValues(),
-            bodyText: '',
-            keywords: ['ALIAS', 'HELP'],
-        );
+        app(Writer::class)->createOrUpdate(writerValues(), bodyText(), ['ALIAS', 'HELP']);
 
         $part = Part::unofficial()->firstWhere('filename', 'parts/test.dat');
         expect($part->keywords->pluck('keyword')->all())
@@ -205,17 +208,26 @@ describe('post-save steps applied in all branches', function () {
 
     it('persists the provided history lines', function () {
         mockBackupFile()->shouldReceive('handle')->never();
-
+        $user = User::factory()->create();
+        $date = now()->format('Y-m-d');
+        $comment = 'Test comment';
+        $historyLine = "0 !HISTORY $date [$user->name] $comment";
         app(Writer::class)->createOrUpdate(
             values: writerValues(),
-            bodyText: '',
+            bodyText: bodyText(),
             keywords: [],
-            history: ['0 !HISTORY 2024-01-01 [Author] Initial'],
+            history: [
+                [
+                    'username' => $user->name,
+                    'date' => $date,
+                    'comment' => $comment,
+                ]
+            ],
         );
 
         $part = Part::unofficial()->firstWhere('filename', 'parts/test.dat');
-        expect($part->history->first()->body)
-            ->toBe('0 !HISTORY 2024-01-01 [Author] Initial');
+        expect($part->history->first()->toString())
+            ->toBe($historyLine);
     });
 
     it('stores the body text quietly (without triggering observers)', function () {
@@ -223,18 +235,18 @@ describe('post-save steps applied in all branches', function () {
 
         app(Writer::class)->createOrUpdate(
             values: writerValues(),
-            bodyText: '0 Test part body',
+            bodyText: bodyText('1 16 0 0 0 1 0 0 0 1 0 0 0 1 empty.dat'),
         );
 
         $part = Part::unofficial()->firstWhere('filename', 'parts/test.dat');
         // Adjust the accessor name to match your actual body storage column/method
-        expect($part->body)->toBe('0 Test part body');
+        expect($part->body->body)->toBe('1 16 0 0 0 1 0 0 0 1 0 0 0 1 empty.dat');
     });
 
     it('defaults keywords and history to empty when not supplied', function () {
         mockBackupFile()->shouldReceive('handle')->never();
 
-        app(Writer::class)->createOrUpdate(writerValues(), '');
+        app(Writer::class)->createOrUpdate(writerValues(), bodyText());
 
         $part = Part::unofficial()->firstWhere('filename', 'parts/test.dat');
         expect($part->keywords)->toBeEmpty()
