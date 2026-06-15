@@ -21,7 +21,7 @@ class Validator
             $messages = $this->partChecker->run($part)->map(fn (CheckMessage $check) => $check->toArray())->toArray();
             $part->check_messages()->createMany($messages);
         }
-        $part->can_release = $part->isOfficial() || ($part->check_messages->doesntHaveHoldableIssues());
+        $part->can_release = $part->isOfficial() || $part->check_messages->doesntHaveHoldableIssues();
         $part->updateReadyForAdmin();
         $part->save();
     }

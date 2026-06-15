@@ -9,10 +9,9 @@ use App\Models\Part\Part;
 use App\Models\User;
 use App\Services\BackupFile;
 use App\Services\Part\Writer;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class, WithoutModelEvents::class);
+uses(RefreshDatabase::class);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -53,7 +52,7 @@ describe('when an unofficial part already exists', function () {
 
     it('calls BackupFile::handle with a sanitised filename and the current file content', function () {
         // Arrange
-        $existing = Part::factory()->unofficial()->create(['filename' => 'parts/test.dat']);
+        $existing = Part::factory()->unofficial()->createQuietly(['filename' => 'parts/test.dat']);
         $expectedSlug = str_replace('/', '-', $existing->filename); // 'parts-test.dat'
         $expectedContent = $existing->get();
 
@@ -68,7 +67,7 @@ describe('when an unofficial part already exists', function () {
     });
 
     it('deletes all votes on the existing unofficial part', function () {
-        $existing = Part::factory()->unofficial()->hasVotes(3)->create(['filename' => 'parts/test.dat']);
+        $existing = Part::factory()->unofficial()->hasVotes(3)->createQuietly(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle');
 
         app(Writer::class)->createOrUpdate(writerValues(), bodyText());
@@ -77,7 +76,7 @@ describe('when an unofficial part already exists', function () {
     });
 
     it('fills the existing record with the new values instead of creating a new row', function () {
-        $existing = Part::factory()->unofficial()->create([
+        $existing = Part::factory()->unofficial()->createQuietly([
             'filename'    => 'parts/test.dat',
             'description' => 'Old Description',
         ]);
@@ -90,7 +89,7 @@ describe('when an unofficial part already exists', function () {
     });
 
     it('does not touch the official part', function () {
-        $official = Part::factory()->official()->create(['filename' => 'parts/test.dat']);
+        $official = Part::factory()->official()->createQuietly(['filename' => 'parts/test.dat']);
         Part::factory()->unofficial()->create(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle');
 
@@ -101,7 +100,7 @@ describe('when an unofficial part already exists', function () {
     });
 
     it('returns the refreshed unofficial part', function () {
-        $existing = Part::factory()->unofficial()->create(['filename' => 'parts/test.dat']);
+        $existing = Part::factory()->unofficial()->createQuietly(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle');
 
         $result = app(Writer::class)->createOrUpdate(writerValues(['description' => 'Updated']), bodyText());
@@ -119,7 +118,7 @@ describe('when an unofficial part already exists', function () {
 describe('when only an official part exists', function () {
 
     it('creates a new unofficial part record', function () {
-        Part::factory()->official()->create(['filename' => 'parts/test.dat']);
+        Part::factory()->official()->createQuietly(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle')->never(); // no backup for a new part
 
         expect(Part::unofficial()->count())->toBe(0);
@@ -130,7 +129,7 @@ describe('when only an official part exists', function () {
     });
 
     it('associates the new unofficial part with the official part', function () {
-        $official = Part::factory()->official()->create(['filename' => 'parts/test.dat']);
+        $official = Part::factory()->official()->createQuietly(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle')->never();
 
         app(Writer::class)->createOrUpdate(writerValues(), bodyText());
@@ -140,7 +139,7 @@ describe('when only an official part exists', function () {
     });
 
     it('returns the newly created unofficial part', function () {
-        Part::factory()->official()->create(['filename' => 'parts/test.dat']);
+        Part::factory()->official()->createQuietly(['filename' => 'parts/test.dat']);
         mockBackupFile()->shouldReceive('handle')->never();
 
         $result = app(Writer::class)->createOrUpdate(writerValues(['description' => 'Brand New']), bodyText());
