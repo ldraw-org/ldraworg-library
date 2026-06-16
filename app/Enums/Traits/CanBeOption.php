@@ -13,10 +13,10 @@ trait CanBeOption
     {
         return $this->label();
     }
-  
+
     /**
     * @param array<\BackedEnum>|array{} $types
-    * @return array<int|string, string> 
+    * @return array<int|string, string>
     */
     public static function options(array $types = []): array
     {

@@ -3,9 +3,8 @@
 namespace App\Services\Check\PartChecks;
 
 use App\Enums\PartCategory;
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartError;
 
 class PatternPartDescription extends BaseCheck
 {
@@ -19,7 +18,7 @@ class PatternPartDescription extends BaseCheck
         $hasPattern = preg_match('~Pattern(?:\h+\(.*\))?$~ui', $this->part->description(), $matches);
         $doesntHavekeyword = !in_array('Colour Combination', $this->part->keywords());
         if ($notExcludedCategory && !$hasPattern && $doesntHavekeyword) {
-            yield $this->error(CheckType::Error, PartError::PatternNotInDescription);
+            yield $this->error(PartError::PatternNotInDescription);
         }
     }
 }

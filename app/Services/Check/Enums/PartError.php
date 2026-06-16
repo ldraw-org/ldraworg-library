@@ -3,9 +3,10 @@
 namespace App\Services\Check\Enums;
 
 use App\Enums\Traits\CanBeOption;
+use App\Services\Check\Contracts\CheckItem;
 use Filament\Support\Contracts\HasLabel;
 
-enum PartError: string implements HasLabel
+enum PartError: string implements CheckItem, HasLabel
 {
     use CanBeOption;
 
@@ -20,7 +21,6 @@ enum PartError: string implements HasLabel
 
     case CircularReference = 'circularreference';
     case BfcNotCcw = 'bfc';
-    case PreviewInvalid = 'previewinvalid';
 
     case LineInvalid = 'line.invalid';
     case InvalidLineType0 = 'line.invalidmeta';
@@ -67,15 +67,52 @@ enum PartError: string implements HasLabel
     case HistoryInvalid = 'history.invalid';
     case HistoryAuthorNotRegistered = 'history.authorregistered';
 
-    case TrackerNoCertifiedParents = 'tracker_hold.nocertparents';
-    case TrackerHasUncertifiedSubfiles = 'tracker_hold.uncertsubs';
-    case TrackerHasMissingSubfiles = 'tracker_hold.missing';
-    case TrackerAdminHold = 'tracker_hold.adminhold';
+    public function type(): CheckType
+    {
+        return CheckType::Error;
+    }
 
-    case WarningMinifigCategory = 'warning.minifigcategory';
-    case WarningNotCoplanar = 'warning.notcoplaner';
-    case WarningStickerColor = 'warning.stickercolor';
-    case WarningLicense = 'warning.license';
-    case WarningDescriptionNumberSpaces = 'warning.descriptionnumbers';
-    case WarningDecimalPrecision = 'warning.decimalprecision';
+    public function isMultiLine(): bool
+    {
+        return match($this) {
+            self::LineInvalid,
+            self::InvalidLineType0,
+            self::InvalidLineColor,
+            self::InvalidColoredLines,
+            self::InvalidColor16,
+            self::InvalidColor24,
+            self::InvalidLineNumbers,
+            self::RotationMatrixIsSingular,
+            self::IdenticalPoints,
+            self::PointsColinear,
+            self::QuadNotConvex,
+            self::QuadNotCoplanar,
+            self::DecimalPrecision,
+            self::TrailingZeros,
+            self::LeadingZeros => true,
+            default => false,
+        };
+    }
+
+    public function multiLineHeader(): ?string
+    {
+        return match($this) {
+            self::LineInvalid => 'Invalid Line',
+            self::InvalidLineType0 => 'Invalid META command or comment without //',
+            self::InvalidLineColor => 'Color code not in LDConfig.ldr',
+            self::InvalidColoredLines => 'Linetypes 2 and 5 should only be color 24',
+            self::InvalidColor16 => 'Color code 16 not allowed for linetypes 2, 5',
+            self::InvalidColor24 => 'Color code 24 not allowed for linetypes 1, 3, 4',
+            self::InvalidLineNumbers => 'Invalid number format',
+            self::RotationMatrixIsSingular => 'Singular rotation matrix',
+            self::IdenticalPoints => 'Identical points',
+            self::PointsColinear => 'Points are colinear',
+            self::QuadNotConvex => 'Quad is concave or bowtie',
+            self::QuadNotCoplanar,
+            self::DecimalPrecision,
+            self::TrailingZeros,
+            self::LeadingZeros => __('partcheck.' . $this->value),
+            default => null,
+        };
+    }
 }

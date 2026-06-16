@@ -2,9 +2,8 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartWarning;
 use App\Services\Check\Traits\ParsedPartOnly;
 
 class PreviewIsValid extends BaseCheck
@@ -14,7 +13,7 @@ class PreviewIsValid extends BaseCheck
     public function check(): iterable
     {
         if ($this->part->hasInvalidPreview() || ($this->part->preview() !== null && $this->part->previewRotation() === null)) {
-            yield $this->error(CheckType::Warning, PartError::WarningPreviewInvalid);
+            yield $this->error(PartWarning::WarningPreviewInvalid);
         }
     }
 }

@@ -2,10 +2,9 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Enums\PartTypeQualifier;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartError;
 
 class AliasInParts extends BaseCheck
 {
@@ -14,7 +13,7 @@ class AliasInParts extends BaseCheck
         if ($this->part->type_qualifier() == PartTypeQualifier::Alias &&
             ! $this->part->type()?->inPartsFolder()
         ) {
-            yield $this->error(CheckType::Error, PartError::AliasNotInParts);
+            yield $this->error(PartError::AliasNotInParts);
         }
     }
 }

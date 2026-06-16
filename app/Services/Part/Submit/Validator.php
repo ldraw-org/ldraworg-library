@@ -36,7 +36,6 @@ class Validator
 
                 if ($parts->where('filename', "{$folder}{$partname}")->isNotEmpty()) {
                     $checkmessages->push(CheckMessage::fromArray([
-                        'checkType' => CheckType::Error,
                         'error' => PartError::DuplicateFile,
                         'value' => $part->type() === PartType::Primitive ? 'Parts' : 'Primitive',
                     ]));

@@ -2,11 +2,10 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartAutomatedHold;
 use App\Services\Check\Traits\PartOnly;
 
 class TrackerHolds extends BaseCheck
@@ -26,19 +25,19 @@ class TrackerHolds extends BaseCheck
 
         // Validate and yield errors
         if (!$hasCertifiedParents) {
-            yield $this->error(CheckType::TrackerHold, PartError::TrackerNoCertifiedParents);
+            yield $this->error(PartAutomatedHold::TrackerNoCertifiedParents);
         }
 
         if ($hasUncertifiedSubparts) {
-            yield $this->error(CheckType::TrackerHold, PartError::TrackerHasUncertifiedSubfiles);
+            yield $this->error(PartAutomatedHold::TrackerHasUncertifiedSubfiles);
         }
 
         if ($this->hasMissingSubfiles()) {
-            yield $this->error(CheckType::TrackerHold, PartError::TrackerHasMissingSubfiles);
+            yield $this->error(PartAutomatedHold::TrackerHasMissingSubfiles);
         }
 
         if ($this->part->rawPart()->manual_hold_flag) {
-            yield $this->error(CheckType::TrackerHold, PartError::TrackerAdminHold);
+            yield $this->error(PartAutomatedHold::TrackerAdminHold);
         }
     }
 

@@ -2,9 +2,9 @@
 
 namespace App\Models\Traits;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Models\CheckMessage;
+use App\Services\Check\Contracts\CheckItem;
+use App\Services\Check\Enums\CheckType;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -35,25 +35,25 @@ trait HasCheckMessages
     }
 
     #[Scope]
-    protected function hasMessage(Builder $query, PartError|string $error): void
+    protected function hasMessage(Builder $query, CheckItem|string $error): void
     {
         self::applyMessageFilter($query, $error, useOr: false, negate: false);
     }
 
     #[Scope]
-    protected function orHasMessage(Builder $query, PartError|string $error): void
+    protected function orHasMessage(Builder $query, CheckItem|string $error): void
     {
         self::applyMessageFilter($query, $error, useOr: true, negate: false);
     }
 
     #[Scope]
-    protected function doesntHaveMessage(Builder $query, PartError|string $error): void
+    protected function doesntHaveMessage(Builder $query, CheckItem|string $error): void
     {
         self::applyMessageFilter($query, $error, useOr: false, negate: true);
     }
 
     #[Scope]
-    protected function orDoesntHaveMessage(Builder $query, PartError|string $error): void
+    protected function orDoesntHaveMessage(Builder $query, CheckItem|string $error): void
     {
         self::applyMessageFilter($query, $error, useOr: true, negate: true);
     }
@@ -65,7 +65,7 @@ trait HasCheckMessages
 
     private static function applyMessageFilter(
         Builder $query,
-        PartError|string $error,
+        CheckItem|string $error,
         bool $useOr,
         bool $negate
     ): Builder {

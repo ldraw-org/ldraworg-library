@@ -2,29 +2,42 @@
 
 namespace App\Services\Check\Enums;
 
-enum PartWarning: string
+use App\Enums\Traits\CanBeOption;
+use App\Services\Check\Contracts\CheckItem;
+use Filament\Support\Contracts\HasLabel;
+
+enum PartWarning: string implements CheckItem, HasLabel
 {
+    use CanBeOption;
+
     case WarningMinifigCategory = 'warning.minifigcategory';
     case WarningNotCoplanar = 'warning.notcoplaner';
     case WarningStickerColor = 'warning.stickercolor';
     case WarningLicense = 'warning.license';
     case WarningDescriptionNumberSpaces = 'warning.descriptionnumbers';
     case WarningDecimalPrecision = 'warning.decimalprecision';
+    case WarningPreviewInvalid = 'warning.previewinvalid';
 
     public function type(): CheckType
     {
         return CheckType::Warning;
     }
 
-    public function checkClass(): string
+    public function isMultiLine(): bool
     {
         return match($this) {
-            self::WarningMinifigCategory => App\Services\Check\PartChecks\MinifigCategoryWarning::class,
-            self::WarningNotCoplanar => App\Services\Check\PartChecks\ValidLines::class,
-            self::WarningStickerColor => App\Services\Check\PartChecks\StickerColorWarning::class,
-            self::WarningLicense => App\Services\Check\PartChecks\LibraryLicenseWarning::class,
-            self::WarningDescriptionNumberSpaces => App\Services\Check\PartChecks\DescriptionNumberWarning::class,
-            self::WarningDecimalPrecision => App\Services\Check\PartChecks\ValidLines::class,
+            self::WarningNotCoplanar,
+            self::WarningDecimalPrecision => true,
+            default => false,
+        };
+    }
+
+    public function multiLineHeader(): ?string
+    {
+        return match($this) {
+            self::WarningNotCoplanar => 'Quad is not coplanar',
+            self::WarningDecimalPrecision => 'Decimal precision exceeds library recommendation',
+            default => null
         };
     }
 }

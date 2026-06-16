@@ -3,9 +3,8 @@
 namespace App\Services\Check\PartChecks;
 
 use App\Enums\PartCategory;
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartError;
 use Illuminate\Support\Str;
 
 class ObsoletePartIsValid extends BaseCheck
@@ -20,7 +19,7 @@ class ObsoletePartIsValid extends BaseCheck
         $descObsolete = $desc->contains('(Obsolete)') || $desc->startsWith('~Obsolete');
         $catObsolete = $this->part->category() == PartCategory::Obsolete;
         if (($catObsolete && !$descObsolete) || (!$catObsolete && $descObsolete)) {
-            yield $this->error(CheckType::Error, PartError::ImproperObsolete);
+            yield $this->error(PartError::ImproperObsolete);
         }
     }
 }

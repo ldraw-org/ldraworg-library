@@ -2,9 +2,8 @@
 
 namespace App\Services\Check;
 
-use App\Enums\PartError;
-use App\Enums\CheckType;
 use App\Models\Part\Part;
+use App\Services\Check\Contracts\CheckItem;
 use App\Services\Parser\ParsedPartCollection;
 use App\Services\Check\Contracts\PartDataAdapter;
 use App\Services\Check\Adapters\PartModelAdapter;
@@ -59,8 +58,8 @@ abstract class BaseCheck
         };
     }
 
-    protected function error(CheckType $check_type, PartError $check, ?int $line_number = null, ?string $value = null, ?string $type = null, ?string $text = null): CheckMessage
+    protected function error(CheckItem $check, ?int $line_number = null, ?string $value = null, ?string $type = null, ?string $text = null): CheckMessage
     {
-        return CheckMessage::fromArray(compact('check_type', 'check', 'line_number', 'value', 'type', 'text'));
+        return CheckMessage::fromArray(compact( 'check', 'line_number', 'value', 'type', 'text'));
     }
 }

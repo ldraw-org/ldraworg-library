@@ -40,6 +40,7 @@ class PartFactory extends Factory
             'part_status' => PartStatus::Needs2MoreVotes,
             'preview' => PreviewRotation::Default,
             'header' => '',
+            'bfc' => 'CCW',
         ];
     }
 
@@ -79,7 +80,8 @@ class PartFactory extends Factory
     public function withBody(string $body = '0 body text'): static
     {
         return $this->afterCreating(function (Part $part) use ($body): void {
-            $part->body()->create(['body' => $body]);
+            $part->body->body = $body;
+            $part->save();
         });
     }
 

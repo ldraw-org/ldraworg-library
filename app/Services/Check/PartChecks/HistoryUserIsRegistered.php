@@ -2,10 +2,9 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Services\Check\BaseCheck;
 use App\Models\User;
+use App\Services\Check\Enums\PartError;
 use App\Services\Check\Traits\ParsedPartOnly;
 use Illuminate\Support\Arr;
 
@@ -20,9 +19,9 @@ class HistoryUserIsRegistered extends BaseCheck
             $realname = Arr::get($history, 'realname');
             $usernameNotFound = !is_null($username) && User::where('name', $username)->doesntExist();
             $realnameNotFound = !is_null($realname) && User::where('realname', $realname)->doesntExist();
-            
+
             if ($usernameNotFound || $realnameNotFound) {
-                yield $this->error(CheckType::Error, PartError::HistoryAuthorNotRegistered, value: $username ?? $realname);
+                yield $this->error(PartError::HistoryAuthorNotRegistered, value: $username ?? $realname);
                 return false;
             }
         }

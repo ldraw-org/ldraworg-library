@@ -132,7 +132,7 @@
             <div class="text-lg font-bold">Status:</div>
             <x-part.status :$part show-status />
             @if($part->check_messages->hasIssues())
-                <x-message.not-releaseable :$part />
+                <x-message.checks :$part />
             @endif
         @if($part->isUnofficial())
             <div class="text-md font-bold">Current Votes:</div>

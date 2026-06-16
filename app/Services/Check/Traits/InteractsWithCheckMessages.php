@@ -2,8 +2,7 @@
 
 namespace App\Services\Check\Traits;
 
-use App\Enums\CheckType;
-use App\Services\Check\CheckMessage;
+use App\Services\Check\Enums\CheckType;
 use Illuminate\Support\Collection;
 
 trait InteractsWithCheckMessages
@@ -25,7 +24,7 @@ trait InteractsWithCheckMessages
 
     protected function getCheckType(CheckType $checkType): self
     {
-        return $this->filter(fn (CheckMessage $message)=> $message->check_type == $checkType);
+        return $this->filter(fn ($message)=> $message->check->type() == $checkType);
     }
 
     public function hasErrors(): bool
@@ -80,7 +79,7 @@ trait InteractsWithCheckMessages
 
     protected function hasCheckType(CheckType $checkType): bool
     {
-        return $this->contains(fn ($message)=> $message->check_type == $checkType);
+        return $this->contains(fn ($message) => $message->check->type() == $checkType);
     }
 
     public function arrayByType(): Collection
@@ -88,12 +87,29 @@ trait InteractsWithCheckMessages
         return $this
             ->map(fn ($m) => [
                 'check_type' => $m->check_type->value,
-                'error' => $m->check->value,
+                'check' => $m->check->value,
                 'message' => $m->message(),
                 'line_number' => $m->line_number,
                 'text' => $m->text,
             ])
-            ->groupBy(['check_type', 'error']);
+            ->groupBy(['check_type', 'check']);
     }
 
+    public function messageArray(): Collection
+    {
+        return $this
+            ->groupBy(fn ($m) => $m->check->value)
+            ->map(fn ($messages) => [
+                'check' => $check = $messages->first()->check,
+                'message' => $messages->first()->message(),
+                'lines' => $check->isMultiLine()
+                    ? $messages->map(fn ($m) => "Line {$m->line_number}: {$m->text}")->values()->all()
+                    : null,
+            ])
+            ->groupBy(fn (array $m) => $m['check']->type()->value)
+            ->map(fn ($messages) => [
+                'type' => $messages->first()['check']->type(),
+                'checks' => $messages,
+            ]);
+    }
 }
