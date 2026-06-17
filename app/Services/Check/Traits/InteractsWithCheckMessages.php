@@ -99,4 +99,16 @@ trait InteractsWithCheckMessages
                 'checks' => $messages,
             ]);
     }
+
+    public function tableArray(): Collection
+    {
+        return $this
+            ->map(fn ($message) =>
+                $message->check->isMultiLine()
+                    ? $message->check->multiLineHeader()
+                    : $message->message(),
+            )
+            ->unique();
+    }
+
 }

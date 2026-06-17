@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Tables;
 
+use App\Services\Check\Enums\CheckType;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use Filament\Support\Enums\Width;
 use App\Enums\LibraryIcon;
 use App\Enums\License;
 use App\Enums\PartCategory;
-use App\Enums\PartError;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -155,14 +155,14 @@ class PartListTable extends BasicTable
                         ->searchable()
                         ->icon(LibraryIcon::CategoryConstraint->value)
                         ->multiple(),
-                    SelectConstraint::make('part_errors')
-                        ->options(PartError::class)
+                    SelectConstraint::make('check_messages')
+                        ->options(CheckType::allCheckItems())
                         ->searchable()
                         ->optionsLimit(100)
                         ->icon(LibraryIcon::Error->value)
                         ->multiple()
                         ->operators([
-                            IsOperator::make('error')
+                            IsOperator::make('checks')
                                 ->query(function (Builder $query, bool $isInverse, IsOperator $operator) {
                                     $values = $operator->getSettings()['values'] ?? [];
 

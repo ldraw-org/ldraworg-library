@@ -70,7 +70,7 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                             ->grow(false)
                             ->label('Status'),
                         TextColumn::make('part_check')
-                            ->state(fn (Part $part) => $part->check_messages->map->message())
+                            ->state(fn (Part $part) => $part->check_messages->unique('check')->map->message())
                             ->listWithLineBreaks()
                             ->alignment(Alignment::End),
                     ])->alignment(Alignment::End),

@@ -41,4 +41,13 @@ enum CheckType: string
         };
     }
 
+    public static function allCheckItems(): array
+    {
+        return array_merge(
+            PartError::options(),
+            PartWarning::options(),
+            PartAutomatedHold::options(),
+        );
+    }
+
 }
