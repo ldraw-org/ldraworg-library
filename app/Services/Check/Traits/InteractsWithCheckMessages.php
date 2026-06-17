@@ -82,19 +82,6 @@ trait InteractsWithCheckMessages
         return $this->contains(fn ($message) => $message->check->type() == $checkType);
     }
 
-    public function arrayByType(): Collection
-    {
-        return $this
-            ->map(fn ($m) => [
-                'check_type' => $m->check_type->value,
-                'check' => $m->check->value,
-                'message' => $m->message(),
-                'line_number' => $m->line_number,
-                'text' => $m->text,
-            ])
-            ->groupBy(['check_type', 'check']);
-    }
-
     public function messageArray(): Collection
     {
         return $this

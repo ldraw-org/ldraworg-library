@@ -36,7 +36,7 @@ class CheckMessage extends Model
     protected static function booted(): void
     {
         static::saving(function (self $model) {
-            $model->check_type = $model->check_item->type();
+            $model->check_type = $model->check->type();
         });
     }
 

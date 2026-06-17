@@ -2,12 +2,11 @@
 
 namespace App\Services\Part\Submit;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Enums\PartType;
 use App\Models\Part\Part;
 use App\Services\Check\CheckMessage;
 use App\Services\Check\CheckMessageCollection;
+use App\Services\Check\Enums\PartError;
 use App\Services\Check\PartChecker;
 use App\Services\LDraw\LDrawFile;
 use App\Services\Parser\ParsedPartCollection;

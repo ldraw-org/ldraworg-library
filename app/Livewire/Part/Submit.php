@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Part;
 
-use App\Enums\PartError;
+use App\Services\Check\Enums\PartError;
 use App\Services\Part\Submit\Registrar;
 use App\Services\Part\Submit\Validator;
 use Filament\Schemas\Schema;
@@ -19,6 +19,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -109,7 +110,7 @@ class Submit extends Component implements HasSchemas
 
     protected function findUploadedFile(string $filename): ?TemporaryUploadedFile
     {
-        /** @var \Illuminate\Support\Collection<int, TemporaryUploadedFile> $files */
+        /** @var Collection<int, TemporaryUploadedFile> $files */
         $files = collect($this->data['partfiles']);
 
         return $files->first(fn (TemporaryUploadedFile $file) =>
@@ -128,7 +129,7 @@ class Submit extends Component implements HasSchemas
             return;
         }
 
-        $this->fileStates[$filename]['messages'] = $collection->map->toArray();
+        $this->fileStates[$filename]['messages'] = $collection;
 
         $this->fileStates[$filename]['hasErrors'] = $collection->hasErrors();
         $this->fileStates[$filename]['hasWarnings'] = $collection->hasWarnings();

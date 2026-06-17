@@ -22,12 +22,11 @@ class SubmitValidation extends Component
         array $state
     ) {
         $this->filename = $filename;
-        $this->messages = CheckMessageCollection::fromArray($state['messages'])
-            ->arrayByType();
+        $this->messages = $state['messages']->messageArray();
     }
 
     public function render(): View|Closure|string
     {
-        return view('components.message.not-releaseable');
+        return view('components.message.checks');
     }
 }
