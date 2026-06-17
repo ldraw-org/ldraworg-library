@@ -25,7 +25,6 @@ class PartChecker
         \App\Services\Check\PartChecks\ObsoletePartIsValid::class,
         \App\Services\Check\PartChecks\PatternHasSetKeyword::class,
         \App\Services\Check\PartChecks\DescriptionNumberWarning::class,
-        \App\Services\Check\PartChecks\DecimalPrecisionExceeded::class,
         \App\Services\Check\PartChecks\HasTrailingZeros::class,
     ];
 

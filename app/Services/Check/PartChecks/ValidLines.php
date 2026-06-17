@@ -37,11 +37,11 @@ class ValidLines extends BaseCheck
             }
             if ($line['linetype'] != 0) {
                 if (preg_match('~\d*\.\d{5,}~', $line['text'], $matches)) {
-                    $decimalCount = strlen(substr(strrchr($matches[0], "."), 1));
+                    $decimalCount = strrchr($matches[0], ".")
+                            |> (fn($x) => substr($x, 1))
+                            |> strlen(...);
                     if ($decimalCount >= 6) {
                         yield $this->error(PartError::DecimalPrecision, line_number: $line['line_number'], text: $line['text']);
-                    } elseif ($decimalCount > 3 && $this->part->type()->isNotPrimitive() || $decimalCount > 4 && $this->part->type()->isPrimitive()) {
-                        yield $this->error(PartWarning::WarningDecimalPrecision, line_number: $line['line_number'], type: $this->part->type()->value, value: $decimalCount, text: $line['text']);
                     }
                 }
                 if (preg_match('~\.\d*?0(\h|$)~', $line['text'])) {
