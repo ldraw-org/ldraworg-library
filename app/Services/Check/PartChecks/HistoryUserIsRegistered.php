@@ -12,6 +12,9 @@ class HistoryUserIsRegistered extends BaseCheck
 {
     use ParsedPartOnly;
 
+    /**
+     * @return \Generator
+     */
     public function check(): iterable
     {
         foreach($this->part->history() as $history) {
@@ -22,7 +25,7 @@ class HistoryUserIsRegistered extends BaseCheck
 
             if ($usernameNotFound || $realnameNotFound) {
                 yield $this->error(PartError::HistoryAuthorNotRegistered, value: $username ?? $realname);
-                return false;
+                return;
             }
         }
     }
