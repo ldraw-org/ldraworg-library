@@ -177,11 +177,7 @@ class Submit extends Component implements HasSchemas
             return;
         }
 
-        $collection = CheckMessageCollection::fromArray(
-            $this->fileStates[$filename]['messages']
-        );
-
-        $collection = $collection
+        $collection = $this->fileStates[$filename]['messages']
             ->reject(fn (CheckMessage $message) =>
                 $message->check === $error
             );
