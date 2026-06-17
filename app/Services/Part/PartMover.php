@@ -160,7 +160,7 @@ class PartMover
             $attributes['filename'] = $newName;
         }
         $body = $part->body->body;
-        $keywords = $part->keywords->all();
+        $keywords = $part->keywords->pluck('keyword')->values()->all();
         $history = $part->history->all();
         return $this->writer->createOrUpdate($attributes, $body, $keywords, $history);
     }
