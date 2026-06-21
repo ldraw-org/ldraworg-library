@@ -2,11 +2,18 @@
 
 namespace App\Enums\Traits;
 
+use Illuminate\Support\Str;
+
 trait CanBeOption
 {
     public function label(): string
     {
-        return preg_replace('/(?<=\p{Ll})(?=\p{Lu})|(?<=\p{L})(?=\p{N})|(?<=\p{N})(?=\p{L})/u', ' ', $this->name);
+        return $this->customLabel() ?? Str::headline($this->name);
+    }
+
+    protected function customLabel(): ?string
+    {
+        return null;
     }
 
     public function getLabel(): ?string

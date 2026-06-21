@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Models\CheckMessage;
 use App\Services\Check\Enums\CheckType;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
@@ -31,6 +32,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 
 class PartListTable extends BasicTable
@@ -156,7 +158,19 @@ class PartListTable extends BasicTable
                         ->icon(LibraryIcon::CategoryConstraint->value)
                         ->multiple(),
                     SelectConstraint::make('check_messages')
-                        ->options(CheckType::allCheckItems())
+                        ->options(fn () =>
+                            DB::table('check_messages')
+                                ->select(['check_type', 'check'])
+                                ->distinct()
+                                ->get()
+                                ->mapWithKeys(function ($row) {
+                                    $check = CheckType::from($row->check_type)->enumClass()::from($row->check);
+
+                                    return [
+                                        $check->value => $check->label()
+                                    ];
+                                })
+                        )
                         ->searchable()
                         ->optionsLimit(100)
                         ->icon(LibraryIcon::Error->value)

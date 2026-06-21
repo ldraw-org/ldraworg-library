@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 #[CollectedBy(CheckMessageCollection::class)]
 #[Unguarded]
@@ -40,9 +41,24 @@ class CheckMessage extends Model
         });
     }
 
+    public static function distinctCheckOptions(): array
+    {
+        return DB::table('check_messages')
+            ->select(['check_type', 'check'])
+            ->distinct()
+            ->get()
+            ->mapWithKeys(function ($row) {
+                $check = CheckType::from($row->check_type)->enumClass()::from($row->check);
+                $key = "{$row->check_type}:{$row->check}";
+
+                return [$key => $check->isMultiLine() ? $check->multiLineHeader() : $check->description()];
+            })
+            ->all();
+    }
+
     public function message(): string
     {
-        return __("partcheck.{$this->check->value}", ['line' => $this->line_number, 'value' => $this->value, 'type' => $this->type]);
+        return $this->check->message(['line' => $this->line_number, 'value' => $this->value, 'type' => $this->type]);
     }
 
 }
