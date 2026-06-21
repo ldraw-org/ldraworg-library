@@ -61,4 +61,14 @@ enum PartStatus: int
     {
         return self::options(self::trackerStatus());
     }
+
+    public function customLabel(): ?string
+    {
+        return match ($this) {
+            PartStatus::Needs1MoreVote => 'Needs 1 More Vote',
+            PartStatus::Needs2MoreVotes => 'Needs 2 More Votes',
+            default => null,
+        };
+    }
+
 }

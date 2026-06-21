@@ -36,4 +36,13 @@ enum License: string
         }
         return null;
     }
+
+    public function customLabel(): ?string
+    {
+        return match($this) {
+            self::CC_BY_4 => 'CC BY 4.0 - Creative Commons Attribution 4.0 International',
+            self::CC_BY_2 => 'CC BY 2.0 - Creative Commons Attribution 2.0 Generic',
+            self::CC0 => 'CC0 - Creative Commons Zero 1.0 Universal',
+        };
+    }
 }
