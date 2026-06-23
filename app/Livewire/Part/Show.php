@@ -7,6 +7,7 @@ use App\Services\Part\GenerateHeader;
 use App\Services\Part\ImageGenerator;
 use App\Services\Part\RebrickableSync;
 use App\Services\Part\SyncSubparts;
+use App\Services\Part\ToggleManualHold;
 use App\Services\Part\Validator;
 use Filament\Actions\ActionGroup;
 use Filament\Schemas\Schema;
@@ -373,10 +374,7 @@ class Show extends Component implements HasSchemas, HasActions
             ->color($this->part->manual_hold_flag ? 'red' : 'gray')
             ->icon(LibraryIcon::PartFlag->value)
             ->label($this->part->manual_hold_flag ? 'On Administrative Hold' : 'Place on Administrative Hold')
-            ->action(function () {
-                $this->part->manual_hold_flag = !$this->part->manual_hold_flag;
-                $this->part->save();
-            })
+            ->action(fn () => app(ToggleManualHold::class)->handle($this->part))
             ->visible(Auth::user()?->can('flagManualHold', $this->part) ?? false);
     }
 

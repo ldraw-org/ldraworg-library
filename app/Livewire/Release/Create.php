@@ -77,7 +77,7 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                 ])->from('md')
             ])
             ->recordClasses(function (Part $p) {
-                if ($p->check_messages->hasHoldableIssues()) {
+                if ($p->check_messages->hasHoldableIssues() || $p->manual_hold_flag === true) {
                     return '!bg-red-300';
                 } elseif ($p->check_messages->hasWarnings()) {
                     return '!bg-orange-300';

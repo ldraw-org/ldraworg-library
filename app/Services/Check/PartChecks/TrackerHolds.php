@@ -35,10 +35,6 @@ class TrackerHolds extends BaseCheck
         if ($this->hasMissingSubfiles()) {
             yield $this->error(PartAutomatedHold::TrackerHasMissingSubfiles);
         }
-
-        if ($this->part->rawPart()->manual_hold_flag) {
-            yield $this->error(PartAutomatedHold::TrackerAdminHold);
-        }
     }
 
     private function hasCertifiedParents(): bool
