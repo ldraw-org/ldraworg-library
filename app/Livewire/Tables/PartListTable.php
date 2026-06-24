@@ -241,7 +241,7 @@ class PartListTable extends BasicTable
                                 ->searchable()
                                 ->multiple(),
                         )
-                        ->icon(LibraryIcon::ViewerStudLogo->value)
+                        ->icon(LibraryIcon::LegoBrick->value)
                         ->emptyable(),
                     RelationshipConstraint::make('subparts')
                         ->selectable(
@@ -251,7 +251,7 @@ class PartListTable extends BasicTable
                                 ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->meta_name} - {$p->description}")
                                 ->multiple(),
                         )
-                        ->icon(LibraryIcon::ViewerStudLogo->value)
+                        ->icon(LibraryIcon::LegoBrick->value)
                         ->emptyable(),
                     RelationshipConstraint::make('parents')
                         ->selectable(
@@ -261,7 +261,7 @@ class PartListTable extends BasicTable
                                 ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->meta_name} - {$p->description}")
                                 ->multiple(),
                         )
-                        ->icon(LibraryIcon::ViewerStudLogo->value)
+                        ->icon(LibraryIcon::LegoBrick->value)
                         ->emptyable(),
                 ]),
         ];
