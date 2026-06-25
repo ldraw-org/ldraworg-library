@@ -44,4 +44,5 @@
             <x-library-icon :icon="LibraryIcon::Error" title="Not releaseable" class="w-8 fill-red-500" />
             <div class="font-bold">Not Releaseable (red-800)</div>
         </div>
+    </div>
 </x-layout.base>

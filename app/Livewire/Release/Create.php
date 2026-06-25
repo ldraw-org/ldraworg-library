@@ -5,7 +5,6 @@ namespace App\Livewire\Release;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
-use App\Enums\CheckType;
 use App\Enums\PartStatus;
 use App\Filament\Tables\Columns\PartStatusColumn;
 use App\Jobs\MakePartRelease;
