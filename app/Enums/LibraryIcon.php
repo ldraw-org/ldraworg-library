@@ -61,4 +61,5 @@ enum LibraryIcon: string
     case TableFilter = 'mdi-filter';
     case TableSortDesc = 'mdi-chevron-down';
     case TableSortAsc = 'mdi-chevron-up';
+    case VoteOverturn = 'mdi-sync';
 }
