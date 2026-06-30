@@ -46,6 +46,10 @@ class Icon extends Component
      */
     private function getLowerLeftIconAndColor(): array
     {
+        if ($this->event->comment === null) {
+            return [null, null];
+        }
+
         return match($this->event->event_type) {
             EventType::Review,
             EventType::Submit,
@@ -66,10 +70,6 @@ class Icon extends Component
 
         if ($this->event->initial_submit && $this->event->part->official_part !== null) {
             return [LibraryIcon::PartFix, 'fill-green-400'];
-        }
-
-        if (!$this->event->initial_submit) {
-            return [LibraryIcon::VoteOverturn, 'fill-green-400'];
         }
 
         return [null, null];
