@@ -22,11 +22,11 @@ class GenerateHeader
     public function generateHeaderString(Part $part): string
     {
         $topBlock = [
-            "0 {$part->description}", // Added this
+            "0 {$part->description}",
             "0 Name: {$part->meta_name}",
             $part->user->toString(),
+            $this->getLdrawOrgLine($part->isUnofficial(), $part->type, $part->type_qualifier, $part->release),
             $part->license->ldrawString(),
-            $this->getLdrawOrgLine($part->isUnofficial(), $part->type, $part->type_qualifier, $part->release)
         ];
 
         $help = $part->help !== null && count($part->help) > 0 ? '0 !HELP ' . implode("\n0 !HELP ", $part->help) : null;
