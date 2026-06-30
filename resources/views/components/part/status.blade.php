@@ -1,15 +1,16 @@
 @props(['part', 'showStatus' => false, 'showMyVote' => false])
+@use("\App\Enums\LibraryIcon")
 @php
     $userVote = $part->votes->where('user_id', auth()->user()?->id)->first()?->vote_type
 @endphp
 <div>
     @if ($part->isUnofficial())
         @if (!$part->ready_for_admin)
-            <x-library-icon icon="not-releaseable" title="Not releaseable" color="fill-red-300" class="inline w-7" />
+            <x-library-icon :icon="LibraryIcon::NotReleaseable" title="Not releaseable" color="fill-red-300" class="inline w-7" />
         @endif
         @if ($showMyVote)
             @empty($userVote)
-                <x-library-icon icon="user-vote" class="inline w-7 fill-gray-400" title="My Vote: None"/>
+                <x-library-icon :icon="LibraryIcon::UserVote" class="inline w-7 fill-gray-400" title="My Vote: None"/>
             @else
                 <x-library-icon :icon="$userVote->icon()" class="inline w-7 {{$userVote->iconColor()}}" title="My Vote: {{$userVote->label()}}" />
             @endempty

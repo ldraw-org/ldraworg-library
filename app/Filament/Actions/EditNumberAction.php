@@ -2,112 +2,115 @@
 
 namespace App\Filament\Actions;
 
+use App\Enums\PartCategory;
+use App\Events\PartSubmitted;
+use App\Services\Part\PartMover;
+use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Utilities\Get;
 use App\Enums\PartType;
 use App\Events\PartRenamed;
-use App\Events\PartSubmitted;
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
-use App\Models\Part\PartHistory;
 use Closure;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\Auth;
 
-class EditNumberAction
+class EditNumberAction extends EditAction
 {
-    public static function make(Part $part, ?string $name = null): EditAction
+    protected function setUp(): void
     {
-        return EditAction::make($name)
-            ->label('Renumber/Move')
+        parent::setUp();
+
+        $this->label('Renumber/Move')
             ->modalHeading('Move/Renumber Part')
-            ->record($part)
-            ->schema(self::formSchema($part))
             ->successNotificationTitle('Renumber/Move Successful')
-            ->using(fn (Part $p, array $data) => self::updateMove($p, $data))
-            ->visible(Auth::user()?->can('move', $part) ?? false);
+            ->failureNotificationTitle('No rename specified')
+            ->visible(fn (?Part $record) => Auth::user()?->can('move', $record))
+            ->schema(fn (?Part $record) => $this->getRenumberFormSchema($record))
+            ->using(fn (array $data, EditAction $action, PartMover $mover) => $this->handleMove($data, $action, $mover));
     }
 
-    protected static function formSchema(Part $part): array
+    protected function getRenumberFormSchema(Part $part): array
     {
         return [
             TextInput::make('folder')
                 ->label('Current Location')
                 ->placeholder($part->type->folder())
-                ->disabled(),
+                ->disabled()
+                ->dehydrated(false)
+                ->visible($part->isUnofficial()),
             TextInput::make('name')
                 ->label('Current Name')
                 ->placeholder(basename($part->filename))
-                ->disabled(),
-            Radio::make('type')
-                ->label('Select destination folder:')
-                ->options(function () use ($part) {
-                    $types = $part->type->isDatFormat() ? PartType::datFormat() : PartType::imageFormat();
-                    $options = [];
-                    foreach ($types as $type) {
-                        if ($type->folder() == 'parts') {
-                            $options[$type->value] = "{$type->folder()} ($type->value)";
-                        } else {
-                            $options[$type->value] = $type->folder();
-                        }
-                    }
-                    return $options;
-                }),
+                ->disabled()
+                ->dehydrated(false),
+            Select::make('type')
+                ->label('New Type:')
+                ->required()
+                ->placeholder(false)
+                ->live()
+                ->options($part->type->isDatFormat() ? PartType::options(PartType::datFormat()) : PartType::options(PartType::imageFormat()))
+                ->visible($part->isUnofficial()),
             TextInput::make('newname')
-                ->label('New Name')
-                ->helperText('Exclude the folder from the name')
-                ->nullable()
-                ->string()
+                ->label($part->isUnofficial() ? 'New Name' : 'Move to')
+                ->helperText($part->isUnofficial() ? 'Exclude the folder from the name' : '')
                 ->rules([
                     fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $part) {
-                        if (!empty($get('type'))) {
-                            $newType = PartType::tryFrom($get('type'));
-                            $p = Part::find($part->id);
-                            if (!is_null($newType) && !is_null($p)) {
-                                $newName = basename($value, ".{$p->type->format()}");
-                                $newName = "{$newType->folder()}/{$newName}.{$newType->format()}";
-                                $oldp = Part::firstWhere('filename', $newName);
-                                if (!is_null($oldp)) {
-                                    $fail($newName . " already exists");
-                                }
-                            }
+                        $type = PartType::tryFrom($get('type')) ?? $part->type;
+                        $input = filled($value) ? $value : $part->filename;
+
+                        $sanitizedName = pathinfo(basename($input), PATHINFO_FILENAME);
+
+                        if (blank($sanitizedName)) {
+                            $sanitizedName = pathinfo(basename($part->filename), PATHINFO_FILENAME);
+                        }
+
+                        $finalFilename = "{$sanitizedName}.{$type->format()}";
+
+                        $isActuallyChanging = ($type->value !== $part->type->value) ||
+                            ("{$sanitizedName}.{$type->format()}" !== basename($part->filename));
+                        if (!$isActuallyChanging) {
+                            $fail('No change detected.');
+                        }
+                        if (Part::where('filename', $finalFilename)->exists()) {
+                            $fail('A part of this name already exists,');
                         }
                     }
                 ]),
             ];
     }
 
-    protected static function updateMove(Part $part, array $data): Part
+    protected function handleMove(array $data, EditAction $action, PartMover $mover): void
     {
-        $manager = app(PartManager::class);
-        $newType = PartType::from($data['type']);
-        $newName = basename($data['newname'], ".{$part->type->format()}");
-        $newName = "{$newName}.{$newType->format()}";
+        /** @var Part $part */
+        $part = $this->getRecord();
+        $type = PartType::tryFrom($data['type'] ?? null) ?? $part->type;
+
+        $input = filled($data['newname']) ? $data['newname'] : $part->filename;
+
+        $sanitizedName = pathinfo(basename($input), PATHINFO_FILENAME);
+        if (blank($sanitizedName)) {
+            $sanitizedName = pathinfo(basename($part->filename), PATHINFO_FILENAME);
+        }
+
+        $finalFilename = "{$sanitizedName}.{$type->format()}";
+
+        $isActuallyChanging = ($type->value !== $part->type->value) ||
+            ("{$sanitizedName}.{$type->format()}" !== basename($part->filename));
+
+        if (!$isActuallyChanging) {
+            $action->cancel();
+        }
+
         if ($part->isUnofficial()) {
             $oldname = $part->filename;
-            $manager->movePart($part, $newName, $newType);
-            $part->refresh();
+            $mover->moveUnofficialPart($part, $type, $finalFilename);
             PartRenamed::dispatch($part, Auth::user(), $oldname, $part->filename);
         } else {
-            $upart = Part::unofficial()->where('filename', "{$newType->folder()}$newName")->first();
-            if (is_null($upart)) {
-                $upart = $manager->copyOfficialToUnofficialPart($part);
-                PartHistory::create([
-                    'part_id' => $upart->id,
-                    'user_id' => Auth::user()->id,
-                    'comment' => 'Moved from ' . $part->meta_name,
-                ]);
-                $upart->refresh();
-                $manager->movePart($upart, $newName, $newType);
-                PartSubmitted::dispatch($upart, Auth::user());
-            }
-            $mpart = $manager->addMovedTo($part, $upart);
-            $part->unofficial_part()->associate($mpart);
-            $part->save();
-            $mpart->save();
+            $upart = $mover->moveOfficialPart($part, $finalFilename, Auth::user());
+            PartSubmitted::dispatch($upart, Auth::user());
+            $mpart = $upart->parents()->firstWhere('category', PartCategory::Moved);
             PartSubmitted::dispatch($mpart, Auth::user());
         }
-        return $part;
     }
 }

@@ -5,7 +5,6 @@ namespace App\Livewire\Release;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
-use App\Enums\CheckType;
 use App\Enums\PartStatus;
 use App\Filament\Tables\Columns\PartStatusColumn;
 use App\Jobs\MakePartRelease;
@@ -70,14 +69,14 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                             ->grow(false)
                             ->label('Status'),
                         TextColumn::make('part_check')
-                            ->state(fn (Part $part) => $part->check_messages->map->message())
+                            ->state(fn (Part $part) => $part->check_messages->unique('check')->map->message())
                             ->listWithLineBreaks()
                             ->alignment(Alignment::End),
                     ])->alignment(Alignment::End),
                 ])->from('md')
             ])
             ->recordClasses(function (Part $p) {
-                if ($p->check_messages->hasHoldableIssues()) {
+                if ($p->check_messages->hasHoldableIssues() || $p->manual_hold_flag === true) {
                     return '!bg-red-300';
                 } elseif ($p->check_messages->hasWarnings()) {
                     return '!bg-orange-300';

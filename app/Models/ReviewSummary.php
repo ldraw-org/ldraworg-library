@@ -4,15 +4,15 @@ namespace App\Models;
 
 use App\Models\Part\Part;
 use App\Models\Traits\HasOrder;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
+#[Unguarded]
 class ReviewSummary extends Model
 {
     use HasOrder;
-
-    protected $guarded = [];
 
     public function parts(): Collection
     {

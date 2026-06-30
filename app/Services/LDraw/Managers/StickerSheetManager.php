@@ -5,7 +5,7 @@ namespace App\Services\LDraw\Managers;
 use App\Enums\PartCategory;
 use App\Models\Part\Part;
 use App\Models\RebrickablePart;
-use App\Services\LDraw\Rebrickable;
+use App\Services\External\Rebrickable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
@@ -24,9 +24,9 @@ class StickerSheetManager
         if ($sheet->rb_part_category_id != 58) {
             return $sheet->parts->newCollection();
         }
-        
+
         $sheet->loadMissing('parts', 'parts.parents');
-        
+
         $parts = $sheet->parts->whereNull('unofficial_part');
         $filenames = $parts->pluck('filename')->values();
 
@@ -61,7 +61,7 @@ class StickerSheetManager
         if ($rbCount == $dbCount) {
             return;
         }
-      
+
         $stickerParts = $this->rebrickable
             ->getParts([
                 'part_cat_id' => 58,
@@ -100,7 +100,7 @@ class StickerSheetManager
         $this->rebrickable->getPartColorSets($sheet->number, 9999)
             ->each(fn (array $set) => $this->setManager->updateOrCreateSetFromArray($set));
     }
-    
+
     public function getStickerPart(Part $part): ?RebrickablePart
     {
         if ($part->category !== PartCategory::Sticker && $part->category !== PartCategory::StickerShortcut) {
@@ -164,7 +164,7 @@ class StickerSheetManager
             ], [
                 'name' => "Sticker Sheet for {$flatBase}",
             ]);
-        }   
+        }
 
     }
 

@@ -2,7 +2,7 @@
 
 namespace App\MediaLibrary\ImageGenerators;
 
-use App\Services\LDraw\Render\LDView;
+use App\Services\Render\LDView;
 use App\Services\Parser\ImprovedParser;
 use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\Conversions\Conversion;

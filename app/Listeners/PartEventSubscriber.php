@@ -54,10 +54,10 @@ class PartEventSubscriber
     {
         PartEvent::create([
             'event_type' => EventType::Release,
-            'user_id' => $event->user->id,
-            'part_id' => $event->part->id,
-            'part_release_id' => $event->release->id,
-            'comment' => "Release {$event->release->name}",
+            'user_id' => $event->actorId,
+            'part_id' => $event->partId,
+            'part_release_id' => $event->releaseId,
+            'comment' => "Release {$event->releaseName}",
         ]);
     }
 

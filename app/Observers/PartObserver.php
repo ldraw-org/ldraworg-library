@@ -2,9 +2,18 @@
 
 namespace App\Observers;
 
-use App\Services\LDraw\Managers\Part\PartManager;
+use App\Enums\PreviewRotation;
+use App\Events\PartSubmitted;
 use App\Events\PartDeleted;
+use App\Jobs\CheckPart;
+use App\Jobs\GeneratePartImage;
+use App\Jobs\UpdateImage;
 use App\Jobs\UpdateLibraryCsv;
+use App\Services\Part\GenerateHeader;
+use App\Services\Part\Remover;
+use App\Services\Part\SyncSubparts;
+use App\Services\Part\SyncUnknownPartNumber;
+use App\Services\Part\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Part\Part;
 use App\Models\User;
@@ -13,96 +22,96 @@ use Illuminate\Support\Facades\Log;
 
 class PartObserver implements ShouldHandleEventsAfterCommit
 {
+    public function __construct(
+        protected SyncUnknownPartNumber $syncUnknownNumber,
+        protected SyncSubparts $syncSubparts,
+        protected Validator $validator,
+        protected Remover $remover,
+        protected GenerateHeader $generateHeader,
+    ) {}
+
     public function deleting(Part $part): void
     {
-        $part->putDeletedBackup();
-        $part->load('parents');
+        $this->remover->putDeletedBackup($part);
     }
 
     public function deleted(Part $part): void
     {
-        $pm = app(PartManager::class);
-        $part->parents->each(function (Part $p) use ($pm) {
-            $pm->loadSubparts($p);
-            $pm->checkPart($p);
+        $part->parents->each(function (Part $p) {
+            $this->syncSubparts->loadSubparts($p);
+            CheckPart::dispatch($p->id);
         });
         PartDeleted::dispatch(Auth::user() ?? User::find(1), $part->filename, $part->description);
     }
 
-
     public function saving(Part $part): void
     {
-        if (config('ldraw.library_debug')) {
-            Log::debug("Saving part {$part->id} ({$part->filename})");
-            if ($part->isDirty('part_status')) {
-                Log::debug("and status changed");
-            }
-        }
-        if ($part->isDirty(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
-            UpdateLibraryCsv::dispatch();
-            if (config('ldraw.library_debug')) {
-                Log::debug("Updated library.csv while saving {$part->id} ({$part->filename})");
-            }
-        }
-
-        // Null out empty attributes
-        if ($part->isDirty('help') && !is_null($part->help) && trim(implode('', $part->help)) === '') {
+        if ($part->isDirty('help') && $part->help !== null && trim(implode('', $part->help)) === '') {
             $part->help = null;
         }
-        if ($part->isDirty('cmdline') && trim($part->cmdline) === '') {
+        if ($part->isDirty('cmdline') && $part->cmdline !== null && trim($part->cmdline) === '') {
             $part->cmdline = null;
         }
-        /*
-                if ($part->isDirty([
-                    'description',
-                    'filename',
-                    'user_id',
-                    'type',
-                    'type_qualifier',
-                    'part_release_id',
-                    'help',
-                    'category',
-                    'part_release_id',
-                    'bfc',
-                    'cmdline',
-                    'license',
-                    'preview'
-                ])) {
-                    $part->generateHeader(false);
-                }
-        */
+        if ($part->isDirty('preview') && $part->preview === null) {
+            $part->preview = PreviewRotation::Default;
+        }
+        if ($part->isDirty($this->headerRelevantAttributes())) {
+            $this->generateHeader->updatePartHeader($part);
+        }
     }
 
-    /*
-        public function updating(Part $part): void
-        {
-            if ($part->isDirty()) {
-                $part->generateHeader(false);
+    public function saved(Part $part): void
+    {
+        if (!$part->wasRecentlyCreated) {
+            if ($part->wasChanged($this->headerRelevantAttributes())) {
+                CheckPart::dispatch($part->id);
             }
-            if (config('ldraw.library_debug')) {
-                Log::debug("Updated part {$part->id} ({$part->filename})");
+            if ($part->wasChanged(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
+                UpdateLibraryCsv::dispatch();
+            }
+            if ($part->wasChanged('filename')) {
+                $this->syncUnknownNumber->handle($part);
+            }
+            if($part->wasChanged('preview')) {
+                GeneratePartImage::dispatch($part->id);
             }
         }
+    }
 
-        public function retrieved(Part $part): void
-        {
-            if (config('ldraw.library_debug')) {
-                Log::debug("Retrieved part {$part->id} ({$part->filename})");
-            }
+    public function pivotAttached(Part $part, $relationName): void
+    {
+        if ($relationName === 'keywords') {
+            $this->generateHeader->updatePartHeader($part);
+            $part->saveQuietly();
+            CheckPart::dispatch($part->id);
         }
+    }
 
-        public function pivotAttached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
-        {
-            if (config('ldraw.library_debug')) {
-                Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
-            }
+    public function pivotDetached(Part $part, $relationName): void
+    {
+        if ($relationName === 'keywords') {
+            $this->generateHeader->updatePartHeader($part);
+            $part->saveQuietly();
+            CheckPart::dispatch($part->id);
         }
+    }
 
-        public function pivotDetached(Part $part, string $relationName, array $pivotIds, array $pivotIdsAttributes): void
-        {
-            if (config('ldraw.library_debug')) {
-                Log::debug("Pivot {$relationName} updated for {$part->id} ({$part->filename})");
-            }
-        }
-    */
+    protected function headerRelevantAttributes(): array
+    {
+        return [
+            'description',
+            'filename',
+            'user_id',
+            'type',
+            'type_qualifier',
+            'part_release_id',
+            'help',
+            'category',
+            'part_release_id',
+            'bfc',
+            'cmdline',
+            'license',
+            'preview'
+        ];
+    }
 }

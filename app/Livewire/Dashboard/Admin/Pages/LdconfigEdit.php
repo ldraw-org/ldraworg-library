@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
+use App\Services\BackupFile;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -87,13 +88,13 @@ class LdconfigEdit extends Component implements HasSchemas
         $old_ldconfig = Storage::get('library/official/LDConfig.ldr') ?? '';
         $old_ldcfgalt = Storage::get('library/official/LDCfgalt.ldr') ?? '';
         if ($data['ldconfig-text'] != $old_ldconfig) {
-            store_backup('LDConfig.ldr', $old_ldconfig);
+            app(BackupFile::class)->handle('LDConfig.ldr', $old_ldconfig);
             Storage::put('library/official/LDConfig.ldr', $data['ldconfig-text']);
             app(LDConfigManager::class)->importColours();
             app(LDConfigManager::class)->importAvatars();
         }
         if ($data['ldcfgalt-text'] != $old_ldcfgalt) {
-            store_backup('LDCfgalt.ldr', $old_ldcfgalt);
+            app(BackupFile::class)->handle('LDCfgalt.ldr', $old_ldcfgalt);
             Storage::put('library/official/LDCfgalt.ldr', $data['ldcfgalt-text']);
         }
     }

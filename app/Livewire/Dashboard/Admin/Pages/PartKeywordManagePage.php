@@ -84,7 +84,7 @@ class PartKeywordManagePage extends BasicResourceManagePage implements HasAction
                 $keyword->save();
             }
             $keyword->parts()->official()->update(['has_minor_edit' => true]);
-            MassHeaderGenerate::dispatch($keyword->parts);
+            MassHeaderGenerate::dispatch($keyword->parts->pluck('id')->toArray());
         }
     }
 
@@ -109,7 +109,7 @@ class PartKeywordManagePage extends BasicResourceManagePage implements HasAction
         $finalKeyword = PartKeyword::find($data['merge-keyword']);
         $finalKeyword->parts()->official()->update(['has_minor_edit' => true]);
         $finalKeyword->parts->each(fn (Part $p) => $p->keywords()->toggle([$keyword->id, $finalKeyword->id]));
-        MassHeaderGenerate::dispatch($finalKeyword->parts);
+        MassHeaderGenerate::dispatch($finalKeyword->parts->pluck('id')->toArray());
         $finalKeyword->delete();
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\MassHeaderGenerate;
 use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
@@ -11,21 +12,24 @@ class PartKeywordObserver implements ShouldHandleEventsAfterCommit
 {
     public function saved(PartKeyword $keyword): void
     {
-        if ($keyword->wasChanged()) {
-            $keyword->parts->each->generateHeader();
+        if ($keyword->wasChanged('keyword')) {
+            $this->dispatchMassUpdate($keyword);
         }
-        if (config('ldraw.library_debug')) {
-            Log::debug("Saved keyword {$keyword->id} ({$keyword->keyword})");
-        }
-    }    
+    }
 
-    
+
     public function deleting(PartKeyword $keyword): void
     {
-        $keyword->parts->each(fn (Part $part) => $part->keywords()->detach($keyword));
-        if (config('ldraw.library_debug')) {
-            Log::debug("Removed keyword {$keyword->id} ({$keyword->keyword})");
-        }
-    }    
+        $this->dispatchMassUpdate($keyword);
+    }
 
+    protected function dispatchMassUpdate(PartKeyword $keyword): void
+    {
+        // Use the query builder (parts()) to get IDs efficiently
+        $partIds = $keyword->parts()->pluck('id')->all();
+
+        if (!empty($partIds)) {
+            MassHeaderGenerate::dispatch($partIds);
+        }
+    }
 }

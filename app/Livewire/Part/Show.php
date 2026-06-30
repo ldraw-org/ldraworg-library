@@ -2,19 +2,24 @@
 
 namespace App\Livewire\Part;
 
-use App\Services\Part\PartRebrickableService;
+use App\Services\Part\BasePartSync;
+use App\Services\Part\GenerateHeader;
+use App\Services\Part\ImageGenerator;
+use App\Services\Part\RebrickableSync;
+use App\Services\Part\SyncSubparts;
+use App\Services\Part\ToggleManualHold;
+use App\Services\Part\Validator;
+use Filament\Actions\ActionGroup;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use App\Enums\ExternalSite;
 use App\Enums\LibraryIcon;
-use App\Enums\PartCategory;
 use App\Enums\VoteType;
 use App\Filament\Actions\EditHeaderAction;
 use App\Filament\Actions\EditNumberAction;
 use App\Filament\Actions\EditPreviewAction;
 use App\Filament\Actions\Part\Download\PartFileDownloadAction;
 use App\Filament\Actions\Part\Download\PartZipFileDownloadAction;
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Services\LDraw\Managers\VoteManager;
 use App\Models\Part\Part;
 use App\Models\Vote;
@@ -25,7 +30,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\Textarea;
@@ -51,6 +55,7 @@ class Show extends Component implements HasSchemas, HasActions
     public Part $part;
     public ?string $comment = null;
     public ?string $vote_type_code = null;
+    public bool $webGlSupported = false;
 
     public function form(Schema $schema): Schema
     {
@@ -123,17 +128,20 @@ class Show extends Component implements HasSchemas, HasActions
 
     public function editHeaderAction(): EditAction
     {
-        return EditHeaderAction::make($this->part, 'editHeader');
+        return EditHeaderAction::make('editHeader')
+            ->record($this->part);
     }
 
     public function editNumberAction(): EditAction
     {
-        return  EditNumberAction::make($this->part, 'editNumber');
+        return EditNumberAction::make('editNumber')
+            ->record($this->part);
     }
 
     public function editPreviewAction(): EditAction
     {
-        return EditPreviewAction::make($this->part, 'editPreview');
+        return EditPreviewAction::make('editPreview')
+            ->record($this->part);
     }
 
     public function patternPartAction(): Action
@@ -174,7 +182,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('updateImage')
                 ->action(function () {
-                    app(PartManager::class)->updateImage($this->part);
+                    app(ImageGenerator::class)->regenerateImage($this->part);
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Image Updated')
@@ -188,7 +196,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('updateRebrickableData')
                 ->action(function () {
-                    app(PartRebrickableService::class)->syncRebrickablePart($this->part);
+                    app(RebrickableSync::class)->syncRebrickablePart($this->part);
                     Notification::make()
                         ->title('Rebrickable data refreshed')
                         ->success()
@@ -201,7 +209,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('recheckPart')
                 ->action(function () {
-                    app(PartManager::class)->checkPart($this->part);
+                    app(Validator::class)->checkPart($this->part);
                     //$this->part->updatePartStatus();
                     $this->dispatch('subparts-updated');
                     Notification::make()
@@ -216,7 +224,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('updateSubparts')
                 ->action(function () {
-                    app(PartManager::class)->loadSubparts($this->part);
+                    app(SyncSubparts::class)->loadSubparts($this->part);
                     $this->dispatch('subparts-updated');
                     Notification::make()
                         ->title('Subparts Reloaded')
@@ -257,7 +265,8 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('regenerateHeader')
             ->action(function() {
-                $this->part->generateHeader();
+                app(GenerateHeader::class)->updatePartHeader($this->part);
+                $this->part->saveQuietly();
                 Notification::make()
                     ->title('Header Regenerated')
                     ->success()
@@ -365,10 +374,7 @@ class Show extends Component implements HasSchemas, HasActions
             ->color($this->part->manual_hold_flag ? 'red' : 'gray')
             ->icon(LibraryIcon::PartFlag->value)
             ->label($this->part->manual_hold_flag ? 'On Administrative Hold' : 'Place on Administrative Hold')
-            ->action(function () {
-                $this->part->manual_hold_flag = !$this->part->manual_hold_flag;
-                $this->part->save();
-            })
+            ->action(fn () => app(ToggleManualHold::class)->handle($this->part))
             ->visible(Auth::user()?->can('flagManualHold', $this->part) ?? false);
     }
 
@@ -415,7 +421,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('editBasePart')
             ->label('Refresh Base Part/Meta Data')
-            ->action(fn () => app(PartManager::class)->updateBasePart($this->part))
+            ->action(fn () => app(BasePartSync::class)->syncBasePart($this->part))
             ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 
@@ -475,6 +481,28 @@ class Show extends Component implements HasSchemas, HasActions
                 return route('parts.show', $this->part->unofficial_part->id ?? 0);
             })
             ->visible(!is_null($this->part->unofficial_part) || !is_null($this->part->official_part));
+    }
+
+    public function adminToolsActionGroup(): ActionGroup
+    {
+        return ActionGroup::make([
+                $this->editHeaderAction(),
+                $this->editNumberAction(),
+                $this->editPreviewAction(),
+                $this->editBasePartAction(),
+                $this->regenerateHeaderAction(),
+                $this->updateImageAction(),
+                $this->recheckPartAction(),
+                $this->updateSubpartsAction(),
+                $this->updateRebrickableDataAction(),
+                $this->retieFixAction(),
+                $this->deleteAction()
+            ])
+            ->label('Admin Tools')
+            ->icon(LibraryIcon::MenuDown->value)
+            ->button()
+            ->color('gray')
+            ->outlined();
     }
 
     #[Layout('components.layout.tracker')]

@@ -24,6 +24,7 @@ class SendDailyDigests implements ShouldQueue
             ->where('is_legacy', false)
             ->where('is_synthetic', false)
             ->where('is_ptadmin', false)
+            ->where('mail_daily_digest', true)
             ->chunkById(100, function ($users) {
                 foreach ($users as $user) {
                     // This dispatches a separate job to the 'jobs' table for every user

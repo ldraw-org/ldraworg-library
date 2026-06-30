@@ -16,8 +16,16 @@ class PartKeywordFactory extends Factory
      */
     public function definition(): array
     {
+        $numWords = $this->faker->numberBetween(1,3);
+        $words = $this->faker->words($numWords, true);
+        if ($numWords > 1 && $this->faker->boolean()) {
+            $words = "\"{$words}\"";
+        } else {
+            $words = ucfirst($words);
+        }
+
         return [
-            //
+            'keyword' => $words,
         ];
     }
 }

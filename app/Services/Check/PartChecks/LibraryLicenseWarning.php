@@ -3,9 +3,8 @@
 namespace App\Services\Check\PartChecks;
 
 use App\Enums\License;
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartWarning;
 use App\Services\Check\Traits\PartOnly;
 
 class LibraryLicenseWarning extends BaseCheck
@@ -15,7 +14,7 @@ class LibraryLicenseWarning extends BaseCheck
     public function check(): iterable
     {
         if ($this->part->rawPart()->isUnofficial() && $this->part->license() != License::CC_BY_4) {
-            yield $this->error(CheckType::Warning, error: PartError::WarningLicense);
+            yield $this->error(PartWarning::WarningLicense);
         }
     }
 }

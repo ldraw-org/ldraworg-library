@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use App\Enums\License;
-use App\Models\Mybb\MybbUser;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
 use App\Models\Part\UnknownPartNumber;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -16,31 +16,18 @@ use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ObservedBy([UserObserver::class])]
+#[Fillable(['name', 'email', 'realname', 'password', 'license', 'forum_user_id', 'is_legacy', 'is_ptadmin', 'is_synthetic'])]
 class User extends Authenticatable
 {
     use HasFactory;
     use HasParts;
     use HasRoles;
     use Notifiable;
-
-    protected $fillable = [
-        'name',
-        'email',
-        'realname',
-        'password',
-        'license',
-        'forum_user_id',
-        'is_legacy',
-        'is_synthetic',
-        'is_ptadmin'
-    ];
 
     protected $hidden = [
         'password',
@@ -96,10 +83,6 @@ class User extends Authenticatable
         return $this->belongsToMany(Part::class, 'user_part_notifications');
     }
 
-    public function forum_user(): BelongsTo
-    {
-        return $this->belongsTo(MybbUser::class, 'forum_user_id', 'uid');
-    }
     #[Scope]
     protected function fromAuthor(Builder $query, string $username, ?string $realname = null): void
     {

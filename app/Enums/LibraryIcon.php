@@ -36,7 +36,7 @@ enum LibraryIcon: string
     case Info = 'mdi-information-slab-circle';
     case UserVote = 'mdi-account-circle';
     case ViewerRefresh = 'mdi-refresh';
-    case ViewerStudLogo = 'mdi-toy-brick';
+    case LegoBrick = 'mdi-toy-brick';
     case ViewerHarlequin = 'mdi-brush';
     case ViewerBfc = 'mdi-flip-to-back';
     case ViewerShowAxis = 'mdi-axis-arrow';
@@ -61,4 +61,5 @@ enum LibraryIcon: string
     case TableFilter = 'mdi-filter';
     case TableSortDesc = 'mdi-chevron-down';
     case TableSortAsc = 'mdi-chevron-up';
+    case VoteOverturn = 'mdi-sync';
 }

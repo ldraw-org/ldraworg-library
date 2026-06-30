@@ -2,14 +2,14 @@
 
 namespace App\Models\Omr;
 
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
 use Illuminate\Database\Eloquent\Model;
 
+#[Unguarded]
 class Theme extends Model
 {
     use HasRecursiveRelationships;
-
-    protected $guarded = [];
 
     public function getCustomPaths()
     {

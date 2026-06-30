@@ -2,21 +2,20 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartWarning;
 
 class DescriptionNumberWarning extends BaseCheck
 {
-    protected $wordsBefore = [
+    protected array $wordsBefore = [
         'Type',
         'Phase',
         'Functions',
     ];
-    protected $wordsAfter  = [
-        'Ball', 
-        'Balls', 
-        'Stripe', 
+    protected array $wordsAfter  = [
+        'Ball',
+        'Balls',
+        'Stripe',
         'Stripes',
         'White',
     ];
@@ -41,8 +40,7 @@ class DescriptionNumberWarning extends BaseCheck
 
         if (preg_match_all($regex, $this->part->description())) {
             yield $this->error(
-                CheckType::Warning,
-                PartError::WarningDescriptionNumberSpaces
+                PartWarning::WarningDescriptionNumberSpaces
             );
         }
     }

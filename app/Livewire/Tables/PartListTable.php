@@ -2,13 +2,14 @@
 
 namespace App\Livewire\Tables;
 
+use App\Models\CheckMessage;
+use App\Services\Check\Enums\CheckType;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use Filament\Support\Enums\Width;
 use App\Enums\LibraryIcon;
 use App\Enums\License;
 use App\Enums\PartCategory;
-use App\Enums\PartError;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
@@ -31,6 +32,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 
 class PartListTable extends BasicTable
@@ -155,14 +157,26 @@ class PartListTable extends BasicTable
                         ->searchable()
                         ->icon(LibraryIcon::CategoryConstraint->value)
                         ->multiple(),
-                    SelectConstraint::make('part_errors')
-                        ->options(PartError::class)
+                    SelectConstraint::make('check_messages')
+                        ->options(fn () =>
+                            DB::table('check_messages')
+                                ->select(['check_type', 'check'])
+                                ->distinct()
+                                ->get()
+                                ->mapWithKeys(function ($row) {
+                                    $check = CheckType::from($row->check_type)->enumClass()::from($row->check);
+
+                                    return [
+                                        $check->value => $check->label()
+                                    ];
+                                })
+                        )
                         ->searchable()
                         ->optionsLimit(100)
                         ->icon(LibraryIcon::Error->value)
                         ->multiple()
                         ->operators([
-                            IsOperator::make('error')
+                            IsOperator::make('checks')
                                 ->query(function (Builder $query, bool $isInverse, IsOperator $operator) {
                                     $values = $operator->getSettings()['values'] ?? [];
 
@@ -227,7 +241,7 @@ class PartListTable extends BasicTable
                                 ->searchable()
                                 ->multiple(),
                         )
-                        ->icon(LibraryIcon::ViewerStudLogo->value)
+                        ->icon(LibraryIcon::LegoBrick->value)
                         ->emptyable(),
                     RelationshipConstraint::make('subparts')
                         ->selectable(
@@ -237,7 +251,7 @@ class PartListTable extends BasicTable
                                 ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->meta_name} - {$p->description}")
                                 ->multiple(),
                         )
-                        ->icon(LibraryIcon::ViewerStudLogo->value)
+                        ->icon(LibraryIcon::LegoBrick->value)
                         ->emptyable(),
                     RelationshipConstraint::make('parents')
                         ->selectable(
@@ -247,7 +261,7 @@ class PartListTable extends BasicTable
                                 ->getOptionLabelFromRecordUsing(fn (Part $p) => "{$p->meta_name} - {$p->description}")
                                 ->multiple(),
                         )
-                        ->icon(LibraryIcon::ViewerStudLogo->value)
+                        ->icon(LibraryIcon::LegoBrick->value)
                         ->emptyable(),
                 ]),
         ];

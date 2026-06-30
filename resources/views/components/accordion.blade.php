@@ -5,7 +5,7 @@
     <div {{ $header->attributes->class(['flex flex-row items-center gap-1']) }}>
 
         <x-library-icon
-            icon="menu-right"
+            :icon="\App\Enums\LibraryIcon::MenuRight"
             class="w-7 cursor-pointer transition-transform"
             ::class="{ 'rotate-90': open }"
             @click="open = !open"

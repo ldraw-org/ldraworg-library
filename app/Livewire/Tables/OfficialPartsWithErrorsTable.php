@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Tables;
 
+use App\Services\Check\Enums\CheckType;
+use App\Services\Check\Enums\PartError;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Filament\Actions\Part\Download\PartFileDownloadAction;
 use App\Models\Part\Part;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
@@ -35,7 +35,7 @@ class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
                 TextColumn::make('description')
                     ->sortable(),
                 TextColumn::make('errors')
-                    ->state(fn (Part $part) => $part->check_messages->getErrors()->map->message())
+                    ->state(fn (Part $part) => $part->check_messages->getErrors()->tableArray())
                     ->listWithLineBreaks()
                     ->bulleted()
                     ->wrap()
@@ -45,7 +45,7 @@ class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
                     ->color('info'),
             ])
             ->filters([
-                SelectFilter::make('errors')
+                SelectFilter::make('Errors')
                     ->label('Part Errors')
                     ->options(PartError::options())
                     ->multiple()

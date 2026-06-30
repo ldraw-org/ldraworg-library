@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Part;
 
 use App\Http\Controllers\Controller;
-use App\Services\LDraw\ZipFiles;
+use App\Services\Support\ZipFiles;
 use Illuminate\Support\Carbon;
 use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Http\Response;
-  
+
 class PartDownloadController extends Controller
 {
     public function __construct(

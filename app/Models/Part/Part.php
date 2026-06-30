@@ -13,10 +13,10 @@ use App\Enums\PartTypeQualifier;
 use App\Enums\PreviewRotation;
 use App\Enums\VoteType;
 use App\Models\RebrickablePart;
-use App\Models\Traits\HasErrorScopes;
+use App\Models\Traits\HasCheckMessages;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -27,7 +27,6 @@ use App\Models\Traits\HasUser;
 use App\Models\User;
 use App\Models\Vote;
 use App\Observers\PartObserver;
-use App\Services\Check\CheckMessageCollection;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -38,7 +37,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
@@ -53,6 +51,7 @@ use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
  */
 #[ObservedBy([PartObserver::class])]
 #[CollectedBy(PartCollection::class)]
+#[Unguarded]
 class Part extends Model implements HasMedia
 {
     use InteractsWithMedia;
@@ -62,9 +61,7 @@ class Part extends Model implements HasMedia
     use HasPartRelease;
     use HasUser;
     use HasFactory;
-    use HasErrorScopes;
-
-    protected $guarded = [];
+    use HasCheckMessages;
 
     /**
     * @return array{
@@ -313,14 +310,6 @@ class Part extends Model implements HasMedia
     protected function activeParts(Builder $query): void
     {
         $query->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved]);
-    }
-
-    protected function checkMessages(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value) => CheckMessageCollection::fromArray(json_decode($value ?? '[]', true)),
-            set: fn (CheckMessageCollection $value) => json_encode($value->toArray())
-        );
     }
 
     protected function metaName(): Attribute
@@ -644,7 +633,6 @@ class Part extends Model implements HasMedia
 
         $this->setKeywords($keywords);
         $this->load('keywords');
-        $this->generateHeader();
     }
 
     public function setHistory(array|SupportCollection $history): void
@@ -744,6 +732,18 @@ class Part extends Model implements HasMedia
         $this->body->save();
     }
 
+    public function setBodyQuietly(string|PartBody $body): void
+    {
+        $body = $body instanceof PartBody ? $body->body : $body;
+        if (is_null($this->body)) {
+            $partBody = $this->body()->make(['body' => $body]);
+            $partBody->saveQuietly();
+            $this->load('body');
+            return;
+        }
+        $this->body->body = $body;
+        $this->body->saveQuietly();
+    }
     public function setSearchText(): void
     {
         $file = str_replace('-', 'd', $this->filename);
@@ -778,80 +778,6 @@ class Part extends Model implements HasMedia
         $text = preg_replace('/(\d+)\.(\d+)/', '$1.$2 $1p$2', $text);
 
         return Str::squish($text);
-    }
-
-    public function generateHeader(bool $save = true): void
-    {
-        $this->load('user', 'history', 'keywords', 'release');
-
-        $name = $this->meta_name;
-        $user = $this->user->toString();
-        $license = $this->license->ldrawString();
-        $typestr = $this->type->ldrawString($this->isUnofficial());
-        if (!is_null($this->type_qualifier)) {
-            $typestr .= " {$this->type_qualifier->value}";
-        }
-        if (!is_null($this->release)) {
-            $typestr .= $this->release->toString();
-        }
-
-        $help = !is_null($this->help) && count($this->help) > 0 ? '0 !HELP ' . implode("\n0 !HELP ", $this->help) : '';
-        $bfc = '';
-        if (!is_null($this->bfc)) {
-            $bfc = "0 BFC CERTIFY {$this->bfc}";
-        } elseif (!$this->isTexmap()) {
-            $bfc = "0 BFC NOCERTIFY";
-        }
-
-        $category = '';
-        $firstWord = Str::of($this->description)
-            ->replaceMatches('/^[~|=_]+/i', '')
-            ->trim()
-            ->words(1, '')
-            ->toString();
-        if (PartCategory::tryFrom($firstWord) != $this->category && $this->type->inPartsFolder()) {
-            $category = $this->category->ldrawString() . "\n";
-        }
-
-        $keywords = '';
-        $line = '';
-        $this->keywords->each(function (PartKeyword $keyword, int $id) use (&$keywords, &$line) {
-            $kw = ($line === '') ? $keyword->keyword : ', ' . $keyword->keyword;
-            if (Str::length("0 !KEYWORDS {$line}{$kw}") > 80) {
-                $keywords .= "\n0 !KEYWORDS {$line}";
-                $line = $keyword->keyword;
-            } else {
-                $line .= $kw;
-            }
-        });
-        $keywords .= $line !== '' ? "\n0 !KEYWORDS {$line}" : '';
-
-        $preview = $this->preview->ldrawString();
-        $cmdline = !is_null($this->cmdline) && $this->cmdline !== '' ? "0 !CMDLINE {$this->cmdline}" : '';
-        $history = $this->history
-              ->map(fn (PartHistory $h): string => $h->toString())
-              ->implode("\n");
-
-        $header = "0 {$this->description}\n" .
-                  "0 Name: {$name}\n" .
-                  "{$user}\n{$typestr}\n{$license}\n\n" .
-                  "{$help}\n\n{$bfc}\n\n{$category}\n{$keywords}\n\n" .
-                  "{$cmdline}\n\n{$preview}\n\n{$history}";
-
-        $this->header = trim(preg_replace('#\n{3,}#us', "\n\n", $header));
-        if ($save) {
-            $this->setSearchText();
-        }
-        if (config('ldraw.library_debug')) {
-            Log::debug("Generated header for {$this->id} ({$this->filename})\n{$this->header}");
-        }
-    }
-
-    public function putDeletedBackup(): void
-    {
-        $t = time();
-        Storage::put("deleted/library/{$this->filename}.{$t}", $this->get());
-        Storage::put('deleted/library/' . str_replace(['.png', '.dat'], '.evt', $this->filename). ".{$t}", $this->events->toJson());
     }
 
     public function statusCode(): string

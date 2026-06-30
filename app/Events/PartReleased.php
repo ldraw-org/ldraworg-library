@@ -19,9 +19,10 @@ class PartReleased
      * Create a new event instance.
      */
     public function __construct(
-        public Part $part,
-        public User $user,
-        public PartRelease $release,
+        public int $partId,
+        public int $actorId,
+        public int $releaseId,
+        public string $releaseName,
     ) {
     }
 }

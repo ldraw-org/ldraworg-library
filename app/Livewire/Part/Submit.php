@@ -2,20 +2,16 @@
 
 namespace App\Livewire\Part;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
-use App\Services\Submit\SubmitFileValidator;
+use App\Services\Check\Enums\PartError;
+use App\Services\Part\Submit\Registrar;
+use App\Services\Part\Submit\Validator;
 use Filament\Schemas\Schema;
-use App\Enums\PartType;
 use App\Enums\Permission;
 use App\Services\LDraw\LDrawFile;
-use App\Services\LDraw\Managers\Part\PartManager;
 use App\Models\Part\Part;
 use App\Models\User;
 use App\Services\Check\CheckMessage;
 use App\Services\Check\CheckMessageCollection;
-use App\Services\Check\PartChecker;
-use App\Services\Parser\ParsedPartCollection;
 use Closure;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -24,8 +20,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Support\Collection;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
 use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -33,9 +27,6 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-/**
- * @property \Filament\Schemas\Schema $form
- */
 class Submit extends Component implements HasSchemas
 {
     use InteractsWithSchemas;
@@ -119,10 +110,12 @@ class Submit extends Component implements HasSchemas
 
     protected function findUploadedFile(string $filename): ?TemporaryUploadedFile
     {
-        return collect($this->data['partfiles'])
-            ->first(fn ($file) =>
-                $file->getClientOriginalName() === $filename
-            );
+        /** @var Collection<int, TemporaryUploadedFile> $files */
+        $files = collect($this->data['partfiles']);
+
+        return $files->first(fn (TemporaryUploadedFile $file) =>
+            $file->getClientOriginalName() === $filename
+        );
     }
 
     protected function storeFileValidationState(string $filename, CheckMessageCollection $collection): void
@@ -136,7 +129,7 @@ class Submit extends Component implements HasSchemas
             return;
         }
 
-        $this->fileStates[$filename]['messages'] = $collection->map->toArray()->all();
+        $this->fileStates[$filename]['messages'] = $collection;
 
         $this->fileStates[$filename]['hasErrors'] = $collection->hasErrors();
         $this->fileStates[$filename]['hasWarnings'] = $collection->hasWarnings();
@@ -148,7 +141,7 @@ class Submit extends Component implements HasSchemas
         );
     }
 
-    public function checkFile(string $filename, SubmitFileValidator $submitFileValidator): void
+    public function checkFile(string $filename, Validator $submitFileValidator): void
     {
         $uploaded = $this->findUploadedFile($filename);
 
@@ -168,7 +161,7 @@ class Submit extends Component implements HasSchemas
 
     protected function checkFiles(): void
     {
-        $submitFileValidator = app(SubmitFileValidator::class);
+        $submitFileValidator = app(Validator::class);
         foreach ($this->data['partfiles'] as $file) {
             $fileName = $file->getClientOriginalName();
             $this->checkFile($fileName, $submitFileValidator);
@@ -184,13 +177,9 @@ class Submit extends Component implements HasSchemas
             return;
         }
 
-        $collection = CheckMessageCollection::fromArray(
-            $this->fileStates[$filename]['messages']
-        );
-
-        $collection = $collection
+        $collection = $this->fileStates[$filename]['messages']
             ->reject(fn (CheckMessage $message) =>
-                $message->error === $error
+                $message->check === $error
             );
 
         $this->storeFileValidationState(
@@ -216,7 +205,7 @@ class Submit extends Component implements HasSchemas
     {
         $this->rejected_files = null;
         $this->submitted_parts = [];
-        $manager = app(PartManager::class);
+        $registrar = app(Registrar::class);
         $data = $this->form->getState();
 
         if (
@@ -238,10 +227,8 @@ class Submit extends Component implements HasSchemas
             })
             ->map(fn (TemporaryUploadedFile $file) =>
                 LDrawFile::fromUploadedFile($file)
-            )
-            ->values()
-            ->all();
-        $parts = $manager->submit($files, $user, $data['comments']);
+            );
+        $parts = $registrar->submit($files, $user, $data['comments']);
 
         $submittedNames = $parts
             ->pluck('filename')

@@ -6,12 +6,11 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
-use Filament\Schemas\Components\Utilities\Set;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Fieldset;
 use App\Enums\License;
 use App\Enums\Permission;
 use App\Livewire\Dashboard\BasicResourceManagePage;
-use App\Models\Mybb\MybbUser;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Filament\Forms\Components\Checkbox;
@@ -43,7 +42,7 @@ class UserManagePage extends BasicResourceManagePage implements HasActions
     {
         return $table
             ->query(User::query())
-            ->defaultSort('realname', 'asc')
+            ->defaultSort('realname')
             ->heading('User Management')
             ->columns([
                 TextColumn::make('id')
@@ -95,26 +94,9 @@ class UserManagePage extends BasicResourceManagePage implements HasActions
     protected function formSchema(): array
     {
         return [
-            Select::make('forum_user_id')
-                ->label('Forum User Name')
-                ->options(
-                    MybbUser::whereNotIn('usergroup', [5,7])
-                        ->whereNotIn('uid', User::whereNotNull('forum_user_id')->pluck('forum_user_id')->all())
-                        ->orderBy('username')
-                        ->pluck('username', 'uid')
-                )
-                ->required()
-                ->live()
-                ->searchable()
-                ->afterStateUpdated(function (Set $set, int $state) {
-                    $user = MybbUser::find($state);
-                    if (!is_null($user)) {
-                        $set('realname', $user->username);
-                        $set('name', $user->loginname);
-                        $set('email', $user->email);
-                    }
-                })
-                ->hiddenOn('edit'),
+            TextInput::make('forum_user_id')
+                ->label('Forum User ID')
+                ->integer(),
             TextInput::make('name')
                 ->required()
                 ->maxLength(255),
@@ -128,6 +110,16 @@ class UserManagePage extends BasicResourceManagePage implements HasActions
             Select::make('license')
                 ->options(License::options())
                 ->default(app(LibrarySettings::class)->default_part_license)
+                ->required(),
+            Toggle::make('mail_daily_digest')
+                ->label('Receive daily digest of tracked parts')
+                ->default(true)
+                ->required(),
+            Select::make('timezone')
+                ->label('Timezone')
+                ->options(timezone_identifiers_list())
+                ->in(timezone_identifiers_list())
+                ->default('UTC')
                 ->required(),
             Select::make('roles')
                 ->relationship('roles', titleAttribute: 'name')

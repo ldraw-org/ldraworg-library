@@ -26,26 +26,25 @@ use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use App\Services\PartHeaderEdit;
+use App\Services\Part\HeaderEdit;
 
-class EditHeaderAction
+class EditHeaderAction extends EditAction
 {
-    public static function make(Part $part, ?string $name = null): EditAction
+    public function setUp(): void
     {
-        $headerEditor = app(PartHeaderEdit::class);
+        parent::setUp();
 
-        return EditAction::make($name)
-            ->label('Edit Header')
-            ->record($part)
-            ->schema(self::formSchema())
-            ->mutateRecordDataUsing(fn (Part $p, array $data) => $headerEditor->setupHeaderData($p, $data))
-            ->using(fn (Part $p, array $data): Part => $headerEditor->storeHeaderData($p, $data))
+        $headerEditor = app(HeaderEdit::class);
+
+        $this->label('Edit Header')
+            ->schema(fn() => $this->formSchema())
+            ->mutateRecordDataUsing(fn (?Part $record, array $data) => $headerEditor->setupHeaderData($record, $data))
+            ->using(fn (?Part $record, array $data): Part => $headerEditor->storeHeaderData($record, $data))
             ->successNotificationTitle('Header updated')
-            ->visible(fn (Part $p) => $p->isUnofficial() && (Auth::user()?->can('update', $p) ?? false));
+            ->visible(fn (?Part $record) => $record?->isUnofficial() && (Auth::user()?->can('update', $record) ?? false));
     }
 
-    /** @return array<Filament\Forms\Components\Component> */
-    protected static function formSchema(): array
+    protected function formSchema(): array
     {
         return [
             TextInput::make('description')

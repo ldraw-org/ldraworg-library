@@ -2,9 +2,8 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartError;
 use Illuminate\Support\Str;
 
 class UnknownPartNumber extends BaseCheck
@@ -13,7 +12,7 @@ class UnknownPartNumber extends BaseCheck
     {
         $name = basename(str_replace('\\', '/', $this->part->name()));
         if (Str::startsWith($name, 'x')) {
-            yield $this->error(CheckType::Error, PartError::UnknownPartNumberName);
+            yield $this->error(PartError::UnknownPartNumberName);
         }
     }
 }

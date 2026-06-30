@@ -22,7 +22,7 @@ class UserTable extends BasicTable implements HasActions
     {
         return $table
             ->query(User::query()->withMax('part_events', 'created_at')->where('is_ptadmin', false)->where('is_synthetic', false))
-            ->defaultSort('realname', 'asc')
+            ->defaultSort('realname')
             ->heading('User List')
             ->columns([
                 TextColumn::make('realname')
@@ -41,10 +41,6 @@ class UserTable extends BasicTable implements HasActions
                     ->sortable(),
                 TextColumn::make('part_events_max_created_at')
                     ->label('Last Library Action')
-                    ->since()
-                    ->sortable(),
-                TextColumn::make('forum_user.lastactive')
-                    ->label('Last Active on Forum')
                     ->since()
                     ->sortable(),
             ])

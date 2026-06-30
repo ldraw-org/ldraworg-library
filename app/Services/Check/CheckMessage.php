@@ -2,64 +2,57 @@
 
 namespace App\Services\Check;
 
-use App\Enums\PartError;
-use App\Enums\CheckType;
+use App\Services\Check\Contracts\CheckItem;
+use App\Services\Check\Enums\CheckType;
 use Illuminate\Support\Arr;
 use Livewire\Wireable;
 
 class CheckMessage implements Wireable
 {
+    public readonly CheckType $check_type;
+
     private function __construct(
-        public CheckType $checkType,
-        public PartError $error,
-        public ?int $lineNumber = null,
-        public ?string $value = null,
-        public ?string $type = null,
-        public ?string $text = null,
+        public CheckItem $check,
+        public ?int      $line_number = null,
+        public ?string   $value = null,
+        public ?string   $type = null,
+        public ?string   $text = null,
     ) {
+        $this->check_type = $this->check->type();
     }
 
-    public function toLivewire()
+    public function toLivewire(): array
     {
         return $this->toArray();
     }
- 
-    public static function fromLivewire($value)
+
+    public static function fromLivewire($value): self
     {
         return self::fromArray($value);
     }
 
-    public static function fromPartError(PartError $error): self
+    public static function fromPartError(CheckItem $item): self
     {
-        return new self(CheckType::Error, $error);
+        return new self($item);
     }
 
-    public static function fromArray(array $checkmessage): self
+    public static function fromArray(array $checkMessage): self
     {
-        $checkType = Arr::get($checkmessage, 'checkType');
-        if (! $checkType instanceof CheckType) {
-            $checkType = CheckType::tryFrom($checkType);
-        }
-        $error = Arr::get($checkmessage, 'error');
-        if (! $error instanceof PartError) {
-            $error = PartError::tryFrom($error);
-        }
         return new self(
-            $checkType,
-            $error,
-            Arr::get($checkmessage, 'lineNumber'),
-            Arr::get($checkmessage, 'value'),
-            Arr::get($checkmessage, 'type'),
-            Arr::get($checkmessage, 'text'),           
+            Arr::get($checkMessage, 'check'),
+            Arr::get($checkMessage, 'line_number'),
+            Arr::get($checkMessage, 'value'),
+            Arr::get($checkMessage, 'type'),
+            Arr::get($checkMessage, 'text'),
         );
     }
 
     public function toArray(): array
     {
         return [
-            'checkType' => $this->checkType,
-            'error' => $this->error,
-            'lineNumber' => $this->lineNumber,
+            'check_type' => $this->check_type,
+            'check' => $this->check,
+            'line_number' => $this->line_number,
             'value' => $this->value,
             'type' => $this->type,
             'text' => $this->text,
@@ -68,6 +61,7 @@ class CheckMessage implements Wireable
 
     public function message(): string
     {
-       return __("partcheck.{$this->error->value}", ['line' => $this->lineNumber, 'value' => $this->value, 'type' => $this->type]);
+        return __("partcheck.{$this->check->value}", ['line' => $this->line_number, 'value' => $this->value, 'type' => $this->type]);
     }
+
 }

@@ -1,3 +1,4 @@
+@use("\App\Enums\LibraryIcon")
 <div x-data="{ webgl: true }">
     <x-slot:title>
         File Detail {{ $part->filename }}
@@ -23,13 +24,13 @@
 
     <div class="flex flex-col space-y-4 bg-white p-2 rounded-lg">
         <div class="flex flex-wrap gap-2">
-            <x-filament-action action="downloadAction" />
-            <x-filament-action action="downloadZipAction" />
-            <x-filament-action action="patternPartAction" />
-            <x-filament-action action="stickerSearchAction" />
-            <x-filament-action action="adminCertifyAllAction" />
-            <x-filament-action action="certifyAllAction" />
-            @if (!$part->isTexmap())
+            <x-filament-action :action="$this->downloadAction" />
+            <x-filament-action :action="$this->downloadZipAction" />
+            <x-filament-action :action="$this->patternPartAction" />
+            <x-filament-action :action="$this->stickerSearchAction" />
+            <x-filament-action :action="$this->adminCertifyAllAction" />
+            <x-filament-action :action="$this->certifyAllAction" />
+            @if (!$part->isTexmap() && $webGlSupported)
                 <x-filament::button
                     color="gray"
                     outlined
@@ -38,41 +39,7 @@
                     3D View
                 </x-filament::button>
             @endif
-
-            @if ($this->editHeaderAction->isVisible() ||
-                $this->editNumberAction->isVisible() ||
-                $this->editPreviewAction->isVisible() ||
-                $this->editBasePartAction->isVisible() ||
-                $this->regenerateHeaderAction->isVisible() ||
-                $this->updateImageAction->isVisible() ||
-                $this->recheckPartAction->isVisible() ||
-                $this->updateSubpartsAction->isVisible() ||
-                $this->updateRebrickableDataAction->isVisible() ||
-                $this->retieFixAction->isVisible() ||
-                $this->deleteAction->isVisible()
-            )
-
-                <x-filament-actions::group
-                    :actions="[
-                        $this->editHeaderAction,
-                        $this->editNumberAction,
-                        $this->editPreviewAction,
-                        $this->editBasePartAction,
-                        $this->regenerateHeaderAction,
-                        $this->updateImageAction,
-                        $this->recheckPartAction,
-                        $this->updateSubpartsAction,
-                        $this->updateRebrickableDataAction,
-                        $this->retieFixAction,
-                        $this->deleteAction
-                    ]"
-                    label="Admin Tools"
-                    icon="{{ \App\Enums\LibraryIcon::MenuDown->value }}"
-                    button="true"
-                    color="gray"
-                    outlined="true"
-                />
-            @endif
+            <x-filament-action-group :group="$this->adminToolsActionGroup()" />
         </div>
         <div @class([
                 'text-3xl font-bold py-2 px-3 w-fit rounded-lg',
@@ -82,19 +49,16 @@
                 {{ucfirst($part->libFolder())}} File <span id="filename">{{ $part->filename }}</span>
         </div>
         <div>
-            <x-filament-action action="viewFixAction" />
+            <x-filament-action :action="$this->viewFixAction" />
             @if ($part->isUnofficial())
-                <x-filament-action action="toggleTrackedAction" />
-                <x-filament-action action="toggleDeleteFlagAction" />
-                @if($part->delete_flag && !$this->toggleDeleteFlagAction->isVisible())
-                    <x-filament::button
-                        icon="{{ \App\Enums\LibraryIcon::PartFlag->value }}"
-                        color="danger"
-                    >
-                        Flagged for Deletion
-                    </x-filament::button>
-                @endif
-                <x-filament-action action="toggleManualHoldAction" />
+                <x-filament-action :action="$this->toggleTrackedAction" />
+                <x-filament-action
+                    :action="$this->toggleDeleteFlagAction"
+                    :show-fallback="$part->delete_flag"
+                    fallback-color="danger"
+                    fallback-label="Flagged For Deletion"
+                />
+                <x-filament-action :action="$this->toggleManualHoldAction" />
             @endif
         </div>
         @if ($this->part->type->inPartsFolder())
@@ -102,31 +66,25 @@
                 <span class="font-bold text-lg">
                     Part Attributes:
                 </span>
-                <x-filament-action action="viewBasePartAction" />
-                <x-filament-action action="toggleIsPatternAction" />
-                @if (!$this->toggleIsPatternAction->isVisible())
-                    <x-filament::button
-                        color="gray"
-                    >
-                    {{$this->part->is_pattern ? 'Printed' : 'Not Printed'}}
-                    </x-filament::button>
-                @endif
-                <x-filament-action action="toggleIsCompositeAction" />
-                @if (!$this->toggleIsCompositeAction->isVisible())
-                    <x-filament::button
-                        color="gray"
-                    >
-                        {{$this->part->is_composite ? 'Assembly' : 'Single Part'}}
-                    </x-filament::button>
-                @endif
-                <x-filament-action action="toggleIsDualMouldAction" />
-                @if (!$this->toggleIsDualMouldAction->isVisible())
-                    <x-filament::button
-                        color="gray"
-                    >
-                        {{$this->part->is_dual_mould ? 'Dual Moulded' : 'Single Mould'}}
-                    </x-filament::button>
-                @endif
+                <x-filament-action :action="$this->viewBasePartAction" />
+                <x-filament-action
+                    :action="$this->toggleIsPatternAction"
+                    show-fallback
+                    fallback-color="gray"
+                    fallback-label="{{$this->part->is_pattern ? 'Printed' : 'Not Printed'}}"
+                />
+                <x-filament-action
+                    :action="$this->toggleIsCompositeAction"
+                    show-fallback
+                    fallback-color="gray"
+                    fallback-label="{{$this->part->is_composite ? 'Assembly' : 'Single Part'}}"
+                />
+                <x-filament-action
+                    :action="$this->toggleIsDualMouldAction"
+                    show-fallback
+                    fallback-color="gray"
+                    fallback-label=" {{$this->part->is_dual_mould ? 'Dual Moulded' : 'Single Mould'}}"
+                />
             </div>
             @if ($this->viewRebrickableAction->isVisible() ||
                 $this->viewBrickLinkAction->isVisible() ||
@@ -138,14 +96,14 @@
                         External Sites:
                     </div>
                     @if (!is_null($part->rebrickable_part))
-                        <x-library-icon icon="link-on" class="w-5" color="fill-gray-400" title="External site data provided by Rebrickable.com" />
+                        <x-library-icon :icon="LibraryIcon::LinkOn" class="w-5" color="fill-gray-400" title="External site data provided by Rebrickable.com" />
                     @else
-                        <x-library-icon icon="link-off" class="w-5" color="fill-red-300" title="External site data provided by part keywords" />
+                        <x-library-icon :icon="LibraryIcon::LinkOff" class="w-5" color="fill-red-300" title="External site data provided by part keywords" />
                     @endif
-                    <x-filament-action action="viewRebrickableAction" />
-                    <x-filament-action action="viewBrickLinkAction" />
-                    <x-filament-action action="viewBrickSetAction" />
-                    <x-filament-action action="viewBrickOwlAction" />
+                    <x-filament-action :action="$this->viewRebrickableAction" />
+                    <x-filament-action :action="$this->viewBrickLinkAction" />
+                    <x-filament-action :action="$this->viewBrickSetAction" />
+                    <x-filament-action :action="$this->viewBrickOwlAction" />
                 </div>
             @endif
         @endif
@@ -153,7 +111,7 @@
           <div class="flex flex-col md:flex-row-reverse w-full">
             <div class="flex w-full justify-center items-center md:w-1/3">
                 <img class = 'w-80 h-80 object-contain'
-                @if(!$part->isTexmap()) wire:click="$dispatch('open-modal', { id: 'ldbi' })" @endif
+                @if(!$part->isTexmap() && $webGlSupported) wire:click="$dispatch('open-modal', { id: 'ldbi' })" @endif
                 src="{{$part->getFirstMediaUrl('image')}}" alt="{{ $part->description }}" title="{{ $part->description }}">
             </div>
             <div class="w-full md:w-2/3">
@@ -175,7 +133,7 @@
             <div class="text-lg font-bold">Status:</div>
             <x-part.status :$part show-status />
             @if($part->check_messages->hasIssues())
-                <x-message.not-releaseable :$part />
+                <x-message.checks :$part />
             @endif
         @if($part->isUnofficial())
             <div class="text-md font-bold">Current Votes:</div>
@@ -263,7 +221,14 @@
     @push('scripts')
         @script
         <script>
-            $wire.on('open-modal', (modal) => {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+            if (gl && gl instanceof WebGLRenderingContext) {
+                $wire.set('webGlSupported', true);
+            }
+
+            $wire.on('open-modal', () => {
                 if (scene == null) {
                     $wire.dispatch('ldbi-render-model');
                 }

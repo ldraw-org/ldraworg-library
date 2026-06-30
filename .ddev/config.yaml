@@ -10,13 +10,20 @@ database:
     type: mysql
     version: "8.4"
 webimage_extra_packages: [optipng, imagemagick, jpegoptim, pngquant, gifsicle, libavif-bin, php8.5-imap, php8.5-imagick, php8.5-sqlite3]
+web_extra_daemons:
+  - name: horizon
+    command: php artisan horizon
+    directory: /var/www/html
 use_dns_when_possible: true
 composer_version: "2"
 web_environment: []
 corepack_enable: false
 xhgui_https_port: "8142"
 xhgui_http_port: "8143"
-
+hooks:
+  post-start:
+    - exec: mysql -uroot -proot -hdb -e "CREATE DATABASE IF NOT EXISTS library_testing_ldraw_org; GRANT
+        ALL ON library_testing_ldraw_org.* TO 'db'@'%';"
 # Key features of DDEV's config.yaml:
 
 # name: <projectname> # Name of the project, automatically provides

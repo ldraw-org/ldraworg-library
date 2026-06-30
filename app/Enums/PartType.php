@@ -3,10 +3,11 @@
 namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
+use Filament\Support\Contracts\HasLabel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
-enum PartType: string
+enum PartType: string implements HasLabel
 {
     use CanBeOption;
 
@@ -157,5 +158,10 @@ enum PartType: string
     public function format(): string
     {
         return $this->isDatFormat() ? 'dat' : 'png';
+    }
+
+    public function extension(): string
+    {
+        return ".{$this->format()}";
     }
 }

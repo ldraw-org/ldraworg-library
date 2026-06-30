@@ -2,13 +2,13 @@
 
 namespace App\Models\Part;
 
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+#[Unguarded]
 class PartKeyword extends Model
 {
-    protected $guarded = [];
-
     public $timestamps = false;
 
     public function parts(): BelongsToMany

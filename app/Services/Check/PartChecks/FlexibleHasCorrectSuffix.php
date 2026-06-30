@@ -2,10 +2,9 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Enums\PartTypeQualifier;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartError;
 
 class FlexibleHasCorrectSuffix extends BaseCheck
 {
@@ -16,7 +15,7 @@ class FlexibleHasCorrectSuffix extends BaseCheck
         if ($this->part->type_qualifier() == PartTypeQualifier::FlexibleSection && $category?->isActive() &&
             !$hasKSuffix
         ) {
-            yield $this->error(CheckType::Error, PartError::FlexSectionIncorrectSuffix);
+            yield $this->error(PartError::FlexSectionIncorrectSuffix);
         }
     }
 }

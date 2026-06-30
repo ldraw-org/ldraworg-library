@@ -2,29 +2,16 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdateImage;
+use App\Jobs\GenerateOmrModelImage;
 use App\Models\Omr\OmrModel;
 use Illuminate\Console\Command;
 
 class RenderModels extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:render-models {model?*} {--missing}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Refresh Omr Model Images';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
 
@@ -41,7 +28,7 @@ class RenderModels extends Command
             ->lazy()
             ->each(function (OmrModel $m) use (&$count, $onlyMissing) {
                 if (!$onlyMissing || !file_exists($m->getFirstMediaPath('image'))) {
-                    UpdateImage::dispatch($m)->onQueue('maintenance');
+                    GenerateOmrModelImage::dispatch($m->id)->onQueue('maintenance');
                     $count++;
                 }
             });

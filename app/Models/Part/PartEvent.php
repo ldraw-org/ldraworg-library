@@ -5,6 +5,7 @@ namespace App\Models\Part;
 use App\Enums\EventType;
 use App\Enums\VoteType;
 use App\Models\Traits\HasPart;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasUser;
@@ -13,13 +14,12 @@ use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use App\Collections\PartEventCollection;
 
 #[CollectedBy(PartEventCollection::class)]
+#[Unguarded]
 class PartEvent extends Model
 {
     use HasPartRelease;
     use HasUser;
     use HasPart;
-
-    protected $guarded = [];
 
     /**
     * @return array{

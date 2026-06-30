@@ -7,7 +7,7 @@ use App\Enums\PartStatus;
 use App\Enums\PartType;
 use App\Events\PartReleased;
 use App\Jobs\CheckPart;
-use App\Jobs\UpdateImage;
+use App\Jobs\GeneratePartImage;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
@@ -16,9 +16,10 @@ use App\Models\User;
 use App\Models\Vote;
 use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
-use App\Services\LDraw\ZipFiles;
+use App\Services\Support\ZipFiles;
+use App\Services\Part\BasePartSync;
+use App\Services\Part\SyncSubparts;
 use App\Settings\LibrarySettings;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -26,7 +27,7 @@ use Illuminate\Support\Facades\Storage;
 class PartReleaseManager
 {
     protected PartRelease $release;
-    protected PartManager $manager;
+    protected SyncSubparts $subpartSync;
     protected LibrarySettings $settings;
     protected ZipFiles $zipfiles;
     protected CacheService $cache;
@@ -38,7 +39,7 @@ class PartReleaseManager
         protected bool $includeLdconfig = false,
         protected array $extraFiles = []
     ) {
-        $this->manager = app(PartManager::class);
+        $this->subpartSync = app(SyncSubparts::class);
         $this->settings = app(LibrarySettings::class);
         $this->zipfiles = app(ZipFiles::class);
         $this->cache = app(CacheService::class);
@@ -216,9 +217,6 @@ class PartReleaseManager
                 $part->part_release_id = $this->release->id;
                 $part->has_minor_edit = false;
                 $part->save();
-                $part->refresh();
-                $part->generateHeader();
-                $part->save();
             });
     }
 
@@ -257,9 +255,6 @@ class PartReleaseManager
             $part->part_release_id = $this->release->id;
             $part->clearMediaCollection('image');
             $part->save();
-            $part->refresh();
-            $part->generateHeader();
-            $part->save();
             if ($part->type->inPartsFolder()) {
                 $this->release
                     ->addMedia(Storage::path($viewImagePath), 'image')
@@ -297,10 +292,7 @@ class PartReleaseManager
         $opart->setKeywords($upart->keywords->pluck('keyword')->values()->all());
         $opart->setHistory($upart->history);
         $opart->setBody($upart->body);
-        $opart->save();
-        $opart->refresh();
-        $opart->generateHeader();
-        $this->manager->updateBasePart($opart);
+        app(BasePartSync::class)->syncBasePart($opart);
         $opart->save();
         return $opart;
     }
@@ -377,9 +369,9 @@ class PartReleaseManager
         // Dispatch jobs in small batches
         Part::whereIn('id', $affectedIds)->chunk(500, function($parts) {
             $parts->each(function (Part $p) {
-                UpdateImage::dispatch($p);
+                GeneratePartImage::dispatch($p->id);
                 CheckPart::dispatch($p);
-                $this->manager->loadSubparts($p);
+                $this->subpartSync->loadSubparts($p);
             });
         });
 

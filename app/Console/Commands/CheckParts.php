@@ -20,7 +20,7 @@ class CheckParts extends Command
             $q = Part::whereIn('id', $this->argument('part'));
             $count = $q->count();
             if ($count > 0) {
-                CheckPart::dispatch($q->get())->onQueue('maintenance');
+                CheckPart::dispatch($q->pluck('id')->values()->all())->onQueue('maintenance');
             }
         } else {
             $q = Part::query()
@@ -33,7 +33,7 @@ class CheckParts extends Command
                 fn (Builder $query) => $query->official()
             );
             $count = $q->count();
-            $q->each(fn (Part $part) => CheckPart::dispatch($part)->onQueue('maintenance'));
+            $q->each(fn (Part $part) => CheckPart::dispatch($part->id)->onQueue('maintenance'));
         }
         $this->info("{$count} parts queued for error check");
     }

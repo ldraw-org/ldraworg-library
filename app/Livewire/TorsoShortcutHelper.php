@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Services\Part\Submit\Registrar;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
@@ -9,13 +10,12 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\View;
-use App\Services\LDraw\Managers\Part\PartManager;
 use Filament\Schemas\Components\Fieldset;
 use App\Services\LDraw\LDrawModelMaker;
 use App\Enums\PartCategory;
 use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Services\LDraw\LDrawFile;
-use App\Services\LDraw\Rebrickable;
+use App\Services\External\Rebrickable;
 use App\Models\Part\Part;
 use App\Services\Check\PartChecker;
 use App\Services\Check\PartChecks\PatternHasSetKeyword;
@@ -273,7 +273,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         if ($u->cannot('create', Part::class)) {
             return;
         }
-        $pm = app(PartManager::class);
+        $registrar = app(Registrar::class);
         $file = LDrawFile::fromArray(
             [
                 'mimetype' => 'text/plain',
@@ -281,7 +281,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                 'contents' => $this->makeShortcut()
             ]
         );
-        $p = $pm->submit($file, $u);
+        $p = $registrar->submit($file, $u);
         $newpart = $p->first();
         $this->redirectRoute('parts.show', $newpart);
     }

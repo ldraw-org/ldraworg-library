@@ -1,3 +1,4 @@
+@use("\App\Enums\LibraryIcon")
 <x-layout.base>
     <x-slot:title>
         LDraw.org Icon and Colors Demo
@@ -18,7 +19,7 @@
             </div>
         @endforeach
         <div class="flex flex-row space-x-2 pl-4">
-            <x-library-icon icon="part-fix" class="w-8 fill-green-400" />
+            <x-library-icon :icon="LibraryIcon::PartFix" class="w-8 fill-green-400" />
             <div class="font-bold">Fix (green-400) (Used as modifier on bottom right) </div>
         </div>
         <div class="text-xl font-bold">Vote Type Icons</div>
@@ -29,7 +30,7 @@
             </div>
         @endforeach
         <div class="flex flex-row space-x-2 pl-4">
-            <x-library-icon icon="user-vote" class="fill-gray-400 w-8" />
+            <x-library-icon :icon="LibraryIcon::UserVote" class="fill-gray-400 w-8" />
             <div class="font-bold">No Recorded Vote (gray-400)</div>
         </div>
         <div class="text-xl font-bold">Part Status Icons</div>
@@ -40,7 +41,8 @@
             </div>
         @endforeach
         <div class="flex flex-row space-x-2 pl-4">
-            <x-library-icon icon="error" title="Not releaseable" class="w-8 fill-red-500" />
+            <x-library-icon :icon="LibraryIcon::Error" title="Not releaseable" class="w-8 fill-red-500" />
             <div class="font-bold">Not Releaseable (red-800)</div>
         </div>
+    </div>
 </x-layout.base>

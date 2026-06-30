@@ -1,3 +1,4 @@
+@use("\App\Enums\LibraryIcon")
 <div @class([
     'p-4 border border-gray-200 rounded-md flex items-center',
     'justify-center text-center' => $centered,
@@ -10,13 +11,13 @@
     @if($icon)
         @switch($type)
             @case('error')
-                <x-library-icon icon="error" class="w-14" color="fill-red-800" />
+                <x-library-icon :icon="LibraryIcon::Error" class="w-14" color="fill-red-800" />
                 @break
             @case('warning')
-                <x-library-icon icon="alert" class="w-14" color="fill-yellow-800" />
+                <x-library-icon :icon="LibraryIcon::Alert" class="w-14" color="fill-yellow-800" />
                 @break
             @case('info')
-                <x-library-icon icon="info" class="w-14" color="fill-blue-800" />
+                <x-library-icon :icon="LibraryIcon::Info" class="w-14" color="fill-blue-800" />
                 @break
         @endswitch
     @endif

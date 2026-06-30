@@ -6,17 +6,17 @@ namespace App\Models\Document;
 use App\Models\Traits\HasOrder;
 use App\Observers\DocumentObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[ObservedBy(DocumentObserver::class)]
+#[Unguarded]
 class Document extends Model
 {
     use HasOrder;
     use HasFactory;
-
-    protected $guarded = [];
 
     protected $with = [
         'category'
@@ -25,11 +25,11 @@ class Document extends Model
     /**
     * @return array{
     *     'restricted': 'boolean',
-    *     'published': 'boolean', 
-    *     'draft': 'boolean', 
+    *     'published': 'boolean',
+    *     'draft': 'boolean',
     *     'type': 'App\\Enums\\DocumentType',
     * }
-    */    
+    */
     protected function casts(): array
     {
         return [

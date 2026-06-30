@@ -1,4 +1,5 @@
 @props(['event'])
+@use("\App\Enums\LibraryIcon")
 <div class="flex-flex-col rounded border border-gray-200 p-4" {{ $attributes }}>
     <div class="flex flex-row space-x-4 place-items-center" >
         <x-event.icon :$event />
@@ -12,15 +13,15 @@
             @endif
             <div class="flex flex-row">
                 @if($event->user->hasRole('Library Admin'))
-                    <x-library-icon icon="user-library-admin" class="w-5" title="Part Library Admin"/>
+                    <x-library-icon :icon="LibraryIcon::UserLibraryAdmin" class="w-5" title="Part Library Admin"/>
                 @elseif($event->user->hasRole('Senior Reviewer'))
-                    <x-library-icon icon="user-senior-reviewer" class="w-5" title="Senior Part Reviewer"/>
+                    <x-library-icon :icon="LibraryIcon::UserSeniorReviewer" class="w-5" title="Senior Part Reviewer"/>
                 @elseif($event->user->hasRole('Part Header Editor'))
-                    <x-library-icon icon="user-header-editor" class="w-5" title="Part Header Editor"/>
+                    <x-library-icon :icon="LibraryIcon::UserSeniorReviewer" class="w-5" title="Part Header Editor"/>
                 @elseif($event->user->hasRole('Part Reviewer'))
-                    <x-library-icon icon="user-part-reviewer" class="w-5" title="Part Reviewer"/>
+                    <x-library-icon :icon="LibraryIcon::UserPartReviewer" class="w-5" title="Part Reviewer"/>
                 @elseif($event->user->hasRole('Part Author'))
-                    <x-library-icon icon="user-part-author" class="w-5" title="Part Author"/>
+                    <x-library-icon :icon="LibraryIcon::UserPartAuthor" class="w-5" title="Part Author"/>
                 @endif
             </div>
             <div>

@@ -3,15 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Services\LDraw\LDrawModelMaker;
-use App\Services\LDraw\SupportFiles;
 use App\Models\Part\Part;
 use App\Models\Omr\OmrModel;
+use App\Services\Support\MakeCategoriesTxt;
+use App\Services\Support\MakeLibraryCsv;
+use App\Services\Support\MakePtReleases;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
 class SupportFilesController extends Controller
 {
+    public function __construct(
+        protected MakeLibraryCsv $libraryCsv,
+        protected MakePtReleases $ptReleases,
+        protected MakeCategoriesTxt $categoriesTxt,
+    ) {}
+
     public function webglpart(Part $part, LDrawModelMaker $maker): JsonResponse
     {
         return response()->json($maker->webGl($part));
@@ -24,24 +32,30 @@ class SupportFilesController extends Controller
 
     public function categories(): Response
     {
-        return response(SupportFiles::categoriesText())->header('Content-Type', 'text/plain');
-    }
-
-    public function librarycsv(): Response
-    {
-        if (!Storage::exists('library/library.csv')) {
-            SupportFiles::setLibraryCsv();
+        if (!Storage::exists('library/categories.txt')) {
+            $this->categoriesTxt->handle();
         }
         return response(Storage::get('library/library.csv'))->header('Content-Type', 'text/plain; charset=utf-8');
+    }
+
+    public function libraryCsv(): Response
+    {
+        if (!Storage::exists('library/library.csv')) {
+            $this->libraryCsv->handle();
+        }
+        return response(Storage::get('library/library.csv'))->header('Content-Type', 'text/csv; charset=utf-8');
     }
 
     public function ptreleases(string $output): Response
     {
         $output = strtolower($output);
-        if ($output === 'tab') {
-            return response(SupportFiles::ptReleases('tab'))->header('Content-Type', 'text/plain; charset=utf-8');
+        if (!Storage::exists('library/ptreleases.tsv') || !Storage::exists('library/ptreleases.xml')) {
+            $this->ptReleases->handle();
         }
-        return response(SupportFiles::ptReleases('xml'))->header('Content-Type', 'application/xml; charset=utf-8');
+        if ($output === 'tab') {
+            return response(Storage::get('library/ptreleases.tsv'))->header('Content-Type', 'text/plain; charset=utf-8');
+        }
+        return response(Storage::get('library/ptreleases.xml'))->header('Content-Type', 'application/xml; charset=utf-8');
     }
 
 }

@@ -1,4 +1,4 @@
- <x-slot:title>
+<x-slot:title>
      Parts Tracker File Submit Form
 </x-slot>
 <div>

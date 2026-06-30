@@ -2,10 +2,9 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\CheckType;
-use App\Enums\PartError;
 use App\Enums\PartCategory;
 use App\Services\Check\BaseCheck;
+use App\Services\Check\Enums\PartWarning;
 
 class StickerColorWarning extends BaseCheck
 {
@@ -14,7 +13,7 @@ class StickerColorWarning extends BaseCheck
         if ($this->part->type()?->inPartsFolder() && $this->part->category() == PartCategory::StickerShortcut) {
             foreach($this->part->bodyLines()->where('linetype', 1) as $line) {
                 if ($line['color'] != 16) {
-                    yield $this->error(CheckType::Warning, PartError::WarningStickerColor);
+                    yield $this->error(PartWarning::WarningStickerColor);
                     break;
                 }
             }

@@ -2,27 +2,17 @@
 
 namespace App\Console\Commands;
 
-use App\Services\LDraw\SupportFiles;
+use App\Services\Support\MakeLibraryCsv;
 use Illuminate\Console\Command;
 
 class RefreshLibraryCsv extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:refresh-csv';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Refresh the library CSV file';
 
-    public function handle(SupportFiles $support): void
+    public function handle(MakeLibraryCsv $libraryCsv): void
     {
-        $support->setLibraryCsv();
+        $libraryCsv->handle();
     }
 }

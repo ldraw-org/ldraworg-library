@@ -10,23 +10,10 @@ use Illuminate\Support\Facades\Mail;
 
 class SendEmail extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'lib:test-email {user} {--daily}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Send a test or digest email to a user';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         $rn = $this->argument('user');

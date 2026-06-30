@@ -1,29 +1,32 @@
 <?php
 
 use App\Enums\PartType;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DocumentIndexController;
 use App\Http\Controllers\DocumentShowController;
-use App\Livewire\Dashboard\Admin\Pages\PartReleaseManagePage;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SupportFilesController;
 use App\Http\Controllers\Part\LastDayDownloadZipController;
 use App\Http\Controllers\Part\LatestPartsController;
 use App\Http\Controllers\Part\LatestReleaseController;
-use App\Http\Controllers\Part\PartUpdateController;
 use App\Http\Controllers\Part\PartDownloadController;
+use App\Http\Controllers\Part\PartUpdateController;
 use App\Http\Controllers\Part\WeeklyPartsController;
 use App\Http\Controllers\ReviewSummaryController;
 use App\Http\Controllers\StickerSheetShowController;
+use App\Http\Controllers\SupportFilesController;
 use App\Http\Controllers\TrackerHistoryController;
+use App\Livewire\Auth\ForgotPassword;
+use App\Livewire\Auth\Login;
+use App\Livewire\Auth\PasswordReset;
 use App\Livewire\Dashboard\Admin\Index as AdminIndex;
 use App\Livewire\Dashboard\Admin\Pages\DocumentCategoryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\DocumentManagePage;
 use App\Livewire\Dashboard\Admin\Pages\LdconfigEdit;
+use App\Livewire\Dashboard\Admin\Pages\LibrarySettingsPage;
+use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
+use App\Livewire\Dashboard\Admin\Pages\PartReleaseManagePage;
 use App\Livewire\Dashboard\Admin\Pages\ReviewSummaryManagePage;
 use App\Livewire\Dashboard\Admin\Pages\RoleManagePage;
 use App\Livewire\Dashboard\Admin\Pages\UserManagePage;
-use App\Livewire\Dashboard\Admin\Pages\LibrarySettingsPage;
-use App\Livewire\Dashboard\Admin\Pages\PartKeywordManagePage;
 use App\Livewire\Dashboard\User\Index as UserIndex;
 use App\Livewire\JoinLdraw;
 use App\Livewire\LDrawModelViewer;
@@ -40,6 +43,8 @@ use App\Livewire\Release\Create;
 use App\Livewire\Search\Suffix;
 use App\Livewire\TorsoShortcutHelper;
 use App\Livewire\Tracker\ConfirmCA;
+use App\Livewire\User\Settings;
+use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'index')->name('index');
 
@@ -48,7 +53,7 @@ Route::middleware(['throttle:file'])->group(function () {
     Route::get('/webgl/part/{part}', [SupportFilesController::class, 'webglpart'])->name('webgl.part');
     Route::get('/webgl/omr/{omrmodel}', [SupportFilesController::class, 'webglmodel'])->name('webgl.model');
     Route::get('/categories.txt', [SupportFilesController::class, 'categories'])->name('categories-txt');
-    Route::get('/library.csv', [SupportFilesController::class, 'librarycsv'])->name('library-csv');
+    Route::get('/library.csv', [SupportFilesController::class, 'libraryCsv'])->name('library-csv');
     Route::get('/ptreleases/{output}', [SupportFilesController::class, 'ptreleases'])->name('ptreleases');
     Route::get('/tracker/latest-parts', LatestPartsController::class)->name('part.latest');
     Route::get('/tracker/weekly-parts', WeeklyPartsController::class)->name('part.weekly-api');
@@ -60,13 +65,22 @@ Route::middleware(['throttle:file'])->group(function () {
         ->name('part.download');
 });
 
+// Login
+Route::middleware(['throttle:login'])->group(function () {
+    Route::get('/login', Login::class)->name('login');
+    Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth');
+    Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
+    Route::get('/reset-password/{token}', PasswordReset::class)->name('password.reset');
+});
+
 // Tools
 Route::get('/model-viewer', LDrawModelViewer::class)->name('model-viewer');
 Route::get('/pbg', PbgGenerator::class)->name('pbg');
 
 Route::view('/icons', 'icon-demo')->name('icon-demo');
 
-Route::get('/joinldraw', JoinLdraw::class)->name('joinldraw');
+// Temporarily disabled until a new join mechanism is developed
+// Route::get('/joinldraw', JoinLdraw::class)->name('joinldraw');
 
 Route::middleware(['ldrawmember'])->group(function () {
     Route::view('/polls', 'poll.index')->can('voteAny', App\Models\Poll\Poll::class)->name('poll.index');
@@ -149,16 +163,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('/', UserIndex::class)->name('index');
-});
-
-Route::middleware(['auth'])->get('/logout', function () {
-    auth()->logout();
-    return back();
+    Route::get('/settings', Settings::class )->name('settings');
 });
 
 // permanentRedirects
 Route::name('permanentRedirects.')->group(function () {
-    Route::permanentRedirect('/login', 'https://forums.ldraw.org/member.php?action=login')->name('login');
     Route::permanentRedirect('/docs', 'https://www.ldraw.org/docs-main.html')->name('doc');
 
     Route::permanentRedirect('/official/search', '/parts/list')->name('official.search');

@@ -4,6 +4,7 @@ namespace App\Models\Omr;
 
 use App\Enums\License;
 use App\Models\Traits\HasUser;
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Image\Enums\Fit;
@@ -11,12 +12,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
+#[Unguarded]
 class OmrModel extends Model implements HasMedia
 {
     use InteractsWithMedia;
     use HasUser;
-
-    protected $guarded = [];
 
     protected $with = [
         'set',
@@ -31,7 +31,7 @@ class OmrModel extends Model implements HasMedia
     *     'missing_patterns': 'boolean',
     *     'missing_stickers': 'boolean',
     *     'alt_model': 'boolean',
-    *     'approved': 'boolean'    
+    *     'approved': 'boolean'
     * }
     */
     protected function casts(): array
