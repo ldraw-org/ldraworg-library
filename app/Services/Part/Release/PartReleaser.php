@@ -5,10 +5,8 @@ namespace App\Services\Part\Release;
 use App\Events\PartReleased;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
-use App\Models\Part\PartHistory;
 use App\Models\Part\PartRelease;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
 
 class PartReleaser
 {
@@ -17,39 +15,35 @@ class PartReleaser
     )
     {}
 
-    public function releaseAllMarkedUnofficialParts(PartRelease $release, int $actorId, string $stagingPath): void
+    public function releaseAllMarkedUnofficialParts(PartRelease $release, User $actor, string $stagingPath): void
     {
         Part::where('marked_for_release', true)
             ->lazy()
-            ->each(fn (Part $part) => $this->releaseUnofficialPart($part, $release, $actorId, $stagingPath));
+            ->each(fn (Part $part) => $this->releaseUnofficialPart($part, $release, $actor, $stagingPath));
     }
 
-    public function releaseMinorEdits(PartRelease $release, int $actorId): void
+    public function releaseMinorEdits(PartRelease $release, User $actor): void
     {
         Part::official()
             ->where('has_minor_edit', true)
             ->whereDoesntHave('unofficial_part')
-            ->each(fn (Part $part) => $this->updateOfficialMinorEdit($part, $release, $actorId));
+            ->lazy()
+            ->each(fn (Part $part) => $this->updateOfficialMinorEdit($part, $release, $actor));
     }
 
-    protected function updateOfficialMinorEdit(Part $part, PartRelease $release, int $actorId): void
+    protected function updateOfficialMinorEdit(Part $part, PartRelease $release, User $actor): void
     {
-        PartHistory::create([
-            'user_id' => $actorId,
-            'part_id' => $part->id,
+        $part->history->create([
+            'user_id' => $actor->id,
             'comment' => "Minor header edits"
         ]);
-        PartHistory::create([
-            'user_id' => $actorId,
-            'part_id' => $part->id,
-            'comment' => "Official Update {$release->name}"
-        ]);
+        $this->addReleaseHistoryLine($part, $release, $actor);
         $part->part_release_id = $release->id;
         $part->has_minor_edit = false;
         $part->save();
     }
 
-    protected function releaseUnofficialPart(Part $part, PartRelease $release, int $actorId, string $stagingPath): void
+    protected function releaseUnofficialPart(Part $part, PartRelease $release, User $actor, string $stagingPath): void
     {
         // Only unofficial parts can be released
         if ($part->isOfficial()) {
@@ -57,16 +51,16 @@ class PartReleaser
         }
 
         if ($part->isFix()) {
-            $this->releaseUnofficialFix($part, $release, $actorId);
+            $this->releaseUnofficialFix($part, $release, $actor);
         } else {
-            $this->releaseUnofficialPart($part, $release, $actorId, $stagingPath);
+            $this->releaseNewPart($part, $release, $actor, $stagingPath);
         }
 
-        PartReleased::dispatch($part->id, $actorId, $release->id, $release->name);
+        PartReleased::dispatch($part->id, $actor->id, $release->id, $release->name);
 
     }
 
-    protected function releaseUnofficialFix(Part $part, PartRelease $release, int $actorId): void
+    protected function releaseUnofficialFix(Part $part, PartRelease $release, User $actor): void
     {
         $officialPart = $part->official_part;
 
@@ -90,7 +84,7 @@ class PartReleaser
         $officialPart->setKeywords($part->keywords->pluck('keyword')->values()->all());
         $officialPart->setHistory($part->history);
         $officialPart->setBody($part->body);
-        $this->addReleaseHistoryLine($officialPart, $release, $actorId);
+        $this->addReleaseHistoryLine($officialPart, $release, $actor);
 
         PartEvent::where('part_id', $part->id)
             ->update([
@@ -103,7 +97,7 @@ class PartReleaser
 
     }
 
-    protected function releaseNewPart(Part $part, PartRelease $release, int $actorId, string $stagingPath): void
+    protected function releaseNewPart(Part $part, PartRelease $release, User $actor, string $stagingPath): void
     {
         $part->part_release_id = $release->id;
         if ($part->type->inPartsFolder()) {
@@ -114,14 +108,13 @@ class PartReleaser
                 'part_release_id' => $release->id,
             ]);
         $part->clearMediaCollection('image');
-        $this->addReleaseHistoryLine($part, $release, $actorId);
+        $this->addReleaseHistoryLine($part, $release, $actor);
         $part->save();
     }
-    protected function addReleaseHistoryLine(Part $part, PartRelease $release, int $actorId): void
+    protected function addReleaseHistoryLine(Part $part, PartRelease $release, User $actor): void
     {
-        PartHistory::create([
-            'user_id' => $actorId,
-            'part_id' => $part->id,
+        $part->history->create([
+            'user_id' => $actor->id,
             'comment' => "Official Update {$release->name}"
         ]);
     }
