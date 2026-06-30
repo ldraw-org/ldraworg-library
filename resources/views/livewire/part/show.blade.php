@@ -179,7 +179,7 @@
             @endif
             @if ($part->isUnofficial())
                 @forelse ($part->orderedEvents()->unofficial() as $event)
-                    <x-event.list.item :$event wire:key="part-event-{{$event->id}}" />
+                    <x-event.list-item :$event wire:key="part-event-{{$event->id}}" />
                 @empty
                     <div>No Events</div>
                 @endforelse
