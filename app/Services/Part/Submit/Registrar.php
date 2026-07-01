@@ -8,7 +8,6 @@ use App\Events\PartSubmitted;
 use App\Jobs\UpdateZip;
 use App\Models\Part\Part;
 use App\Models\User;
-use App\Services\BackupFile;
 use App\Services\LDraw\LDrawFile;
 use App\Services\Parser\ParsedPartCollection;
 use App\Services\Part\BasePartSync;
@@ -52,7 +51,7 @@ class Registrar
         $parts->each(function (Part $part) use ($user, $comments) {
             $user->notification_parts()->syncWithoutDetaching([$part->id]);
             UpdateZip::dispatch($part);
-            PartSubmitted::dispatch($part, $user);
+            PartSubmitted::dispatch($part, $user, $comments);
         });
 
         return $parts;
