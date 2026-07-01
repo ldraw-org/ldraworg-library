@@ -61,7 +61,7 @@ class CheckMessage implements Wireable
 
     public function message(): string
     {
-        return __("partcheck.{$this->check->value}", ['line' => $this->line_number, 'value' => $this->value, 'type' => $this->type]);
+        return $this->check->message(['line' => $this->line_number, 'value' => $this->value, 'type' => $this->type]);;
     }
 
 }
