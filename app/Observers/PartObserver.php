@@ -55,7 +55,7 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         if ($part->isDirty('preview') && $part->preview === null) {
             $part->preview = PreviewRotation::Default;
         }
-        if ($part->isDirty($this->headerRelevantAttributes())) {
+        if ($part->header === '' || $part->isDirty($this->headerRelevantAttributes())) {
             $this->generateHeader->updatePartHeader($part);
         }
     }
