@@ -31,7 +31,7 @@ class ListItem extends Component
             $event->processedComment();
         $this->eventText = $this->getEventText();
         $this->hasHeaderEditAccordion = $event->event_type == EventType::HeaderEdit && !is_null($event->header_changes);
-        $this->formattedDate = $this->event->created_at->setTimezone(Auth::user()?->timezone ?? 'UTC')->format('Y-m-d h:i:s');
+        $this->formattedDate = $this->event->created_at->setTimezone(Auth::user()?->timezone ?? 'UTC')->format('Y-m-d H:i:s');
     }
     public function render(): View|Closure|string
     {
