@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ObservedBy([UserObserver::class])]
-#[Fillable(['name', 'email', 'realname', 'password', 'license', 'forum_user_id', 'is_legacy', 'is_ptadmin', 'is_synthetic'])]
+#[Fillable(['name', 'email', 'realname', 'password', 'license', 'forum_user_id', 'is_legacy', 'is_ptadmin', 'is_synthetic','mail_daily_digest', 'timezone'])]
 class User extends Authenticatable
 {
     use HasFactory;

@@ -7,6 +7,7 @@ use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
@@ -45,7 +46,9 @@ class Settings extends Component implements HasSchemas
                     ->required(),
                 Select::make('timezone')
                     ->label('Timezone')
-                    ->options(timezone_identifiers_list())
+                    ->searchable()
+                    ->selectablePlaceholder(false)
+                    ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
                     ->in(timezone_identifiers_list())
                     ->required(),
             ])
@@ -62,7 +65,12 @@ class Settings extends Component implements HasSchemas
     public function save(): void
     {
         $data = $this->form->getState();
-        dd($data);
+        $this->user->update($data);
+        Notification::make()
+            ->title('Settings saved')
+            ->success()
+            ->send();
+
     }
 
     #[Layout('components.layout.base')]
