@@ -16,8 +16,8 @@ class PartHistoryObserver
     public function saved(PartHistory $partHistory): void
     {
         if ($partHistory->part_id !== null &&
-            $partHistory->wasRecentlyCreated &&
-            $partHistory->wasChanged(['created_at', 'user_id', 'comment'])) {
+            ($partHistory->wasRecentlyCreated ||
+            $partHistory->wasChanged(['created_at', 'user_id', 'comment']))) {
             $this->generateHeader($partHistory->part);
         }
     }
