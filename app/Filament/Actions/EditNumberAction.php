@@ -4,6 +4,7 @@ namespace App\Filament\Actions;
 
 use App\Enums\PartCategory;
 use App\Events\PartSubmitted;
+use App\Jobs\UpdateZip;
 use App\Services\Part\PartMover;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Utilities\Get;
@@ -106,11 +107,13 @@ class EditNumberAction extends EditAction
             $oldname = $part->filename;
             $mover->moveUnofficialPart($part, $type, $finalFilename);
             PartRenamed::dispatch($part, Auth::user(), $oldname, $part->filename);
+            UpdateZip::dispatch($part, $oldname);
         } else {
             $upart = $mover->moveOfficialPart($part, $finalFilename, Auth::user());
             PartSubmitted::dispatch($upart, Auth::user());
             $mpart = $upart->parents()->firstWhere('category', PartCategory::Moved);
             PartSubmitted::dispatch($mpart, Auth::user());
+            UpdateZip::dispatch($mpart);
         }
     }
 }
