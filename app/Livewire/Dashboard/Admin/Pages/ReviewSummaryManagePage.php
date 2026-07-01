@@ -44,7 +44,6 @@ class ReviewSummaryManagePage extends BasicResourceManagePage implements HasActi
                 EditAction::make()
                     ->schema($this->formSchema()),
                 DeleteAction::make()
-                    ->before(fn (ReviewSummary $summary) => $summary->items()->delete())
             ])
             ->headerActions([
                 CreateAction::make()
