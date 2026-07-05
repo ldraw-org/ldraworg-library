@@ -96,7 +96,6 @@ class PartMover
         }
 
         $part->filename = $newPartName;
-        dd($part->getAttributes());
         $part->save();
         $this->updatePartReferences($part, $oldMetaName);
         $this->finalizer->handle(new PartCollection([$part]));
