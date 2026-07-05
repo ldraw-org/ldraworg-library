@@ -87,14 +87,16 @@ class PartMover
 
         if (!$part->type->inPartsFolder() && $newPartType->inPartsFolder()) {
             $part->category = (new ParsedPartCollection($part->header))->category();
-        } else {
+        } elseif (!$newPartType->inPartsFolder()) {
             $part->category = null;
         }
+
         if ($part->type->folder() !== $newPartType->folder()) {
             $part->type = $newPartType;
         }
 
         $part->filename = $newPartName;
+        dd($part->getAttributes());
         $part->save();
         $this->updatePartReferences($part, $oldMetaName);
         $this->finalizer->handle(new PartCollection([$part]));
