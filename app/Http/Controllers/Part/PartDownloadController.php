@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Part;
 
 use App\Http\Controllers\Controller;
 use App\Services\Support\ZipFiles;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Carbon;
 use App\Models\Part\Part;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,7 +47,12 @@ class PartDownloadController extends Controller
                 ]
             );
         } else {
-            $if_mod_since = new Carbon(request()->header('If-Modified-Since', date('r', 0)));
+            $headerValue = request()->header('If-Modified-Since');
+            try {
+                $if_mod_since = $headerValue ? Carbon::parse(trim($headerValue)) : Carbon::createFromTimestamp(0);
+            } catch (InvalidFormatException $e) {
+                $if_mod_since = Carbon::createFromTimestamp(0);
+            }
             $last_change = $part->lastChange();
             if ($part->lastChange() <= $if_mod_since) {
                 return response(null, 304)->header('Last-Modified', $last_change->format('r'));
