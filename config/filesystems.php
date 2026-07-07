@@ -89,8 +89,6 @@ return [
         public_path('storage') => storage_path('app/public'),
         public_path('library') => storage_path('app/library'),
         public_path('media') => storage_path('app/library-media'),
-        public_path('assets/ldbi/js') => resource_path('js/buildinginstructions.js/js'),
-        public_path('assets/ldbi/textures') => resource_path('js/buildinginstructions.js/textures'),
     ],
 
 ];
