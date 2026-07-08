@@ -1,6 +1,9 @@
 *
+!assets/
+!assets/**/
 !assets/**/*
 !images/
+!images/**/
 !images/**/*
 !.gitignore
 !robots.txt
