@@ -10,4 +10,4 @@ and released under the MIT License. See LICENSE for more details.
 Source: https://github.com/LasseD/buildinginstructions.js
 Vendored at commit: 054b3188fe6eb4f05dcba50f8366491555d12fa2
 Only `js/` and `textures/` are used; everything else (samples, models, docs) was left out.
-To update: clone the repo at the desired commit, diff `js/`/`textures/` against `public/assets/ldbi/`, copy over, update the commit hash here.
+To update: clone the repo at the desired commit, diff `js/`/`textures/cube`/`textures/materials` against `public/assets/ldbi/`, copy over, update the commit hash here.
