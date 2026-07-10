@@ -22,9 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'currentlic' => App\Http\Middleware\CurrentLicense::class,
             'ldrawmember' => App\Http\Middleware\LdrawMember::class
         ]);
-        $middleware->encryptCookies(except: [
-            'mybbuser',
-        ]);
+        $middleware->trustProxies(at: '127.0.0.1');
         $middleware->redirectGuestsTo('/login');
     })
     ->withExceptions(function (Exceptions $exceptions) {
