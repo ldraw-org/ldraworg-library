@@ -35,7 +35,7 @@ class SupportFilesController extends Controller
         if (!Storage::exists('library/categories.txt')) {
             $this->categoriesTxt->handle();
         }
-        return response(Storage::get('library/library.csv'))->header('Content-Type', 'text/plain; charset=utf-8');
+        return response(Storage::get('library/categories.txt'))->header('Content-Type', 'text/plain; charset=utf-8');
     }
 
     public function libraryCsv(): Response
