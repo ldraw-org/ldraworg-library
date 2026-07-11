@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Part;
 
+use App\Services\Support\Enums\ReleaseOutput;
+use App\Services\Support\MakePtReleases;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Part\PartRelease;
@@ -10,8 +13,15 @@ use Illuminate\View\View;
 
 class PartUpdateController extends Controller
 {
-    public function index(Request $request): Response|View
+    public function __construct(
+        protected MakePtReleases $makePtReleases
+    ) {}
+
+    public function index(Request $request): Response|RedirectResponse|View
     {
+        if ($request->has('output')) {
+            return redirect()->route('ptreleases', ['output' => $request->query('output')]);
+        }
         if ($request->has('latest')) {
             $releases = PartRelease::current();
         } else {

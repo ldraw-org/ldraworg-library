@@ -50,6 +50,12 @@ class DailyMaintenance extends Command
             $this->info('Regenerate unofficial zip');
             $this->call('lib:refresh-zip');
 
+            $this->info('Regenerate ptreleases files');
+            $this->call('lib:refresh-ptreleases');
+
+            $this->info('Regenerate categories.txt');
+            $this->call('lib:refresh-categories-txt');
+
             $this->info('Regenerate library.csv');
             $this->call('lib:refresh-csv');
 
