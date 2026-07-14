@@ -38,19 +38,24 @@ enum PartCategory: string
     case FigureAccessory = 'Figure Accessory';
     case Flag = 'Flag';
     case Flexible = 'Flexible';
-    case Forklift = 'Forklift';
     case Freestyle = 'Freestyle';
     case Garage = 'Garage';
     case Glass = 'Glass';
-    case Grab = 'Grab';
     case Helper = 'Helper';
     case Hinge = 'Hinge';
     case Homemaker = 'Homemaker';
     case Hose = 'Hose';
     case Ladder = 'Ladder';
-    case Lever = 'Lever';
     case Magnet = 'Magnet';
-    case Minifig = 'Minifig';
+    case MinifigHead = 'Minifig Head';
+    case MinifigUpper = 'Minifig Upper';
+    case MinifigLower = 'Minifig Lower';
+    case MinifigLeg = 'Minifig Leg';
+    case MinifigHips = 'Minifig Hips';
+    case MinifigArm = 'Minifig Arm';
+    case MinifigHand = 'Minifig Hand';
+    case MinifigTorso = 'Minifig Torso';
+    case MinifigAssembly = 'Minifig Assembly';
     case MinifigAccessory = 'Minifig Accessory';
     case MinifigFootwear = 'Minifig Footwear';
     case MinifigHeadwear = 'Minifig Headwear';
@@ -66,7 +71,6 @@ enum PartCategory: string
     case Plant = 'Plant';
     case Plate = 'Plate';
     case Platform = 'Platform';
-    case PovRAY = 'Pov-RAY';
     case Propeller = 'Propeller';
     case Quatro = 'Quatro';
     case Rack = 'Rack';
@@ -103,6 +107,13 @@ enum PartCategory: string
     case Wing = 'Wing';
     case Znap = 'Znap';
 
+    // Legacy Categoris
+    case Minifig = 'Minifig';
+    case PovRAY = 'Pov-RAY';
+    case Lever = 'Lever';
+    case Grab = 'Grab';
+    case Forklift = 'Forklift';
+
     public function ldrawString(): string
     {
         return "0 !CATEGORY {$this->value}";
@@ -131,4 +142,34 @@ enum PartCategory: string
             default => false,
         };
     }
+
+    public function retired(): array
+    {
+        return [
+            self::Minifig,
+            self::PovRAY,
+            self::Forklift,
+            self::Lever,
+            self::Grab
+        ];
+    }
+
+    public function isRetired(): bool
+    {
+        return in_array($this, $this->retired());
+    }
+
+    public function retiredMessage(): string
+    {
+        return match ($this) {
+            self::Minifig => 'use suitable active Minifig category',
+            self::Forklift => 'use Vehicle',
+            self::PovRAY,
+            self::Lever,
+            self::Grab => 'no replacement',
+            default => ''
+        };
+    }
+
+
 }
