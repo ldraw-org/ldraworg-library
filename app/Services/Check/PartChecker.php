@@ -26,6 +26,7 @@ class PartChecker
         \App\Services\Check\PartChecks\PatternHasSetKeyword::class,
         \App\Services\Check\PartChecks\DescriptionNumberWarning::class,
         \App\Services\Check\PartChecks\HasTrailingZeros::class,
+        \App\Services\Check\PartChecks\RetiredCategoryWarning::class,
     ];
 
     /** @var array<class-string<BaseCheck>> */

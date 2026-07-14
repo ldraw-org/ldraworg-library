@@ -12,7 +12,7 @@ enum PartWarning: string implements CheckItem, HasLabel
     use CanBeOption;
     use HasMessage;
 
-    case WarningMinifigCategory = 'warning.minifigcategory';
+    case WarningRetiredCategory = 'warning.minifigcategory';
     case WarningNotCoplanar = 'warning.notcoplaner';
     case WarningStickerColor = 'warning.stickercolor';
     case WarningLicense = 'warning.license';
@@ -47,7 +47,7 @@ enum PartWarning: string implements CheckItem, HasLabel
     {
         return match ($this) {
             self::WarningNotCoplanar => 'Line :line, quad is not coplanar (angle :value)',
-            self::WarningMinifigCategory => 'Ensure correct Minifig category',
+            self::WarningRetiredCategory => 'Category: :type is retired, use :value',
             self::WarningStickerColor => 'Ensure stickers that are not color 16 are applied to defined transparent surfaces',
             self::WarningLicense => 'Parts without CC BY 4.0 license may not be released',
             self::WarningDescriptionNumberSpaces => 'Number in description may need a leading space',
