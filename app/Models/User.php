@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[ObservedBy([UserObserver::class])]
-#[Fillable(['name', 'email', 'realname', 'password', 'license', 'forum_user_id', 'is_legacy', 'is_ptadmin', 'is_synthetic','mail_daily_digest', 'timezone'])]
+#[Fillable(['name', 'email', 'realname', 'password', 'license', 'forum_user_id', 'is_legacy', 'is_ptadmin', 'is_synthetic','mail_daily_digest', 'timezone', 'relative_time'])]
 class User extends Authenticatable
 {
     use HasFactory;
@@ -43,6 +43,7 @@ class User extends Authenticatable
     *     'is_synthetic': 'boolean',
     *     'is_ptadmin': 'boolean',
     *     'ca_confirm': 'boolean',
+    *     'relative_time': 'boolean'
     * }
     */
     protected function casts(): array
@@ -54,7 +55,8 @@ class User extends Authenticatable
             'is_legacy' => 'boolean',
             'is_synthetic' => 'boolean',
             'is_ptadmin' => 'boolean',
-            'ca_confirm' => 'boolean'
+            'ca_confirm' => 'boolean',
+            'relative_time' => 'boolean'
         ];
     }
 

@@ -16,7 +16,7 @@
                 {{ $eventText }}
             </div>
         </div>
-        <div class="text-xs text-gray-500">
+        <div title="{{ $eventDateTime }}" class="text-xs text-gray-500">
             {{ $formattedDate }}
         </div>
     </div>

@@ -19,11 +19,13 @@ class ListItem extends Component
     public readonly string $eventText;
     public readonly bool $hasHeaderEditAccordion;
     public readonly string $formattedDate;
+    public readonly string $eventDateTime;
 
 
     public function __construct(
         public PartEvent $event
     ) {
+        $user = Auth::user();
         $this->authorString = $event->user->author_string;
         [$this->authorIcon, $this->authorIconTitle] = $this->getAuthorIconAndTitle();
         $this->comment = $event->event_type == EventType::HeaderEdit ?
@@ -31,7 +33,11 @@ class ListItem extends Component
             $event->processedComment();
         $this->eventText = $this->getEventText();
         $this->hasHeaderEditAccordion = $event->event_type == EventType::HeaderEdit && !is_null($event->header_changes);
-        $this->formattedDate = $this->event->created_at->setTimezone(Auth::user()?->timezone ?? 'UTC')->format('Y-m-d H:i:s');
+        $tzDate = $this->event->created_at->setTimezone($user?->timezone ?? 'UTC');
+        $this->formattedDate = $user?->relative_time === true ?
+            $tzDate->diffForHumans() :
+            $tzDate->format('Y-m-d H:i:s');
+        $this->eventDateTime = $tzDate->format('Y-m-d H:i:s T');
     }
     public function render(): View|Closure|string
     {

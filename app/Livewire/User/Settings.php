@@ -51,6 +51,10 @@ class Settings extends Component implements HasSchemas
                     ->options(array_combine(timezone_identifiers_list(), timezone_identifiers_list()))
                     ->in(timezone_identifiers_list())
                     ->required(),
+                Toggle::make('relative_time')
+                    ->label('Show time stamps in relative time')
+                    ->default(true)
+                    ->required(),
             ])
             ->statePath('data')
             ->model($this->user);

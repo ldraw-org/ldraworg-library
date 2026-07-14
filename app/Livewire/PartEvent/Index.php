@@ -25,6 +25,8 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\Attributes\Url;
@@ -48,7 +50,18 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
                     EventIconColumn::make('event_type')
                         ->grow(false),
                     TextColumn::make('created_at')
-                        ->since()
+                        ->formatStateUsing(function (?string $state): ?string {
+                            $date = Carbon::parse($state)->setTimezone(auth()->user()?->timezone ?? config('app.timezone'));
+
+                            return auth()->user()?->relative_time
+                                ? $date->diffForHumans()
+                                : $date->format('Y-m-d H:i:s');
+                        })
+                        ->tooltip(function (?string $state): ?string {
+                            return Carbon::parse($state)
+                                ->setTimezone(auth()->user()?->timezone ?? config('app.timezone'))
+                                ->format('Y-m-d H:i:s T');
+                        })
                         ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('created_at', $direction)->orderBy('id', 'asc'))
                         ->label('Date/Time')
                         ->grow(false),
