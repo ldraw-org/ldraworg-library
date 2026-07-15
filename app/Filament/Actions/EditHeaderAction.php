@@ -94,7 +94,6 @@ class EditHeaderAction extends EditAction
                 ->nullable(),
             Select::make('category')
                 ->options(PartCategory::options())
-                ->helperText('A !CATEGORY meta will be added only if this differs from the first word in the description')
                 ->hidden(fn (Part $p) => !$p->type->inPartsFolder())
                 ->disabled(fn (Part $p) => !$p->type->inPartsFolder())
                 ->searchable()
