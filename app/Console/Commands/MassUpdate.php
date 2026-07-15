@@ -12,5 +12,6 @@ class MassUpdate extends Command
 
     public function handle(): void
     {
+
     }
 }
