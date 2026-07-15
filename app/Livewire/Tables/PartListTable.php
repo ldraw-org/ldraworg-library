@@ -104,7 +104,7 @@ class PartListTable extends BasicTable
                 ->query(fn (Builder $query) => $query->whereHas('ancestors', fn (Builder $query2) => $query2->whereIn('part_status', [PartStatus::Certified, PartStatus::AwaitingAdminReview])))
                 ->visible(fn () => Auth::check()),
             SelectFilter::make('category')
-                ->options(PartCategory::options())
+                ->options(PartCategory::class)
                 ->searchable()
                 ->preload()
                 ->multiple(),
@@ -153,7 +153,7 @@ class PartListTable extends BasicTable
                                 ->multiple(),
                         ),
                     SelectConstraint::make('category')
-                        ->options(PartCategory::options())
+                        ->options(PartCategory::class)
                         ->searchable()
                         ->icon(LibraryIcon::CategoryConstraint->value)
                         ->multiple(),
