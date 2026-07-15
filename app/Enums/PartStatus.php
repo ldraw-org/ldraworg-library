@@ -53,7 +53,13 @@ enum PartStatus: int
     /** @return array<self> */
     public static function trackerStatus(): array
     {
-        return [PartStatus::Certified, PartStatus::AwaitingAdminReview, PartStatus::Needs1MoreVote, PartStatus::Needs2MoreVotes, PartStatus::ErrorsFound];
+        return [
+            PartStatus::Certified,
+            PartStatus::AwaitingAdminReview,
+            PartStatus::Needs1MoreVote,
+            PartStatus::Needs2MoreVotes,
+            PartStatus::ErrorsFound
+        ];
     }
 
     /** @return array<string, string> */
