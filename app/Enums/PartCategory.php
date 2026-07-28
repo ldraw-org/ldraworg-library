@@ -3,8 +3,9 @@
 namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
+use Filament\Support\Contracts\HasLabel;
 
-enum PartCategory: string
+enum PartCategory: string implements HasLabel
 {
     use CanBeOption;
 
@@ -55,6 +56,7 @@ enum PartCategory: string
     case MinifigArm = 'Minifig Arm';
     case MinifigHand = 'Minifig Hand';
     case MinifigTorso = 'Minifig Torso';
+    case MinifigBody = 'Minifig Body';
     case MinifigAssembly = 'Minifig Assembly';
     case MinifigAccessory = 'Minifig Accessory';
     case MinifigFootwear = 'Minifig Footwear';
@@ -171,5 +173,8 @@ enum PartCategory: string
         };
     }
 
-
+    public function customLabel(): string
+    {
+        return $this->value;
+    }
 }
