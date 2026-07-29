@@ -2,10 +2,14 @@
 
 namespace App\Enums;
 
+use App\Enums\Traits\CanBeOption;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Contracts\Support\Htmlable;
 
-enum PreviewRotation: string implements HasLabel {
+enum PreviewRotation: string implements HasLabel
+{
+    use CanBeOption;
+
     case Default = '1 0 0 0 1 0 0 0 1';
     case XNegative90 = '1 0 0 0 0 1 0 -1 0';
     case XPositive90 = '1 0 0 0 0 -1 0 1 0';
@@ -17,7 +21,7 @@ enum PreviewRotation: string implements HasLabel {
     case ZPositive90 = '0 1 0 -1 0 0 0 0 1';
     case Z180 = '-1 0 0 0 -1 0 0 0 1';
 
-    public function getLabel(): string|Htmlable|null
+    public function customLabel(): string
     {
         return match ($this) {
             self::Default => 'Default (No Rotation)',

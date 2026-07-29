@@ -15,22 +15,8 @@ return [
     // Choose between cloudflare disk or local storage
     'archive_disk' => env('ARCHIVE_DISK', 'local'),
 
-    // These are groups for Part Author/Reviewer tags
-    'mybb-groups' => [
-        'Administrators' => 4,
-        'Part Author' => 8,
-        'Part Reviewer' => 9,
-        'Library Admin' => 10,
-        'LDraw Member' => 21,
-        'Registered' => 11,
-    ],
-
-    // Mybb OMR info
-    'mybb_omr' => [
-        'omr_forum_id' => 17,
-        'checked_icon_id' => 17,
-        'attachment_path' => '/var/www/ldraw.org/mybb/uploads/',
-    ],
+    // Local user Password
+    'local_user_password' => env('LOCAL_USER_PASSWORD', null),
 
     // External Site URL Stubs
     'external_sites' => [

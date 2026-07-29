@@ -110,7 +110,7 @@ class PartListTable extends BasicTable
                 ->multiple(),
             SelectFilter::make('type')
                 ->label('!LDRAW_ORG Type')
-                ->options(PartType::options())
+                ->options(PartType::class)
                 ->preload()
                 ->multiple(),
             QueryBuilder::make()
@@ -140,7 +140,7 @@ class PartListTable extends BasicTable
                         ->searchable(),
                     SelectConstraint::make('type')
                         ->label('!LDRAW_ORG Type')
-                        ->options(PartType::options())
+                        ->options(PartType::class)
                         ->multiple(),
                     SelectConstraint::make('type_qualifier')
                         ->label('Alias/Physical Colour/Flex Section')
