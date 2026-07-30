@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\Vote;
 use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
+use App\Services\Part\GenerateHeader;
 use App\Services\Support\ZipFiles;
 use App\Services\Part\BasePartSync;
 use App\Services\Part\SyncSubparts;
@@ -242,7 +243,7 @@ class PartReleaseManager
 
         PartEvent::unofficial()->where('part_id', $part->id)->update(['part_release_id' => $this->release->id]);
 
-        PartReleased::dispatch($part, $this->user, $this->release);
+        PartReleased::dispatch($part->id, $this->user->id, $this->release->id, $this->release->name);
 
         if (!is_null($part->official_part)) {
             $opart = $this->updateOfficialWithUnofficial($part, $part->official_part);
@@ -254,6 +255,7 @@ class PartReleaseManager
         } else {
             $part->part_release_id = $this->release->id;
             $part->clearMediaCollection('image');
+            app(GenerateHeader::class)->updatePartHeader($part);
             $part->save();
             if ($part->type->inPartsFolder()) {
                 $this->release
@@ -293,6 +295,7 @@ class PartReleaseManager
         $opart->setHistory($upart->history);
         $opart->setBody($upart->body);
         app(BasePartSync::class)->syncBasePart($opart);
+        app(GenerateHeader::class)->updatePartHeader($opart);
         $opart->save();
         return $opart;
     }
@@ -370,7 +373,7 @@ class PartReleaseManager
         Part::whereIn('id', $affectedIds)->chunk(500, function($parts) {
             $parts->each(function (Part $p) {
                 GeneratePartImage::dispatch($p->id);
-                CheckPart::dispatch($p);
+                CheckPart::dispatch($p->id);
                 $this->subpartSync->loadSubparts($p);
             });
         });
