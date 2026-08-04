@@ -9,7 +9,7 @@ class UserObserver
 {
     public function saved(User $user): void
     {
-        SyncUser::dispatch($user->id, $user->getChanges());
+        SyncUser::dispatch($user, $user->getChanges());
     }
 
 }

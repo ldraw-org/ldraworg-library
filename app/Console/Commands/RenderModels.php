@@ -5,10 +5,11 @@ namespace App\Console\Commands;
 use App\Jobs\GenerateOmrModelImage;
 use App\Models\Omr\OmrModel;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 
 class RenderModels extends Command
 {
-    protected $signature = 'lib:render-models {model?*} {--missing}';
+    protected $signature = 'lib:render-models {--M|missing}';
 
     protected $description = 'Refresh Omr Model Images';
 
@@ -16,22 +17,13 @@ class RenderModels extends Command
     {
 
         $this->info("Queueing omr model images");
-        if ($this->argument('model')) {
-            $models = OmrModel::whereIn('id', $this->argument('model'));
-        } else {
-            $models = OmrModel::query();
-        }
-
-        $count = 0;
         $onlyMissing = $this->option('missing');
-        $models
-            ->lazy()
-            ->each(function (OmrModel $m) use (&$count, $onlyMissing) {
-                if (!$onlyMissing || !file_exists($m->getFirstMediaPath('image'))) {
-                    GenerateOmrModelImage::dispatch($m->id)->onQueue('maintenance');
-                    $count++;
-                }
+        OmrModel::query()
+            ->chunk(200, function ($models) use ($onlyMissing) {
+                GenerateOmrModelImage::dispatch(
+                    $models->map(fn (OmrModel $m) => $m->withoutRelations()),
+                    $onlyMissing
+                )->onQueue('maintenance');
             });
-        $this->info("{$count} omr model images queued");
     }
 }

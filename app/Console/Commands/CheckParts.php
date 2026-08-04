@@ -6,24 +6,18 @@ use App\Jobs\CheckPart;
 use App\Models\Part\Part;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class CheckParts extends Command
 {
-    protected $signature = 'lib:check {part?*} {--u|unofficial-only} {--o|official-only}';
+    protected $signature = 'lib:check {--u|unofficial-only} {--o|official-only}';
 
     protected $description = 'Error check parts';
 
     public function handle(): void
     {
         $this->info("Queuing parts for error check");
-        if ($this->argument('part')) {
-            $q = Part::whereIn('id', $this->argument('part'));
-            $count = $q->count();
-            if ($count > 0) {
-                CheckPart::dispatch($q->pluck('id')->values()->all())->onQueue('maintenance');
-            }
-        } else {
-            $q = Part::query()
+        Part::query()
             ->when(
                 $this->option('unofficial-only') && !$this->option('official-only'),
                 fn (Builder $query) => $query->unofficial()
@@ -31,10 +25,7 @@ class CheckParts extends Command
             ->when(
                 $this->option('official-only') && !$this->option('unofficial-only'),
                 fn (Builder $query) => $query->official()
-            );
-            $count = $q->count();
-            $q->each(fn (Part $part) => CheckPart::dispatch($part->id)->onQueue('maintenance'));
-        }
-        $this->info("{$count} parts queued for error check");
+            )
+            ->chunk(200, fn (Collection $parts) => CheckPart::dispatch($parts)->onQueue('maintenance'));
     }
 }

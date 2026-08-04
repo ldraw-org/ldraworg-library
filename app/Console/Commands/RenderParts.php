@@ -9,36 +9,29 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RenderParts extends Command
 {
-    protected $signature = 'lib:render-parts {part?*} {--o|official-only} {--u|unofficial-only} {--M|missing}';
+    protected $signature = 'lib:render-parts {--o|official-only} {--u|unofficial-only} {--M|missing}';
 
     protected $description = 'Refresh Library Images';
 
     public function handle(): void
     {
-        $this->info("Queueing part images");
-        if ($this->argument('part')) {
-            $parts = Part::whereIn('id', $this->argument('part'));
-        } else {
-            $parts = Part::query()
-                ->when(
-                    $this->option('unofficial-only') && !$this->option('official-only'),
-                    fn (Builder $query) => $query->unofficial()
-                )
-                ->when(
-                    $this->option('official-only') && !$this->option('unofficial-only'),
-                    fn (Builder $query) => $query->official()
-                );
-        }
-        $count = 0;
+        $this->info('Queueing part images');
+
         $onlyMissing = $this->option('missing');
-        $parts
-            ->lazy()
-            ->each(function (Part $p) use (&$count, $onlyMissing) {
-                if (!$onlyMissing || !file_exists($p->getFirstMediaPath('image'))) {
-                    GeneratePartImage::dispatch($p->id)->onQueue('maintenance');
-                    $count++;
-                }
+        Part::query()
+            ->when(
+                $this->option('unofficial-only') && !$this->option('official-only'),
+                fn (Builder $query) => $query->unofficial()
+            )
+            ->when(
+                $this->option('official-only') && !$this->option('unofficial-only'),
+                fn (Builder $query) => $query->official()
+            )
+            ->chunk(200, function ($parts) use ($onlyMissing) {
+                GeneratePartImage::dispatch(
+                    $parts->map(fn (Part $p) => $p->withoutRelations()),
+                    $onlyMissing
+                )->onQueue('maintenance');
             });
-        $this->info("{$count} part images queued");
     }
 }

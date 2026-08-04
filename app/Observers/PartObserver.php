@@ -60,42 +60,6 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         }
     }
 
-    public function saved(Part $part): void
-    {
-        if (!$part->wasRecentlyCreated) {
-            if ($part->wasChanged($this->headerRelevantAttributes())) {
-                CheckPart::dispatch($part->id);
-            }
-            if ($part->wasChanged(['description', 'filename']) && $part->type->inPartsFolder() && $part->isNotFix()) {
-                UpdateLibraryCsv::dispatch();
-            }
-            if ($part->wasChanged('filename')) {
-                $this->syncUnknownNumber->handle($part);
-            }
-            if($part->wasChanged('preview')) {
-                GeneratePartImage::dispatch($part->id);
-            }
-        }
-    }
-
-    public function pivotAttached(Part $part, $relationName): void
-    {
-        if ($relationName === 'keywords') {
-            $this->generateHeader->updatePartHeader($part);
-            $part->saveQuietly();
-            CheckPart::dispatch($part->id);
-        }
-    }
-
-    public function pivotDetached(Part $part, $relationName): void
-    {
-        if ($relationName === 'keywords') {
-            $this->generateHeader->updatePartHeader($part);
-            $part->saveQuietly();
-            CheckPart::dispatch($part->id);
-        }
-    }
-
     protected function headerRelevantAttributes(): array
     {
         return [

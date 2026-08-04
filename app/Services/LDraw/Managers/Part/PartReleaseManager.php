@@ -372,7 +372,7 @@ class PartReleaseManager
         // Dispatch jobs in small batches
         Part::whereIn('id', $affectedIds)->chunk(500, function($parts) {
             $parts->each(function (Part $p) {
-                GeneratePartImage::dispatch($p->id);
+                GeneratePartImage::dispatch($p->withoutRelations());
                 CheckPart::dispatch($p->id);
                 $this->subpartSync->loadSubparts($p);
             });

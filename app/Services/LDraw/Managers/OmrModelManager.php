@@ -70,7 +70,7 @@ class OmrModelManager
         $model->addMediaFromString($modeltext)
             ->usingFilename($model->filename())
             ->toMediaCollection('file');
-        GenerateOmrModelImage::dispatch($model->id);
+        GenerateOmrModelImage::dispatch($model);
         $file->posthash = true;
         $file->save();
     }

@@ -25,9 +25,9 @@ class Finalizer
 
         $parts->each(fn (Part $p) => $this->subpartSync->loadSubparts($p, true));
 
-        $ancestorIds = collect();
+        $ancestors = collect();
 
-        $parts->each(function (Part $p) use ($ancestorIds) {
+        $parts->each(function (Part $p) use ($ancestors) {
             $p->updatePartStatus();
             if ($p->official_part !== null) {
                 $this->subpartSync->updateUnofficialWithOfficialFix($p->official_part);
@@ -36,16 +36,18 @@ class Finalizer
             $this->validator->checkPart($p);
             $p->updateReadyForAdmin();
             $this->imageGenerator->regenerateImage($p);
-            $ancestorIds->push(...$p->ancestors->pluck('id'));
-            UpdateParentParts::dispatch($p->id);
-            UpdateRebrickable::dispatch($p->id);
+            $ancestors->push(...$p->ancestors);
+            UpdateParentParts::dispatch($p);
+            UpdateRebrickable::dispatch($p);
             CheckPart::dispatch($p->id);
         });
 
-        $ancestorIds
-            ->diff($parts->pluck('id'))
-            ->unique()
-            ->each(fn (int $id) => GeneratePartImage::dispatch($id));
+        $partIds = $parts->pluck('id');
+
+        $ancestors
+            ->unique('id')
+            ->reject(fn (Part $ancestor) => $partIds->contains($ancestor->id))
+            ->each(fn (Part $ancestor) => GeneratePartImage::dispatch($ancestor->withoutRelations()));
 
         UpdateLibraryCsv::dispatch();
     }

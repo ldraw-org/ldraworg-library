@@ -6,7 +6,9 @@ use App\Models\Part\Part;
 use App\Services\Part\RebrickableSync;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 
+#[DeleteWhenMissingModels]
 class UpdateRebrickable implements ShouldQueue
 {
     use Queueable;
@@ -15,7 +17,7 @@ class UpdateRebrickable implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        protected int $partId,
+        protected Part $part,
         protected bool $updateOfficial = false
     ) {
     }
@@ -25,12 +27,6 @@ class UpdateRebrickable implements ShouldQueue
      */
     public function handle(RebrickableSync $partRebrickableService): void
     {
-        $part = Part::find($this->partId);
-
-        if (! $part) {
-            return;
-        }
-
-        $partRebrickableService->syncRebrickablePart($part, $this->updateOfficial);
+        $partRebrickableService->syncRebrickablePart($this->part, $this->updateOfficial);
     }
 }

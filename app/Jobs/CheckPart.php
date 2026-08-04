@@ -4,30 +4,30 @@ namespace App\Jobs;
 
 use App\Models\Part\Part;
 use App\Services\Part\Validator;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\Attributes\Timeout;
 
+#[DeleteWhenMissingModels]
+#[Timeout(1800)]
 class CheckPart implements ShouldQueue
 {
-    use Dispatchable;
-    use InteractsWithQueue;
     use Queueable;
-    use SerializesModels;
 
-    public function __construct(
-        protected int|array $partIds
-    ) {
-        if (is_integer($this->partIds)) {
-            $this->partIds = [$this->partIds];
-        }
+    protected Collection $parts;
+
+    public function __construct(Part|Collection $parts)
+    {
+        $this->parts = $parts instanceof Part
+            ? new Collection([$parts])
+            : $parts;
     }
 
     public function handle(Validator $validator): void
     {
-        $parts = Part::with(['user', 'history', 'body'])->whereIn('id', $this->partIds)->get();
-        $parts->each(fn (Part $part) => $validator->checkPart($part));
+        $this->parts->load(['user', 'history', 'body']);
+        $this->parts->each(fn (Part $part) => $validator->checkPart($part));
     }
 }

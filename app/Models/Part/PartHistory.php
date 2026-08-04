@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 #[Unguarded]
-#[ObservedBy(PartHistoryObserver::class)]
 class PartHistory extends Model
 {
     use HasPart;
