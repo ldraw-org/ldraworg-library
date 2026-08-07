@@ -5,13 +5,15 @@ namespace App\Jobs;
 use App\Models\Part\Part;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Timeout;
 
+#[Timeout(1800)]
 class BuildSearchText implements ShouldQueue
 {
     use Queueable;
 
     public $timeout = 1800;
-  
+
     public function handle(): void
     {
         Part::with(['history', 'keywords'])->cursor()->each(fn (Part $p) => $p->setSearchText());
