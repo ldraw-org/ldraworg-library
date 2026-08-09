@@ -7,6 +7,7 @@ use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Events\PartHeaderEdited;
+use App\Jobs\GeneratePartImage;
 use App\Jobs\UpdateRebrickable;
 use App\Jobs\UpdateZip;
 use App\Models\Part\Part;
@@ -14,9 +15,6 @@ use App\Models\Part\PartHistory;
 use App\Models\Part\PartKeyword;
 use App\Models\User;
 use App\Services\Parser\ParsedPartCollection;
-use App\Services\Part\GenerateHeader;
-use App\Services\Part\ImageGenerator;
-use App\Services\Part\Validator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +42,6 @@ class HeaderEdit
     public function storeHeaderData(Part $part, array $data): Part
     {
         $validator = app(Validator::class);
-        $imageGenerator = app(ImageGenerator::class);
         $changes = ['old' => [], 'new' => []];
 
         // Merge description and category changes
@@ -75,6 +72,7 @@ class HeaderEdit
         list($part, $previewChanged, $previewChanges) = $this->updatePreview($part, $data);
         if ($previewChanged) {
             $changes = $this->mergeChanges($changes, $previewChanges);
+            GeneratePartImage::dispatch($part->withoutRelations());
         }
 
         if (count($changes['new']) > 0) {
@@ -85,6 +83,7 @@ class HeaderEdit
             PartHeaderEdited::dispatch($part, Auth::user(), $changes, $data['editcomment'] ?? null);
             Auth::user()->notification_parts()->syncWithoutDetaching([$part->id]);
             UpdateZip::dispatch($part);
+            app(GenerateHeader::class)->updatePartHeader($part);
         }
 
         return $part;
@@ -263,7 +262,7 @@ class HeaderEdit
             $changes['old']['keywords'] = implode(", ", $partKeywords->all());
             $changes['new']['keywords'] = implode(", ", $new_kws->all());
             $part->setKeywords($new_kws->all());
-            UpdateRebrickable::dispatch($part->id);
+            UpdateRebrickable::dispatch($part->withoutRelations());
         }
 
         return $changes;

@@ -39,7 +39,7 @@ class PartObserver implements ShouldHandleEventsAfterCommit
     {
         $part->parents->each(function (Part $p) {
             $this->syncSubparts->loadSubparts($p);
-            CheckPart::dispatch($p->id);
+            CheckPart::dispatch($p->withoutRelations());
         });
         PartDeleted::dispatch(Auth::user() ?? User::find(1), $part->filename, $part->description);
     }

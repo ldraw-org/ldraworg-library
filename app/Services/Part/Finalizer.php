@@ -37,9 +37,9 @@ class Finalizer
             $p->updateReadyForAdmin();
             $this->imageGenerator->regenerateImage($p);
             $ancestors->push(...$p->ancestors);
-            UpdateParentParts::dispatch($p);
-            UpdateRebrickable::dispatch($p);
-            CheckPart::dispatch($p->id);
+            UpdateParentParts::dispatch($p->withoutRelations());
+            UpdateRebrickable::dispatch($p->withoutRelations());
+            CheckPart::dispatch($p->withoutRelations());
         });
 
         $partIds = $parts->pluck('id');

@@ -373,7 +373,7 @@ class PartReleaseManager
         Part::whereIn('id', $affectedIds)->chunk(500, function($parts) {
             $parts->each(function (Part $p) {
                 GeneratePartImage::dispatch($p->withoutRelations());
-                CheckPart::dispatch($p->id);
+                CheckPart::dispatch($p->withoutRelations());
                 $this->subpartSync->loadSubparts($p);
             });
         });
