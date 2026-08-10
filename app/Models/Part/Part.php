@@ -582,20 +582,6 @@ class Part extends Model implements HasMedia
     public function setExternalSiteKeywords(bool $updateOfficial = false): void
     {
         $rbPart = $this->rebrickable_part;
-
-        $prefixes = ExternalSite::prefixes();
-
-        $idsToRemove = $this->keywords
-            ->filter(fn (PartKeyword $kw) =>
-            Str::startsWith(Str::lower($kw->keyword), $prefixes)
-            )
-            ->pluck('id');
-
-        if ($idsToRemove->isNotEmpty()) {
-            $this->keywords()->detach($idsToRemove->all());
-            $this->load('keywords');
-        }
-
         if (is_null($rbPart) ||
             $rbPart->is_local ||
             ($this->isOfficial() && !$updateOfficial) ||
@@ -606,6 +592,20 @@ class Part extends Model implements HasMedia
         }
 
         $partNum = basename($this->filename, '.dat');
+
+
+        $prefixes = ExternalSite::prefixes();
+
+        $idsToRemove = $this->keywords
+            ->filter(fn (PartKeyword $kw) =>
+                Str::startsWith(Str::lower($kw->keyword), $prefixes)
+            )
+            ->pluck('id');
+
+        if ($idsToRemove->isNotEmpty()) {
+            $this->keywords()->detach($idsToRemove->all());
+            $this->load('keywords');
+        }
 
         $keywords = $this->keywords->pluck('keyword')->all();
         $kwSet = false;
