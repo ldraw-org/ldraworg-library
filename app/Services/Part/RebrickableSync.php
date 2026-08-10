@@ -17,6 +17,8 @@ class RebrickableSync
     public function syncRebrickablePart(Part $part, bool $updateOfficial = false): void
     {
         if (! $part->canSetRebrickablePart()) {
+            $part->rebrickable_part()->disassociate();
+            $part->save();
             return;
         }
 
