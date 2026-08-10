@@ -18,7 +18,6 @@ class RebrickableSync
     {
         if (! $part->canSetRebrickablePart()) {
             $part->rebrickable_part()->disassociate();
-            $part->setExternalSiteKeywords($updateOfficial);
             $part->save();
             return;
         }
