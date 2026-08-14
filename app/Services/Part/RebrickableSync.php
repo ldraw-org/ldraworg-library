@@ -11,6 +11,7 @@ class RebrickableSync
     public function __construct(
         protected StickerSheetManager $stickerSheetManager,
         protected RebrickablePartManager $rebrickablePartManager,
+        protected GenerateHeader $generateHeader,
     )
     {}
 
@@ -29,6 +30,7 @@ class RebrickableSync
         }
 
         $part->setExternalSiteKeywords($updateOfficial);
+        $this->generateHeader->updatePartHeader($p);
     }
 
 }

@@ -17,6 +17,7 @@ class Finalizer
         protected ImageGenerator $imageGenerator,
         protected Validator      $validator,
         protected BasePartSync   $basePartSync,
+        protected GenerateHeader $generateHeader,
     ) {}
 
     public function handle(PartCollection $parts): void
@@ -36,10 +37,12 @@ class Finalizer
             $this->validator->checkPart($p);
             $p->updateReadyForAdmin();
             $this->imageGenerator->regenerateImage($p);
+            $this->generateHeader->updatePartHeader($p);
             $ancestors->push(...$p->ancestors);
             UpdateParentParts::dispatch($p->withoutRelations());
             UpdateRebrickable::dispatch($p->withoutRelations());
             CheckPart::dispatch($p->withoutRelations());
+
         });
 
         $partIds = $parts->pluck('id');
