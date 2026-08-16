@@ -24,7 +24,7 @@ class SyncSubparts
         if (!$quiet  && $missingBefore !== $missingAfter) {
             $part->refresh();
             $this->partCheckService->checkPart($part);
-            UpdateRebrickable::dispatch($part->id);
+            UpdateRebrickable::dispatch($part->withoutRelations());
             $part->updateReadyForAdmin();
         }
     }

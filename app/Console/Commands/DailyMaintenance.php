@@ -42,7 +42,7 @@ class DailyMaintenance extends Command
                         ->orWhereBetween('created_at', [now()->subWeek()->subDay(), now()->subWeek()])
                         ->orWhereBetween('created_at', [now()->subMonth()->subDay(), now()->subMonth()])
                 )
-                ->each(fn (Part $part) => UpdateRebrickable::dispatch($part));
+                ->each(fn (Part $part) => UpdateRebrickable::dispatch($part->withoutRelations()));
 
             $this->info('Reloading colors for LDConfig');
             $this->call('lib:update-ldconfig');
