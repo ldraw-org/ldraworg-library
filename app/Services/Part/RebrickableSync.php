@@ -30,7 +30,7 @@ class RebrickableSync
         }
 
         $part->setExternalSiteKeywords($updateOfficial);
-        $this->generateHeader->updatePartHeader($p);
+        $this->generateHeader->updatePartHeader($part);
     }
 
 }
