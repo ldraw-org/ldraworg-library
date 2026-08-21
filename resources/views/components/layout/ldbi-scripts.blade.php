@@ -9,7 +9,7 @@
 <script src="{{version('assets/ldbi/js/RenderPass.js')}}" type="text/javascript" ></script>
 <script src="{{version('assets/ldbi/js/MaskPass.js')}}" type="text/javascript" ></script>
 <script src="{{version('assets/ldbi/js/EffectComposer.js')}}" type="text/javascript" ></script>
-<script src="{{version('assets/js/ldraworgscene.js')}}" type="text/javascript" ></script>    
+<script src="{{version('assets/js/ldraworgscene.js')}}" type="text/javascript" ></script>
 <script src="{{version('assets/ldbi/js/ClientStorage.js')}}" type="text/javascript" ></script>
 <script src="{{version('assets/ldbi/js/LDROptions.js')}}" type="text/javascript" ></script>
 <script src="{{version('assets/ldbi/js/LDRShaders.js')}}" type="text/javascript" ></script>
@@ -18,6 +18,6 @@
 <script src="{{version('assets/ldbi/js/LDRBFCGeometries.js')}}" type="text/javascript" ></script>
 <script src="{{version('assets/ldbi/js/LDRMeasurer.js')}}" type="text/javascript" ></script>
 <script src="{{version('assets/ldbi/js/LDRLoader.js')}}" type="text/javascript"></script>
-<script src="{{version('assets/ldbi/js/LDRGenerator.js')}}" type="text/javascript"></script>
+{{-- <script src="{{version('assets/ldbi/js/LDRGenerator.js')}}" type="text/javascript"></script> --}}
 <script src="{{version('assets/ldbi/js/LDRStuds.js')}}" type="text/javascript"></script>
 <script src="{{version('assets/ldbi/js/VertexNormalsHelper.js')}}" type="text/javascript"></script>
