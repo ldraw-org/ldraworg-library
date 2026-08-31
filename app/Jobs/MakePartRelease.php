@@ -2,33 +2,17 @@
 
 namespace App\Jobs;
 
-use Illuminate\Bus\Batchable;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Database\Eloquent\Collection;
 use App\Models\User;
 use App\Services\LDraw\Managers\Part\PartReleaseManager;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Timeout;
 
-class MakePartRelease implements ShouldQueue, ShouldBeUnique
+#[Timeout(3600)]
+class MakePartRelease implements ShouldQueue
 {
-    use Batchable;
-    use Dispatchable;
-    use InteractsWithQueue;
     use Queueable;
-    use SerializesModels;
 
-    public $uniqueFor = 3600;
-    public $timeout = 3600;
-
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
     public function __construct(
         public User $user,
         public bool $includeLdconfig = false,
