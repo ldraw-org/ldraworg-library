@@ -140,8 +140,6 @@ LDR.Generator = {
         return pt;
     },
     cs: (i, div=8) => [Math.cos(i*Math.PI/div),  Math.sin(i*Math.PI/div)],
-
-
     co: function(N, D, M = 1, disc = false, descDecimals = 4) {
         let [pt,s] = this.pT((M > 1 ? 'Hi-Res ' : '') + 'Cylinder ' + (disc ? 'Closed' : 'Open') + ' ' + this.f2s(N/D, descDecimals));
         let p0 = this.V0;
@@ -183,16 +181,16 @@ LDR.Generator = {
     },
     e48: function(N, D, descDecimals = 4) {let p = this.ed(N, D, 3, descDecimals); p.ldraw_org = '48_Primitive'; return p;},
     e48_N_4: function(N) {
-	let [pt,s] = this.pT('Hi-Res Circle ' + N/4);
-	s.asm(this.V0, this.R(1,1), '48/1-4edge.dat');
-	s.asm(this.V0, this.R2(-1,1,1), '48/1-4edge.dat');
+	let [pt,s] = this.pT('Hi-Res Circle ' + this.f2s(N/4));
+	s.asm(this.V0, this.R(1,1), '48/1-4edge');
+	s.asm(this.V0, this.R2(-1,1,1), '48/1-4edge');
 	if(N > 2) {
-	    s.asm(this.V0, this.R(-1,1), '48/1-4edge.dat');
-	    s.asm(this.V0, this.R2(1,1,-1), '48/1-4edge.dat');
+	    s.asm(this.V0, this.R(-1,1), '48/1-4edge');
+	    s.asm(this.V0, this.R2(1,1,-1), '48/1-4edge');
 	}
 	return pt;
     },
-    cy: function(N, D, y = 1, C = 0.4141, M = 1, descDecimals = 4) { // y is for control points
+    cy: function(N, D, y = 1, M = 1, descDecimals = 4) { // y is for control points
         let [pt,S] = this.pT((M > 1 ? 'Hi-Res ' : '') + 'Cylinder ' + this.f2s(N/D, descDecimals));
 
         let p0 = this.V(1, 0, 0), p1 = this.V(1, 1, 0);
@@ -202,7 +200,7 @@ LDR.Generator = {
 
         if(N < D) { // Add conditional line in beginning:
             if(y) {
-                S.addConditionalLine(24, p0, p1, next1, this.V(1, 1, -C)); // First tangest line at y=1 of length C
+                S.addConditionalLine(24, p0, p1, next1, this.V(1, 1, -0.4141)); // First tangest line at y=1 of length 0.4141
             }
             else {
                 S.addConditionalLine(24, p0, p1, next0, this.V(1, 0, -1)); // First tangent line at y=0 of length 1
@@ -222,7 +220,7 @@ LDR.Generator = {
 
             if(y) {
                 if(N < D && i === M*N*16/D + 1) { // Last conditional line aligns with tangent. Thanks Magnus! https://forums.ldraw.org/thread-24262-post-39360.html
-                    let tangent = this.V(); tangent.subVectors(next1, prev1); tangent.setLength(C);
+                    let tangent = this.V(); tangent.subVectors(next1, prev1); tangent.setLength(0.4141);
                     next1.addVectors(p1, tangent);
                 }
                 S.addConditionalLine(24, p0, p1, next1, prev1);
@@ -237,7 +235,7 @@ LDR.Generator = {
         }
         return pt;
     },
-    c48: function(N, D, C = 0.4141, descDecimals = 4) {let p = this.cy(N, D, 1, C, 3, descDecimals); p.ldraw_org = '48_Primitive'; return p;},
+    c48: function(N, D, descDecimals = 4) {let p = this.cy(N, D, 1, 3, descDecimals); p.ldraw_org = '48_Primitive'; return p;},
     cy2: function(N, D, M = 1) {
         let [pt,S] = this.pT((M > 1 ? 'Hi-Res ' : '') + 'Cylinder ' + this.f2s(N/D) + ' without Conditional Lines');
 
@@ -383,7 +381,7 @@ LDR.Generator = {
         for(let i = 1; i <= M*N*16/D; i++) {
             let [c,s] = this.cs(i, 8*M);
             let p = this.V(c, 0, s);
-            S.addTriangle(16, X[parseInt((i-1)/(M === 1 ? 4 : 16))], p, prev);
+            S.addTriangle(16, X[parseInt((i-1)/(4*M))], p, prev);
             prev = p;
         }
         return pt;
@@ -403,8 +401,8 @@ LDR.Generator = {
         }
         return pt;
     },
-    ri: function(N, D, size, M = 1, ERROR_NAME = false) {
-        let [pt,S] = this.pT(ERROR_NAME ? ERROR_NAME : (M > 1 ? 'Hi-Res ' : '') + 'Ring ' + this.pad2(size) + ' x ' + this.f2s(1.0/D*N));
+    ri: function(N, D, size, M = 1, ERROR_NAME = false, obsolete=false) {
+        let [pt,S] = this.pT(ERROR_NAME ? ERROR_NAME : (obsolete?'~':'') + (M > 1 ? 'Hi-Res ' : '') + 'Ring ' + this.pad2(size) + ' x ' + this.f2s(1.0/D*N) + (obsolete?' (Obsolete)':''));
         let SIZE = size+1;
         let prev1 = this.V(size, 0, 0);
         let prev2 = this.V(SIZE, 0, 0);
@@ -418,13 +416,14 @@ LDR.Generator = {
         }
         return pt;
     },
-    r48: function(N, D, size) {let p = this.ri(N, D, size, 3); p.ldraw_org = '48_Primitive'; return p;},
-    r48_4_4_9: function() {
-	let [pt,s] = this.pT('Hi-Res Ring  9 x 1.0');
-	s.asm(this.V0, this.R(1,1), '48/1-4ring9.dat');
-	s.asm(this.V0, this.R2(-1,1,1), '48/1-4ring9.dat');
-	s.asm(this.V0, this.R(-1,1), '48/1-4ring9.dat');
-	s.asm(this.V0, this.R2(1,1,-1), '48/1-4ring9.dat');
+    r48: function(N, D, size, obsolete=false) {let p = this.ri(N, D, size, 3, false, obsolete); p.ldraw_org = '48_Primitive'; return p;},
+    x48_4_4: function(smaller, title) {
+	let [pt,s] = this.pT('Hi-Res ' + title);
+	smaller = '48/1-4' + smaller;
+	s.asm(this.V0, this.R(1,1), smaller);
+	s.asm(this.V0, this.R2(-1,1,1), smaller);
+	s.asm(this.V0, this.R(-1,1), smaller);
+	s.asm(this.V0, this.R2(1,1,-1), smaller);
 	return pt;
     },
     stug: function(X, Y, suffix = '', sub = 1) {
@@ -715,26 +714,14 @@ LDR.Generator = {
         R('?-?cyli', (a,b) => X.cy(a, b));
         R('1-4cyli', () => X.cy(1, 4, 0)); // For some files the test points of conditional lines are at y=0 instead of y=1
         R('4-4cyli', () => X.cy(4, 4, 0)); // y=0
-        R('7-8cyli', () => X.cy(7, 8, 1, 1)); // Inconsistent dist=1 to control points
-        R('7-16cyli', () => X.cy(7, 16, 1, 1)); // Inconsistent dist=1 to control points
         R('48/?-?cyli', (a,b) => X.c48(a, b));
-        R('48/1-12cyli', () => X.c48(1, 12, 0.1316)); // Inconsistent dist to control points
-        R('48/1-3cyli', () => X.c48(1, 3, 0.1305)); // Inconsistent dist to control points
-        R('48/1-4cyli', () => X.c48(1, 4, 0.1316)); // Inconsistent dist to control points
-        R('48/1-16cyli', () => X.c48(1, 16, 0.1317)); // Inconsistent dist to control points!
-        R('48/1-24cyli', () => X.c48(1, 24, 0.1317)); // Inconsistent dist to control points!
-        R('48/1-48cyli', () => X.c48(1, 48, 0.1305, 5)); // Inconsistent dist to control points. Inconsistent number of decimals in description
-	/*
-5 24 0.9914 0 0.1305 0.9914 1 0.1305 0.974411 1 0.25991 1 1 0
-5 24 0.9914 0 0.1305 0.9914 1 0.1305 0.9659   1 0.2588  1 1 0
-
-5 24 1 0 0 1 1 0 0.9914 1  0.1305 1      1 -0.1305
-5 24 1 0 0 1 1 0 0.9914 1 -0.1305 0.9914 1 0.1305	  
-	  */
-        R('48/5-48cyli', () => X.c48(5, 48, 0.1305, 5)); // Inconsistent dist to control points. Inconsistent number of decimals in description
+        R('48/1-48cyli', () => X.c48(1, 48, 5)); // Inconsistent number of decimals in description
+        R('48/5-48cyli', () => X.c48(5, 48, 5)); // Inconsistent number of decimals in description
+	R('48/4-4cyli', () => X.x48_4_4('cyli', 'Cylinder 1.0')); // Inconsistent primitive consisting of smaller primitives
         // Cylinders without conditional lines:
         R('?-?cyli2', (a,b) => X.cy2(a, b));
         R('48/?-?cyli2', (a,b) => X.cy2(a, b, 3));
+	R('48/4-4cyli2', () => X.x48_4_4('cyli2', 'Cylinder 1.0 without Conditional Lines')); // Inconsistent primitive consisting of smaller primitives
         // Cylinders with open ends:
         R('?-?cylo', (a,b) => X.co(a, b));
         R('48/?-?cylo', (a,b) => X.co48(a, b));
@@ -746,10 +733,10 @@ LDR.Generator = {
 
         R('1-4cylc2', () => X.ccX(1, 1, 2, 'Cylinder Closed  0.25 without Edges and Conditional Lines')); // Inconsistent spacing in description
         R('4-4cylc2', () => X.ccX(4));
-        R('48/4-4cylc2', () => X.ccX(4, 3, 'Hi-Res Cylinder Closed 1.0 without Edges or Conditional Lines')); // Inconsistent 'or' vs 'and' in description
+        R('48/4-4cylc2', () => X.ccX(4, 3, 2, 'Hi-Res Cylinder Closed 1.0 without Edges or Conditional Lines')); // Inconsistent 'or' vs 'and' in description
 
         R('?-4cylc3', a => X.ccX(a, 1, ''));
-        R('48/4-4cylc3', a => X.ccX(a, 3, ''));
+        R('48/4-4cylc3', () => X.ccX(4, 3, ''));
 
         // TODO Cylinder truncated by an angled plane:
         R('1-4cyls', () => X.cylSloped(1, X.V(-1, 0, 1)));
@@ -803,8 +790,11 @@ LDR.Generator = {
         R('ring?', a => X.alias('4-4ring'+a));
         R('ring10', () => X.alias('4-4rin10'));
         R('48/?-?rin?', (a,b,c) => X.r48(a, b, c));
+        R('48/3-4rin?', (a) => X.r48(3, 4, a, true));
+        R('48/4-4rin?', (a) => X.r48(4, 4, a, true));
+        R('48/5-6rin16', (a) => X.r48(5, 6, 16, true));
         R('48/?-?ring?', (a,b,c) => X.r48(a, b, c));
-        R('48/4-4ring9', () => X.r48_4_4_9());
+        R('48/4-4ring9', () => X.x48_4_4('ring9', 'Ring  9 x 1.0'));
 	R('?-?ri?', (a,b,c) => X.alias(a+'-'+b+'ring'+c));
 
         // Stud groups (TODO Duplo):

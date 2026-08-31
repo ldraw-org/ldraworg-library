@@ -18,6 +18,6 @@
 <script src="{{version('assets/ldbi/js/LDRBFCGeometries.js')}}" type="text/javascript" ></script>
 <script src="{{version('assets/ldbi/js/LDRMeasurer.js')}}" type="text/javascript" ></script>
 <script src="{{version('assets/ldbi/js/LDRLoader.js')}}" type="text/javascript"></script>
-{{-- <script src="{{version('assets/ldbi/js/LDRGenerator.js')}}" type="text/javascript"></script> --}}
+<script src="{{version('assets/ldbi/js/LDRGenerator.js')}}" type="text/javascript"></script>
 <script src="{{version('assets/ldbi/js/LDRStuds.js')}}" type="text/javascript"></script>
 <script src="{{version('assets/ldbi/js/VertexNormalsHelper.js')}}" type="text/javascript"></script>

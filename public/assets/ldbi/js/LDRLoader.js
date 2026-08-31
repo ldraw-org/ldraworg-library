@@ -1138,7 +1138,7 @@ THREE.LDRPartDescription.prototype.placedColor = function(pdColorID) {
 
 THREE.LDRPartDescription.prototype.toLDR = function(loader) {
     let pt = loader.getPartType(this.ID);    
-    let ret = '1 ' + this.c + ' ' + this.p.toLDR() + ' ' + this.r.toLDR() + ' ' + pt.ID + '\r\n';
+    let ret = '1 ' + this.c + ' ' + this.p.toLDR() + ' ' + this.r.toLDR() + ' ' + (pt ? pt.ID : this.ID) + '\r\n';
     this.commentLines.forEach(x => ret += x.toLDR());
     return ret;
 }
