@@ -48,4 +48,9 @@ enum VoteType: string
             self::AdminFastTrack,
         ];
     }
+
+    public function isAdminCertification(): bool
+    {
+        return $this === self::AdminReview || $this === self::AdminFastTrack;
+    }
 }

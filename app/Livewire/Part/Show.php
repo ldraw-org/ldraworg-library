@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Part;
 
+use App\Filament\Forms\PartReviewForm;
 use App\Services\Part\BasePartSync;
 use App\Services\Part\GenerateHeader;
 use App\Services\Part\ImageGenerator;
@@ -9,6 +10,7 @@ use App\Services\Part\RebrickableSync;
 use App\Services\Part\SyncSubparts;
 use App\Services\Part\ToggleManualHold;
 use App\Services\Part\Validator;
+use App\Services\Vote\VoteManager;
 use Filament\Actions\ActionGroup;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
@@ -20,7 +22,6 @@ use App\Filament\Actions\EditNumberAction;
 use App\Filament\Actions\EditPreviewAction;
 use App\Filament\Actions\Part\Download\PartFileDownloadAction;
 use App\Filament\Actions\Part\Download\PartZipFileDownloadAction;
-use App\Services\LDraw\Managers\VoteManager;
 use App\Models\Part\Part;
 use App\Models\Vote;
 use Filament\Actions\Action;
@@ -61,41 +62,9 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return $schema
             ->components([
-                Section::make('Comment / Vote')
-                    ->schema([
-                        Radio::make('vote_type_code')
-                            ->label('')
-                            ->options(fn () => $this->voteOptions())
-                            ->default('M')
-                            ->required()
-                            ->markAsRequired(false)
-                            ->enum(VoteType::class)
-                            ->inline()
-                            ->inlineLabel(false)
-                            ->validationAttribute('vote type'),
-                        Textarea::make('comment')
-                            ->rows(5)
-                            ->string()
-                            ->nullable()
-                            ->requiredIf('vote_type_code', ['M', 'H'])
-                            ->extraAttributes(['class' => 'font-mono'])
-                            ->validationMessages([
-                                'required_if' => 'A comment is required',
-                            ]),
-                ])
-            ]);
-    }
-
-    #[On('mass-vote')]
-    public function voteOptions(): array
-    {
-        $options = [];
-        foreach (VoteType::cases() as $vt) {
-            if (Auth::user()->can('vote', [Vote::class, $this->part, $vt])) {
-                $options[$vt->value] = $vt->label();
-            }
-        }
-        return $options;
+                ...PartReviewForm::make()
+            ])
+            ->record($this->part);
     }
 
     public function mount(Part $part, ?string $filename = null)
@@ -295,10 +264,10 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('adminCertifyAll')
                 ->action(function () {
-                    $vm = new VoteManager();
+                    $vm = app(VoteManager::class);
                     $vm->adminCertifyAll($this->part, Auth::user());
                     $this->part->refresh();
-                    $this->dispatch('mass-vote');
+                    $this->part->load('votes');
                     Notification::make()
                         ->title('Quickvote action complete')
                         ->success()
@@ -315,10 +284,9 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return Action::make('certifyAll')
                 ->action(function () {
-                    $vm = new VoteManager();
+                    $vm = app(VoteManager::class);
                     $vm->certifyAll($this->part, Auth::user());
-                    $this->part->refresh();
-                    $this->dispatch('mass-vote');
+                    $this->part->load('votes');
                     Notification::make()
                         ->title('Quickvote action complete')
                         ->success()
@@ -334,7 +302,7 @@ class Show extends Component implements HasSchemas, HasActions
     public function postVote()
     {
         $this->form->getState();
-        $vm = new VoteManager();
+        $vm = app(VoteManager::class);
         $vm->castVote($this->part, Auth::user(), VoteType::tryFrom($this->vote_type_code), $this->comment);
         $this->dispatch('mass-vote');
         $this->form->fill();

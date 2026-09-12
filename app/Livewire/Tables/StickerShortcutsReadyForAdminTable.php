@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Services\Vote\VoteManager;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
@@ -10,7 +11,6 @@ use App\Enums\PartStatus;
 use App\Enums\VoteType;
 use App\Models\Part\Part;
 use App\Models\Vote;
-use App\Services\LDraw\Managers\VoteManager;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -38,7 +38,7 @@ class StickerShortcutsReadyForAdminTable extends BasicTable implements HasAction
             ->recordActions([
                 Action::make('Fast Track')
                     ->action(function (Part $p) {
-                        $vm = new VoteManager();
+                        $vm = app(VoteManager::class);
                         $vm->castVote($p, Auth::user(), VoteType::AdminFastTrack);
                     })
                     ->button()
