@@ -5,6 +5,11 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
+use Laravel\Head\Enums\ImageType;
+use Laravel\Head\Enums\OgType;
+use Laravel\Head\Enums\TwitterCard;
+use Laravel\Head\Facades\Head;
+use Laravel\Head\HeadBuilder;
 
 class LDrawServiceProvider extends ServiceProvider
 {
@@ -39,5 +44,12 @@ class LDrawServiceProvider extends ServiceProvider
         Str::macro('initials', function (string $string) {
             return (string) (new Stringable($string))->initials();
         });
+        Head::defaults(fn (HeadBuilder $head) => $head
+            ->canonical()
+            ->og(type: OgType::Website, siteName: 'LDraw.org')
+            ->twitter(card: TwitterCard::SummaryWithLargeImage)
+            ->icon(asset('/images/LDraw_Red_64x64.png'), type: ImageType::Png, sizes: '64x64')
+            ->viewport('width=device-width, initial-scale=1.0, maximum-scale=1.0')
+        );
     }
 }
