@@ -83,6 +83,7 @@ class Part extends Model implements HasMedia
     *     'rebrickable': 'Illuminate\Database\Eloquent\Casts\AsArrayObject',
     *     'help': 'array',
     *     'preview': 'App\\Enums\\PreviewRotation',
+    *     'release_highlight': boolean,
     * }
     */
     protected function casts(): array
@@ -106,6 +107,7 @@ class Part extends Model implements HasMedia
             'rebrickable' => AsArrayObject::class,
             'help' => 'array',
             'preview' => PreviewRotation::class,
+            'release_highlight' => 'boolean',
         ];
     }
 
