@@ -27,6 +27,9 @@ class DailyMaintenance extends Command
             $this->info('Rechecking all unofficial parts');
             $this->call('lib:check', ['--unofficial-only' => true]);
 
+            $this->info('Resyncing part fixes');
+            $this->call('lib:sync-fixes');
+
             $this->info('Removing orphan keywords');
             PartKeyword::doesntHave('parts')->delete();
 
