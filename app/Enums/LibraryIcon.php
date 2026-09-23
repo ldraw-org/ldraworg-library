@@ -21,7 +21,15 @@ enum LibraryIcon: string
     case NotReleaseable = 'mdi-file-document-remove';
     case UnofficialPartStatus = 'mdi-square-rounded';
     case BreadcrumbsSeparater = 'mdi-chevron-double-right';
-    case UserNotification = 'mdi-bell';
+    case Bell = 'mdi-bell';
+    case Remove = 'mdi-trash-can-outline';
+    case BellOff = 'mdi-bell-off';
+    case Download = 'mdi-file-download-outline';
+    case DownloadZip = 'mdi-folder-zip-outline';
+    case ImageRefresh = 'mdi-image-refresh-outline';
+    case EditHeader = 'mdi-file-document-edit-outline';
+    case HeaderRefresh = 'mdi-file-document-refresh-outline';
+    case SubpartsRefresh = 'mdi-source-branch-refresh';
     case PartFlag = 'mdi-flag';
     case ExternalSite = 'mdi-open-in-new';
     case LinkOn = 'mdi-link-variant';
@@ -35,7 +43,7 @@ enum LibraryIcon: string
     case Alert = 'mdi-alert';
     case Info = 'mdi-information-slab-circle';
     case UserVote = 'mdi-account-circle';
-    case ViewerRefresh = 'mdi-refresh';
+    case Refresh = 'mdi-refresh';
     case LegoBrick = 'mdi-toy-brick';
     case ViewerHarlequin = 'mdi-brush';
     case ViewerBfc = 'mdi-flip-to-back';

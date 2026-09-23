@@ -46,7 +46,7 @@ class VotePolicy
         if (is_null($user) || $part->isOfficial() || $this->settings->tracker_locked) {
             return false;
         }
-        $vote = $user->votes->firstWhere('part_id', $part->id);
+        $vote = $user->votes()->firstWhere('part_id', $part->id);
 
         if (!is_null($vote) && $vote->vote_type === $vote_type) {
             return false;

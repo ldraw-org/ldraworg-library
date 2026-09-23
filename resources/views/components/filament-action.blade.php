@@ -1,5 +1,6 @@
 @props(['action', 'showFallback' => false, 'fallbackColor' => 'danger', 'fallbackLabel' => ''])
 
+<div {{ $attributes->merge(['class' => 'size-fit']) }}>
 @if ($action->isVisible())
     {{ $action }}
 @elseif ($showFallback)
@@ -10,3 +11,4 @@
         {{ $fallbackLabel }}
     </x-filament::button>
 @endif
+</div>

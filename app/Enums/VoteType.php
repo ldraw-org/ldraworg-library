@@ -3,8 +3,9 @@
 namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
+use Filament\Support\Contracts\HasLabel;
 
-enum VoteType: string
+enum VoteType: string implements HasLabel
 {
     use CanBeOption;
 

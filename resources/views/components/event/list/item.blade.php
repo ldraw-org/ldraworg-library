@@ -1,6 +1,6 @@
 @props(['event'])
 @use("\App\Enums\LibraryIcon")
-<div class="flex-flex-col rounded border border-gray-200 p-4" {{ $attributes }}>
+<div {{ $attributes->merge(['class' => 'flex-flex-col space-y-4']) }}>
     <div class="flex flex-row space-x-4 place-items-center" >
         <x-event.icon :$event />
         <div class="flex flex-row space-x-2 place-items-center font-bold">
