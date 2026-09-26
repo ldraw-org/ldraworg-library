@@ -8,15 +8,15 @@
     </x-slot>
     <div class="flex flex-row w-full">
         <x-filament-action-group :group="$this->topMenuActionGroup()" />
-        @if (!$part->isTexmap() && $webGlSupported)
+        <div @class(['ps-2', 'hidden' => $part->isTexmap() || !$webGlSupported])>
             <x-filament::button
                 color="gray"
                 outlined
                 wire:click="$dispatch('open-modal', { id: 'ldbi' })"
             >
-                3D View
+                3D View {{$webGlSupported ? 'true' : 'false'}}
             </x-filament::button>
-        @endif
+        </div>
         <x-filament-action class="ml-auto" :action="$this->deleteAction()" />
     </div>
     <div>
@@ -59,6 +59,9 @@
                 src="{{ file_exists($part->getFirstMediaPath('image')) ? $part->getFirstMediaUrl('image') : $part->getFallbackMediaUrl('image')}}"
                 alt="{{ $part->description }}"
                 title="{{ $part->description }}"
+                @if (!$part->isTexmap() && $webGlSupported)
+                    wire:click="$dispatch('open-modal', { id: 'ldbi' })"
+                @endif
             >
             <div>
                 <pre class="whitespace-pre-wrap wrap-break-word font-mono"><code>{{ $part->header }}</code></pre>

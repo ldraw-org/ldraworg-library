@@ -45,7 +45,9 @@
         };
 
         var renderModel = function() {
-            if (WEBGL.isWebGLAvailable()) {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (gl && gl instanceof WebGLRenderingContext) {
                 scene = null;
                 if (modeltype === 'user') {
                     LDR.Colors.load(() => {

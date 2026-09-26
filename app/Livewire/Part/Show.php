@@ -181,10 +181,32 @@ class Show extends Component implements HasSchemas, HasActions
         return $this->buttonAction('rescanSubparts')
             ->action(function () {
                 app(SyncSubparts::class)->loadSubparts($this->part);
+                $this->part->refresh();
                 $this->sendFilamentNotification('Subparts rescanned');
             })
             ->icon(LibraryIcon::SubpartsRefresh)
             ->label('Rescan subparts')
+            ->visible(Auth::user()?->can('update', $this->part) ?? false);
+    }
+
+    protected function editNumberAction(): EditAction
+    {
+        return EditNumberAction::make('editNumber')
+            ->color('gray')
+            ->record($this->part);
+    }
+
+    public function updateRebrickableDataAction(): Action
+    {
+        return $this->buttonAction('updateRebrickableData')
+            ->action(function () {
+                app(RebrickableSync::class)->syncRebrickablePart($this->part);
+                $this->part->refresh();
+                $this->sendFilamentNotification('Rebrickable data refreshed');
+            })
+            ->icon(LibraryIcon::Refresh)
+            ->tooltip('Recheck site data from Rebrickable')
+            ->hiddenLabel()
             ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 
@@ -256,42 +278,10 @@ class Show extends Component implements HasSchemas, HasActions
 
     // Admin tools actions
 
-
-    protected function editNumberAction(): EditAction
-    {
-        return EditNumberAction::make('editNumber')
-            ->color('gray')
-            ->record($this->part);
-    }
-
     protected function editPreviewAction(): EditAction
     {
         return EditPreviewAction::make('editPreview')
             ->record($this->part);
-    }
-
-    public function retieFixAction(): Action
-    {
-        $canEdit = Auth::user()?->cannot('update', $this->part) ?? false;
-        $isVisible = $canEdit &&
-            Part::where('filename', $this->part->filename)->count() > 1 &&
-            $this->part->unofficial_part === null &&
-            $this->part->official_part === null;
-        return Action::make('retieFix')
-            ->label('Retie part fix')
-            ->action(function () {
-                if ($this->part->isUnofficial()) {
-                    $fixpart = Part::official()->firstWhere('filename', $this->part->filename);
-                    $fixpart->unofficial_part()->associate($this->part);
-                    $fixpart->save();
-                } else {
-                    $fixpart = Part::unofficial()->firstWhere('filename', $this->part->filename);
-                    $this->part->unofficial_part()->associate($fixpart);
-                    $this->part->save();
-                }
-                $this->part->refresh();
-            })
-            ->visible($isVisible);
     }
 
     public function deleteAction(): DeleteAction
@@ -311,19 +301,6 @@ class Show extends Component implements HasSchemas, HasActions
             ->modalDescription('Are you sure you\'d like to delete this part? This cannot be easily undone.')
             ->successRedirectUrl(route('tracker.activity'))
             ->successNotificationTitle('Part deleted');
-    }
-
-    public function updateRebrickableDataAction(): Action
-    {
-        return $this->buttonAction('updateRebrickableData')
-            ->action(function () {
-                app(RebrickableSync::class)->syncRebrickablePart($this->part);
-                $this->sendFilamentNotification('Rebrickable data refreshed');
-            })
-            ->icon(LibraryIcon::Refresh)
-            ->tooltip('Recheck site data from Rebrickable')
-            ->hiddenLabel()
-            ->visible(Auth::user()?->can('update', $this->part) ?? false);
     }
 
     public function externalSiteActionGroup(): ActionGroup
