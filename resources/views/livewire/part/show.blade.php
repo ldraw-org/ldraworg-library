@@ -14,7 +14,7 @@
                 outlined
                 wire:click="$dispatch('open-modal', { id: 'ldbi' })"
             >
-                3D View {{$webGlSupported ? 'true' : 'false'}}
+                3D View
             </x-filament::button>
         </div>
         <x-filament-action class="ml-auto" :action="$this->deleteAction()" />
