@@ -212,6 +212,25 @@ class Show extends Component implements HasSchemas, HasActions
 
     // Top menu actions
 
+    protected function viewPartFixAction(): Action
+    {
+        if ($this->part->isUnofficial() && $this->part->official_part !== null) {
+            $route = route('parts.show', $this->part->official_part);
+            $label = 'View official part';
+        } elseif ($this->part->isOfficial() && $this->part->unofficial_part !== null) {
+            $route = route('parts.show', $this->part->unofficial_part);
+            $label = 'View unofficial fix';
+        } else {
+            $route = '';
+            $label = '';
+        }
+        return $this->buttonAction('viewPartFix')
+            ->label($label)
+            ->url($route)
+            ->icon(LibraryIcon::PartFix)
+            ->visible($route !== '');
+    }
+
     protected function downloadAction(): Action
     {
         $route = route('part.download', ['library' => $this->part->libFolder(), 'filename' => $this->part->filename]);
@@ -266,6 +285,7 @@ class Show extends Component implements HasSchemas, HasActions
     public function topMenuActionGroup(): ActionGroup
     {
         return ActionGroup::make([
+            $this->viewPartFixAction(),
             $this->downloadAction(),
             $this->downloadZipAction(),
             $this->patternPartAction(),
