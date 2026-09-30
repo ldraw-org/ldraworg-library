@@ -6,9 +6,11 @@ use App\Models\User;
 use App\Services\LDraw\Managers\Part\PartReleaseManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Queue;
 use Illuminate\Queue\Attributes\Timeout;
 
 #[Timeout(3600)]
+#[Queue('release')]
 class MakePartRelease implements ShouldQueue
 {
     use Queueable;
