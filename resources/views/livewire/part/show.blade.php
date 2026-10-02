@@ -17,7 +17,11 @@
                 3D View
             </x-filament::button>
         </div>
-        <x-filament-action class="ml-auto" :action="$this->deleteAction()" />
+        <div class="ml-auto flex flex-row space-x-2">
+            <x-filament-action  :action="$this->flagForDeleteAction()" />
+            <x-filament-action  :action="$this->manualHoldAction()" />
+            <x-filament-action  :action="$this->deleteAction()" />
+        </div>
     </div>
     <div>
         <div class="flex flex-row space-x-2 place-items-center">

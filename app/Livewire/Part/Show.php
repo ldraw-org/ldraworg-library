@@ -11,6 +11,7 @@ use App\Services\Part\GenerateHeader;
 use App\Services\Part\ImageGenerator;
 use App\Services\Part\RebrickableSync;
 use App\Services\Part\SyncSubparts;
+use App\Services\Part\ToggleManualHold;
 use App\Services\Part\Validator;
 use App\Services\Vote\VoteManager;
 use Filament\Actions\ActionGroup;
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use PharIo\Manifest\Library;
 
 /**
  * @property Schema $form
@@ -122,13 +124,41 @@ class Show extends Component implements HasSchemas, HasActions
         $color = $partIsFollowed ? 'yellow' : 'gray';
         return $this->buttonAction('trackPart', $color)
             ->tooltip($partIsFollowed ? 'Click to stop following this part' : 'Click to follow this part')
-            ->label('')
+            ->hiddenLabel()
             ->icon($partIsFollowed ? LibraryIcon::Bell : LibraryIcon::BellOff)
             ->action(function () {
                 $this->part->notification_users()->toggle(Auth::user()?->id);
                 $this->part->refresh();
             })
             ->visible($this->part->isUnofficial() && Auth::check());
+    }
+
+    public function flagForDeleteAction(): Action
+    {
+        $color = $this->part->delete_flag ? 'red' : 'gray';
+        return $this->buttonAction('flagForDelete', $color)
+            ->tooltip($this->part->delete_flag ? 'Click to flag for deletion' : 'Click remove deletion flag')
+            ->hiddenLabel()
+            ->icon(LibraryIcon::PartFlag)
+            ->action(function () {
+                $this->part->delete_flag = !$this->part->delete_flag;
+                $this->part->save();
+            })
+            ->visible(Auth::user()?->can('flag-delete', $this->part) ?? false);
+    }
+
+    public function manualHoldAction(): Action
+    {
+        $color = $this->part->manual_hold_flag ? 'red' : 'gray';
+        return $this->buttonAction('manualHold', $color)
+            ->tooltip($this->part->manual_hold_flag ? 'Click to place on admin hold' : 'Click to remove admin hold')
+            ->label('')
+            ->icon(LibraryIcon::Error)
+            ->action(function () {
+                app(ToggleManualHold::class)->handle($this->part);
+                $this->part->refresh();
+            })
+            ->visible(Auth::user()?->can('flag-manual-hold', $this->part) ?? false);
     }
 
     public function updateImageAction(): Action
