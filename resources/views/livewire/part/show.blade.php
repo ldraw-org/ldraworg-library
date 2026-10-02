@@ -40,15 +40,17 @@
         @endif
     </div>
 
-
-    <div class="flex flex-row space-x-2">
-        @if (!is_null($part->rebrickable_part))
-            <x-library-icon :icon="LibraryIcon::LinkOn" class="w-6" color="fill-gray-400" title="External site data provided by Rebrickable.com" />
-        @else
-            <x-library-icon :icon="LibraryIcon::LinkOff" class="w-6" color="fill-red-300" title="External site data provided by part keywords" />
-        @endif
-        <x-filament-action-group  :group="$this->externalSiteActionGroup()" />
-    </div>
+    @if($this->externalSiteActionGroup()->isVisible())
+        <div class="flex flex-row space-x-2">
+            @if (!is_null($part->rebrickable_part))
+                <x-library-icon :icon="LibraryIcon::LinkOn" class="w-6" color="fill-gray-400" title="External site data provided by Rebrickable.com" />
+            @else
+                <x-library-icon :icon="LibraryIcon::LinkOff" class="w-6" color="fill-red-300" title="External site data provided by part keywords" />
+            @endif
+            <x-filament-action-group :group="$this->externalSiteActionGroup()" />
+            <x-filament-action :action="$this->updateRebrickableDataAction()" />
+        </div>
+    @endif
     <x-labelled-section>
         <div class="flex flex-row space-x-2">
             <x-filament-action-group :group="$this->partOperationsActionGroup()" />
@@ -70,7 +72,7 @@
 
         <x-accordion id="showContents">
             <x-slot name="header">
-                Show file code
+                <div class="font-bold">Show file code:</div>
             </x-slot>
             <div>
                 <pre><code class="whitespace-pre-wrap wrap-break-word font-mono">{{ trim($part->body->body) }}</code></pre>
@@ -126,27 +128,25 @@
         <x-slot name="header">
             Part Events
         </x-slot>
-        @if ($part->isUnofficial())
-            <div class="flex flex-col divide-y divide-gray-200">
+        <div class="flex flex-col divide-y divide-gray-200">
+            @if ($part->isUnofficial())
+                @if (!is_null($part->official_part))
+                    <x-accordion id="archiveEvents">
+                        <x-slot name="header">
+                            <div class="font-bold">Archived Part Events:</div>
+                        </x-slot>
+                        <livewire:tables.part-events-table :part="$part->official_part->load('events')" />
+                    </x-accordion>
+                @endif
                 @forelse ($part->orderedEvents()->unofficial() as $event)
                     <x-event.list-item class="p-2" :$event wire:key="part-event-{{$event->id}}" />
                 @empty
                     <div>No Events</div>
                 @endforelse
-            </div>
-        @endif
-        @if ($part->isOfficial() || !is_null($part->official_part))
-            @if ($part->isUnOfficial())
-            <x-accordion id="archiveEvents">
-                <x-slot name="header">
-                    Archived Part Events:
-                </x-slot>
-                <livewire:tables.part-events-table :part="$part->official_part->load('events')" />
-            </x-accordion>
             @else
                 <livewire:tables.part-events-table :$part />
             @endif
-         @endif
+        </div>
     </x-labelled-section>
     @if ($part->isUnofficial())
         @can('voteAny', [\App\Models\Vote::class, $this->part])

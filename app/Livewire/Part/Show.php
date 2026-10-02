@@ -330,7 +330,6 @@ class Show extends Component implements HasSchemas, HasActions
             $this->externalSiteAction(ExternalSite::BrickLink),
             $this->externalSiteAction(ExternalSite::BrickOwl),
             $this->externalSiteAction(ExternalSite::Brickset),
-            $this->updateRebrickableDataAction(),
         ])
         ->label('External Sites')
         ->buttonGroup();
