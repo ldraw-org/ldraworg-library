@@ -215,9 +215,17 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             if (Str::startsWith($part['name'], '973')) {
                 continue;
             }
+            $partOptions = [];
             $name = basename($part['name'], '.dat');
-            $partFields[] = LDrawColourSelect::make("part_{$name}_{$index}_color")
-                ->label("Color of {$name} - {$part['description']}");
+            if ($part['variations'] !== []) {
+                $partOptions[] = Select::make("part_{$name}_{$index}_part")
+                    ->options($part['variations'])
+                    ->label('Variation');
+            }
+            $partOptions[] = LDrawColourSelect::make("part_{$name}_{$index}_color")
+                ->label("Color");
+            $partFields[] = Fieldset::make("{$name} - {$part['description']}")
+                ->schema($partOptions);
         }
         return Fieldset::make('Parts')
             ->columns(1)
@@ -255,7 +263,11 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         foreach ($this->template['parts'] as $index => $part) {
             $name = basename($part['name'], '.dat');
             $color = $get("part_{$name}_{$index}_color") ?? 16;
-            $text[] = "1 {$color} {$part['position']} {$part['name']}";
+            $file = $get("part_{$name}_{$index}_part") ?? $part['name'];
+            if (Str::startsWith($part['name'], '973')) {
+                $file = Part::find($get('torso'))->meta_name;
+            }
+            $text[] = "1 {$color} {$part['position']} {$file}";
         }
         $text[] = '';
         $fileText = implode("\n", $text);
@@ -326,10 +338,22 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                     $line['d'], $line['e'], $line['f'],
                     $line['g'], $line['h'], $line['i'],
                 ];
+                if (Str::startsWith($line['file'], '973')) {
+                    $variations = [];
+                } else {
+                    $variations = $part->subparts
+                        ->firstWhere('meta_name', $line['file'])
+                        ->patterns
+                        ->whereNull('unofficial_part')
+                        ->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved])
+                        ->mapWithKeys(fn (Part $p) => [$p->meta_name => "{$p->meta_name} - {$p->description}"])
+                        ->toArray();
+                }
                 $template['parts'][] = [
                     'name' => $line['file'],
                     'description' => $part->subparts->firstWhere('meta_name', $line['file'])->description,
                     'position' => implode(' ', $position),
+                    'variations' => $variations,
                 ];
             }
             return $template;
