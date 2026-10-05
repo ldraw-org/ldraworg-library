@@ -290,6 +290,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             ->when($onlyUnused, function (Builder $query) {
                 $query->whereDoesntHave('parents');
             })
+            ->doesntHave('unofficial_part')
             ->activeParts()
             ->orderBy('filename')
             ->get()
