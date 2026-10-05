@@ -13,6 +13,7 @@ class LDrawColourSelect
         return Select::make($name)
             ->searchable()
             ->preload()
+            ->placeholder('Select a color')
             // Tune fuzzy search behavior for colour-code matching
             ->extraAlpineAttributes(['x-on:click' => 'select.config.fuseOptions = {location: 87, threshold: 0.2}'])
             ->allowHtml()

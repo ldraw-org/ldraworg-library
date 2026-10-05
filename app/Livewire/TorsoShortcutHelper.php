@@ -2,6 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Enums\ExternalSite;
+use App\Enums\PartType;
+use App\Models\Part\PartKeyword;
 use App\Services\Part\Submit\Registrar;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Wizard;
@@ -15,7 +18,6 @@ use App\Services\LDraw\LDrawModelMaker;
 use App\Enums\PartCategory;
 use App\Filament\Forms\Components\LDrawColourSelect;
 use App\Services\LDraw\LDrawFile;
-use App\Services\External\Rebrickable;
 use App\Models\Part\Part;
 use App\Services\Check\PartChecker;
 use App\Services\Check\PartChecks\PatternHasSetKeyword;
@@ -31,7 +33,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
@@ -39,7 +40,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 /**
- * @property \Filament\Schemas\Schema $form
+ * @property Schema $form
  */
 class TorsoShortcutHelper extends Component implements HasSchemas
 {
@@ -78,83 +79,24 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                 Wizard::make([
                     Step::make('Torso and Template')
                         ->schema([
-                            Toggle::make('all-torsos')
-                                ->label('Show all torsos'),
+                            Toggle::make('unusedTorsos')
+                                ->label('Show only torsos without a shortcut')
+                                ->default(true),
                             Select::make('torso')
-                                ->options(function (Get $get) {
-                                    $parts = Part::when(
-                                        !$get('all-torsos'),
-                                        fn (Builder $query2) => $query2->whereDoesntHave(
-                                            'parents',
-                                            fn (Builder $query): Builder =>
-                                            $query->whereLike('description', 'Minifig Torso%')
-                                                ->where('category', '!=', PartCategory::StickerShortcut)
-                                        )
-                                    )
-                                        ->doesntHave('unofficial_part')
-                                        ->whereLike('filename', 'parts/973p%.dat')
-                                        ->whereNotLike('description', '~%')
-                                        ->where('category', '!=', PartCategory::StickerShortcut)
-                                        ->orderBy('filename')
-                                        ->get();
-                                    $options = [];
-                                    foreach ($parts as $part) {
-                                        $name = basename($part->filename, '.dat');
-                                        $options[$part->id] = "{$name} - {$part->description}";
-                                    }
-                                    return $options;
-                                })
+                                ->options(fn (Get $get) => $this->torsoOptions($get('unusedTorsos')))
                                 ->preload()
                                 ->searchable()
                                 ->required(),
                             Select::make('template')
-                                ->options(function () {
-                                    $parts = Part::whereIn('filename', $this->templates)
-                                        ->orderBy('description')
-                                        ->get();
-                                    $options = [];
-                                    foreach ($parts as $part) {
-                                        $name = basename($part->filename, '.dat');
-                                        $options[$part->id] = "{$name} - {$part->description}";
-                                    }
-                                    return $options;
-                                })
+                                ->options($this->templateOptions)
                                 ->preload()
                                 ->live()
                                 ->required()
                                 ->afterStateUpdated(function (Select $c) {
                                     unset($this->template);
-                                    unset($this->selectParts);
                                 }),
                         ])
-                        ->afterValidation(function (Set $set, Get $get) {
-                            $set('bricklink', null);
-                            $set('brickowl', null);
-                            $set('rebrickable', null);
-                            $p = Part::with('keywords')->find($get('torso'));
-                            $set('description', $this->template->description . str_replace('Minifig Torso', '', $p->description));
-                            $set('name', basename($this->template->filename, '.dat') . str_replace('973', '', basename($p->filename)));
-                            $kws = [];
-                            foreach ($p->keywords as $keyword) {
-                                $kw = strtolower($keyword->keyword);
-                                if (Str::startsWith($kw, ['bricklink ', 'brickowl ', 'rebrickable '])) {
-                                    $number = Str::chopStart($kw, ['bricklink ', 'brickowl ', 'rebrickable ']);
-                                    $site = Str::words($kw, 1, '');
-                                    $set($site, $number);
-                                } else {
-                                    $kws[] = $keyword->keyword;
-                                }
-                            }
-                            $set('keywords', implode(', ', $kws));
-                            if (is_null($get('brickowl')) || is_null($get('bricklink')) || is_null($get('rebrickable'))) {
-                                $this->setExternal($get, $set);
-                            }
-                            foreach ($this->templateParts() as $index => $tpart) {
-                                $index++;
-                                $set("part_{$index}_color", '16');
-                                $set("part_{$index}_id", $this->selectParts[$tpart]['default']);
-                            }
-                        }),
+                        ->afterValidation(fn (Set $set, Get $get) => $this->setStep2Values($set, $get)),
                     Step::make('New Shortcut Details')
                         ->schema([
                             TextInput::make('description')
@@ -178,42 +120,28 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                         }
                                     },
                                 ]),
-                            Grid::make([
-                                    'md' => 3
-                                ])
-                                ->schema([
-                                    TextInput::make('rebrickable')
-                                    ->string()
-                                    ->required()
-                                    ->extraAttributes(['class' => 'font-mono']),
-                                    TextInput::make('bricklink')
-                                        ->string()
-                                        ->required()
-                                        ->extraAttributes(['class' => 'font-mono']),
-                                    TextInput::make('brickowl')
-                                        ->string()
-                                        ->required()
-                                        ->extraAttributes(['class' => 'font-mono']),
-                                ]),
+                            $this->externalsSiteSection(),
                             TextInput::make('keywords')
                                 ->required()
                                 ->extraAttributes(['class' => 'font-mono'])
-                                ->rules([
-                                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail) {
-                                        $p = new ParsedPartCollection($this->makeShortcut());
-                                        $errors = app(PartChecker::class)->runSingle(PatternHasSetKeyword::class, $p);
-                                        if ($errors->isNotEmpty()) {
-                                            $fail($errors->first()->message());
-                                        }
-                                    },
-                                ]),
-                            $this->partInput(1),
-                            $this->partInput(2),
-                            $this->partInput(3),
-                            $this->partInput(4),
+                                ->rules(fn (Get $get) => function (string $attribute, $value, Closure $fail) use ($get) {
+                                    $file = [
+                                        $get('description'),
+                                        "0 Name: " . $get('name'),
+                                        PartType::Part->ldrawString(true),
+                                        PartCategory::MinifigUpper->ldrawString(),
+                                        "0 !KEYWORDS {$value}"
+                                    ];
+                                    $p = new ParsedPartCollection(implode("\n", $file));
+                                    $errors = app(PartChecker::class)->runSingle(PatternHasSetKeyword::class, $p);
+                                    if ($errors->isNotEmpty()) {
+                                        $fail($errors->first()->message());
+                                    }
+                                }),
+                            $this->partInputs(),
                         ])
-                        ->afterValidation(function (Set $set) {
-                            $set('new_part', $this->makeShortcut());
+                        ->afterValidation(function (Get $get, Set $set) {
+                            $set('new_part', $this->torsoText($get));
                         }),
                     Step::make('Review and Submit')
                         ->schema([
@@ -237,36 +165,6 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             ->statePath('data');
     }
 
-    protected function setExternal(Get $get, Set $set): void
-    {
-        $rb_num = $get('rebrickable');
-        $bl_num = $get('bricklink');
-        $bo_num = $get('brickowl');
-        if (!Str::endsWith($bl_num, ['c01', 'c02'])) {
-            $bl_num .= 'c01';
-        }
-
-        $rb = new Rebrickable();
-        if (!is_null($rb_num)) {
-            $rb_part = $rb->getPart($rb_num);
-        } elseif (!is_null($bl_num)) {
-            $rb_part = $rb->getParts(['bricklink_id' => $bl_num])?->first();
-        } elseif (!is_null($bo_num)) {
-            $rb_part = $rb->getParts(['brickowl_id' => $bo_num])?->first();
-        } else {
-            $rb_part = $rb->getParts(['search' => basename(Part::find($this->data['torso'])->meta_name, '.dat')])?->first();
-        }
-        if (!is_null($rb_part) && $rb_part['part_num'] != '3814') {
-            $set('rebrickable', $rb_part['part_num']);
-            if (Arr::has($rb_part, 'external_ids.BrickLink')) {
-                $set('bricklink', Arr::get($rb_part, 'external_ids.BrickLink.0'));
-            }
-            if (Arr::has($rb_part, 'external_ids.BrickOwl')) {
-                $set('brickowl', Arr::get($rb_part, 'external_ids.BrickOwl.0'));
-            }
-        }
-    }
-
     public function submitFile(): void
     {
         $u = Auth::user();
@@ -274,154 +172,169 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             return;
         }
         $registrar = app(Registrar::class);
+        $data = $this->form->getState();
         $file = LDrawFile::fromArray(
             [
                 'mimetype' => 'text/plain',
-                'filename' => $this->data['name'],
-                'contents' => $this->makeShortcut()
+                'filename' => $data['name'],
+                'contents' => $data['new_part']
             ]
         );
-        $p = $registrar->submit($file, $u);
-        $newpart = $p->first();
-        $this->redirectRoute('parts.show', $newpart);
+
+        $p = $registrar->submit(collect([$file]), $u);
+        $newPart = $p->first();
+        $this->redirectRoute('parts.show', $newPart);
     }
 
-    protected function partInput(int $index): Fieldset
+    protected function externalsSiteSection(): Fieldset
     {
-        return Fieldset::make()
-            ->label("Part {$index}")
-            ->schema([
-                LDrawColourSelect::make("part_{$index}_color")
-                    ->label('Color'),
-                Select::make("part_{$index}_id")
-                    ->label('Name - Description')
-                    ->options(fn () => array_key_exists($index - 1, $this->templateParts()) ? $this->selectParts[$this->templateParts()[$index - 1]]['subs'] : [])
-                    ->selectablePlaceholder(false)
-                    ->preload(),
+        $externalSiteFields = [];
+        foreach (ExternalSite::cases() as $site) {
+            $otherSites = array_column(
+                array_filter(ExternalSite::cases(), fn ($c) => $c !== $site),
+                'value'
+            );
+            $externalSiteFields[] = TextInput::make($site->value)
+                ->string()
+                ->requiredWithoutAll($otherSites)
+                ->extraAttributes(['class' => 'font-mono']);
+        };
+        return Fieldset::make('External Site Numbers')
+            ->columns([
+                'default' => 1,
+                'md' => count(ExternalSite::cases()),
+                'lg' => count(ExternalSite::cases()),
             ])
-            ->hidden(!array_key_exists($index - 1, $this->templateParts()));
+            ->schema($externalSiteFields);
+    }
+
+    protected function partInputs(): Fieldset
+    {
+        $partFields = [];
+        foreach (Arr::get($this->template, 'parts') ?? [] as $index => $part) {
+            if (Str::startsWith($part['name'], '973')) {
+                continue;
+            }
+            $name = basename($part['name'], '.dat');
+            $partFields[] = LDrawColourSelect::make("part_{$name}_{$index}_color")
+                ->label("Color of {$name} - {$part['description']}");
+        }
+        return Fieldset::make('Parts')
+            ->columns(1)
+            ->schema($partFields);
+    }
+
+    protected function torsoText(Get $get): string
+    {
+        if (Arr::get($this->template, 'parts') === null) {
+            return '';
+        }
+        $user = Auth::user();
+        $keywords = [];
+        foreach (ExternalSite::cases() as $site) {
+            $value = $get($site->value);
+            if ($value !== null) {
+                $keywords[] = $site->name . ' ' . $value;
+            }
+        }
+        $keywords[] = $get('keywords');
+
+        $text = [
+            "0 {$get('description')}",
+            "0 Name: {$get('name')}",
+            $user->toString(),
+            PartType::Part->ldrawString(true),
+            $user->license->ldrawString(),
+            '',
+            '0 BFC CERTIFY CCW',
+            '',
+            PartCategory::MinifigUpper->ldrawString(),
+            "0 !KEYWORDS " . implode(', ', $keywords),
+            '',
+        ];
+        foreach ($this->template['parts'] as $index => $part) {
+            $name = basename($part['name'], '.dat');
+            $color = $get("part_{$name}_{$index}_color") ?? 16;
+            $text[] = "1 {$color} {$part['position']} {$part['name']}";
+        }
+        $text[] = '';
+        $fileText = implode("\n", $text);
+        $this->parts = app(LDrawModelMaker::class)->webGl($fileText);
+        $this->dispatch('render-model');
+        return $fileText;
+    }
+
+    // Form setup functions
+    protected function setStep2Values(Set $set, Get $get)
+    {
+        $torso = Part::find($get('torso'));
+        $set('description', $this->template['description'] . str_replace('Minifig Torso', '', $torso->description));
+        $set('name', basename($this->template['name'], '.dat') . str_replace('973', '', basename($torso->filename)));
+
+        $pattern = '/^(' . implode('|', ExternalSite::prefixes()) . ')/i';
+        $kws = $torso->keywords->filter(
+            fn (PartKeyword $kw) =>
+            !preg_match($pattern, $kw->keyword)
+        );
+        $set('keywords', $kws->sortBy('keyword')->implode('keyword', ', '));
+
+        $set('bricklink', $torso->getExternalSiteNumber(ExternalSite::BrickLink));
+        $set('brickowl', $torso->getExternalSiteNumber(ExternalSite::BrickOwl));
+        $set('brickset', $torso->getExternalSiteNumber(ExternalSite::Brickset));
+        $set('rebrickable', $torso->getExternalSiteNumber(ExternalSite::Rebrickable));
+    }
+    // Utility methods
+    protected function torsoOptions(bool $onlyUnused = false): array
+    {
+        $torsos = Part::whereLike('filename', 'parts/973%.dat')
+            ->when($onlyUnused, function (Builder $query) {
+                $query->whereDoesntHave('parents');
+            })
+            ->activeParts()
+            ->orderBy('filename')
+            ->get()
+            ->mapWithKeys(fn (Part $p) => [$p->id => "{$p->meta_name} - {$p->description}"])
+            ->toArray();
+        return $torsos;
+    }
+
+    #[Computed]
+    protected function templateOptions(): array
+    {
+        $templates = Part::whereIn('filename', $this->templates)
+            ->orderBy('filename')
+            ->get()
+            ->mapWithKeys(fn (Part $p) => [$p->id => "{$p->meta_name} - {$p->description}"])
+            ->toArray();
+        return $templates;
     }
 
     #[Computed(persist: true)]
-    protected function template(): ?Part
+    protected function template(): ?array
     {
-        if (array_key_exists('template', $this->data)) {
-            return Part::with('body', 'subparts')->find($this->data['template']);
+        if (Arr::get($this->data, 'template')) {
+            $part = Part::with(['body', 'subparts'])->find($this->data['template']);
+            $template['name'] = $part->meta_name;
+            $template['description'] = $part->description;
+            $file = new ParsedPartCollection($part->body->body);
+            $template['parts'] = [];
+            foreach ($file->where('linetype', 1) as $line) {
+                $position = [
+                    $line['x1'], $line['y1'], $line['z1'],
+                    $line['a'], $line['b'], $line['c'],
+                    $line['d'], $line['e'], $line['f'],
+                    $line['g'], $line['h'], $line['i'],
+                ];
+                $template['parts'][] = [
+                    'name' => $line['file'],
+                    'description' => $part->subparts->firstWhere('meta_name', $line['file'])->description,
+                    'position' => implode(' ', $position),
+                ];
+            }
+            return $template;
         }
 
         return null;
-    }
-
-    protected function templateParts(): array
-    {
-        $tparts = [];
-        if (!is_null($this->template)) {
-            $pattern = '#^\h*1\h+16\h+((?:[\d.-]+\h+){12})(?P<subpart>[\/a-z0-9_.\\\\-]+)\h*?$#um';
-            preg_match_all($pattern, $this->template->body->body, $subs);
-            array_shift($subs['subpart']);
-            return $subs['subpart'];
-        }
-        return $tparts;
-    }
-
-    #[Computed]
-    protected function selectParts(): array
-    {
-        $parts = [];
-        if (!is_null($this->template)) {
-            foreach ($this->template->subparts as $subpart) {
-                if ($subpart->filename != 'parts/973.dat') {
-                    $name = basename($subpart->filename);
-                    $parts[$name] = ['default' => $subpart->id, 'subs' => [$subpart->id => "{$name} - {$subpart->description}"]];
-                    $pats = $subpart->suffix_parts->where('is_pattern', true)->where('category', '!=', PartCategory::Moved);
-                    foreach ($pats as $pat) {
-                        $patname = basename($pat->filename);
-                        $parts[$name]['subs'][$pat->id] = "{$patname} - {$pat->description}";
-                    }
-                }
-            }
-        }
-        return $parts;
-    }
-
-    #[Computed]
-    protected function colors(): array
-    {
-        if (Storage::exists('library/official/LDConfig.ldr')) {
-            $ldconfig = Storage::get('library/official/LDConfig.ldr');
-            $ldconfig = preg_replace("#\R#", "\n", $ldconfig);
-            $colour_pattern = "/^\h*0\h+!COLOUR\h+(?<name>[A-Za-z_]+)\h+CODE\h+(?<code>\d+)\h+VALUE\h+(?<value>(?:#|0x)[A-Fa-f\d]{6})\h+EDGE\h+(?<edge>\d+|(?:#|0x)[A-Fa-f\d]{6})(?:\h+ALPHA\h+(?<alpha>\d{1,3}))?(?:\h+LUMINANCE\h+(?<luminance>\d+))?(?:\h+(?<material>CHROME|METAL|PEARLESCENT|RUBBER|MATERIAL\h+.*))?\h*$/im";
-            if (preg_match_all($colour_pattern, $ldconfig, $colours, PREG_SET_ORDER)) {
-                $options = [];
-                foreach ($colours as $color) {
-                    $int = hexdec($color['value']);
-                    $rgb = array("red" => ((0xFF & ($int >> 0x10)) / 255.0), "green" => ((0xFF & ($int >> 0x8)) / 255.0), "blue" => ((0xFF & $int) / 255.0));
-                    foreach ($rgb as $tcolor => $value) {
-                        if ($value <= 0.03928) {
-                            $rgb[$tcolor] = $value / 12.92;
-                        } else {
-                            $rgb[$tcolor] = (($value + 0.055) / 1.055) ** 2.4;
-                        }
-                    }
-                    $L = 0.2126 * $rgb['red'] + 0.7152 * $rgb['green'] + 0.0722 * $rgb['blue'];
-                    if ($L > 0.179) {
-                        $text = 'text-gray-900';
-                    } else {
-                        $text = 'text-gray-50';
-                    }
-                    $options[$color['code']] = "<span class=\"{$text} rounded px-2 py-1\" style=\"background-color: {$color['value']}\">{$color['code']} - {$color['name']}</span>";
-                }
-                return $options;
-            }
-        }
-        return [];
-    }
-
-    protected function makeShortcut(): string
-    {
-        $text = "0 {$this->data['description']}\n";
-        $text .= "0 Name: {$this->data['name']}\n";
-        $u = Auth::user();
-        $text .= "0 Author: {$u->author_string}\n";
-        $text .= "0 !LDRAW_ORG Unofficial_Shortcut\n";
-        $text .= $u->license->ldrawString() . "\n\n";
-        $kws = explode(', ', $this->data['keywords']);
-        $kws[] = 'Bricklink ' . $this->data['bricklink'];
-        $kws[] = 'Rebrickable ' . $this->data['rebrickable'];
-        $kws[] = 'BrickOwl ' . $this->data['brickowl'];
-        $kwline = '';
-        foreach ($kws as $index => $kw) {
-            if (array_key_first($kws) == $index) {
-                $kwline = "0 !KEYWORDS ";
-            }
-            if ($kwline !== "0 !KEYWORDS " && mb_strlen("{$kwline}, {$kw}") > 80) {
-                $text .= "{$kwline}\n";
-                $kwline = "0 !KEYWORDS ";
-            }
-            if ($kwline !== "0 !KEYWORDS ") {
-                $kwline .= ", ";
-            }
-            $kwline .= $kw;
-            if (array_key_last($kws) == $index) {
-                $text .= "{$kwline}\n";
-            }
-        }
-        $text .= "\n0 BFC CERTIFY CCW\n\n";
-
-        $pattern = '#^\h*1\h+16\h+((?:[\d.-]+\h+){12})(?P<subpart>[\/a-z0-9_.\\\\-]+)\h*?$#um';
-        preg_match_all($pattern, $this->template->body->body, $matrix);
-        $matrix = $matrix[1];
-        array_shift($matrix);
-        $p = Part::find($this->data['torso']);
-        $text .= "1 16 0 0 0 1 0 0 0 1 0 0 0 1 {$p->meta_name}\n";
-        foreach ($this->templateParts() as $index => $tpart) {
-            $index++;
-            $p = Part::find($this->data["part_{$index}_id"]);
-            $text .= '1 ' . $this->data["part_{$index}_color"] . ' ' . $matrix[$index - 1] . $p->meta_name . "\n";
-        }
-        $this->parts = app(LDrawModelMaker::class)->webGl($text);
-        $this->dispatch('render-model');
-        return $text;
     }
 
     #[Layout('components.layout.tracker')]
