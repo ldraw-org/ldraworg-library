@@ -6,6 +6,7 @@ use App\Enums\ExternalSite;
 use App\Enums\PartType;
 use App\Models\Part\PartKeyword;
 use App\Services\Part\Submit\Registrar;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
@@ -208,7 +209,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             ->schema($externalSiteFields);
     }
 
-    protected function partInputs(): Fieldset
+    protected function partInputs(): Section
     {
         $partFields = [];
         foreach (Arr::get($this->template, 'parts') ?? [] as $index => $part) {
@@ -218,18 +219,18 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             $partOptions = [];
             $name = basename($part['name'], '.dat');
             if ($part['variations'] !== []) {
-                $partOptions[] = Select::make("part_{$name}_{$index}_part")
+                $partOptions[] = Select::make("part_{$index}_part")
                     ->options($part['variations'])
                     ->label('Variation');
             }
-            $partOptions[] = LDrawColourSelect::make("part_{$name}_{$index}_color")
+            $partOptions[] = LDrawColourSelect::make("part_{$index}_color")
                 ->label("Color");
-            $partFields[] = Fieldset::make("{$name} - {$part['description']}")
+            $partFields[] = FieldSet::make("{$name} - {$part['description']}")
                 ->schema($partOptions);
         }
-        return Fieldset::make('Parts')
-            ->columns(1)
-            ->schema($partFields);
+        return Section::make('Parts')
+            ->schema($partFields)
+            ->key('partFields');
     }
 
     protected function torsoText(Get $get): string
@@ -261,9 +262,8 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             '',
         ];
         foreach ($this->template['parts'] as $index => $part) {
-            $name = basename($part['name'], '.dat');
-            $color = $get("part_{$name}_{$index}_color") ?? 16;
-            $file = $get("part_{$name}_{$index}_part") ?? $part['name'];
+            $color = $get("part_{$index}_color") ?? 16;
+            $file = $get("part_{$index}_part") ?? $part['name'];
             if (Str::startsWith($part['name'], '973')) {
                 $file = Part::find($get('torso'))->meta_name;
             }
