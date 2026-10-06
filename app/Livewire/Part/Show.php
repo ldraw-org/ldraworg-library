@@ -137,7 +137,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         $color = $this->part->delete_flag ? 'red' : 'gray';
         return $this->buttonAction('flagForDelete', $color)
-            ->tooltip($this->part->delete_flag ? 'Click to flag for deletion' : 'Click remove deletion flag')
+            ->tooltip($this->part->delete_flag ? 'Click remove deletion flag' : 'Click to flag for deletion')
             ->hiddenLabel()
             ->icon(LibraryIcon::PartFlag)
             ->action(function () {
@@ -151,7 +151,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         $color = $this->part->manual_hold_flag ? 'red' : 'gray';
         return $this->buttonAction('manualHold', $color)
-            ->tooltip($this->part->manual_hold_flag ? 'Click to place on admin hold' : 'Click to remove admin hold')
+            ->tooltip($this->part->manual_hold_flag ? 'Click to remove admin hold' : 'Click to place on admin hold' )
             ->label('')
             ->icon(LibraryIcon::Error)
             ->action(function () {
