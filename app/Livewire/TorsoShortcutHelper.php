@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Enums\ExternalSite;
 use App\Enums\PartType;
 use App\Models\Part\PartKeyword;
+use App\Models\User;
 use App\Services\Part\Submit\Registrar;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -82,22 +83,53 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                         ->schema([
                             Toggle::make('unusedTorsos')
                                 ->label('Show only torsos without a shortcut')
+                                ->live()
                                 ->default(true),
                             Select::make('torso')
                                 ->options(fn (Get $get) => $this->torsoOptions($get('unusedTorsos')))
                                 ->preload()
                                 ->searchable()
-                                ->required(),
+                                ->required()
+                                ->afterStateUpdated(function (int $state, Set $set) {
+                                    unset($this->torso);
+                                    $torsoDescription = $this->torso?->description ?? '';
+                                    $torsoDescription = Str::chopStart($torsoDescription, 'Minifig Torso');
+                                    $description = $this->template['description'] . $torsoDescription;
+                                    $set('description', $description);
+                                    $name = basename($this->template['name'], '.dat');
+                                    $name .= Str::chopStart(basename($this->torso?->meta_name ?? ''), '973');
+                                    $set('name', $name);
+                                    $pattern = '/^(' . implode('|', ExternalSite::prefixes()) . ')/i';
+                                    $kws = $this->torso?->keywords->filter(
+                                        fn (PartKeyword $kw) =>
+                                        !preg_match($pattern, $kw->keyword)
+                                    );
+                                    $set('keywords', $kws->sortBy('keyword')->implode('keyword', ', '));
+                                    foreach (ExternalSite::cases() as $site) {
+                                        $set($site->value, $this->torso?->getExternalSiteNumber($site));
+                                    }
+                                }),
                             Select::make('template')
                                 ->options($this->templateOptions)
+                                ->default(Part::firstWhere('filename', 'parts/76382.dat')->id)
+                                ->selectablePlaceholder(false)
                                 ->preload()
                                 ->live()
                                 ->required()
-                                ->afterStateUpdated(function (Select $c) {
+                                ->afterStateUpdated(function () {
                                     unset($this->template);
+                                    foreach (Arr::get($this->template, 'parts') ?? [] as $index => $part) {
+                                        if ($part['variations'] !== []) {
+                                            Arr::set($this->data, "part_{$index}_part", null);
+                                        }
+                                        Arr::set($this->data, "part_{$index}_color", null);
+                                    }
+                                    $this->form
+                                        ->getComponent('partFields')
+                                        ->getChildSchema()
+                                        ->fill();
                                 }),
-                        ])
-                        ->afterValidation(fn (Set $set, Get $get) => $this->setStep2Values($set, $get)),
+                        ]),
                     Step::make('New Shortcut Details')
                         ->schema([
                             TextInput::make('description')
@@ -105,8 +137,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                 ->extraAttributes(['class' => 'font-mono'])
                                 ->rules([
                                     fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                                        $p = Part::where('description', $value)->partsFolderOnly()->first();
-                                        if (!is_null($p)) {
+                                        if (Part::where('description', $value)->partsFolderOnly()->exists()) {
                                             $fail('A part with that description already exists');
                                         }
                                     },
@@ -115,8 +146,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                 ->required()
                                 ->rules([
                                     fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                                        $p = Part::firstWhere('filename', "parts/{$value}");
-                                        if (!is_null($p)) {
+                                        if (Part::where('filename', "parts/{$value}")->exists()) {
                                             $fail('A part of the name already exists');
                                         }
                                     },
@@ -126,14 +156,8 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                 ->required()
                                 ->extraAttributes(['class' => 'font-mono'])
                                 ->rules(fn (Get $get) => function (string $attribute, $value, Closure $fail) use ($get) {
-                                    $file = [
-                                        $get('description'),
-                                        "0 Name: " . $get('name'),
-                                        PartType::Part->ldrawString(true),
-                                        PartCategory::MinifigUpper->ldrawString(),
-                                        "0 !KEYWORDS {$value}"
-                                    ];
-                                    $p = new ParsedPartCollection(implode("\n", $file));
+                                    $file = $this->getTorsoTextHeader($get('description'), $get('name'), $value);
+                                    $p = new ParsedPartCollection($file);
                                     $errors = app(PartChecker::class)->runSingle(PatternHasSetKeyword::class, $p);
                                     if ($errors->isNotEmpty()) {
                                         $fail($errors->first()->message());
@@ -142,7 +166,11 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                             $this->partInputs(),
                         ])
                         ->afterValidation(function (Get $get, Set $set) {
-                            $set('new_part', $this->torsoText($get));
+                            $data = $this->form->getState();
+                            $fileText = $this->torsoText($data);
+                            $set('new_part', $fileText);
+                            $this->parts = app(LDrawModelMaker::class)->webGl($fileText);
+                            $this->dispatch('render-model');
                         }),
                     Step::make('Review and Submit')
                         ->schema([
@@ -174,11 +202,19 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         }
         $registrar = app(Registrar::class);
         $data = $this->form->getState();
+        $fileText = $this->torsoText($data);
+        $name = $data['name'];
+        if (Str::doesntEndWith($name, '.dat')) {
+            $name .= '.dat';
+        }
+        if (Part::where('filename', "parts/{$name}")->exists()) {
+            return;
+        }
         $file = LDrawFile::fromArray(
             [
                 'mimetype' => 'text/plain',
-                'filename' => $data['name'],
-                'contents' => $data['new_part']
+                'filename' => $name,
+                'contents' => $fileText,
             ]
         );
 
@@ -225,7 +261,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             }
             $partOptions[] = LDrawColourSelect::make("part_{$index}_color")
                 ->label("Color");
-            $partFields[] = FieldSet::make("{$name} - {$part['description']}")
+            $partFields[] = Fieldset::make("{$name} - {$part['description']}")
                 ->schema($partOptions);
         }
         return Section::make('Parts')
@@ -233,68 +269,40 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             ->key('partFields');
     }
 
-    protected function torsoText(Get $get): string
+    protected function torsoText(array $data): string
     {
         if (Arr::get($this->template, 'parts') === null) {
             return '';
         }
-        $user = Auth::user();
+        $text = [];
         $keywords = [];
         foreach (ExternalSite::cases() as $site) {
-            $value = $get($site->value);
+            $value = Arr::get($data, $site->value);
             if ($value !== null) {
                 $keywords[] = $site->name . ' ' . $value;
             }
         }
-        $keywords[] = $get('keywords');
-
-        $text = [
-            "0 {$get('description')}",
-            "0 Name: {$get('name')}",
-            $user->toString(),
-            PartType::Part->ldrawString(true),
-            $user->license->ldrawString(),
-            '',
-            '0 BFC CERTIFY CCW',
-            '',
-            PartCategory::MinifigUpper->ldrawString(),
-            "0 !KEYWORDS " . implode(', ', $keywords),
-            '',
-        ];
+        $keywords[] = Arr::get($data, 'keywords');
+        $kws = implode(', ', $keywords);
+        $description = Arr::get($data, 'description');
+        $name = Arr::get($data, 'name');
+        if (Str::doesntEndWith($name, '.dat')) {
+            $name .= '.dat';
+        }
+        $text[] = $this->getTorsoTextHeader($description, $name, $kws);
         foreach ($this->template['parts'] as $index => $part) {
-            $color = $get("part_{$index}_color") ?? 16;
-            $file = $get("part_{$index}_part") ?? $part['name'];
+            $color = Arr::get($data,"part_{$index}_color") ?? 16;
+            $file = Arr::get($data, "part_{$index}_part") ?? $part['name'];
             if (Str::startsWith($part['name'], '973')) {
-                $file = Part::find($get('torso'))->meta_name;
+                $file = Part::find(Arr::get($data, 'torso'))->meta_name;
             }
             $text[] = "1 {$color} {$part['position']} {$file}";
         }
         $text[] = '';
         $fileText = implode("\n", $text);
-        $this->parts = app(LDrawModelMaker::class)->webGl($fileText);
-        $this->dispatch('render-model');
         return $fileText;
     }
 
-    // Form setup functions
-    protected function setStep2Values(Set $set, Get $get)
-    {
-        $torso = Part::find($get('torso'));
-        $set('description', $this->template['description'] . str_replace('Minifig Torso', '', $torso->description));
-        $set('name', basename($this->template['name'], '.dat') . str_replace('973', '', basename($torso->filename)));
-
-        $pattern = '/^(' . implode('|', ExternalSite::prefixes()) . ')/i';
-        $kws = $torso->keywords->filter(
-            fn (PartKeyword $kw) =>
-            !preg_match($pattern, $kw->keyword)
-        );
-        $set('keywords', $kws->sortBy('keyword')->implode('keyword', ', '));
-
-        $set('bricklink', $torso->getExternalSiteNumber(ExternalSite::BrickLink));
-        $set('brickowl', $torso->getExternalSiteNumber(ExternalSite::BrickOwl));
-        $set('brickset', $torso->getExternalSiteNumber(ExternalSite::Brickset));
-        $set('rebrickable', $torso->getExternalSiteNumber(ExternalSite::Rebrickable));
-    }
     // Utility methods
     protected function torsoOptions(bool $onlyUnused = false): array
     {
@@ -323,15 +331,22 @@ class TorsoShortcutHelper extends Component implements HasSchemas
     }
 
     #[Computed(persist: true)]
+    protected function torso(): ?Part
+    {
+        return Part::find(Arr::get($this->data, 'torso'));
+    }
+
+    #[Computed(persist: true)]
     protected function template(): ?array
     {
         if (Arr::get($this->data, 'template')) {
-            $part = Part::with(['body', 'subparts'])->find($this->data['template']);
+            $part = Part::with(['body', 'subparts', 'subparts.patterns'])->find($this->data['template']);
             $template['name'] = $part->meta_name;
             $template['description'] = $part->description;
             $file = new ParsedPartCollection($part->body->body);
             $template['parts'] = [];
             foreach ($file->where('linetype', 1) as $line) {
+                $subpart = $part->subparts->firstWhere('meta_name', $line['file']);
                 $position = [
                     $line['x1'], $line['y1'], $line['z1'],
                     $line['a'], $line['b'], $line['c'],
@@ -341,17 +356,15 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                 if (Str::startsWith($line['file'], '973')) {
                     $variations = [];
                 } else {
-                    $variations = $part->subparts
-                        ->firstWhere('meta_name', $line['file'])
-                        ->patterns
+                    $variations = $subpart->patterns
                         ->whereNull('unofficial_part')
-                        ->whereNotIn('category', [PartCategory::Obsolete, PartCategory::Moved])
+                        ->activeParts()
                         ->mapWithKeys(fn (Part $p) => [$p->meta_name => "{$p->meta_name} - {$p->description}"])
                         ->toArray();
                 }
                 $template['parts'][] = [
                     'name' => $line['file'],
-                    'description' => $part->subparts->firstWhere('meta_name', $line['file'])->description,
+                    'description' => $subpart->description,
                     'position' => implode(' ', $position),
                     'variations' => $variations,
                 ];
@@ -360,6 +373,30 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         }
 
         return null;
+    }
+
+    #[Computed(persist: true)]
+    protected function user(): User
+    {
+        return Auth::user();
+    }
+
+    protected function getTorsoTextHeader(string $description, string $name, string $keywords): string
+    {
+        $text = [
+            "0 $description",
+            "0 Name: $name",
+            $this->user->toString(),
+            PartType::Part->ldrawString(true),
+            $this->user->license->ldrawString(),
+            '',
+            '0 BFC CERTIFY CCW',
+            '',
+            PartCategory::MinifigUpper->ldrawString(),
+            "0 !KEYWORDS " . $keywords,
+            '',
+        ];
+        return implode("\n", $text);
     }
 
     #[Layout('components.layout.tracker')]
