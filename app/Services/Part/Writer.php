@@ -4,6 +4,7 @@ namespace App\Services\Part;
 
 use App\Models\Part\Part;
 use App\Services\BackupFile;
+use Illuminate\Support\Str;
 
 class Writer
 {
@@ -18,10 +19,13 @@ class Writer
         } elseif ($opart) {
             $upart = Part::create($values);
             $opart->unofficial_part()->associate($upart);
-            $opart->save();
         } else {
             $upart = Part::create($values);
         }
+
+        // normalize filename to all lowercase
+        $upart->filename = Str::lower($upart->filename);
+
         $upart->setKeywords($keywords);
         $upart->setHistory($history);
         $upart->setBodyQuietly($bodyText);
