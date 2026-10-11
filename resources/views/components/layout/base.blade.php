@@ -21,8 +21,8 @@
         <main class="rounded-lg bg-white p-2">
             {{ $slot }}
         </main>
+        <x-layout.site.footer />
     </div>
-    <x-layout.site.footer />
     <div>
         @livewire('notifications')
     </div>
