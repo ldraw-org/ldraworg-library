@@ -46,9 +46,16 @@ class LDrawServiceProvider extends ServiceProvider
         });
         Head::defaults(fn (HeadBuilder $head) => $head
             ->canonical()
-            ->og(type: OgType::Website, siteName: 'LDraw.org')
-            ->twitter(card: TwitterCard::SummaryWithLargeImage)
-            ->icon(asset('/images/LDraw_Red_64x64.png'), type: ImageType::Png, sizes: '64x64')
+            ->applicationName(config('app.name'))
+            ->og(
+                type: OgType::Website,
+                siteName: config('app.name')
+            )
+            ->twitter(
+                card: TwitterCard::SummaryWithLargeImage,
+                site: config('app.name')
+            )
+            ->icon(href: asset('/images/LDraw_Green_64x64.png'), type: ImageType::Png)
             ->viewport('width=device-width, initial-scale=1.0, maximum-scale=1.0')
         );
     }

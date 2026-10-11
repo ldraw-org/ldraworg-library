@@ -33,9 +33,9 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Laravel\Head\Facades\Head;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use PharIo\Manifest\Library;
 
 /**
  * @property Schema $form
@@ -62,6 +62,16 @@ class Show extends Component implements HasSchemas, HasActions
                 ->orderBy('part_release_id', 'desc')
                 ->firstOrFail();
         }
+        Head::og(
+            title: $this->part->filename,
+            description: $this->part->description,
+            url: request()->url(),
+            image: $this->part->getFirstMediaUrl('image')
+        )
+        ->twitter(
+            title: $this->part->filename,
+            description: $this->part->description
+        );
         $this->form->fill();
     }
 
@@ -151,7 +161,7 @@ class Show extends Component implements HasSchemas, HasActions
     {
         $color = $this->part->manual_hold_flag ? 'red' : 'gray';
         return $this->buttonAction('manualHold', $color)
-            ->tooltip($this->part->manual_hold_flag ? 'Click to remove admin hold' : 'Click to place on admin hold' )
+            ->tooltip($this->part->manual_hold_flag ? 'Click to remove admin hold' : 'Click to place on admin hold')
             ->label('')
             ->icon(LibraryIcon::Error)
             ->action(function () {

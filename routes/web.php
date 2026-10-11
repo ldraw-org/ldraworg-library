@@ -45,6 +45,7 @@ use App\Livewire\TorsoShortcutHelper;
 use App\Livewire\Tracker\ConfirmCA;
 use App\Livewire\User\Settings;
 use Illuminate\Support\Facades\Route;
+use Laravel\Head\Enums\ImageType;
 
 Route::view('/', 'index')->name('index');
 
@@ -133,7 +134,9 @@ Route::prefix('tracker')->name('tracker.')->group(function () {
     Route::middleware(['auth'])->get('/release/create', Create::class)->name('release.create');
 });
 
-Route::prefix('omr')->name('omr.')->group(function () {
+Route::prefix('omr')->name('omr.')->withHead(
+    icon: [['href' => asset('/images/LDraw_Black_64x64.png'), 'type' => ImageType::Png]]
+)->group(function () {
     Route::view('/', 'omr.main')->name('main');
     Route::get('/sets', Index::class)->name('sets.index');
     Route::get('sets/{set}', SetShow::class)->name('sets.show');
@@ -142,7 +145,9 @@ Route::prefix('omr')->name('omr.')->group(function () {
 });
 
 
-Route::prefix('documentation')->name('documentation.')->group(function () {
+Route::prefix('documentation')->name('documentation.')->withHead(
+    icon: [['href' => asset('/images/LDraw_Orange_64x64.png'), 'type' => ImageType::Png]]
+)->group(function () {
     Route::get('/', DocumentIndexController::class)->name('index');
     Route::get('/{document_category}/{document}', DocumentShowController::class)->name('show');
 });
@@ -163,7 +168,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('/', UserIndex::class)->name('index');
-    Route::get('/settings', Settings::class )->name('settings');
+    Route::get('/settings', Settings::class)->name('settings');
 });
 
 // permanentRedirects

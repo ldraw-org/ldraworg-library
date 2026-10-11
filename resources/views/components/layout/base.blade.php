@@ -8,7 +8,6 @@
         <meta name="csrf-token" content="{{ csrf_token() }}" />
         @stack('meta')
         @head
-        <link rel="icon" type="image/png" href="{{asset('/images/LDraw_' . $favicon_color . '_64x64.png')}}" >
         @filamentStyles
         @vite('resources/css/app.css')
         @stack('css')
