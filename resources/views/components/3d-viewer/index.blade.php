@@ -3,7 +3,7 @@
     <canvas id="ldbi-canvas" class="size-full"></canvas>
 </div>
 @push('scripts')
-    <x-layout.ldbi-scripts />
+    <x-3d-viewer.ldbi-scripts />
     <script type="text/javascript">
         var scene = null;
         var modelid = "{{$modelid}}";
