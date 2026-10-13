@@ -143,7 +143,7 @@
                     </x-accordion>
                 @endif
                 @forelse ($part->orderedEvents()->unofficial() as $event)
-                    <x-event.list-item class="p-2" :$event wire:key="part-event-{{$event->id}}" />
+                    <x-event.list.item class="p-2" :$event wire:key="part-event-{{$event->id}}" />
                 @empty
                     <div>No Events</div>
                 @endforelse
@@ -194,9 +194,7 @@
             }
 
             $wire.on('open-modal', () => {
-                if (scene == null) {
-                    $wire.dispatch('ldbi-render-model');
-                }
+                 $wire.dispatch('ldbi-render-model');
             });
         </script>
         @endscript

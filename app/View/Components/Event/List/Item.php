@@ -1,6 +1,6 @@
 <?php
 
-namespace App\View\Components\Event;
+namespace App\View\Components\Event\List;
 
 use App\Enums\EventType;
 use App\Enums\LibraryIcon;
@@ -10,7 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
 
-class ListItem extends Component
+class Item extends Component
 {
     public readonly string $authorString;
     public readonly ?LibraryIcon $authorIcon;
@@ -28,7 +28,7 @@ class ListItem extends Component
         $user = Auth::user();
         $this->authorString = $event->user->author_string;
         [$this->authorIcon, $this->authorIconTitle] = $this->getAuthorIconAndTitle();
-        $this->comment = $event->event_type == EventType::HeaderEdit ?
+        $this->comment = $event->event_type === EventType::Rename ?
             "\"{$this->event->moved_from_filename}\" to \"{$this->event->moved_to_filename}\"" :
             $event->processedComment();
         $this->eventText = $this->getEventText();

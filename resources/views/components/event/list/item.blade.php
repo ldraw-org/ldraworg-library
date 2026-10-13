@@ -29,7 +29,7 @@
                 @endif
             @endif
             @if($comment !== null)
-                {{ $event->processedComment() }}
+                {{ $comment }}
             @endif
         </div>
     @endif
