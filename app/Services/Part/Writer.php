@@ -19,6 +19,7 @@ class Writer
         } elseif ($opart) {
             $upart = Part::create($values);
             $opart->unofficial_part()->associate($upart);
+            $opart->save();
         } else {
             $upart = Part::create($values);
         }
