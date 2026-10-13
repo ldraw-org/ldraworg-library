@@ -1,4 +1,4 @@
-@props(['title' => '', 'favicon_color' => 'Green', 'menu' => 'library', 'logo' => 'tracker'])
+@props(['title' => '', 'menu' => 'library', 'logo' => 'tracker'])
 
 <!DOCTYPE html>
 <html lang="en">
