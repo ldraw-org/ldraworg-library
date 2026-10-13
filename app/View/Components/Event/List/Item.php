@@ -8,6 +8,7 @@ use App\Models\Part\PartEvent;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Component;
 
 class Item extends Component
@@ -15,7 +16,7 @@ class Item extends Component
     public readonly string $authorString;
     public readonly ?LibraryIcon $authorIcon;
     public readonly ?string $authorIconTitle;
-    public readonly ?string $comment;
+    public readonly ?HtmlString $comment;
     public readonly string $eventText;
     public readonly bool $hasHeaderEditAccordion;
     public readonly string $formattedDate;
@@ -29,7 +30,7 @@ class Item extends Component
         $this->authorString = $event->user->author_string;
         [$this->authorIcon, $this->authorIconTitle] = $this->getAuthorIconAndTitle();
         $this->comment = $event->event_type === EventType::Rename ?
-            "\"{$this->event->moved_from_filename}\" to \"{$this->event->moved_to_filename}\"" :
+            new HtmlString("\"{$this->event->moved_from_filename}\" to \"{$this->event->moved_to_filename}\"") :
             $event->processedComment();
         $this->eventText = $this->getEventText();
         $this->hasHeaderEditAccordion = $event->event_type == EventType::HeaderEdit && !is_null($event->header_changes);
