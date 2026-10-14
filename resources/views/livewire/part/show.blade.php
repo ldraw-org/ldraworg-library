@@ -178,7 +178,7 @@
                 <x-3d-viewer.button.photo />
             </div>
             <div class="flex flex-col w-full h-full">
-                <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" partname="{{str_replace('\\', '/', $part->meta_name)}}" modelid="{{$part->id}}" />
+                <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" main-model-name="{{str_replace('\\', '/', $part->meta_name)}}" model-id="{{$part->id}}" />
             </div>
         </div>
     </x-filament::modal>
@@ -186,13 +186,8 @@
     @push('scripts')
         @script
         <script type="text/javascript">
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-            if (gl && gl instanceof WebGLRenderingContext) {
-                $wire.set('webGlSupported', true);
-            }
-
+            const webGlSupported = document.createElement('canvas').getContext('webgl') instanceof WebGLRenderingContext;
+            $wire.set('webGlSupported', webGlSupported);
             $wire.on('open-modal', () => {
                  $wire.dispatch('ldbi-render-model');
             });

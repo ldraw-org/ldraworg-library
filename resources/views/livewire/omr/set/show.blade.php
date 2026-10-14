@@ -64,26 +64,9 @@
                     <x-3d-viewer.button.photo />
                 </div>
                 <div class="flex flex-col w-full h-full">
-                    <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" modeltype="omr" />
+                    <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" model-type="omr" />
                 </div>
             </div>
         </x-filament::modal>
-        @push('scripts')
-            @script
-            <script>
-                $wire.on('open-modal', (modal) => {
-                    if (scene == null || modelid != $wire.model_id) {
-                        if (scene) {
-                            scene.clear();
-                            scene = null;
-                        }
-                        modelid = $wire.model_id;
-                        partname = $wire.model_name;
-                        $wire.dispatch('ldbi-render-model');
-                    }
-                });
-            </script>
-            @endscript
-        @endpush
     @endif
     </div>

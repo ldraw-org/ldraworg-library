@@ -19,9 +19,6 @@ class LDrawModelViewer extends Component implements HasSchemas
 
     public ?array $data = [];
 
-    public string $modeltext = '';
-    public array $parts = [];
-
     public function mount(): void
     {
         $this->form->fill();
@@ -44,8 +41,8 @@ class LDrawModelViewer extends Component implements HasSchemas
             return;
         }
         $model = array_pop($this->data['ldraw-model'])->get();
-        $this->parts = app(LDrawModelMaker::class)->webGl($model);
-        $this->dispatch('render-model');
+        $parts = app(LDrawModelMaker::class)->webGl($model);
+        $this->dispatch('ldbi-render-model', parts: $parts, force: true);
     }
 
     #[Layout('components.layout.base')]

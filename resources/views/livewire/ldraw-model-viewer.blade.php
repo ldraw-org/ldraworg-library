@@ -20,7 +20,7 @@
             <x-3d-viewer.button.photo />
         </div>
         <div class="flex flex-col w-full h-full">
-            <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" partname="model.ldr" modeltype="user" />
+            <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" main-model-name="model.ldr" model-type="user" />
         </div>
     </div>
     <div class="border border-gray-200 rounded p-2">
@@ -34,17 +34,4 @@
             <strong>not</strong> permanently stored.
         </p>
     </div>
-
-    @push('scripts')
-        @script
-        <script>
-            $wire.on('render-model', (event) => {
-                parts = $wire.parts;
-                partname = 'model.ldr';
-                $wire.dispatch('ldbi-render-model');
-           });
-        </script>
-        @endscript
-    @endpush
-
 </div>

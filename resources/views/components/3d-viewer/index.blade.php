@@ -1,121 +1,124 @@
-@props(['partname' => '', 'modeltype' => 'part', 'modelid' => null, 'parts' => []])
+@props(['mainModelName' => '', 'modelType' => 'part', 'modelId' => null, 'parts' => []])
 <div id="ldbi-container" {{ $attributes }}>
     <canvas id="ldbi-canvas" class="size-full"></canvas>
 </div>
 @push('scripts')
     <x-3d-viewer.ldbi-scripts />
-    <script type="text/javascript">
-        var scene = null;
-        var modelid = "{{$modelid}}";
-        var modeltype = "{{$modeltype}}";
-        var parts = {{ Js::from($parts) }};
-        var partname = "{{$partname}}";
-        LDR.Options.bgColor = 0xFFFFFF;
+    <script>
+        (() => {
+            // What this component was rendered with. A ldbi-render-model event can override any
+            // of these, which is how a modal shows a different model each time it opens.
+            const defaults = {
+                modelType: {{ Js::from($modelType) }},
+                modelId: {{ Js::from($modelId) }},
+                mainModelName: {{ Js::from($mainModelName) }},
+                parts: {{ Js::from($parts) }},
+            };
+            let parts = defaults.parts;
+            let scene = null;
 
-        LDR.Colors.envMapPrefix = '/assets/ldbi/textures/cube/';
-        LDR.Colors.textureMaterialPrefix = '/assets/ldbi/textures/materials/';
+            LDR.Options.bgColor = 0xFFFFFF;
+            LDR.Colors.envMapPrefix = '/assets/ldbi/textures/cube/';
+            LDR.Colors.textureMaterialPrefix = '/assets/ldbi/textures/materials/';
 
-        const OFFICIAL_DIR = '/library/official', UNOFFICIAL_DIR = '/library/unofficial';
-        var idToUrl = function(id) {
-            if (parts[id]) {
-                return [parts[id]];
-            } else if(id.startsWith('48/') || id.startsWith('8/')) {
-                return [OFFICIAL_DIR + '/p/' + id,
-                        UNOFFICIAL_DIR + '/p/' + id];
-            } else if(id.startsWith('s/')) {
-                return [OFFICIAL_DIR + '/parts/' + id,
-                        UNOFFICIAL_DIR + '/parts/' + id];
-            } else if(id.match(/[a-z][a-z].*\.dat/)) {
-                return [OFFICIAL_DIR + '/p/' + id,
-                        OFFICIAL_DIR + '/parts/' + id,
-                        UNOFFICIAL_DIR + '/p/' + id,
-                        UNOFFICIAL_DIR + '/parts/' + id];
-            }
-            return [OFFICIAL_DIR + '/parts/' + id,
-                        OFFICIAL_DIR + '/p/' + id,
-                        UNOFFICIAL_DIR + '/parts/' + id,
-                        UNOFFICIAL_DIR + '/p/' + id];
-        };
+            const OFFICIAL_DIR = '/library/official', UNOFFICIAL_DIR = '/library/unofficial';
 
-        var idToTextureUrl = function(id) {
-            if (parts[id]) {
-                return parts[id];
-            }
-            return id;
-        };
+            const idToUrl = (id) => {
+                if (parts[id]) {
+                    return [parts[id]];
+                }
+                if (id.startsWith('48/') || id.startsWith('8/')) {
+                    return [OFFICIAL_DIR + '/p/' + id, UNOFFICIAL_DIR + '/p/' + id];
+                }
+                if (id.startsWith('s/')) {
+                    return [OFFICIAL_DIR + '/parts/' + id, UNOFFICIAL_DIR + '/parts/' + id];
+                }
+                if (id.match(/[a-z][a-z].*\.dat/)) {
+                    return [OFFICIAL_DIR + '/p/' + id, OFFICIAL_DIR + '/parts/' + id,
+                        UNOFFICIAL_DIR + '/p/' + id, UNOFFICIAL_DIR + '/parts/' + id];
+                }
+                return [OFFICIAL_DIR + '/parts/' + id, OFFICIAL_DIR + '/p/' + id,
+                    UNOFFICIAL_DIR + '/parts/' + id, UNOFFICIAL_DIR + '/p/' + id];
+            };
 
-        var renderModel = function() {
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            if (gl && gl instanceof WebGLRenderingContext) {
-                scene = null;
-                if (modeltype === 'user') {
-                    LDR.Colors.load(() => {
-                        scene = new LDrawOrg.Model(
-                            document.getElementById('ldbi-canvas'),
-                            partname,
-                            {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
-                        );
-                    },() => {},parts['ldconfig.ldr']);
-                    addEventListener('resize', () => scene.onChange())
-                } else {
-                    if (modeltype === 'omr') {
-                        url = '/webgl/omr/';
-                    } else {
-                        url = '/webgl/part/';
+            const idToTextureUrl = (id) => parts[id] || id;
+
+            // Checked once: every probe leaves a WebGL context behind until it is garbage collected
+            const webglSupported = document.createElement('canvas').getContext('webgl') instanceof WebGLRenderingContext;
+
+            let shownKey = null; // The model currently displayed or loading
+            let request = 0;     // Bumped on every model change so stale async work can tell it was superseded
+
+            const fail = (token, what, error) => {
+                console.error('3D viewer: could not load ' + what, error);
+                if (token === request) {
+                    shownKey = null; // Allow a retry
+                }
+            };
+
+            const createScene = (token, mainModelName) => {
+                LDR.Colors.load(() => {
+                    if (token !== request) {
+                        return;
                     }
-                    fetch(url + modelid)
-                        .then(response => response.json())
-                        .then((response) => {
-                            parts = response;
-                            document.getElementById('ldbi-canvas').innerHTML = parts;
-                            LDR.Colors.load(() => {
-                                scene = new LDrawOrg.Model(
-                                    document.getElementById('ldbi-canvas'),
-                                    partname,
-                                    {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
-                                );
-                            },() => {},parts['ldconfig.ldr']);
-                            addEventListener('resize', () => scene.onChange())
-                        });
-                }
-            }
-        };
+                    scene = new LDrawOrg.Model(
+                        document.getElementById('ldbi-canvas'),
+                        mainModelName,
+                        {idToUrl: idToUrl, idToTextureUrl: idToTextureUrl}
+                    );
+                }, (error) => fail(token, 'colour definitions', error), parts['ldconfig.ldr']);
+            };
 
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('ldbi-render-model', (event) => {
-                renderModel();
-            });
-            Livewire.on('ldbi-default-mode', (event) => {
-                scene.default_mode();
-            });
-            Livewire.on('ldbi-physical-mode', (event) => {
-                if (scene.loader.physicalRenderingAge > 0) {
-                    scene.setPhysicalRenderingAge(0);
+            // payload (all optional): modelType, modelId, mainModelName, parts, and force to rebuild the same model
+            const renderModel = (payload) => {
+                if (!webglSupported) {
+                    return;
                 }
-                else {
-                    scene.setPhysicalRenderingAge(20);
+                const model = {...defaults, ...payload};
+                const key = [model.modelType, model.modelId, model.mainModelName].join(':');
+                if (key === shownKey && !model.force) {
+                    return; // Same model (e.g. the modal was reopened): nothing to do
                 }
-            });
-            Livewire.on('ldbi-harlequin-mode', (event) => {
-                scene.harlequin_mode();
-            });
-            Livewire.on('ldbi-bfc-mode', (event) => {
-                scene.bfc_mode();
-            });
-            Livewire.on('ldbi-stud-logos', (event) => {
-                if (LDR.Options.studLogo == 1) {
-                    LDR.Options.studLogo = 0;
-                } else {
-                    LDR.Options.studLogo = 1;
-                }
-                scene.reload();
-            });
-            Livewire.on('ldbi-show-origin', (event) => {
-                scene.axesHelper.visible = !scene.axesHelper.visible;
-                scene.reload();
-            });
-        });
+                shownKey = key;
+                const token = ++request;
 
+                // Drop the previous model straight away so it isn't left on screen while the new one loads
+                if (scene) {
+                    scene.dispose();
+                    scene = null;
+                }
+                parts = model.parts;
+
+                if (model.modelType === 'user') {
+                    createScene(token, model.mainModelName);
+                    return;
+                }
+                fetch('/webgl/' + model.modelType + '/' + model.modelId)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        if (token !== request) {
+                            return;
+                        }
+                        parts = data;
+                        createScene(token, model.mainModelName);
+                    })
+                    .catch((error) => fail(token, 'model data', error));
+            };
+
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('ldbi-render-model', (payload) => renderModel(payload));
+                Livewire.on('ldbi-default-mode', () => scene?.default_mode());
+                Livewire.on('ldbi-physical-mode', () => scene?.togglePhysicalRendering());
+                Livewire.on('ldbi-harlequin-mode', () => scene?.harlequin_mode());
+                Livewire.on('ldbi-bfc-mode', () => scene?.bfc_mode());
+                Livewire.on('ldbi-stud-logos', () => scene?.toggleStudLogos());
+                Livewire.on('ldbi-show-origin', () => scene?.toggleOrigin());
+            });
+        })();
     </script>
 @endpush

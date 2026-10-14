@@ -30,6 +30,7 @@ class Show extends Component
             $this->model_id = $id;
         }
         $this->dispatch('open-modal', id: 'ldbi');
+        $this->dispatch('ldbi-render-model', modelId: $this->model_id , mainModelName: $this->model_name);
     }
 
     #[Layout('components.layout.omr')]
