@@ -63,8 +63,6 @@ class VoteManager
 
         $parts->each(fn (Part $p) => $this->castVote($p, $user, VoteType::AdminReview));
 
-        // Belt-and-suspenders: subfile status can depend on processing order,
-        // so a final pass catches anything the per-vote recheck missed.
         $parts->each(fn (Part $p) => $this->validator->checkPart($p));
     }
 

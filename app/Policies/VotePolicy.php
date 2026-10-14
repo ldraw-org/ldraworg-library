@@ -71,24 +71,45 @@ class VotePolicy
 
     public function allCertify(User $user, Part $part): bool
     {
-        return $part->isUnofficial() &&
-            $part->type->inPartsFolder() &&
-            $part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::ErrorsFound)->isEmpty() &&
-            !$part->descendantsAndSelf->unofficial()->whereIn('part_status', [PartStatus::Needs2MoreVotes, PartStatus::Needs1MoreVote])->isEmpty() &&
-            $this->vote($user, $part, VoteType::Certify) &&
-            $user->can(Permission::PartVoteCertifyAll) &&
-            !$this->settings->tracker_locked;
+        if (
+            $this->settings->tracker_locked ||
+            !$part->isUnofficial() ||
+            !$part->type->inPartsFolder() ||
+            !$user->can(Permission::PartVoteCertifyAll)
+        ) {
+            return false;
+        }
+
+        $unofficial = $part->descendantsAndSelf->unofficial();
+
+        if ($unofficial->where('part_status', PartStatus::ErrorsFound)->isNotEmpty()) {
+            return false;
+        }
+
+        return $unofficial
+            ->whereIn('part_status', [PartStatus::Needs2MoreVotes, PartStatus::Needs1MoreVote])
+            ->contains(fn (Part $p): bool => $this->vote($user, $p, VoteType::Certify));
     }
 
     public function allAdmin(User $user, Part $part): bool
     {
-        return $part->isUnofficial() &&
-            $part->type->inPartsFolder() &&
-            $part->descendantsAndSelf->unofficial()->where('ready_for_admin', false)->isEmpty() &&
-            $part->descendantsAndSelf->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->isNotEmpty() &&
-            $part->descendantsAndSelf()->unofficial()->where('part_status', PartStatus::AwaitingAdminReview)->whereRelation('votes', 'user_id', $user->id)->doesntExist() &&
-            $this->vote($user, $part, VoteType::AdminReview) &&
-            $user->can(Permission::PartVoteAdminCertifyAll) &&
-            !$this->settings->tracker_locked;
+        if (
+            $this->settings->tracker_locked ||
+            !$part->isUnofficial() ||
+            !$part->type->inPartsFolder() ||
+            !$user->can(Permission::PartVoteAdminCertifyAll)
+        ) {
+            return false;
+        }
+
+        $unofficial = $part->descendantsAndSelf->unofficial();
+
+        if ($unofficial->where('ready_for_admin', false)->isNotEmpty()) {
+            return false;
+        }
+
+        return $unofficial
+            ->where('part_status', PartStatus::AwaitingAdminReview)
+            ->contains(fn (Part $p): bool => $this->vote($user, $p, VoteType::AdminReview));
     }
 }
