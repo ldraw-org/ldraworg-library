@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Enums\LibraryIcon;
+use Filament\Support\View\SupportIconAlias;
+use Filament\Tables\View\TablesIconAlias;
 use Illuminate\Support\ServiceProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
@@ -48,29 +50,30 @@ class FilamentServiceProvider extends ServiceProvider
         Table::configureUsing(function (Table $table): void {
             $table
                 ->emptyState(view('filament.tables.empty', ['none' => 'None']))
-//                ->persistFiltersInSession()
-//                ->persistSearchInSession()
-//                ->persistSortInSession()
+                ->persistFiltersInSession()
+                ->persistSearchInSession()
+                ->persistSortInSession()
                 ->striped()
                 ->paginated([10, 25, 50, 100])
                 ->defaultPaginationPageOption(25);
         });
 
         FilamentIcon::register([
-            'pagination.first-button' => LibraryIcon::PageFirst->value,
-            'pagination.last-button' => LibraryIcon::PageLast->value,
-            'pagination.next-button' => LibraryIcon::PageNext->value,
-            'tables::filters.query-builder.constraints.boolean' => LibraryIcon::BooleanConstraint->value,
-            'tables::filters.query-builder.constraints.date' => LibraryIcon::DateSelect->value,
-            'tables::filters.query-builder.constraints.relationship' => LibraryIcon::RelationshipConstraint->value,
-            'tables::filters.query-builder.constraints.select' => LibraryIcon::Select->value,
-            'tables::filters.query-builder.constraints.text' => LibraryIcon::TextConstraint->value,
-            'tables::columns.icon-column.false' => LibraryIcon::TableFalse->value,
-            'tables::columns.icon-column.true' => LibraryIcon::TableTrue->value,
-            'tables::header-cell.sort-asc-button' => LibraryIcon::TableSortAsc->value,
-            'tables::header-cell.sort-button' => LibraryIcon::TableSortDesc->value,
-            'tables::header-cell.sort-desc-button' => LibraryIcon::TableSortDesc->value,
-            'tables::actions.filter' => LibraryIcon::TableFilter->value,
+            SupportIconAlias::PAGINATION_FIRST_BUTTON => LibraryIcon::PageFirst->value,
+            SupportIconAlias::PAGINATION_LAST_BUTTON => LibraryIcon::PageLast->value,
+            SupportIconAlias::PAGINATION_NEXT_BUTTON => LibraryIcon::PageNext->value,
+            SupportIconAlias::PAGINATION_PREVIOUS_BUTTON => LibraryIcon::PagePrevious->value,
+            TablesIconAlias::FILTERS_QUERY_BUILDER_CONSTRAINTS_BOOLEAN => LibraryIcon::BooleanConstraint->value,
+            TablesIconAlias::FILTERS_QUERY_BUILDER_CONSTRAINTS_DATE => LibraryIcon::DateSelect->value,
+            TablesIconAlias::FILTERS_QUERY_BUILDER_CONSTRAINTS_RELATIONSHIP => LibraryIcon::RelationshipConstraint->value,
+            TablesIconAlias::FILTERS_QUERY_BUILDER_CONSTRAINTS_SELECT => LibraryIcon::Select->value,
+            TablesIconAlias::FILTERS_QUERY_BUILDER_CONSTRAINTS_TEXT => LibraryIcon::TextConstraint->value,
+            TablesIconAlias::COLUMNS_ICON_COLUMN_FALSE => LibraryIcon::TableFalse->value,
+            TablesIconAlias::COLUMNS_ICON_COLUMN_TRUE => LibraryIcon::TableTrue->value,
+            TablesIconAlias::HEADER_CELL_SORT_ASC_BUTTON => LibraryIcon::TableSortAsc->value,
+            TablesIconAlias::HEADER_CELL_SORT_BUTTON => LibraryIcon::TableSortDesc->value,
+            TablesIconAlias::HEADER_CELL_SORT_DESC_BUTTON => LibraryIcon::TableSortDesc->value,
+            TablesIconAlias::ACTIONS_FILTER => LibraryIcon::TableFilter->value,
         ]);
     }
 }
