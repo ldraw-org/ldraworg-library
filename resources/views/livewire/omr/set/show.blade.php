@@ -43,7 +43,7 @@
                             <x-filament::button class="m-2 w-fit" wire:click="openModal({{$model->id}})">
                                 3D View
                             </x-filament::button>
-                            <a class="rounded-lg border border-gray-200 bg-blue-500 font-bold px-4 py-2 text-white m-2 w-fit" href="{{asset('library/omr/' . $model->filename())}}">Download</a>
+                            <a class="rounded-lg border border-gray-200 bg-blue-500 font-bold px-4 py-2 text-white m-2 w-fit" href="{{$model->getFirstMediaUrl('file')}}">Download</a>
                         </div>
                     </div>
                 @empty
