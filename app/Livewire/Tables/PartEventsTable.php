@@ -14,6 +14,7 @@ use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Livewire\Attributes\Lazy;
 
@@ -31,7 +32,8 @@ class PartEventsTable extends BasicTable implements HasActions
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn (): HasMany => $this->part->events()->official())
+            ->relationship(fn (): HasMany => $this->part->events())
+            ->modifyQueryUsing(fn (Builder $query) => $query->official())
             ->defaultSort('created_at', 'desc')
             ->groups([
                 Group::make('part_release_id')
