@@ -21,8 +21,8 @@ class PartModelAdapter implements PartDataAdapter
 
     public function __construct(
         protected Part $part
-    )
-    {}
+    ) {
+    }
 
     protected function parsedContent(): ParsedPartCollection
     {

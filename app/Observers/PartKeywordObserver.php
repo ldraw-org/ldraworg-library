@@ -3,10 +3,8 @@
 namespace App\Observers;
 
 use App\Jobs\MassHeaderGenerate;
-use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
-use Illuminate\Support\Facades\Log;
 
 class PartKeywordObserver implements ShouldHandleEventsAfterCommit
 {

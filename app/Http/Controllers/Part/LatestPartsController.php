@@ -6,7 +6,7 @@ use App\Http\Resources\PartsResource;
 use App\Http\Controllers\Controller;
 use App\Models\Part\PartEvent;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-  
+
 class LatestPartsController extends Controller
 {
     public function __invoke(): ResourceCollection

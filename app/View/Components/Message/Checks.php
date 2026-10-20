@@ -16,7 +16,8 @@ class Checks extends Component
 
     public ?Collection $messages;
 
-    public function __construct(public Part $part) {
+    public function __construct(public Part $part)
+    {
         $this->messages = $part
             ->check_messages
             ->messageArray();

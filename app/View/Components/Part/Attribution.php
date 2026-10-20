@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\Component;
 use App\Models\Part\Part;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 
 class Attribution extends Component
 {

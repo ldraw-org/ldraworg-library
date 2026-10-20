@@ -34,8 +34,6 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
@@ -164,7 +162,8 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                     }
                                 }),
                             $this->partInputs(),
-                        ])->deferLoading())
+                        ])->deferLoading()
+                        )
                         ->afterValidation(function (Get $get, Set $set) {
                             $data = $this->form->getState();
                             $fileText = $this->torsoText($data);
@@ -294,7 +293,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         }
         $text[] = $this->getTorsoTextHeader($description, $name, $kws);
         foreach ($this->template['parts'] as $index => $part) {
-            $color = Arr::get($data,"part_{$index}_color") ?? 16;
+            $color = Arr::get($data, "part_{$index}_color") ?? 16;
             $file = Arr::get($data, "part_{$index}_part") ?? $part['name'];
             if (Str::startsWith($part['name'], '973')) {
                 $file = Part::find(Arr::get($data, 'torso'))->meta_name;

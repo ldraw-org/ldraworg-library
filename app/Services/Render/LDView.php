@@ -100,7 +100,7 @@ class LDView
             Storage::put("debug/part.mpd", file_get_contents($filename));
             $iniFile = file_get_contents($iniPath);
             Storage::put("debug/ldview.ini", $iniFile);
-            $iniFileDebug = str_replace([$ldrawdir,$imagepath] , [Storage::path('debug/ldraw'), Storage::path('debug/part.png')], $iniFile);
+            $iniFileDebug = str_replace([$ldrawdir,$imagepath], [Storage::path('debug/ldraw'), Storage::path('debug/part.png')], $iniFile);
 
             Storage::put("debug/ldview_debug.ini", $iniFileDebug);
             Log::debug("ldview " . Storage::path('debug/part.mpd') . " -IniFile=" . Storage::path('debug/ldview_debug.ini'));

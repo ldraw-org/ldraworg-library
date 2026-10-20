@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Tables;
 
-use App\Services\Check\Enums\CheckType;
 use App\Services\Check\Enums\PartError;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;

@@ -3,12 +3,8 @@
 namespace App\Observers;
 
 use App\Enums\PreviewRotation;
-use App\Events\PartSubmitted;
 use App\Events\PartDeleted;
 use App\Jobs\CheckPart;
-use App\Jobs\GeneratePartImage;
-use App\Jobs\UpdateImage;
-use App\Jobs\UpdateLibraryCsv;
 use App\Services\Part\GenerateHeader;
 use App\Services\Part\Remover;
 use App\Services\Part\SyncSubparts;
@@ -18,7 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Part\Part;
 use App\Models\User;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
-use Illuminate\Support\Facades\Log;
 
 class PartObserver implements ShouldHandleEventsAfterCommit
 {
@@ -28,7 +23,8 @@ class PartObserver implements ShouldHandleEventsAfterCommit
         protected Validator $validator,
         protected Remover $remover,
         protected GenerateHeader $generateHeader,
-    ) {}
+    ) {
+    }
 
     public function deleting(Part $part): void
     {

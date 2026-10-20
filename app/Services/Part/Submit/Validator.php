@@ -40,9 +40,7 @@ class Validator
                     ]));
                 }
             }
-        }
-
-        elseif ($file->mimetype === 'image/png') {
+        } elseif ($file->mimetype === 'image/png') {
 
             $parts = Part::query()
                 ->whereLike('filename', "%{$file->filename}")
@@ -50,9 +48,7 @@ class Validator
 
             $unofficialExists = $parts->unofficial()->isNotEmpty();
             $officialExists   = $parts->official()->isNotEmpty();
-        }
-
-        else {
+        } else {
             $checkmessages->push(
                 CheckMessage::fromPartError(PartError::InvalidFileFormat)
             );

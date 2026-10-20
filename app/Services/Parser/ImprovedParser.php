@@ -3,13 +3,11 @@
 namespace App\Services\Parser;
 
 use App\Enums\LDrawRegex;
-use App\Enums\PartType;
-use App\Enums\PartTypeQualifier;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
-class ImprovedParser {
-
+class ImprovedParser
+{
     public static function fixEncoding(string $text): string
     {
         $old_encode = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1', 'ASCII']);
@@ -43,7 +41,8 @@ class ImprovedParser {
         return $this->matchPerLine($text);
     }
 
-    public function matchPerLine(string $text): Collection {
+    public function matchPerLine(string $text): Collection
+    {
         $lineNumber = 0;
 
         foreach (explode("\n", $text) as $line) {
@@ -69,7 +68,7 @@ class ImprovedParser {
                 if ($m) {
                     $match['invalid'] = false;
                     if ($line[0] === '0') {
-                        switch($match['first_word']) {
+                        switch ($match['first_word']) {
                             case 'Name:':
                                 $match = $this->matchNameCommand($line);
                                 break;
@@ -240,7 +239,7 @@ class ImprovedParser {
             return $match;
         }
 
-        $filename = basename(str_replace('\\', '/', Arr::get($match, 'name')),'.dat');
+        $filename = basename(str_replace('\\', '/', Arr::get($match, 'name')), '.dat');
         $s = [];
         LDrawRegex::Basepart->match($filename, $bp);
         LDrawRegex::SuffixValidate->match($filename, $s);
@@ -254,7 +253,7 @@ class ImprovedParser {
         } if ($suffixes != '') {
             preg_match_all(LDrawRegex::SuffixExtract->value, $suffixes, $matches);
             $match['basepart'] = $basepart;
-            if(implode('', Arr::get($matches, 0, [])) == $suffixes) {
+            if (implode('', Arr::get($matches, 0, [])) == $suffixes) {
                 $match['suffixes'] = Arr::get($matches, 0);
                 $match['suffixes_invalid'] = false;
             } else {

@@ -4,12 +4,8 @@ use App\Enums\License;
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
-use App\Services\Check\Contracts\Check;
-use App\Services\Check\PartChecker;
-use App\Services\LDraw\Parse\ParsedPart;
 use App\Models\LdrawColour;
 use App\Models\User;
-use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -269,7 +265,7 @@ describe('part check', function () {
     ]);
 
     test('test HistoryIsValid', function (string $input, bool $expected) {
-       expect($input)->toHaveCheckResult($expected, 'HistoryIsValid');
+        expect($input)->toHaveCheckResult($expected, 'HistoryIsValid');
     })->with([
         'invalid history, one line' => ["0 Test\n0 !HISTORY 2025-03-02 [] Test", false],
         'invalid history, multi line' => ["0 Test\n0 !HISTORY 2023-03-03 [Test] Comment\n0 !HISTORY 202303-03 [Test] Comment2", false],

@@ -9,7 +9,6 @@ use App\Services\Cache\CacheService;
 use App\Services\External\Rebrickable;
 use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class LDConfigManager
@@ -79,7 +78,7 @@ class LDConfigManager
     {
         return $this->cache->remember(
             CacheKey::LdrawColourCodes,
-            fn() => LdrawColour::pluck('code')->all()
+            fn () => LdrawColour::pluck('code')->all()
         );
     }
 
@@ -87,7 +86,7 @@ class LDConfigManager
     {
         return $this->cache->remember(
             CacheKey::LdrawColourOptions,
-            fn() => LdrawColour::select('id','code','name', 'value')
+            fn () => LdrawColour::select('id', 'code', 'name', 'value')
                 ->orderBy('code')
                 ->get()
                 ->mapWithKeys(
@@ -130,7 +129,7 @@ class LDConfigManager
     {
         return $this->cache->remember(
             CacheKey::AvatarParts,
-            fn() => Avatar::pluck('part', 'category')->all()
+            fn () => Avatar::pluck('part', 'category')->all()
         );
     }
 }

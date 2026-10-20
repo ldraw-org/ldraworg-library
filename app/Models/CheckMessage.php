@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\DB;
 #[Unguarded]
 class CheckMessage extends Model
 {
-    use HasPart, HasFactory;
+    use HasPart;
+    use HasFactory;
 
     /**
      * @return array{

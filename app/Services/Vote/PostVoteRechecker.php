@@ -9,7 +9,8 @@ class PostVoteRechecker
 {
     public function __construct(
         private readonly Validator $validator
-    ) {}
+    ) {
+    }
 
     public function recheck(Part $part): void
     {

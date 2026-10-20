@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Jobs\GenerateOmrModelImage;
 use App\Models\Omr\OmrModel;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Builder;
 
 class RenderModels extends Command
 {

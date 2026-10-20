@@ -113,7 +113,8 @@ class Submit extends Component implements HasSchemas
         /** @var Collection<int, TemporaryUploadedFile> $files */
         $files = collect($this->data['partfiles']);
 
-        return $files->first(fn (TemporaryUploadedFile $file) =>
+        return $files->first(
+            fn (TemporaryUploadedFile $file) =>
             $file->getClientOriginalName() === $filename
         );
     }
@@ -122,7 +123,8 @@ class Submit extends Component implements HasSchemas
     {
         if ($collection->isEmpty()) {
             $this->removeFile($filename);
-            $this->dispatch('setFileState',
+            $this->dispatch(
+                'setFileState',
                 state: true,
                 filename: $filename
             );
@@ -135,7 +137,8 @@ class Submit extends Component implements HasSchemas
         $this->fileStates[$filename]['hasWarnings'] = $collection->hasWarnings();
         $this->fileStates[$filename]['hasTrackerHolds'] = $collection->hasTrackerHolds();
 
-        $this->dispatch('setFileState',
+        $this->dispatch(
+            'setFileState',
             state: ! $collection->hasErrors(),
             filename: $filename
         );
@@ -178,7 +181,8 @@ class Submit extends Component implements HasSchemas
         }
 
         $collection = $this->fileStates[$filename]['messages']
-            ->reject(fn (CheckMessage $message) =>
+            ->reject(
+                fn (CheckMessage $message) =>
                 $message->check === $error
             );
 
@@ -225,24 +229,28 @@ class Submit extends Component implements HasSchemas
                 return ($this->fileStates[$filename]['hasErrors'] ?? false)
                     || ! $file->get();
             })
-            ->map(fn (TemporaryUploadedFile $file) =>
+            ->map(
+                fn (TemporaryUploadedFile $file) =>
                 LDrawFile::fromUploadedFile($file)
             );
         $parts = $registrar->submit($files, $user, $data['comments']);
 
         $submittedNames = $parts
             ->pluck('filename')
-            ->map(fn (string $filename) =>
+            ->map(
+                fn (string $filename) =>
                 basename($filename)
             )
             ->values()
             ->all();
 
         $this->rejected_files = collect($data['partfiles'] ?? [])
-            ->map(fn (TemporaryUploadedFile $file) =>
+            ->map(
+                fn (TemporaryUploadedFile $file) =>
                 $file->getClientOriginalName()
             )
-            ->reject(fn (string $filename) =>
+            ->reject(
+                fn (string $filename) =>
                 in_array($filename, $submittedNames)
             )
             ->implode(', ');

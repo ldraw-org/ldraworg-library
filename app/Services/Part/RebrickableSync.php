@@ -12,8 +12,8 @@ class RebrickableSync
         protected StickerSheetManager $stickerSheetManager,
         protected RebrickablePartManager $rebrickablePartManager,
         protected GenerateHeader $generateHeader,
-    )
-    {}
+    ) {
+    }
 
     public function syncRebrickablePart(Part $part, bool $updateOfficial = false): void
     {

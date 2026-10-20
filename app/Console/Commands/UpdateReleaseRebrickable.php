@@ -14,7 +14,7 @@ class UpdateReleaseRebrickable extends Command
 
     protected $description = 'Do a pre release RB update';
 
-    public function handle():void
+    public function handle(): void
     {
         $parts = Part::where(
             fn ($q) => $q->orWhere('marked_for_release', true)->orWhere('has_minor_edit', true)

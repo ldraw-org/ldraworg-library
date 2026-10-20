@@ -13,8 +13,7 @@ class ImageGenerator
     public function __construct(
         protected LDView $ldview,
         protected OptimizerChain $optimizerChain
-    )
-    {
+    ) {
         $this->optimizerChain->addOptimizer(new Optipng([]));
     }
 

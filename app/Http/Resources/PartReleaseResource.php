@@ -5,7 +5,6 @@ namespace App\Http\Resources;
 use App\Services\LibraryStatisticsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Cache;
 
 class PartReleaseResource extends JsonResource
 {

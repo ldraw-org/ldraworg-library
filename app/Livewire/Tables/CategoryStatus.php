@@ -13,7 +13,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Computed;
 
 class CategoryStatus extends BasicTable implements HasActions

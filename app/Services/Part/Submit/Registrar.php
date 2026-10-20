@@ -29,7 +29,8 @@ class Registrar
         protected BasePartSync   $basePartSync,
         protected Finalizer      $finalizer,
         protected Writer $writer,
-    ) {}
+    ) {
+    }
 
     public function submit(SupportCollection $files, User $user, ?string $comments = null): Collection
     {

@@ -13,17 +13,16 @@ use MathPHP\LinearAlgebra\MatrixFactory;
 
 class ValidLines extends BaseCheck
 {
-
     public function __construct(
         protected VectorMath $vector
-    )
-    {}
+    ) {
+    }
 
     public function check(): iterable
     {
 
-        foreach($this->part->invalidLines() as $line) {
-             yield $this->error(PartError::LineInvalid, line_number: $line['line_number'], text: $line['text']);
+        foreach ($this->part->invalidLines() as $line) {
+            yield $this->error(PartError::LineInvalid, line_number: $line['line_number'], text: $line['text']);
         }
 
         $codes = app(LDConfigManager::class)->ldrawColourCodes();
@@ -38,7 +37,7 @@ class ValidLines extends BaseCheck
             if ($line['linetype'] != 0) {
                 if (preg_match('~\d*\.\d{5,}~', $line['text'], $matches)) {
                     $decimalCount = strrchr($matches[0], ".")
-                            |> (fn($x) => substr($x, 1))
+                            |> (fn ($x) => substr($x, 1))
                             |> strlen(...);
                     if ($decimalCount >= 6) {
                         yield $this->error(PartError::DecimalPrecision, line_number: $line['line_number'], text: $line['text']);

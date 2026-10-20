@@ -74,14 +74,14 @@ class MarkdownService
                 Heading::class => [
                     'class' => static function (Heading $node) {
                         return 'py-2 font-bold ' . match ($node->getLevel()) {
-                                1 => 'text-4xl',
-                                2 => 'text-3xl',
-                                3 => 'text-2xl',
-                                4 => 'text-xl',
-                                5 => 'text-lg',
-                                6 => 'text-base',
-                                default => ''
-                            };
+                            1 => 'text-4xl',
+                            2 => 'text-3xl',
+                            3 => 'text-2xl',
+                            4 => 'text-xl',
+                            5 => 'text-lg',
+                            6 => 'text-base',
+                            default => ''
+                        };
                     },
                 ],
                 BlockQuote::class => [
@@ -93,9 +93,9 @@ class MarkdownService
                 ListBlock::class => [
                     'class' => static function (ListBlock $node) {
                         return 'pl-6 ' . match ($node->getListData()->type) {
-                                'bullet' => 'list-disc',
-                                'ordered' => 'list-decimal',
-                            };
+                            'bullet' => 'list-disc',
+                            'ordered' => 'list-decimal',
+                        };
                     }
                 ],
                 ListItem::class => [

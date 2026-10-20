@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\CheckMessage;
 use App\Services\Check\Enums\CheckType;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
@@ -158,7 +157,8 @@ class PartListTable extends BasicTable
                         ->icon(LibraryIcon::CategoryConstraint->value)
                         ->multiple(),
                     SelectConstraint::make('check_messages')
-                        ->options(fn () =>
+                        ->options(
+                            fn () =>
                             DB::table('check_messages')
                                 ->select(['check_type', 'check'])
                                 ->distinct()

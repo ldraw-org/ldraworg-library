@@ -13,7 +13,6 @@ use UnexpectedValueException;
 
 abstract class BaseCheck
 {
-
     public bool $stopOnError = false;
 
     protected PartDataAdapter $part;
@@ -60,6 +59,6 @@ abstract class BaseCheck
 
     protected function error(CheckItem $check, ?int $line_number = null, ?string $value = null, ?string $type = null, ?string $text = null): CheckMessage
     {
-        return CheckMessage::fromArray(compact( 'check', 'line_number', 'value', 'type', 'text'));
+        return CheckMessage::fromArray(compact('check', 'line_number', 'value', 'type', 'text'));
     }
 }

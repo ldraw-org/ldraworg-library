@@ -13,5 +13,6 @@ readonly class ReleaseEntry
         public string        $name,
         public string        $date,
         public string        $file,
-    ) {}
+    ) {
+    }
 }

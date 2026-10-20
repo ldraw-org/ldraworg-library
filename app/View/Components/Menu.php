@@ -3,9 +3,7 @@
 namespace App\View\Components;
 
 use Illuminate\View\Component;
-use App\Models\Part\Part;
 use App\Services\Menu\MenuRegistry;
-use Illuminate\Support\Facades\Auth;
 
 class Menu extends Component
 {

@@ -11,7 +11,6 @@ use App\Services\LDraw\Managers\LDConfigManager;
 use App\Services\LDraw\Managers\StickerSheetManager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
-use Illuminate\Support\Facades\Cache;
 
 class SetPbg
 {
@@ -46,7 +45,7 @@ class SetPbg
 
         $this->resolveUnpatternedParts($rb_parts);
 
-        $rb_parts->each(fn(array $part) => $this->processPart($part));
+        $rb_parts->each(fn (array $part) => $this->processPart($part));
 
         return $this->makePbg();
     }
@@ -113,7 +112,7 @@ class SetPbg
             $this->addPart($part, $this->getBasename($p->filename), $color);
         } elseif ($stickerSheet) {
             $this->stickerManager->complete_set($stickerSheet)->each(
-                fn(Part $sticker) => $this->addPart($part, $this->getBasename($sticker->filename), $color)
+                fn (Part $sticker) => $this->addPart($part, $this->getBasename($sticker->filename), $color)
             );
         } else {
             $this->addMissingPartMessage($part);
@@ -166,7 +165,7 @@ class SetPbg
     {
         $rbId = $part['color']['id'];
         $colorId = $this->ldrawColorToRebrickable
-          ->search(fn($value, $key) => $value === $rbId);
+          ->search(fn ($value, $key) => $value === $rbId);
 
         if ($colorId !== null) {
             return $colorId;
@@ -192,8 +191,9 @@ class SetPbg
         ];
 
         $items = collect($this->parts)
-            ->flatMap(fn($part) => collect($part['colors'])
-                ->map(fn($qty, $color) => "{$part['ldraw_part']}.dat: [color={$color}][count={$qty}]")
+            ->flatMap(
+                fn ($part) => collect($part['colors'])
+                ->map(fn ($qty, $color) => "{$part['ldraw_part']}.dat: [color={$color}][count={$qty}]")
             )->all();
 
         return implode("\n", array_merge($header, $items));

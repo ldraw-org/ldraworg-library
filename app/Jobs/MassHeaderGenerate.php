@@ -5,7 +5,6 @@ namespace App\Jobs;
 use App\Models\Part\Part;
 use App\Services\Part\GenerateHeader;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Queue\Queueable;
 
 class MassHeaderGenerate implements ShouldQueue

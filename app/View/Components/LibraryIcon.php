@@ -5,9 +5,7 @@ namespace App\View\Components;
 use App\Enums\LibraryIcon as EnumsLibraryIcon;
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 use Illuminate\View\Component;
-
 
 class LibraryIcon extends Component
 {

@@ -9,7 +9,7 @@ trait HasAuthorComponentSetup
     protected static function configureAuthorComponent($component)
     {
         return $component
-            ->options(fn() => app(UserList::class)->userOptions())
+            ->options(fn () => app(UserList::class)->userOptions())
             ->searchable()
             ->label('Author');
     }

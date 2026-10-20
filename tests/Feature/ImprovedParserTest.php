@@ -34,8 +34,8 @@ describe('text clean', function () {
     ]);
 });
 
-describe ('header and body split', function () {
-    it ('parses body start line', function (string $input, int $start, string $header, string $body) {
+describe('header and body split', function () {
+    it('parses body start line', function (string $input, int $start, string $header, string $body) {
         $file = new ParsedPartCollection($input);
         $start_line = $file->bodyStartLine();
         $header_text = $file->headerText();
@@ -445,7 +445,7 @@ describe('keyword parse', function () {
         'extra commas' => ["0 !KEYWORDS Comment,    , Comment2", ['Comment', 'Comment2']],
         'identical words' => ["0 !KEYWORDS Comment, Comment", ['Comment']],
         'multiple lines, identical words' => ["0 !KEYWORDS Comment, Comment2\n0 !KEYWORDS Comment, Comment2", ['Comment', 'Comment2']],
-        'multiple lines, different words' =>["0 !KEYWORDS Comment, Comment2\n0 !KEYWORDS Comment3, Comment4", ['Comment', 'Comment2', 'Comment3', 'Comment4']],
+        'multiple lines, different words' => ["0 !KEYWORDS Comment, Comment2\n0 !KEYWORDS Comment3, Comment4", ['Comment', 'Comment2', 'Comment3', 'Comment4']],
     ]);
     it('fails keyword parse', function (string $input) {
         $file = new ParsedPartCollection($input);
@@ -818,40 +818,40 @@ describe('parse colour', function () {
             ->code->toBeNumeric()->toEqual($expected['code'])
             ->value->toBeString()->toBe($expected['value'])
             ->edge->toBeString()->toBe($expected['edge']);
-        if(Arr::has($expected, 'alpha')) {
+        if (Arr::has($expected, 'alpha')) {
             expect($color)
-                ->alpha->toBeNumeric()->toEqual(Arr::get($expected, 'alpha'));          
+                ->alpha->toBeNumeric()->toEqual(Arr::get($expected, 'alpha'));
         } else {
             expect($color)
                 ->alpha->toBeNull();
         }
-        if(Arr::has($expected, 'luminance')) {
+        if (Arr::has($expected, 'luminance')) {
             expect($color)
-                ->luminance->toBeNumeric()->toEqual(Arr::get($expected, 'luminance'));          
+                ->luminance->toBeNumeric()->toEqual(Arr::get($expected, 'luminance'));
         } else {
             expect($color)
                 ->luminance->toBeNull();
         }
-        if(Arr::has($expected, 'material')) {
+        if (Arr::has($expected, 'material')) {
             expect($color)
                 ->material->toBeIn(['CHROME', 'PEARLESCENT', 'RUBBER', 'MATTE_METALLIC', 'METAL', 'MATERIAL'])
-                ->toBe(Arr::get($expected, 'material'));          
+                ->toBe(Arr::get($expected, 'material'));
         } else {
             expect($color)
                  ->material->toBeNull();
         }
-        if(Arr::has($expected, 'material_params')) {
+        if (Arr::has($expected, 'material_params')) {
             expect($color)->material_params
                 ->toBeArray()
                 ->toHaveKeys(['material_type', 'value', 'alpha', 'luminance', 'fraction', 'vfraction', 'size', 'minsize', 'maxsize', 'fabric_type'])
-                ->toMatchArray(Arr::get($expected, 'material_params'));          
+                ->toMatchArray(Arr::get($expected, 'material_params'));
         } else {
             expect($color)
                  ->material_params->toBeNull();
         }
     })->with([
         'normal colour' => [
-             '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080', 
+             '0 !COLOUR Black CODE 0 VALUE #1B2A34 EDGE #808080',
              [
                  'name' => 'Black',
                  'code' => 0,
@@ -860,7 +860,7 @@ describe('parse colour', function () {
              ]
         ],
         'transparent colour' => [
-             '0 !COLOUR Trans_Dark_Blue CODE 33 VALUE #0020A0 EDGE #000B38 ALPHA 128', 
+             '0 !COLOUR Trans_Dark_Blue CODE 33 VALUE #0020A0 EDGE #000B38 ALPHA 128',
              [
                  'name' => 'Trans_Dark_Blue',
                  'code' => 33,
@@ -870,7 +870,7 @@ describe('parse colour', function () {
              ]
         ],
         'chrome colour' => [
-             '0 !COLOUR Chrome_Antique_Brass CODE 60 VALUE #645A4C EDGE #665B4D CHROME', 
+             '0 !COLOUR Chrome_Antique_Brass CODE 60 VALUE #645A4C EDGE #665B4D CHROME',
              [
                  'name' => 'Chrome_Antique_Brass',
                  'code' => 60,
@@ -880,7 +880,7 @@ describe('parse colour', function () {
              ]
         ],
         'pearlescent colour' => [
-             '0 !COLOUR Pearl_Black CODE 83 VALUE #0A1327 EDGE #333333 PEARLESCENT', 
+             '0 !COLOUR Pearl_Black CODE 83 VALUE #0A1327 EDGE #333333 PEARLESCENT',
              [
                  'name' => 'Pearl_Black',
                  'code' => 83,
@@ -890,7 +890,7 @@ describe('parse colour', function () {
              ]
         ],
         'metal colour' => [
-             '0 !COLOUR Metallic_Silver CODE 80 VALUE #767676 EDGE #333333 METAL', 
+             '0 !COLOUR Metallic_Silver CODE 80 VALUE #767676 EDGE #333333 METAL',
              [
                  'name' => 'Metallic_Silver',
                  'code' => 80,
@@ -900,7 +900,7 @@ describe('parse colour', function () {
              ]
         ],
         'rubber colour' => [
-             '0 !COLOUR Rubber_Dark_Orange CODE 10484 VALUE #91501C EDGE #333333 RUBBER', 
+             '0 !COLOUR Rubber_Dark_Orange CODE 10484 VALUE #91501C EDGE #333333 RUBBER',
              [
                  'name' => 'Rubber_Dark_Orange',
                  'code' => 10484,
@@ -910,7 +910,7 @@ describe('parse colour', function () {
              ]
         ],
         'luminance colour' => [
-             '0 !COLOUR Glow_In_Dark_Opaque CODE 21 VALUE #E0FFB0 EDGE #B8FF4D ALPHA 240 LUMINANCE 15', 
+             '0 !COLOUR Glow_In_Dark_Opaque CODE 21 VALUE #E0FFB0 EDGE #B8FF4D ALPHA 240 LUMINANCE 15',
              [
                  'name' => 'Glow_In_Dark_Opaque',
                  'code' => 21,
@@ -921,7 +921,7 @@ describe('parse colour', function () {
              ]
         ],
         'glitter colour' => [
-             '0 !COLOUR Glitter_Trans_Dark_Pink CODE 114 VALUE #DF6695 EDGE #B9275F ALPHA 128 MATERIAL GLITTER VALUE #B92790 FRACTION 0.17 VFRACTION 0.2 SIZE 1', 
+             '0 !COLOUR Glitter_Trans_Dark_Pink CODE 114 VALUE #DF6695 EDGE #B9275F ALPHA 128 MATERIAL GLITTER VALUE #B92790 FRACTION 0.17 VFRACTION 0.2 SIZE 1',
              [
                  'name' => 'Glitter_Trans_Dark_Pink',
                  'code' => 114,
@@ -939,7 +939,7 @@ describe('parse colour', function () {
              ]
         ],
         'opal colour' => [
-             '0 !COLOUR Opal_Trans_Clear CODE 360 VALUE #FCFCFC EDGE #C9C9C9 ALPHA 240 LUMINANCE 5 MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1', 
+             '0 !COLOUR Opal_Trans_Clear CODE 360 VALUE #FCFCFC EDGE #C9C9C9 ALPHA 240 LUMINANCE 5 MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1',
              [
                  'name' => 'Opal_Trans_Clear',
                  'code' => 360,
@@ -959,7 +959,7 @@ describe('parse colour', function () {
              ]
         ],
         'speckle colour' => [
-             '0 !COLOUR Speckle_Black_Copper CODE 75 VALUE #000000 EDGE #AB6038 MATERIAL SPECKLE VALUE #AB6038 FRACTION 0.4 MINSIZE 1 MAXSIZE 3', 
+             '0 !COLOUR Speckle_Black_Copper CODE 75 VALUE #000000 EDGE #AB6038 MATERIAL SPECKLE VALUE #AB6038 FRACTION 0.4 MINSIZE 1 MAXSIZE 3',
              [
                  'name' => 'Speckle_Black_Copper',
                  'code' => 75,
@@ -976,7 +976,7 @@ describe('parse colour', function () {
              ]
         ],
         'fabric colour' => [
-             '0 !COLOUR Canvas_Black CODE 20000 VALUE #1B2A34 EDGE #808080 MATERIAL FABRIC CANVAS', 
+             '0 !COLOUR Canvas_Black CODE 20000 VALUE #1B2A34 EDGE #808080 MATERIAL FABRIC CANVAS',
              [
                  'name' => 'Canvas_Black',
                  'code' => 20000,

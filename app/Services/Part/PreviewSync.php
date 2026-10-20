@@ -9,7 +9,8 @@ class PreviewSync
 {
     public function __construct(
         protected ImageGenerator $imageGenerator,
-    ) {}
+    ) {
+    }
 
     public function updatePartPreview(Part $part, ?PreviewRotation $preview): void
     {

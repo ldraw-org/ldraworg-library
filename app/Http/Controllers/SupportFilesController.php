@@ -18,7 +18,8 @@ class SupportFilesController extends Controller
         protected MakeLibraryCsv $libraryCsv,
         protected MakePtReleases $ptReleases,
         protected MakeCategoriesTxt $categoriesTxt,
-    ) {}
+    ) {
+    }
 
     public function webglpart(Part $part, LDrawModelMaker $maker): JsonResponse
     {

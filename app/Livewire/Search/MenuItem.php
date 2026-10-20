@@ -13,11 +13,11 @@ use Livewire\Component;
 class MenuItem extends Component
 {
     public ?string $tableSearch = '';
-  
+
     #[On('doSearch')]
     public function performSearch(): void
     {
-        // This just triggers a re-render. 
+        // This just triggers a re-render.
         // The #[Computed] property will handle the actual logic.
     }
 
@@ -46,9 +46,9 @@ class MenuItem extends Component
             ->get()
             ->mapWithKeys(fn ($part) => [
                 $part->id => [
-                    'name' => $part->meta_name, 
+                    'name' => $part->meta_name,
                     'description' => $part->description,
-                    'image_url' => $part->getFirstMediaUrl('image','thumb'),
+                    'image_url' => $part->getFirstMediaUrl('image', 'thumb'),
                 ]
             ])->toArray();
     }
@@ -70,9 +70,9 @@ class MenuItem extends Component
             ->get()
             ->mapWithKeys(fn ($set) => [
                 $set->id => [
-                    'name' => $set->name, 
+                    'name' => $set->name,
                     'description' => $set->number,
-                    'image_url' => $set->models->first()?->getFirstMediaUrl('image','thumb'),
+                    'image_url' => $set->models->first()?->getFirstMediaUrl('image', 'thumb'),
                 ]
             ])->toArray();
     }
@@ -81,7 +81,7 @@ class MenuItem extends Component
     {
         return  redirect()->route('parts.list', ['tableSearch' => $this->tableSearch]);
     }
-    
+
     public function render()
     {
         return view('livewire.search.menu-item');

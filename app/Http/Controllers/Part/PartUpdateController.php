@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Part;
 
-use App\Services\Support\Enums\ReleaseOutput;
 use App\Services\Support\MakePtReleases;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +14,8 @@ class PartUpdateController extends Controller
 {
     public function __construct(
         protected MakePtReleases $makePtReleases
-    ) {}
+    ) {
+    }
 
     public function index(Request $request): Response|RedirectResponse|View
     {

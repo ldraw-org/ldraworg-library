@@ -23,14 +23,13 @@ class DailyDigest extends Mailable
 
     public function __construct(
         protected User $user
-    )
-    {
+    ) {
         $this->date = now()->subDay();
         $this->next = $this->date->copy()->endOfDay();
     }
 
     public function envelope(): Envelope
-   {
+    {
         return new Envelope(
             subject: 'Parts Tracker Daily Summary for ' . $this->date->copy()->format('Y-m-d'),
         );

@@ -14,7 +14,8 @@ class PartMover
     public function __construct(
         protected Finalizer    $finalizer,
         protected Writer       $writer,
-    ) {}
+    ) {
+    }
 
     public function moveOfficialPart(Part $part, string $newName, User $actor): Part
     {

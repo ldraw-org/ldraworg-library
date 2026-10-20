@@ -2,9 +2,6 @@
 
 namespace App\View\Components\Message;
 
-use App\Models\Part\Part;
-use App\Services\Check\CheckMessage;
-use App\Services\Check\CheckMessageCollection;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;

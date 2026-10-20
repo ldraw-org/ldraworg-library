@@ -64,7 +64,7 @@ class PartCollection extends Collection
             $data['new_of_type'][$type->value] = $count;
         }
         $this->where('category', PartCategory::Moved)
-            ->each(function (Part $part, int $id) use (&$data){
+            ->each(function (Part $part, int $id) use (&$data) {
                 $data['moved'][] = ['from' => $part->meta_name,  'to' => $part->description];
             });
         $this->whereNotNull('official_part')

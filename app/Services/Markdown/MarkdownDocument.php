@@ -9,6 +9,6 @@ class MarkdownDocument
     public function __construct(
         public readonly HtmlString $content,
         public readonly HtmlString $toc
-    )
-    {}
+    ) {
+    }
 }

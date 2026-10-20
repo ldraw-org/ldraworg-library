@@ -50,4 +50,3 @@ it('does not update official can release', function () {
     app(BaseValidator::class)->checkPart($part);
     expect($part->can_release)->toBeTrue();
 });
-

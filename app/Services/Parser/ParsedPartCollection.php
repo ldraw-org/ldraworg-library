@@ -27,7 +27,8 @@ class ParsedPartCollection extends Collection
     public function getFirstMeta(string $meta, bool $validOnly = true): ?array
     {
         return $this
-            ->when($validOnly,
+            ->when(
+                $validOnly,
                 fn (Collection $collection, bool $value) => $collection->where('invalid', false)
             )
             ->where('meta', $meta)
@@ -143,11 +144,11 @@ class ParsedPartCollection extends Collection
         $meta = $this->getFirstMeta('category', false);
         if (!is_null($meta) && Arr::get($meta, 'invalid') === true) {
             return null;
-        } elseif(!is_null($meta)) {
+        } elseif (!is_null($meta)) {
             return PartCategory::tryFrom(Arr::get($meta, 'category'));
         }
 
-        return PartCategory::tryFrom(Arr::get($this->getFirstMeta('description'), 'category') );
+        return PartCategory::tryFrom(Arr::get($this->getFirstMeta('description'), 'category'));
     }
 
     public function keywords(): ?array
@@ -246,7 +247,7 @@ class ParsedPartCollection extends Collection
                     $isTexture ? 'p/textures/'     . $subpart : 'p/'     . $subpart,
                 ];
             })
-            ->flatMap(fn($paths) => $paths)
+            ->flatMap(fn ($paths) => $paths)
             ->all();
         return count($subparts) ? $subparts : null;
     }
@@ -336,17 +337,17 @@ class ParsedPartCollection extends Collection
     {
         $nameRaw = $this->getFirstMeta('name');
         if (is_null($nameRaw) || is_null(Arr::get($nameRaw, 'suffixes')) || Arr::get($nameRaw, 'suffixes_invalid') === true) {
-           return false;
+            return false;
         }
 
         $suffixes = Arr::get($nameRaw, 'suffixes');
         $suffix_num = count($suffixes);
         if ($suffix_num == 1) {
             return  Str::startsWith($suffixes[0], $letter);
-        } elseif (Str::startsWith($suffixes[$suffix_num-1], '-')) {
-            return Str::startsWith($suffixes[$suffix_num-2], $letter);
+        } elseif (Str::startsWith($suffixes[$suffix_num - 1], '-')) {
+            return Str::startsWith($suffixes[$suffix_num - 2], $letter);
         }
-        return  Str::startsWith($suffixes[$suffix_num-1], $letter);
+        return  Str::startsWith($suffixes[$suffix_num - 1], $letter);
     }
 
     public function isPattern(): bool

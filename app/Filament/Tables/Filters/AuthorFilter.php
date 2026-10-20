@@ -3,7 +3,6 @@
 namespace App\Filament\Tables\Filters;
 
 use App\Filament\Traits\HasAuthorComponentSetup;
-use App\Models\User;
 use Filament\Tables\Filters\SelectFilter;
 
 class AuthorFilter

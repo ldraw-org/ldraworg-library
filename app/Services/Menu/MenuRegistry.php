@@ -43,17 +43,17 @@ class MenuRegistry
         return [
             ['label' => 'Library', 'children' => self::library()],
             ['label' => 'Parts Tracker', 'children' => self::tracker()],
-            ['label' => 'Library General', 'children' =>[
+            ['label' => 'Library General', 'children' => [
                 AdminNavItem::SiteSettings,
                 AdminNavItem::LdConfigEdit,
                 AdminNavItem::KeywordManage,
                 AdminNavItem::PartReleaseManage,
             ]],
-            ['label' => 'Users', 'children' =>[
+            ['label' => 'Users', 'children' => [
                 AdminNavItem::UsersManage,
                 AdminNavItem::RolesManage,
             ]],
-            ['label' => 'Documentation', 'children' =>[
+            ['label' => 'Documentation', 'children' => [
                 AdminNavItem::DocumentationManage,
                 AdminNavItem::DocumentationCategoryManage,
             ]],
@@ -71,7 +71,7 @@ class MenuRegistry
             TrackerNavItem::WeeklyParts,
             LibraryNavItem::Documentation,
             ['label' => 'Other', 'children' => [
-                ['label' => 'Downloads', 'children' =>[
+                ['label' => 'Downloads', 'children' => [
                     OtherNavItem::UnofficialPartZip,
                     OtherNavItem::DailySubmitsZip
                 ]],
@@ -88,7 +88,7 @@ class MenuRegistry
 
     protected static function getSummaries(): array
     {
-        return ReviewSummary::ordered()->get()->map(fn($s) => [
+        return ReviewSummary::ordered()->get()->map(fn ($s) => [
             'label' => $s->header,
             'link' => route('tracker.summary.view', $s)
         ])->toArray();

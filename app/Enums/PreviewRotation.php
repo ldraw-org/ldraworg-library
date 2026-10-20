@@ -4,7 +4,6 @@ namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
 use Filament\Support\Contracts\HasLabel;
-use Illuminate\Contracts\Support\Htmlable;
 
 enum PreviewRotation: string implements HasLabel
 {
@@ -47,7 +46,8 @@ enum PreviewRotation: string implements HasLabel
         return "1 {$this->previewString()}";
     }
 
-    public function ldrawString(): string {
+    public function ldrawString(): string
+    {
         if ($this === self::Default) {
             return '';
         }

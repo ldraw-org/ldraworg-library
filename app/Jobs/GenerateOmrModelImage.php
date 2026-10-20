@@ -21,8 +21,7 @@ class GenerateOmrModelImage implements ShouldQueue
     public function __construct(
         OmrModel|Collection $omrModels,
         protected bool $onlyMissing = false
-    )
-    {
+    ) {
         $this->omrModels = $omrModels instanceof OmrModel
             ? new Collection([$omrModels])
             : $omrModels;

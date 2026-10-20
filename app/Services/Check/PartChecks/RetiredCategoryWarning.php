@@ -2,10 +2,8 @@
 
 namespace App\Services\Check\PartChecks;
 
-use App\Enums\PartCategory;
 use App\Services\Check\BaseCheck;
 use App\Services\Check\Enums\PartWarning;
-use App\Services\Check\Traits\PartOnly;
 
 class RetiredCategoryWarning extends BaseCheck
 {

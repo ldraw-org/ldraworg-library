@@ -60,7 +60,8 @@ class ZipFiles
                     500,
                     function (Collection $parts) use ($zip) {
                         $parts->each(fn (Part $part) => self::addPartToZip($zip, $part));
-                    });
+                    }
+                );
         }
     }
 
@@ -131,7 +132,8 @@ class ZipFiles
                         }
                     }
 
-                });
+                }
+            );
 
         $completeZip->close();
         $updateZip->close();

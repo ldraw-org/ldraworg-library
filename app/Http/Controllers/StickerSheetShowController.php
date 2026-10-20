@@ -12,8 +12,8 @@ class StickerSheetShowController extends Controller
 {
     public function __construct(
         protected StickerSheetManager $manager
-    )
-    {}
+    ) {
+    }
     public function __invoke(RebrickablePart $sheet): View
     {
         if ($sheet->rb_part_category_id !== 58) {

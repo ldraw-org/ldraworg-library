@@ -17,7 +17,7 @@ class HistoryUserIsRegistered extends BaseCheck
      */
     public function check(): iterable
     {
-        foreach($this->part->history() as $history) {
+        foreach ($this->part->history() as $history) {
             $username = Arr::get($history, 'username');
             $realname = Arr::get($history, 'realname');
             $usernameNotFound = !is_null($username) && User::where('name', $username)->doesntExist();

@@ -2,7 +2,6 @@
 
 namespace App\Services\Check;
 
-use App\Enums\CheckType;
 use App\Services\Check\Traits\InteractsWithCheckMessages;
 use Illuminate\Support\Collection;
 
@@ -18,7 +17,8 @@ class CheckMessageCollection extends Collection
         return static::make(
             collect($messages)
                 ->filter()
-                ->map(fn ($message) =>
+                ->map(
+                    fn ($message) =>
                 $message instanceof CheckMessage
                     ? $message
                     : CheckMessage::fromArray($message)

@@ -11,7 +11,8 @@ class ImageGenerator
 {
     public function __construct(
         public LDView $ldview,
-    ) {}
+    ) {
+    }
 
     public function regenerateImage(OmrModel $model): void
     {

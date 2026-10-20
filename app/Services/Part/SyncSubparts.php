@@ -12,8 +12,8 @@ class SyncSubparts
     public function __construct(
         protected ImageGenerator $partImageService,
         protected Validator      $partCheckService,
-    )
-    {}
+    ) {
+    }
 
     public function loadSubparts(Part $part, bool $quiet = false): void
     {

@@ -7,7 +7,6 @@ use App\Models\Part\Part;
 use App\Services\Parser\ImprovedParser;
 use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -26,13 +25,13 @@ class LDrawModelMaker
         $file[] = $part->get();
         $this->getPartSubparts($part)
           ->each(function (Part $p) use (&$file) {
-            if ($p->isTexmap()) {
-                $file[] = $p->get(true, true);
-            } else {
-                $file[] = "0 FILE {$p->meta_name}";
-                $file[] = $p->get();
-            }
-        });
+              if ($p->isTexmap()) {
+                  $file[] = $p->get(true, true);
+              } else {
+                  $file[] = "0 FILE {$p->meta_name}";
+                  $file[] = $p->get();
+              }
+          });
         return implode("\r\n", $file);
     }
 
@@ -73,30 +72,31 @@ class LDrawModelMaker
           ->select('id', 'filename', 'type', 'header')
           ->whereIn('id', array_keys($allLibraryIds))
           ->each(function (Part $p) use (&$lines) {
-                if ($p->isTexmap()) {
-                    $lines[] = $p->get(true, true);
-                } else {
-                    $lines[] = "0 FILE {$p->meta_name}";
-                    $lines[] = $p->get();
-                }
-            });
-        return $file .= implode("\r\n", $lines) . "\r\n";;
+              if ($p->isTexmap()) {
+                  $lines[] = $p->get(true, true);
+              } else {
+                  $lines[] = "0 FILE {$p->meta_name}";
+                  $lines[] = $p->get();
+              }
+          });
+        return $file .= implode("\r\n", $lines) . "\r\n";
+        ;
     }
 
 
     public function diff(Part $part1, Part $part2): string
     {
         $lines1 = collect(explode("\n", $part1->body->body))
-            ->filter(fn($line) => $line !== '' && $line[0] !== '0')
+            ->filter(fn ($line) => $line !== '' && $line[0] !== '0')
             ->values();
 
         $lines2 = collect(explode("\n", $part2->body->body))
-            ->filter(fn($line) => $line !== '' && $line[0] !== '0')
+            ->filter(fn ($line) => $line !== '' && $line[0] !== '0')
             ->values();
 
-        $delcolor   = ['1'=>'36','2'=>'12','3'=>'36','4'=>'36','5'=>'12'];
-        $addcolor   = ['1'=>'2','2'=>'10','3'=>'2','4'=>'2','5'=>'10'];
-        $matchcolor = ['1'=>'15','2'=>'8','3'=>'15','4'=>'15','5'=>'8'];
+        $delcolor   = ['1' => '36','2' => '12','3' => '36','4' => '36','5' => '12'];
+        $addcolor   = ['1' => '2','2' => '10','3' => '2','4' => '2','5' => '10'];
+        $matchcolor = ['1' => '15','2' => '8','3' => '15','4' => '15','5' => '8'];
 
         $m = $lines1->count();
         $n = $lines2->count();
@@ -106,29 +106,29 @@ class LDrawModelMaker
 
         for ($i = 0; $i < $m; $i++) {
             for ($j = 0; $j < $n; $j++) {
-                $curr[$j+1] = ($lines1[$i] === $lines2[$j])
+                $curr[$j + 1] = ($lines1[$i] === $lines2[$j])
                     ? $prev[$j] + 1
-                    : max($prev[$j+1], $curr[$j]);
+                    : max($prev[$j + 1], $curr[$j]);
             }
             [$prev, $curr] = [$curr, $prev];
         }
 
         $diffLines = collect();
-        $backtrack = function($i, $j) use (&$lines1, &$lines2, &$delcolor, &$addcolor, &$matchcolor, &$prev, &$diffLines, &$backtrack) {
-            if ($i > 0 && $j > 0 && $lines1[$i-1] === $lines2[$j-1]) {
-                $backtrack($i-1, $j-1);
+        $backtrack = function ($i, $j) use (&$lines1, &$lines2, &$delcolor, &$addcolor, &$matchcolor, &$prev, &$diffLines, &$backtrack) {
+            if ($i > 0 && $j > 0 && $lines1[$i - 1] === $lines2[$j - 1]) {
+                $backtrack($i - 1, $j - 1);
                 $diffLines->push(
-                    preg_replace_callback('#^([12345]) (\d+)#', fn($m) => $m[1] . ' ' . $matchcolor[$m[1]], $lines1[$i-1])
+                    preg_replace_callback('#^([12345]) (\d+)#', fn ($m) => $m[1] . ' ' . $matchcolor[$m[1]], $lines1[$i - 1])
                 );
-            } elseif ($j > 0 && ($i === 0 || $prev[$j] >= $prev[$j-1])) {
-                $backtrack($i, $j-1);
+            } elseif ($j > 0 && ($i === 0 || $prev[$j] >= $prev[$j - 1])) {
+                $backtrack($i, $j - 1);
                 $diffLines->push(
-                    preg_replace_callback('#^([12345]) (\d+)#', fn($m) => $m[1] . ' ' . $addcolor[$m[1]], $lines2[$j-1])
+                    preg_replace_callback('#^([12345]) (\d+)#', fn ($m) => $m[1] . ' ' . $addcolor[$m[1]], $lines2[$j - 1])
                 );
             } elseif ($i > 0) {
-                $backtrack($i-1, $j);
+                $backtrack($i - 1, $j);
                 $diffLines->push(
-                    preg_replace_callback('#^([12345]) (\d+)#', fn($m) => $m[1] . ' ' . $delcolor[$m[1]], $lines1[$i-1])
+                    preg_replace_callback('#^([12345]) (\d+)#', fn ($m) => $m[1] . ' ' . $delcolor[$m[1]], $lines1[$i - 1])
                 );
             }
         };

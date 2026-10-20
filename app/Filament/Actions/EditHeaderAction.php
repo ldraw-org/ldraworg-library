@@ -37,7 +37,7 @@ class EditHeaderAction extends EditAction
         $headerEditor = app(HeaderEdit::class);
 
         $this->label('Edit Header')
-            ->schema(fn() => $this->formSchema())
+            ->schema(fn () => $this->formSchema())
             ->mutateRecordDataUsing(fn (?Part $record, array $data) => $headerEditor->setupHeaderData($record, $data))
             ->using(fn (?Part $record, array $data): Part => $headerEditor->storeHeaderData($record, $data))
             ->after(function () {

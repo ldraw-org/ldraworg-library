@@ -24,7 +24,7 @@ trait InteractsWithCheckMessages
 
     protected function getCheckType(CheckType $checkType): self
     {
-        return $this->filter(fn ($message)=> $message->check->type() == $checkType);
+        return $this->filter(fn ($message) => $message->check->type() == $checkType);
     }
 
     public function hasErrors(): bool
@@ -103,7 +103,8 @@ trait InteractsWithCheckMessages
     public function tableArray(): Collection
     {
         return $this
-            ->map(fn ($message) =>
+            ->map(
+                fn ($message) =>
                 $message->check->isMultiLine()
                     ? $message->check->multiLineHeader()
                     : $message->message(),

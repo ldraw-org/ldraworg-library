@@ -24,8 +24,8 @@ class HeaderEdit
 {
     public function __construct(
         protected GenerateHeader $generateHeader,
-    )
-    {}
+    ) {
+    }
 
     public function setupHeaderData(Part $part, array $data): array
     {
@@ -102,13 +102,14 @@ class HeaderEdit
         return $currentChanges;
     }
 
-      private function getPartKeywords(Part $part): string
+    private function getPartKeywords(Part $part): string
     {
         if (is_null($part->rebrickable_part)) {
             $kws = $part->keywords;
         } else {
             $pattern = '/^(' . implode('|', ExternalSite::prefixes()) . ')/i';
-            $kws = $part->keywords->filter(fn (PartKeyword $kw) =>
+            $kws = $part->keywords->filter(
+                fn (PartKeyword $kw) =>
                 !preg_match($pattern, $kw->keyword)
             );
         }

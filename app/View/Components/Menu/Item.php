@@ -15,7 +15,7 @@ class Item extends Component
     public bool $isTopLevel;
 
     public function __construct(
-        public mixed $item, 
+        public mixed $item,
         public int $depth = 0
     ) {
         // Normalize the data
@@ -49,7 +49,9 @@ class Item extends Component
 
         // Recursive check: If I have children, am I "active" because they are?
         foreach ($this->children as $child) {
-            if ($this->isChildActive($child)) return true;
+            if ($this->isChildActive($child)) {
+                return true;
+            }
         }
 
         return false;
@@ -59,11 +61,15 @@ class Item extends Component
     {
 
         $link = $item instanceof Navigable ? $item->route() : ($item['link'] ?? '#');
-        if ($link !== '#' && request()->url() === $link) return true;
+        if ($link !== '#' && request()->url() === $link) {
+            return true;
+        }
 
         if (is_array($item) && isset($item['children'])) {
             foreach ($item['children'] as $child) {
-                if ($this->isChildActive($child)) return true;
+                if ($this->isChildActive($child)) {
+                    return true;
+                }
             }
         }
         return false;

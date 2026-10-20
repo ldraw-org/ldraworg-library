@@ -44,7 +44,8 @@ class LDrawServiceProvider extends ServiceProvider
         Str::macro('initials', function (string $string) {
             return (string) (new Stringable($string))->initials();
         });
-        Head::defaults(fn (HeadBuilder $head) => $head
+        Head::defaults(
+            fn (HeadBuilder $head) => $head
             ->canonical()
             ->applicationName(config('app.name'))
             ->og(

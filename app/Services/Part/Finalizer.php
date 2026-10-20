@@ -18,7 +18,8 @@ class Finalizer
         protected Validator      $validator,
         protected BasePartSync   $basePartSync,
         protected GenerateHeader $generateHeader,
-    ) {}
+    ) {
+    }
 
     public function handle(PartCollection $parts): void
     {

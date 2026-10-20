@@ -8,7 +8,6 @@ use App\Services\Parser\ParsedPartCollection;
 
 class PartChecker
 {
-
     /** @var array<class-string<BaseCheck>> */
     protected array $commonChecks = [
         \App\Services\Check\PartChecks\LibraryApprovedName::class,

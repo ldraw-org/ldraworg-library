@@ -24,7 +24,9 @@ class MakeLibraryCsv
             ->map(function (Part $part) {
                 $media = $part->getFirstMedia('image');
                 $imageDate = ($media?->created_at ?? $part->created_at)->format('Y-m-d');
-                if ($part->category === null) dd($part->filename);
+                if ($part->category === null) {
+                    dd($part->filename);
+                }
                 return [
                     basename($part->filename),
                     $part->description,

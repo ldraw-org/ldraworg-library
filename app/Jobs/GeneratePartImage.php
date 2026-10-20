@@ -21,8 +21,7 @@ class GeneratePartImage implements ShouldQueue
     public function __construct(
         Part|Collection $parts,
         protected bool $onlyMissing = false
-    )
-    {
+    ) {
         $this->parts = $parts instanceof Part
             ? new Collection([$parts])
             : $parts;

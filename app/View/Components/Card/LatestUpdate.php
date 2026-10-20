@@ -7,7 +7,6 @@ use App\Services\LibraryStatisticsService;
 use App\Services\PartReleaseService;
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\Component;
 
 class LatestUpdate extends Component
@@ -22,8 +21,7 @@ class LatestUpdate extends Component
     public function __construct(
         protected PartReleaseService $releaseService,
         protected LibraryStatisticsService $statistics,
-    )
-    {
+    ) {
         $this->update = $this->releaseService->currentRelease();
         $this->officialCount = $this->statistics->officialPartCount();
     }

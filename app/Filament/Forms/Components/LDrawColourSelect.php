@@ -2,7 +2,6 @@
 
 namespace App\Filament\Forms\Components;
 
-use App\Models\LdrawColour;
 use App\Services\LDraw\Managers\LDConfigManager;
 use Filament\Forms\Components\Select;
 

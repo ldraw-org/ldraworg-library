@@ -10,13 +10,14 @@ class PartReleaseService
 {
     public function __construct(
         protected CacheService $cache
-    ) {}
+    ) {
+    }
 
     public function currentRelease(): PartRelease
     {
         return $this->cache->remember(
             CacheKey::PartReleaseCurrent,
-            fn() => PartRelease::current(),
+            fn () => PartRelease::current(),
         );
     }
 }

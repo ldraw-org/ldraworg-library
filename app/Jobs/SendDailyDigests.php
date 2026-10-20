@@ -16,11 +16,11 @@ class SendDailyDigests implements ShouldQueue
     {
         // Use chunkById to keep memory usage low even if you have thousands of users
         User::whereHas('notification_parts', function ($q) {
-                $q->whereHas('events', function ($qu) {
-                    $qu->whereNull('part_release_id')
-                        ->whereBetween('created_at', [now()->subDay()->startOfDay(), now()->startOfDay()]);
-                });
-            })
+            $q->whereHas('events', function ($qu) {
+                $qu->whereNull('part_release_id')
+                    ->whereBetween('created_at', [now()->subDay()->startOfDay(), now()->startOfDay()]);
+            });
+        })
             ->where('is_legacy', false)
             ->where('is_synthetic', false)
             ->where('is_ptadmin', false)

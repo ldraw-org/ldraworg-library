@@ -2,10 +2,6 @@
 
 namespace App\Services\Cache;
 
-use App\Enums\PartType;
-use App\Models\LdrawColour;
-use App\Models\Part\Part;
-use App\Models\Part\PartRelease;
 use Illuminate\Support\Facades\Cache;
 
 class CacheService

@@ -16,8 +16,8 @@ class SyncUser implements ShouldQueue
     public function __construct(
         protected User $user,
         protected array $changes
-    )
-    {}
+    ) {
+    }
 
     public function handle(SyncUserParts $syncUserParts): void
     {

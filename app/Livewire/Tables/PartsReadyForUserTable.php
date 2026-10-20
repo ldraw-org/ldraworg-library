@@ -4,11 +4,8 @@ namespace App\Livewire\Tables;
 
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Concerns\InteractsWithActions;
-use App\Enums\EventType;
 use App\Enums\PartStatus;
-use App\Enums\PartType;
 use App\Models\Part\Part;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,14 +21,18 @@ class PartsReadyForUserTable extends BasicTable implements HasActions
                 Part::with('media', 'votes', 'official_part')
                     ->unofficial()
                     ->partsFolderOnly()
-                    ->whereHas('descendantsAndSelf', fn (Builder $query) => 
+                    ->whereHas(
+                        'descendantsAndSelf',
+                        fn (Builder $query) =>
                         $query->whereIn('part_status', [
                             PartStatus::Needs1MoreVote,
                             PartStatus::Needs2MoreVotes,
                         ])
                         ->whereDoesntHave('votes', fn (Builder $v) => $v->where('user_id', Auth::user()->id))
                     )
-                    ->whereDoesntHave('descendantsAndSelf', fn($q) =>
+                    ->whereDoesntHave(
+                        'descendantsAndSelf',
+                        fn ($q) =>
                         $q->where('part_status', PartStatus::ErrorsFound)
                     )
             )

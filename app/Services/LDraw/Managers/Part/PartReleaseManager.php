@@ -370,7 +370,7 @@ class PartReleaseManager
         $affectedIds = array_unique($affectedIds);
 
         // Dispatch jobs in small batches
-        Part::whereIn('id', $affectedIds)->chunk(500, function($parts) {
+        Part::whereIn('id', $affectedIds)->chunk(500, function ($parts) {
             $parts->each(function (Part $p) {
                 GeneratePartImage::dispatch($p->withoutRelations());
                 CheckPart::dispatch($p->withoutRelations());
@@ -381,6 +381,7 @@ class PartReleaseManager
         $this->cache->reset(CacheKey::OfficialPartCount);
         $this->cache->warm(CacheKey::OfficialPartCount);
         $this->cache->reset(CacheKey::PartReleaseCurrent);
-        $this->cache->warm(CacheKey::PartReleaseCurrent);;
+        $this->cache->warm(CacheKey::PartReleaseCurrent);
+        ;
     }
 }

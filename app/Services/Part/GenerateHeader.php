@@ -62,8 +62,7 @@ class GenerateHeader
         PartType $partType,
         ?PartTypeQualifier $partTypeQualifier = null,
         ?PartRelease $partRelease = null,
-    ): string
-    {
+    ): string {
         $ldrawOrgLine = $partType->ldrawString($isUnofficial);
         if ($partTypeQualifier !== null) {
             $ldrawOrgLine  .= " {$partTypeQualifier->value}";

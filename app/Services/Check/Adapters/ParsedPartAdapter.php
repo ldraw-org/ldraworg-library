@@ -16,8 +16,8 @@ class ParsedPartAdapter implements PartDataAdapter
 {
     public function __construct(
         protected ParsedPartCollection $part
-    )
-    {}
+    ) {
+    }
 
     public function description(): ?string
     {

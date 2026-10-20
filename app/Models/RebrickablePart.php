@@ -2,16 +2,13 @@
 
 namespace App\Models;
 
-use App\Services\External\Rebrickable;
 use App\Models\Omr\Set;
-use App\Models\Part\Part;
 use App\Models\Traits\HasParts;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Arr;
 
 #[Unguarded]
 class RebrickablePart extends Model

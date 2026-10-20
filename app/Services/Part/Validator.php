@@ -4,15 +4,14 @@ namespace App\Services\Part;
 
 use App\Models\Part\Part;
 use App\Services\Check\CheckMessage;
-use App\Services\Check\CheckMessageCollection;
 use App\Services\Check\PartChecker;
 
 class Validator
 {
     public function __construct(
         protected PartChecker $partChecker,
-    )
-    {}
+    ) {
+    }
 
     public function checkPart(Part $part, ?string $filename = null): void
     {

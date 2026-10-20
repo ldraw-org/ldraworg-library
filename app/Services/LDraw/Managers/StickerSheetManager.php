@@ -11,13 +11,12 @@ use Illuminate\Support\Str;
 
 class StickerSheetManager
 {
-
     public function __construct(
         protected Rebrickable $rebrickable,
         protected SetManager $setManager,
         protected RebrickablePartManager $rebrickablePartManager,
-    )
-    {}
+    ) {
+    }
 
     public function complete_set(RebrickablePart $sheet): Collection
     {
@@ -46,7 +45,7 @@ class StickerSheetManager
         });
     }
 
-    function refreshStickerParts(): void
+    public function refreshStickerParts(): void
     {
         $stickerParts = $this->rebrickable->getParts([
             'part_cat_id' => 58,
@@ -222,7 +221,7 @@ class StickerSheetManager
     protected function extractStickerSubpart(Part $part): ?Part
     {
         return $part->subparts
-            ?->first(fn(Part $p) => $p->category === PartCategory::Sticker);
+            ?->first(fn (Part $p) => $p->category === PartCategory::Sticker);
     }
 
 }

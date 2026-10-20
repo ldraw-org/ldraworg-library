@@ -16,8 +16,8 @@ class PartDownloadController extends Controller
 {
     public function __construct(
         protected ZipFiles $zipfiles
-    )
-    {}
+    ) {
+    }
 
     public function __invoke(string $library, string $filename): StreamedResponse|Response
     {

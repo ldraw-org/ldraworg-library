@@ -12,10 +12,10 @@ class VectorMath
         $a = new Vector($a);
         $b = new Vector($b);
         $c = new Vector($c);
-    
+
         return $a->subtract($b)
                  ->crossProduct($c->subtract($a))
-                 ->normalize();      
+                 ->normalize();
     }
 
     public function angleBetweenTriangles(array $triangle1, array $triangle2): float
@@ -36,22 +36,22 @@ class VectorMath
     public function isConvexQuad(array $quad): bool
     {
         [$p1, $p2, $p3, $p4] = $quad;
-    
+
         $v1 = (new Vector($p2))->subtract(new Vector($p1));
         $v2 = (new Vector($p3))->subtract(new Vector($p2));
         $v3 = (new Vector($p4))->subtract(new Vector($p3));
         $v4 = (new Vector($p1))->subtract(new Vector($p4));
-    
+
         $c1 = $v1->crossProduct($v2)->normalize();
         $c2 = $v2->crossProduct($v3)->normalize();
         $c3 = $v3->crossProduct($v4)->normalize();
         $c4 = $v4->crossProduct($v1)->normalize();
-    
+
         $dot12 = $c1->dotProduct($c2);
         $dot23 = $c2->dotProduct($c3);
         $dot34 = $c3->dotProduct($c4);
         $dot41 = $c4->dotProduct($c1);
-    
+
         return $dot12 > 0 && $dot23 > 0 && $dot34 > 0 && $dot41 > 0;
     }
 
@@ -67,7 +67,7 @@ class VectorMath
         } else {
             $angles[] = $this->angleAtVertex($points[1], $points[2], $points[3]);
             $angles[] = $this->angleAtVertex($points[2], $points[3], $points[0]);
-            $angles[] = $this->angleAtVertex($points[3], $points[0], $points[1]);          
+            $angles[] = $this->angleAtVertex($points[3], $points[0], $points[1]);
         }
 
         if (max($angles) > config('ldraw.check.max_point_angle')) {

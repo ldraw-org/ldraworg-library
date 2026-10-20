@@ -12,8 +12,8 @@ class PartReleaser
 {
     public function __construct(
         protected AddViewImage $addViewImage,
-    )
-    {}
+    ) {
+    }
 
     public function releaseAllMarkedUnofficialParts(PartRelease $release, User $actor, string $stagingPath): void
     {

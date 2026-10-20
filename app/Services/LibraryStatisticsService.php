@@ -6,13 +6,13 @@ use App\Enums\PartType;
 use App\Models\Part\Part;
 use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
-use Illuminate\Support\Facades\Cache;
 
 class LibraryStatisticsService
 {
     public function __construct(
         protected CacheService $cache
-    ) {}
+    ) {
+    }
 
     public function officialPartCount(bool $live = false): int
     {
