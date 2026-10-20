@@ -169,8 +169,8 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                             $data = $this->form->getState();
                             $fileText = $this->torsoText($data);
                             $set('new_part', $fileText);
-                            $this->parts = app(LDrawModelMaker::class)->webGl($fileText);
-                            $this->dispatch('render-model');
+                            $parts = app(LDrawModelMaker::class)->webGl($fileText);
+                            $this->dispatch('ldbi-render-model', parts: $parts);
                         }),
                     Step::make('Review and Submit')
                         ->schema([
@@ -181,14 +181,10 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                         ->readOnly()
                                         ->extraAttributes(['class' => 'font-mono']),
                                     View::make('forms.3d-view')
-                                        ->viewData([
-                                            'parts' => $this->parts,
-                                            'partname' => 'model.ldr',
-                                        ])
                                 ])
                         ]),
                 ])
-                    ->submitAction(new HtmlString(Blade::render("<x-filament::button type=\"submit\">\n<x-filament::loading-indicator wire:loading wire:target=\"submitFile\" class=\"h-5 w-5\" />\nSubmit\n</x-filament::button>")))
+                    ->submitAction(view('filament.wizard-submit-button', ['target' => 'submitFile']))
 
             ])
             ->statePath('data');
