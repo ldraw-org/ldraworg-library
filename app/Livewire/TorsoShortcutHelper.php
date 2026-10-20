@@ -80,6 +80,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             ->components([
                 Wizard::make([
                     Step::make('Torso and Template')
+                        ->key('torsoSelectStep')
                         ->schema([
                             Toggle::make('unusedTorsos')
                                 ->label('Show only torsos without a shortcut')
@@ -109,7 +110,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                         $set($site->value, $this->torso?->getExternalSiteNumber($site));
                                     }
                                 }),
-                            Select::make('template')
+                            Select::make('templateId')
                                 ->options($this->templateOptions)
                                 ->default(Part::firstWhere('filename', 'parts/76382.dat')->id)
                                 ->selectablePlaceholder(false)
@@ -124,14 +125,13 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                         }
                                         Arr::set($this->data, "part_{$index}_color", null);
                                     }
-                                    $this->form
-                                        ->getComponent('partFields')
-                                        ->getChildSchema()
-                                        ->fill();
                                 }),
                         ]),
                     Step::make('New Shortcut Details')
-                        ->schema([
+                        ->key('torsoEditStep')
+                        ->schema(
+                            Schema::make()
+                            ->components([
                             TextInput::make('description')
                                 ->required()
                                 ->extraAttributes(['class' => 'font-mono'])
@@ -164,7 +164,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                     }
                                 }),
                             $this->partInputs(),
-                        ])
+                        ])->deferLoading())
                         ->afterValidation(function (Get $get, Set $set) {
                             $data = $this->form->getState();
                             $fileText = $this->torsoText($data);
@@ -173,6 +173,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                             $this->dispatch('ldbi-render-model', parts: $parts);
                         }),
                     Step::make('Review and Submit')
+                        ->key('torsoReviewStep')
                         ->schema([
                             Grid::make(2)
                                 ->schema([
@@ -187,7 +188,8 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                     ->submitAction(view('filament.wizard-submit-button', ['target' => 'submitFile']))
 
             ])
-            ->statePath('data');
+            ->statePath('data')
+            ->key('torsoWizard');
     }
 
     public function submitFile(): void
@@ -252,7 +254,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             $name = basename($part['name'], '.dat');
             if ($part['variations'] !== []) {
                 $partOptions[] = Select::make("part_{$index}_part")
-                    ->options($part['variations'])
+                    ->options(fn () => $this->variationsOptions($part))
                     ->label('Variation');
             }
             $partOptions[] = LDrawColourSelect::make("part_{$index}_color")
@@ -263,6 +265,11 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         return Section::make('Parts')
             ->schema($partFields)
             ->key('partFields');
+    }
+
+    protected function variationsOptions(array $part): array
+    {
+        return $part['variations'];
     }
 
     protected function torsoText(array $data): string
@@ -335,8 +342,10 @@ class TorsoShortcutHelper extends Component implements HasSchemas
     #[Computed(persist: true)]
     protected function template(): ?array
     {
-        if (Arr::get($this->data, 'template')) {
-            $part = Part::with(['body', 'subparts', 'subparts.patterns'])->find($this->data['template']);
+        if (Arr::get($this->data, 'templateId')) {
+            $template = [];
+            $part = Part::with(['body', 'subparts', 'subparts.patterns'])->find($this->data['templateId']);
+            $template['id'] = $part->id;
             $template['name'] = $part->meta_name;
             $template['description'] = $part->description;
             $file = new ParsedPartCollection($part->body->body);
