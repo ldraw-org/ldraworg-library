@@ -1,9 +1,9 @@
 <?php
 
 use App\Livewire\FileEditor;
+use App\Models\Part\Part;
+use App\Models\Part\PartRelease;
 use Illuminate\Support\Facades\Route;
-
-//Route::middleware(['can:edit-files'])->get('/ace', FileEditor::class)->name('ace');
 
 Route::get('/daily-digest', function () {
     return new App\Mail\DailyDigest(auth()->user());
