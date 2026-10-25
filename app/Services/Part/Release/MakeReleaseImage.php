@@ -24,8 +24,8 @@ class MakeReleaseImage
             $paths = [public_path('images/updates/default_img.png')];
         }
         $generator = new UpdateImageGenerator(
-            width: 600,
-            height: 337,
+            width: 1200,
+            height: 675,
             caption: "LDraw.org Library Update {$release->name}",
             font: $fontPath
         );
