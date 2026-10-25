@@ -10,7 +10,7 @@ class MakeReleaseImage
 {
     public function handle(PartRelease $release): string
     {
-        $fontPath = resource_path('fonts/DejaVuSans.ttf');
+        $fontPath = resource_path('fonts/DejaVu/DejaVuSans.ttf');
         $images = $release
             ->getMedia('view')
             ->filter(fn (Media $media) => $media->getCustomProperty('highlight') === true);
