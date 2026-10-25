@@ -28,7 +28,6 @@ class MassUpdate extends Command
                 file_put_contents($imagePath, $image);
                 $release->clearMediaCollection('image');
                 $release->addMedia($imagePath)->toMediaCollection('image');
-                $this->info($imagePath);
             });
     }
 }

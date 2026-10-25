@@ -27,7 +27,8 @@ class MakeReleaseImage
             width: 1200,
             height: 675,
             caption: "LDraw.org Library Update {$release->name}",
-            font: $fontPath
+            font: $fontPath,
+            captionSize: 48
         );
         return $generator->generate($paths);
     }
