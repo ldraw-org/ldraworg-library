@@ -26,6 +26,7 @@ class MassUpdate extends Command
                 }
                 $imagePath = $tempDir->path("{$release->short}.png");
                 file_put_contents($imagePath, $image);
+                $release->clearMediaCollection('image');
                 $release->addMedia($imagePath)->toMediaCollection('image');
                 $this->info($imagePath);
             });

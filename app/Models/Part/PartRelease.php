@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
@@ -51,10 +52,10 @@ class PartRelease extends Model implements HasMedia
             ->registerMediaConversions(function (Media $media) {
                 $this->addMediaConversion('card')
                     ->keepOriginalImageFormat()
-                    ->fit(Fit::Contain, 600);
+                    ->fit(Fit::Contain, 600, 400);
                 $this->addMediaConversion('thumb')
                     ->keepOriginalImageFormat()
-                    ->fit(Fit::Contain, 160, 100);
+                    ->fit(Fit::Contain, 160, 160);
             });
         $this->addMediaCollection('view')
             ->registerMediaConversions(function (Media $media) {
@@ -123,7 +124,10 @@ class PartRelease extends Model implements HasMedia
             }
         );
     }
-
+    public function notesHtml(): HtmlString
+    {
+        return new HtmlString(nl2br($this->notes));
+    }
     public function notes_url(): ?string
     {
         if (Storage::exists("library/official/models/Note{$this->short}CA.txt")) {
@@ -147,5 +151,10 @@ class PartRelease extends Model implements HasMedia
     public function isLatest(): bool
     {
         return self::current()?->id === $this->id;
+    }
+
+    public function hasWindowsInstaller(): bool
+    {
+        return Storage::exists('library/updates/LDrawParts.exe');
     }
 }

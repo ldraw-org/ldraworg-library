@@ -21,13 +21,6 @@ class PartDependenciesTable extends BasicTable implements HasActions
     public PartDependency $dependency = PartDependency::Subparts;
     public Part $part;
 
-    #[On('mass-vote')]
-    public function searchUpdated()
-    {
-        $this->resetTable();
-        $this->render();
-    }
-
     public function placeholder(array $params = [])
     {
         return view('livewire.loading', $params);

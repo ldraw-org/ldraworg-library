@@ -188,7 +188,7 @@ class Show extends Component implements HasSchemas, HasActions
         return EditHeaderAction::make('editHeader')
             ->color('gray')
             ->outlined()
-            ->icon(LibraryIcon::EditHeader)
+            ->icon(LibraryIcon::FileDocumentOutline)
             ->record($this->part);
     }
 

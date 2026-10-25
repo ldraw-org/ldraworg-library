@@ -1,6 +1,6 @@
 <x-card
     {{ $attributes }}
-    title="Parts Update: {{$update->name}}"
+    title="LDraw.org Library Update: {{$update->name}}"
     link="{{route('part-update.index', ['latest'])}}"
     image="{{$update->getFirstMediaUrl('image','card')}}"
 >

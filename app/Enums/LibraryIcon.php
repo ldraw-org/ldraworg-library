@@ -27,7 +27,7 @@ enum LibraryIcon: string
     case Download = 'mdi-file-download-outline';
     case DownloadZip = 'mdi-folder-zip-outline';
     case ImageRefresh = 'mdi-image-refresh-outline';
-    case EditHeader = 'mdi-file-document-edit-outline';
+    case FileDocumentOutline = 'mdi-file-document-edit-outline';
     case HeaderRefresh = 'mdi-file-document-refresh-outline';
     case SubpartsRefresh = 'mdi-source-branch-refresh';
     case PartFlag = 'mdi-flag';
@@ -70,4 +70,7 @@ enum LibraryIcon: string
     case TableSortDesc = 'mdi-chevron-down';
     case TableSortAsc = 'mdi-chevron-up';
     case VoteOverturn = 'mdi-sync';
+    case CubeOutline = 'mdi-cube-outline';
+    case MicrosoftWindows = 'mdi-microsoft-windows';
+
 }

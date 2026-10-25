@@ -26,7 +26,7 @@ class MakeReleaseImage
         $generator = new UpdateImageGenerator(
             width: 600,
             height: 337,
-            caption: "Parts Update {$release->name}",
+            caption: "LDraw.org Library Update {$release->name}",
             font: $fontPath
         );
         return $generator->generate($paths);
