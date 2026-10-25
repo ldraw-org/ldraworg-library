@@ -47,6 +47,15 @@ class PartRelease extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
+        $this->addMediaCollection('image')
+            ->registerMediaConversions(function (Media $media) {
+                $this->addMediaConversion('card')
+                    ->keepOriginalImageFormat()
+                    ->fit(Fit::Contain, 600);
+                $this->addMediaConversion('thumb')
+                    ->keepOriginalImageFormat()
+                    ->fit(Fit::Contain, 160, 100);
+            });
         $this->addMediaCollection('view')
             ->registerMediaConversions(function (Media $media) {
                 $this->addMediaConversion('thumb')

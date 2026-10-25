@@ -4,11 +4,7 @@
         <div class="font-bold justify-self-start p-2">
             LDraw.org Parts Update {{$release->name}}
         </div>
-        @if (file_exists(public_path('images/updates/' . $release->short . '.png')))
-            <img class="w-1/3 justify-self-end p-2" src="{{asset('images/updates/' .  $release->short . '.png')}}"/>
-        @else
-            <img class="w-1/3 justify-self-end p-2" src="{{asset('images/updates/default.png')}}"/>
-        @endif
+        <img class="w-1/3 justify-self-end p-2" src="{{$release->getFirstMediaUrl('image','thumb')}}"/>
     </div>
     <div class="flex flex-row divide-x divide-gray-200">
         <div class="flex flex-col justify-items-start">
