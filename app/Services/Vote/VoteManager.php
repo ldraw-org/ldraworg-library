@@ -26,6 +26,7 @@ class VoteManager
     {
         $comment = $this->normalizeComment($comment);
         $existingVote = $this->findExistingVote($part, $user);
+        $wasHeld = $part->part_status === PartStatus::ErrorsFound;
 
         if (! $this->eligibility->canVote($user, $part, $vt, $comment, $existingVote)) {
             return;
@@ -41,8 +42,13 @@ class VoteManager
             $part->refresh();
             $part->updatePartStatus();
         }
+        $isHeld = $part->part_status === PartStatus::ErrorsFound;
 
-        if (($wasAdminCert && $vt === VoteType::CancelVote) || $isAdminCert) {
+        if (
+            ($wasAdminCert && $vt === VoteType::CancelVote) ||
+            $isAdminCert ||
+            ($wasHeld !== $isHeld)
+        ) {
             $this->rechecker->recheck($part);
         }
 

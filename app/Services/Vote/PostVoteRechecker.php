@@ -16,7 +16,7 @@ class PostVoteRechecker
     {
         // Call the relations as methods (not properties) so `unofficial()`
         // applies as a query scope before the results are fetched.
-        $part->parentsAndSelf()
+        $part->ancestorsAndSelf()
             ->unofficial()
             ->get()
             ->merge($part->descendants()->unofficial()->get())
