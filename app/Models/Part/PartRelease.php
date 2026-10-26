@@ -52,10 +52,10 @@ class PartRelease extends Model implements HasMedia
             ->registerMediaConversions(function (Media $media) {
                 $this->addMediaConversion('card')
                     ->keepOriginalImageFormat()
-                    ->fit(Fit::Contain, 600, 400);
+                    ->fit(Fit::Max, 600, 400);
                 $this->addMediaConversion('thumb')
                     ->keepOriginalImageFormat()
-                    ->fit(Fit::Contain, 160, 160);
+                    ->fit(Fit::Max, 160, 160);
             });
         $this->addMediaCollection('view')
             ->registerMediaConversions(function (Media $media) {

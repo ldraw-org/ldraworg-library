@@ -22,7 +22,7 @@
     ])>
         @if($hasImage)
             <div class="flex items-start justify-center p-4">
-                <img class="rounded" src="{{ $release->getFirstMediaUrl('image', 'thumb') }}"
+                <img class="object-scale-down rounded" src="{{ $release->getFirstMediaUrl('image', 'card') }}"
                      alt="Preview of LDraw.org Library Update {{ $release->name }}">
             </div>
         @endif
