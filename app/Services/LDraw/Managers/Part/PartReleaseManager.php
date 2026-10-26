@@ -8,6 +8,7 @@ use App\Enums\PartType;
 use App\Events\PartReleased;
 use App\Jobs\CheckPart;
 use App\Jobs\GeneratePartImage;
+use App\Jobs\GenerateReleaseImage;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartHistory;
@@ -264,6 +265,7 @@ class PartReleaseManager
                         'description' => $part->description,
                         'filename' => $part->filename,
                         'id' => $part->id,
+                        'highlight' => $part->release_highlight
                     ])
                     ->toMediaCollection('view');
             }
@@ -328,6 +330,8 @@ class PartReleaseManager
             Storage::put("library/official/ldraw/{$filename}", $contents);
         }
 
+        GenerateReleaseImage::dispatch($this->release);
+
         $this->release->enabled = true;
         $this->release->save();
     }
@@ -341,7 +345,8 @@ class PartReleaseManager
             'has_minor_edit' => false,
             'missing_parts' => null,
             'manual_hold_flag' => 0,
-            'marked_for_release' => false
+            'marked_for_release' => false,
+            'release_highlight' => false,
         ]);
         $officialIds = Part::official()->pluck('id');
 

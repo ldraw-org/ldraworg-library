@@ -52,6 +52,14 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                 Split::make([
                     ToggleColumn::make('marked_for_release')
                         ->grow(false),
+                    ToggleColumn::make('release_highlight')
+                        ->disabled(fn (Part $part) =>
+                            !$part->marked_for_release ||
+                            !$part->type->inPartsFolder() ||
+                            $part->category->isInactive() ||
+                            $part->category->isSticker()
+                        )
+                        ->grow(false),
                     SpatieMediaLibraryImageColumn::make('image')
                         ->collection('image')
                         ->conversion('thumb')
@@ -98,8 +106,9 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                     ->successRedirectUrl(route('tracker.activity')),
                 Action::make('reset-marked-parts')
                     ->action(function () {
-                        Part::unofficial()->where('can_release', false)->where('marked_for_release', true)->update([
-                            'marked_for_release' => false
+                        Part::unofficial()->where('marked_for_release', true)->update([
+                            'marked_for_release' => false,
+                            'release_highlight' => false,
                         ]);
                         Part::unofficial()
                             ->where('can_release', true)
