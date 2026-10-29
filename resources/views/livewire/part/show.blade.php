@@ -178,7 +178,7 @@
                 <x-3d-viewer.button.photo />
             </div>
             <div class="flex flex-col w-full h-full">
-                <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" main-model-name="{{str_replace('\\', '/', $part->meta_name)}}" model-id="{{$part->id}}" />
+                <x-3d-viewer class="border border-gray-200 rounded-lg overflow-hidden w-full h-[calc(100dvh-12rem)]" main-model-name="{{str_replace('\\', '/', $part->meta_name)}}" model-id="{{$part->id}}" />
             </div>
         </div>
     </x-filament::modal>
