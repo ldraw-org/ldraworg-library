@@ -44,14 +44,16 @@
         @endif
     </div>
 
-    @if($this->externalSiteActionGroup()->isVisible())
+    @if($part->canHaveRebrickablePart())
         <div class="flex flex-row space-x-2">
-            @if (!is_null($part->rebrickable_part))
-                <x-library-icon :icon="LibraryIcon::LinkOn" class="w-6" color="fill-gray-400" title="External site data provided by Rebrickable.com" />
-            @else
-                <x-library-icon :icon="LibraryIcon::LinkOff" class="w-6" color="fill-red-300" title="External site data provided by part keywords" />
+            @if($this->externalSiteActionGroup()->isVisible())
+                @if (!is_null($part->rebrickable_part))
+                    <x-library-icon :icon="LibraryIcon::LinkOn" class="w-6" color="fill-gray-400" title="External site data provided by Rebrickable.com" />
+                @else
+                    <x-library-icon :icon="LibraryIcon::LinkOff" class="w-6" color="fill-red-300" title="External site data provided by part keywords" />
+                @endif
+                <x-filament-action-group :group="$this->externalSiteActionGroup()" />
             @endif
-            <x-filament-action-group :group="$this->externalSiteActionGroup()" />
             <x-filament-action :action="$this->updateRebrickableDataAction()" />
         </div>
     @endif
