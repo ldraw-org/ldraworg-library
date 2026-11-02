@@ -57,16 +57,7 @@
             <x-slot name="heading">
                 3D View
             </x-slot>
-            <div class="flex flex-col space-y-2">
-                <div class="flex gap-2">
-                    <x-3d-viewer.button.normal />
-                    <x-3d-viewer.button.studlogo />
-                    <x-3d-viewer.button.photo />
-                </div>
-                <div class="flex flex-col w-full h-full">
-                    <x-3d-viewer class="border border-gray-200 w-full h-[80vh]" model-type="omr" />
-                </div>
-            </div>
+            <x-3d-viewer class="border border-gray-200 rounded-lg overflow-hidden w-full h-[calc(100dvh-12rem)]" model-type="omr" />
         </x-filament::modal>
     @endif
     </div>

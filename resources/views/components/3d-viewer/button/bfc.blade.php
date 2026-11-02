@@ -1,1 +1,1 @@
-<x-3d-viewer.button :icon="\App\Enums\LibraryIcon::ViewerBfc" label="Back Face Culling (BFC) mode" onClick="ldbi-bfc-mode" />
+<x-3d-viewer.button :icon="\App\Enums\LibraryIcon::ViewerBfc" label="Back Face Culling (BFC) mode" click="ldbi-bfc-mode" />

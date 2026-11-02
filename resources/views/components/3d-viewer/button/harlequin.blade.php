@@ -1,1 +1,1 @@
-<x-3d-viewer.button :icon="\App\Enums\LibraryIcon::ViewerHarlequin" label="Harlequin (random color) mode" onClick="ldbi-harlequin-mode" />
+<x-3d-viewer.button :icon="\App\Enums\LibraryIcon::ViewerHarlequin" label="Harlequin (random color) mode" click="ldbi-harlequin-mode" />

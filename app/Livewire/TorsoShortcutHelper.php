@@ -180,7 +180,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                         ->autosize()
                                         ->readOnly()
                                         ->extraAttributes(['class' => 'font-mono']),
-                                    View::make('forms.3d-view')
+                                    View::make('filament.forms.3d-viewer')
                                 ])
                         ]),
                 ])

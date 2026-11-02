@@ -1,6 +1,17 @@
-@props(['mainModelName' => '', 'modelType' => 'part', 'modelId' => null, 'parts' => []])
-<div id="ldbi-container" {{ $attributes }}>
-    <canvas id="ldbi-canvas" class="size-full"></canvas>
+@props(['hasButtonBar' => true, 'mainModelName' => '', 'modelType' => 'part', 'modelId' => null, 'parts' => []])
+<div class="flex flex-col space-y-2">
+    @if ($hasButtonBar)
+        @if($modelType === 'part')
+            <x-3d-viewer.button-bar.part-review />
+        @else
+            <x-3d-viewer.button-bar.model />
+        @endif
+    @endif
+    <div class="flex flex-col w-full h-full">
+        <div id="ldbi-container" {{ $attributes }}>
+            <canvas id="ldbi-canvas" class="size-full"></canvas>
+        </div>
+    </div>
 </div>
 @push('scripts')
     <x-3d-viewer.ldbi-scripts />
