@@ -37,17 +37,10 @@ LDrawOrg.Model = function(canvas, model, options) {
     this.orbitControls.handleKeys = false;
     this.orbitControls.screenSpacePanning = true;
 
-    // Axes helper (hidden by default)
+    // Axes helper (hidden by default). It is parented to baseObject in clear(), so it
+    // sits at the model's origin without copying a matrix that may not be up to date.
     this.axesHelper = new THREE.AxesHelper(20);
-    this.axesHelper.matrixAutoUpdate = false;
     this.axesHelper.visible = false;
-    this.axesHelper.reset = () => {
-        if (!this.baseObject) {
-            return;
-        }
-        this.axesHelper.matrix.copy(this.baseObject.matrixWorld);
-        this.axesHelper.updateMatrixWorld(true);
-    };
 
     // Ambient lighting
     this.scene.add(new THREE.AmbientLight(0x656565));
@@ -156,9 +149,6 @@ LDrawOrg.Model.prototype.onLoad = function() {
     // Repaint when textures are loaded
     LDR.Colors.loadTextures(() => this.render());
 
-    this.axesHelper.matrix.copy(this.baseObject.matrixWorld);
-    this.scene.add(this.axesHelper);
-
     this.onLoaded();
     this.onChange();
 };
@@ -177,6 +167,7 @@ LDrawOrg.Model.prototype.clear = function() {
     this.baseObject.add(opaqueObject);
     this.baseObject.add(sixteenObject);
     this.baseObject.add(transObject);
+    this.baseObject.add(this.axesHelper); // Moves with the model's centering offset
     this.scene.add(this.baseObject);
 
     this.mc = new LDR.MeshCollector(opaqueObject, sixteenObject, transObject);
