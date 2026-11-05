@@ -14,6 +14,7 @@ class Rebrickable
     protected string $apiUrl = 'https://rebrickable.com/api/v3/lego';
     protected string $apiKey;
     protected int $maxRetries = 3;
+    protected string $pageSize = '400';
 
     public function __construct()
     {
@@ -111,7 +112,7 @@ class Rebrickable
         return Cache::remember(
             "rebrickable_set_parts_{$setnumber}",
             3600,
-            fn () => $this->makeApiCall("{$this->apiUrl}/sets/{$setnumber}/parts/?inc_minifig_parts=1&inc_part_details=1&inc_color_details=0&page_size=1000")
+            fn () => $this->makeApiCall("{$this->apiUrl}/sets/{$setnumber}/parts/?inc_minifig_parts=1&inc_part_details=1&inc_color_details=0&page_size={$this->pageSize}")
         );
     }
 
