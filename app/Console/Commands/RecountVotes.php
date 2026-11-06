@@ -13,8 +13,7 @@ class RecountVotes extends Command
 
     public function handle(): void
     {
-        $this->info('Recounting all votes');
-        Part::unofficial()->lazy()->each->updatePartStatus();
-        $this->info('Vote recount complete');
+        \App\Jobs\RecountVotes::dispatch();
+        $this->info('Votes queued for recount');
     }
 }
