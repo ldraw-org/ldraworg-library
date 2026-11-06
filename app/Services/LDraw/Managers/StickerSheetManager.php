@@ -64,7 +64,6 @@ class StickerSheetManager
         $stickerParts = $this->rebrickable
             ->getParts([
                 'part_cat_id' => 58,
-                'page_size' => 1000,
             ]);
 
         $dbStickerParts = RebrickablePart::where('rb_part_category_id', 58)
