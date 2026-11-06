@@ -15,8 +15,6 @@ class ReloadSubparts extends Command
 
     public function handle(): void
     {
-        $lib = $this->option('official-only') ? 'official' : ($this->option('unofficial-only') ? 'unofficial' : 'all');
-        $this->info("Reloading {$lib} subparts");
         Part::query()
             ->when(
                 $this->option('unofficial-only') && !$this->option('official-only'),
@@ -26,7 +24,11 @@ class ReloadSubparts extends Command
                 $this->option('official-only') && !$this->option('unofficial-only'),
                 fn (Builder $query) => $query->official()
             )
-            ->each(fn (Part $p) => app(SyncSubparts::class)->loadSubparts($p));
-        $this->info('Subpart reload complete');
+            ->chunk(200, function ($parts) {
+                \App\Jobs\ReloadSubparts::dispatch(
+                    $parts->map(fn (Part $p) => $p->withoutRelations())
+                )->onQueue('maintenance');
+            });
+        $this->info('Subparts queued for reload');
     }
 }
