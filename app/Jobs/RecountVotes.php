@@ -17,6 +17,6 @@ class RecountVotes implements ShouldQueue
 
     public function handle(): void
     {
-        Part::unofficial()->lazy()->each->updatePartStatus();//
+        Part::unofficial()->lazy()->each->updatePartStatus();
     }
 }
