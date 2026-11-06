@@ -13,9 +13,12 @@ class SyncFixes extends Command
 {
     public function handle(): void
     {
-        $parts = Part::unofficial()
+        Part::unofficial()
             ->whereDoesntHave('official_part')
-            ->get();
-        \App\Jobs\SyncFixes::dispatch($parts);
+            ->chunk(200, function ($parts) {
+                \App\Jobs\SyncFixes::dispatch(
+                    $parts->map(fn (Part $p) => $p->withoutRelations())
+                )->onQueue('maintenance');
+            });
     }
 }
