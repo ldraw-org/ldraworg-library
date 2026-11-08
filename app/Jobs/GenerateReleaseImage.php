@@ -6,7 +6,11 @@ use App\Models\Part\PartRelease;
 use App\Services\Part\Release\ReleaseImageGenerator;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Queue;
+use Illuminate\Queue\Attributes\Timeout;
 
+#[Timeout(1800)]
+#[Queue('release')]
 class GenerateReleaseImage implements ShouldQueue
 {
     use Queueable;

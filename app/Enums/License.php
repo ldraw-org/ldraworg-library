@@ -45,4 +45,13 @@ enum License: string
             self::CC0 => 'CC0 - Creative Commons Zero 1.0 Universal',
         };
     }
+
+    public function url(): string
+    {
+        return match($this) {
+            self::CC_BY_4 => 'https://creativecommons.org/licenses/by/4.0/',
+            self::CC_BY_2 => 'https://creativecommons.org/licenses/by/2.0/',
+            self::CC0 => 'https://creativecommons.org/publicdomain/zero/1.0/',
+        };
+    }
 }

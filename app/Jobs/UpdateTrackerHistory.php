@@ -6,7 +6,11 @@ use App\Models\Part\Part;
 use App\Models\TrackerHistory;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Queue;
+use Illuminate\Queue\Attributes\Timeout;
 
+#[Timeout(1800)]
+#[Queue('maintenance')]
 class UpdateTrackerHistory implements ShouldQueue
 {
     use Queueable;

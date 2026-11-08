@@ -6,7 +6,13 @@ use App\Models\Part\Part;
 use App\Services\Part\GenerateHeader;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\Attributes\Queue;
+use Illuminate\Queue\Attributes\Timeout;
 
+#[DeleteWhenMissingModels]
+#[Timeout(1800)]
+#[Queue('maintenance')]
 class MassHeaderGenerate implements ShouldQueue
 {
     use Queueable;

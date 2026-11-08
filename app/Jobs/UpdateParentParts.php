@@ -9,11 +9,15 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\Attributes\Queue;
+use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Part\Part;
 
 #[DeleteWhenMissingModels]
+#[Timeout(1800)]
+#[Queue('maintenance')]
 class UpdateParentParts implements ShouldQueue
 {
     use Dispatchable;

@@ -7,7 +7,11 @@ use App\Services\LDraw\Managers\StickerSheetManager;
 use App\Services\Part\RebrickableSync;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Queue;
+use Illuminate\Queue\Attributes\Timeout;
 
+#[Timeout(1800)]
+#[Queue('maintenance')]
 class UpdateRebrickableStickerParts implements ShouldQueue
 {
     use Queueable;

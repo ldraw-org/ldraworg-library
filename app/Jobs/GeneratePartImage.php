@@ -8,10 +8,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\Attributes\Queue;
 use Illuminate\Queue\Attributes\Timeout;
 
 #[DeleteWhenMissingModels]
 #[Timeout(1800)]
+#[Queue('maintenance')]
 class GeneratePartImage implements ShouldQueue
 {
     use Queueable;

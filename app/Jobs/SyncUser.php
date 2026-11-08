@@ -7,8 +7,10 @@ use App\Services\User\SyncUserParts;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\Attributes\Queue;
 
 #[DeleteWhenMissingModels]
+#[Queue('maintenance')]
 class SyncUser implements ShouldQueue
 {
     use Queueable;

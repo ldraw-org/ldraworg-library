@@ -7,8 +7,12 @@ use App\Services\Part\RebrickableSync;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\Attributes\Queue;
+use Illuminate\Queue\Attributes\Timeout;
 
 #[DeleteWhenMissingModels]
+#[Timeout(1800)]
+#[Queue('maintenance')]
 class UpdateRebrickable implements ShouldQueue
 {
     use Queueable;

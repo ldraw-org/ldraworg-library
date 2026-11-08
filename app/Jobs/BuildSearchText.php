@@ -5,9 +5,11 @@ namespace App\Jobs;
 use App\Models\Part\Part;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Queue;
 use Illuminate\Queue\Attributes\Timeout;
 
 #[Timeout(1800)]
+#[Queue('maintenance')]
 class BuildSearchText implements ShouldQueue
 {
     use Queueable;
