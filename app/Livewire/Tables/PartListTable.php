@@ -113,7 +113,7 @@ class PartListTable extends BasicTable
                 ->preload()
                 ->multiple(),
             QueryBuilder::make()
-                ->constraintPickerColumns(['md' => 2, 'xl' => 4])
+                ->constraintPickerColumns(['md' => 2, 'xl' => 3])
                 ->constraints([
                     // TODO: Third Party
                     TextConstraint::make('description'),
