@@ -152,7 +152,7 @@ class ZipFiles
 
     protected function stagePart(TemporaryDirectory $scratch, Part $part): string
     {
-        $path = $scratch->path("{$part->id}.dat");
+        $path = $scratch->path() . '/' . $part->id;
         file_put_contents($path, $part->get());
 
         return $path;
