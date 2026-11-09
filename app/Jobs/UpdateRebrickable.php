@@ -2,9 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Collections\PartCollection;
 use App\Models\Part\Part;
 use App\Services\Part\RebrickableSync;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\Attributes\Queue;
@@ -17,20 +19,21 @@ class UpdateRebrickable implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new job instance.
-     */
+
+    protected Collection $parts;
+
     public function __construct(
-        protected Part $part,
+        Part|Collection $parts,
         protected bool $updateOfficial = false
     ) {
+        $this->parts = $parts instanceof Part
+            ? new Collection([$parts])
+            : $parts;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(RebrickableSync $partRebrickableService): void
     {
-        $partRebrickableService->syncRebrickablePart($this->part, $this->updateOfficial);
+        $this->parts
+            ->each(fn (Part $part) => $partRebrickableService->syncRebrickablePart($part, $this->updateOfficial));
     }
 }

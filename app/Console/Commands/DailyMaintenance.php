@@ -30,22 +30,16 @@ class DailyMaintenance extends Command
             $this->info('Resyncing part fixes');
             $this->call('lib:sync-fixes');
 
-            $this->info('Removing orphan keywords');
-            PartKeyword::doesntHave('parts')->delete();
+            if (PartKeyword::doesntHave('parts')->exists()) {
+                $this->info('Removing orphan keywords');
+                PartKeyword::doesntHave('parts')->delete();
+            }
 
             $this->info('Ensuring initial submit event exists');
             $this->call('lib:fix-initial-submit');
 
-            $this->info('Refreshing Rebrickable data');
-            Part::canHaveRebrickablePart()
-                ->where(
-                    fn ($query) =>
-                    $query
-                        ->orwhereBetween('created_at', [now(), now()->subDay()])
-                        ->orWhereBetween('created_at', [now()->subWeek()->subDay(), now()->subWeek()])
-                        ->orWhereBetween('created_at', [now()->subMonth()->subDay(), now()->subMonth()])
-                )
-                ->each(fn (Part $part) => UpdateRebrickable::dispatch($part->withoutRelations()));
+            $this->info('Queue update of uonfficial parts without rebrickable data');
+            $this->call('lib:update-rebrickable');
 
             $this->info('Reloading colors for LDConfig');
             $this->call('lib:update-ldconfig');
