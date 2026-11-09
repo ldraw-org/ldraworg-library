@@ -147,12 +147,12 @@ class ZipFiles
     protected function newScratch(): TemporaryDirectory
     {
         // Keep off /tmp: in Docker it is often RAM-backed or small.
-        return TemporaryDirectory::make(storage_path('app/scratch'))->deleteWhenDestroyed();
+        return TemporaryDirectory::make()->deleteWhenDestroyed();
     }
 
     protected function stagePart(TemporaryDirectory $scratch, Part $part): string
     {
-        $path = $scratch->path((string) $part->id);
+        $path = $scratch->path("{$part->id}.dat");
         file_put_contents($path, $part->get());
 
         return $path;
