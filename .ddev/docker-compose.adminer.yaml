@@ -1,0 +1,99 @@
+#ddev-generated
+services:
+  adminer:
+    container_name: ddev-${DDEV_SITENAME}-adminer
+    image: ${ADMINER_DOCKER_IMAGE:-adminer:6-standalone}
+    hostname: ${DDEV_SITENAME}-adminer
+    # Started as root, entrypoint.sh drops to the host user.
+    user: root
+    environment:
+      - ADMINER_DEFAULT_DRIVER=${ADMINER_DEFAULT_DRIVER:-${DDEV_DATABASE_FAMILY:-server}}
+      - ADMINER_DEFAULT_SERVER=${ADMINER_DEFAULT_SERVER:-db}
+      - ADMINER_DEFAULT_DB=${ADMINER_DEFAULT_DB:-db}
+      - ADMINER_DEFAULT_USERNAME=${ADMINER_DEFAULT_USERNAME:-db}
+      - ADMINER_DEFAULT_PASSWORD=${ADMINER_DEFAULT_PASSWORD:-db}
+      - ADMINER_PLUGINS=${ADMINER_PLUGINS:-tables-filter}
+      - ADMINER_DESIGN=${ADMINER_DESIGN:-}
+      - DDEV_UID=${DDEV_UID}
+      - DDEV_GID=${DDEV_GID}
+      - VIRTUAL_HOST=${DDEV_HOSTNAME}
+      - HTTP_EXPOSE=9100:8080
+      - HTTPS_EXPOSE=9101:8080
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+    volumes:
+      - ".:/mnt/ddev_config"
+      - "../:/mnt/ddev_app"
+      - "ddev-global-cache:/mnt/ddev-global-cache"
+    configs:
+      - source: ddev-passwordless-login.php
+        target: /var/www/html/plugins/ddev-passwordless-login.php
+        mode: "0444"
+      - source: entrypoint.sh
+        target: /usr/local/bin/entrypoint.sh
+        mode: "0755"
+
+configs:
+  ddev-passwordless-login.php:
+    content: |
+      <?php
+      /**
+       * Adminer plugin for logging in with the DDEV credentials.
+       *
+       * Adminer connects only with a password from its session, so store it the
+       * same way its own login does and redirect to the authenticated URL.
+       */
+      class DDEVPasswordlessLogin extends Adminer\Plugin {
+        function __construct() {
+          if (count($$_GET)) {
+            return;
+          }
+          $$driver = ['mysql' => 'server', 'postgres' => 'pgsql'][$$_ENV['ADMINER_DEFAULT_DRIVER']] ?? $$_ENV['ADMINER_DEFAULT_DRIVER'];
+          $$server = $$_ENV['ADMINER_DEFAULT_SERVER'];
+          $$username = $$_ENV['ADMINER_DEFAULT_USERNAME'];
+          $$db = $$_ENV['ADMINER_DEFAULT_DB'];
+          Adminer\set_password($$driver, $$server, $$username, $$_ENV['ADMINER_DEFAULT_PASSWORD']);
+          Adminer\redirect(Adminer\auth_url($$driver, $$server, $$username, $$db));
+        }
+
+        function login($$login, $$password) {
+          // Adminer refuses a login without a password, SQLite has none.
+          if (Adminer\JUSH === 'sqlite') {
+            return true;
+          }
+        }
+      }
+
+  entrypoint.sh:
+    content: |
+      #!/bin/sh
+      set -e
+      # Serve as the host user, so that SQLite databases in the project keep its
+      # ownership. Only the uid and gid matter, the name is cosmetic.
+      if [ "$$(id -u)" = 0 ]; then
+        chown "$$DDEV_UID:$$DDEV_GID" plugins-enabled
+        grep -q '^ddev:' /etc/passwd || echo "ddev:x:$$DDEV_UID:$$DDEV_GID:::/bin/sh" >> /etc/passwd
+        exec su ddev -s /bin/sh -c 'exec "$$@"' -- sh "$$0" "$$@"
+      fi
+      if [ -n "$$ADMINER_DESIGN" ]; then
+        # Only create link on initial start, to ensure that explicit changes to
+        # adminer.css after the container was started once are preserved.
+        if [ ! -e .adminer-init ]; then
+          # See https://github.com/TimWolla/docker-adminer/pull/216
+          for css_file in adminer.css adminer-dark.css; do
+            if [ -f "designs/$$ADMINER_DESIGN/$$css_file" ]; then
+              ln -sf "designs/$$ADMINER_DESIGN/$$css_file" adminer.css
+              break
+            fi
+          done
+        fi
+      fi
+      number=1
+      # Always enable the login, ignoring a duplicate from an older config.
+      for PLUGIN in $$(printf '%s\n' ddev-passwordless-login $$ADMINER_PLUGINS | awk '!seen[$$0]++'); do
+        php plugin-loader.php "$$PLUGIN" > plugins-enabled/$$(printf "%03d" $$number)-$$PLUGIN.php
+        number=$$(($$number+1))
+      done
+      touch .adminer-init || true
+      exec "$$@"
