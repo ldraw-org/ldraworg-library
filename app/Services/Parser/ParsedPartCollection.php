@@ -218,7 +218,8 @@ class ParsedPartCollection extends Collection
     {
         return $this
             ->pluck('file')
-            ->merge($this->pluck('glossfile'), $this->pluck('tex_geometry.line.file'))
+            ->merge($this->pluck('glossfile'))
+            ->merge($this->pluck('line.file'))
             ->filter()
             ->map(fn (string $subpart) => Str::of($subpart)->lower()->trim()->toString())
             ->unique()
