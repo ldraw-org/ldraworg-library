@@ -53,6 +53,7 @@ class FilamentServiceProvider extends ServiceProvider
                 ->persistFiltersInSession()
                 ->persistSearchInSession()
                 ->persistSortInSession()
+                ->persistRecordsPerPageInSession()
                 ->striped()
                 ->paginated([10, 25, 50, 100])
                 ->defaultPaginationPageOption(25);
