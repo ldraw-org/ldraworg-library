@@ -142,8 +142,12 @@ class Rebrickable
         );
     }
 
-    public function getThemes(): Collection
+    public function getThemes(bool $fresh = false): Collection
     {
+        if ($fresh) {
+            Cache::forget('rebrickable_themes');
+        }
+
         return Cache::remember(
             "rebrickable_themes",
             86400,
