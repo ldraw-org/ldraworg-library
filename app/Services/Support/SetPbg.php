@@ -34,10 +34,9 @@ class SetPbg
             return false;
         }
 
-        // A newly created set has already had its one sync attempt
-        $partsAvailable = $set->wasRecentlyCreated
-            ? $set->rebrickable_parts()->exists()
-            : $this->setWriter->refreshPartsIfStale($set);
+        // Only a never synced set needs Rebrickable, and a newly created one has already had its attempt
+        $partsAvailable = $set->refreshed_at !== null
+            || (! $set->wasRecentlyCreated && $this->setWriter->syncParts($set));
 
         if (! $partsAvailable) {
             $this->messages->add('errors', 'Unable to load the set parts from Rebrickable');
@@ -46,10 +45,7 @@ class SetPbg
 
         $items = $this->collectItems($set->rebrickable_parts()->with('parts')->get());
 
-        $set->pbg = $this->makePbg($set, $this->resolveAliases($items));
-        $set->save();
-
-        return $set->pbg;
+        return $this->makePbg($set, $this->resolveAliases($items));
     }
 
     /**

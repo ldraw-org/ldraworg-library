@@ -46,20 +46,21 @@ class Writer
                 'rb_url' => $setData['set_url'],
             ]
         );
-        $this->refreshPartsIfStale($set);
+        if ($set->rebrickable_parts()->doesntExist() ||
+            $set->refreshed_at === null ||
+            $set->refreshed_at->lt(now()->subMonth())
+        ) {
+            $this->syncParts($set);
+        }
 
         return $set;
     }
 
     /**
-     * @return bool false when stale parts could not be refreshed
+     * @return bool false when the parts could not be fetched, leaving the existing parts untouched
      */
-    public function refreshPartsIfStale(Set $set): bool
+    public function syncParts(Set $set): bool
     {
-        if ($set->refreshed_at?->gte(now()->subMonth()) && $set->rebrickable_parts()->exists()) {
-            return true;
-        }
-
         try {
             $this->syncSetParts->handle($set);
         } catch (RebrickableRequestFailed) {

@@ -65,8 +65,8 @@ beforeEach(function () {
     LdrawColour::factory()->create(['code' => 4, 'rebrickable_id' => 4]);
 });
 
-it('builds and stores a pbg from stored set parts without calling Rebrickable', function () {
-    $set = pbgSet();
+it('builds a pbg from the stored parts of an old set without calling Rebrickable', function () {
+    $set = pbgSet(['refreshed_at' => now()->subYears(5)]);
     $brick = pbgRebrickablePart('3001');
     pbgLdrawPart('3001', $brick);
     pbgAttach($set, $brick, 4, 3);
@@ -88,7 +88,6 @@ it('builds and stores a pbg from stored set parts without calling Rebrickable', 
         '3001.dat: [color=4][count=4]',
         '3001.dat: [color=15][count=2]',
     ]);
-    expect($set->fresh()->pbg)->toBe($pbg);
     expect($generator->messages->isEmpty())->toBeTrue();
 });
 
@@ -170,8 +169,8 @@ it('reports missing parts with escaped details and unmapped colours', function (
     expect($generator->messages->get('errors'))->toBe(['LDraw color not found for part 3005, using 16']);
 });
 
-it('refreshes stale set parts before generating', function () {
-    $set = pbgSet(['refreshed_at' => now()->subMonths(2)]);
+it('syncs a set that has never been synced before generating', function () {
+    $set = pbgSet(['refreshed_at' => null]);
     pbgAttach($set, pbgRebrickablePart('3001'), 0);
     pbgLdrawPart('3001', RebrickablePart::firstWhere('number', '3001'));
     Http::fake([
@@ -191,8 +190,8 @@ it('refreshes stale set parts before generating', function () {
     expect($set->fresh()->refreshed_at->isToday())->toBeTrue();
 });
 
-it('returns an error instead of a pbg when a stale set cannot be refreshed', function () {
-    $set = pbgSet(['refreshed_at' => now()->subMonths(2)]);
+it('returns an error instead of a pbg when an unsynced set cannot be synced', function () {
+    $set = pbgSet(['refreshed_at' => null]);
     pbgAttach($set, pbgRebrickablePart('3001'), 0);
     Http::fake(['rebrickable.com/*' => Http::response('Server Error', 500)]);
 
@@ -200,7 +199,7 @@ it('returns an error instead of a pbg when a stale set cannot be refreshed', fun
 
     expect($generator->pbg('1234-1'))->toBeFalse();
     expect($generator->messages->get('errors'))->toBe(['Unable to load the set parts from Rebrickable']);
-    expect($set->fresh()->pbg)->toBeNull();
+    expect($set->fresh()->refreshed_at)->toBeNull();
 });
 
 it('reports a set that does not exist', function () {
