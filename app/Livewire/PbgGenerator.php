@@ -8,6 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -49,11 +50,11 @@ class PbgGenerator extends Component implements HasSchemas
     {
         $data = $this->form->getState();
         $set = $data['set-number'];
-        if (!str_ends_with($set, '-1')) {
-            $set .= "-1";
+        if (! Str::isMatch('/-\d+$/', $set)) {
+            $set .= '-1';
         }
         $set_pbg = app(SetPbg::class);
-        $this->pbg = $set_pbg->pbg($set);
+        $this->pbg = $set_pbg->pbg($set, true) ?: null;
         $this->hasMessages = $set_pbg->messages->isNotEmpty();
         $this->hasErrors = $set_pbg->messages->has('errors');
         $this->errors = $set_pbg->messages->get('errors');

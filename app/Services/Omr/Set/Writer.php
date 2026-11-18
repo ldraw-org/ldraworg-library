@@ -46,21 +46,30 @@ class Writer
                 'rb_url' => $setData['set_url'],
             ]
         );
-        if ($set->rebrickable_parts()->doesntExist() ||
-            $set->refreshed_at === null ||
-            $set->refreshed_at->lt(now()->subMonth())
-        ) {
-            try {
-                $this->syncSetParts->handle($set);
-            } catch (RebrickableRequestFailed) {
-                return $set;
-            }
-
-            $set->refreshed_at = now();
-            $set->save();
-        }
+        $this->refreshPartsIfStale($set);
 
         return $set;
+    }
+
+    /**
+     * @return bool false when stale parts could not be refreshed
+     */
+    public function refreshPartsIfStale(Set $set): bool
+    {
+        if ($set->refreshed_at?->gte(now()->subMonth()) && $set->rebrickable_parts()->exists()) {
+            return true;
+        }
+
+        try {
+            $this->syncSetParts->handle($set);
+        } catch (RebrickableRequestFailed) {
+            return false;
+        }
+
+        $set->refreshed_at = now();
+        $set->save();
+
+        return true;
     }
 
     protected function ensureThemeExists(int $themeId): bool

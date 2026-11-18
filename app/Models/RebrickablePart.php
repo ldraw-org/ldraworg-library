@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @property-read object{ldraw_colour_id: ?int, quantity: ?int, is_spare: bool} $pivot
+ */
 #[Unguarded]
 class RebrickablePart extends Model
 {
