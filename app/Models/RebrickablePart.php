@@ -40,7 +40,7 @@ class RebrickablePart extends Model
     public function sets(): BelongsToMany
     {
         return $this->belongsToMany(Set::class, 'rebrickable_parts_sets', 'rebrickable_part_id', 'set_id')
-                    ->withPivot('ldraw_colour_id', 'quantity');
+                    ->withPivot('ldraw_colour_id', 'quantity', 'is_spare');
     }
 
     #[Scope]

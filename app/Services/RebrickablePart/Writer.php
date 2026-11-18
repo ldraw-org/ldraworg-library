@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Services\LDraw\Managers;
+namespace App\Services\RebrickablePart;
 
-use App\Models\RebrickablePart;
 use App\Models\Part\Part;
+use App\Models\RebrickablePart;
 use App\Services\External\Rebrickable;
 use Illuminate\Support\Arr;
 
-class RebrickablePartManager
+class Writer
 {
     public function __construct(
         protected Rebrickable $rebrickable,
@@ -26,13 +26,15 @@ class RebrickablePartManager
             'brickowl' => Arr::get($partData, 'external_ids.BrickOwl', []),
             'lego' => Arr::get($partData, 'external_ids.LEGO', []),
             'rb_part_category_id' => Arr::get($partData, 'part_cat_id'),
-            'element' => Arr::get($partData, 'element'),
             'refreshed_at' => now(),
         ];
 
+        // Not every source provides these, so a missing value must not erase a stored one
+        $optionalValues = Arr::whereNotNull(Arr::only($partData, ['element', 'print_of']));
+
         return RebrickablePart::updateOrCreate(
             ['number' => $values['number']],
-            $values
+            [...$values, ...$optionalValues]
         );
     }
 

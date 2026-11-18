@@ -3,14 +3,14 @@
 namespace App\Services\Part;
 
 use App\Models\Part\Part;
-use App\Services\LDraw\Managers\RebrickablePartManager;
 use App\Services\LDraw\Managers\StickerSheetManager;
+use App\Services\RebrickablePart\Writer as RebrickablePartWriter;
 
 class RebrickableSync
 {
     public function __construct(
         protected StickerSheetManager $stickerSheetManager,
-        protected RebrickablePartManager $rebrickablePartManager,
+        protected RebrickablePartWriter $rebrickablePartWriter,
         protected GenerateHeader $generateHeader,
     ) {
     }
@@ -26,7 +26,7 @@ class RebrickableSync
             $part->rebrickable_part()->associate($rbPart);
             $part->save();
         } else {
-            $this->rebrickablePartManager->findOrCreateFromPart($part);
+            $this->rebrickablePartWriter->findOrCreateFromPart($part);
         }
 
         $part->setExternalSiteKeywords($updateOfficial);

@@ -41,7 +41,7 @@ class Set extends Model
     public function rebrickable_parts(): BelongsToMany
     {
         return $this->belongsToMany(RebrickablePart::class, 'rebrickable_parts_sets', 'set_id', 'rebrickable_part_id')
-                    ->withPivot('ldraw_colour_id', 'quantity');
+                    ->withPivot('ldraw_colour_id', 'quantity', 'is_spare');
     }
 
     public function mainModel(): OmrModel

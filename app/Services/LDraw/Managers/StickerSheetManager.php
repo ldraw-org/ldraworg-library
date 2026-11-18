@@ -6,6 +6,8 @@ use App\Enums\PartCategory;
 use App\Models\Part\Part;
 use App\Models\RebrickablePart;
 use App\Services\External\Rebrickable;
+use App\Services\Omr\Set\Writer;
+use App\Services\RebrickablePart\Writer as RebrickablePartWriter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
@@ -13,8 +15,8 @@ class StickerSheetManager
 {
     public function __construct(
         protected Rebrickable $rebrickable,
-        protected SetManager $setManager,
-        protected RebrickablePartManager $rebrickablePartManager,
+        protected Writer $setWriter,
+        protected RebrickablePartWriter $rebrickablePartWriter,
     ) {
     }
 
@@ -88,7 +90,7 @@ class StickerSheetManager
         $stickerParts
             ->filter(fn (array $item) => isset($newNumbersSet[$item['part_num']]))
             ->each(function (array $item) {
-                $rbPart  = $this->rebrickablePartManager->updateOrCreateFromArray($item);
+                $rbPart  = $this->rebrickablePartWriter->updateOrCreateFromArray($item);
                 $this->refreshStickerSets($rbPart);
             });
     }
@@ -96,7 +98,7 @@ class StickerSheetManager
     public function refreshStickerSets(RebrickablePart $sheet): void
     {
         $this->rebrickable->getPartColorSets($sheet->number, 9999)
-            ->each(fn (array $set) => $this->setManager->updateOrCreateSetFromArray($set));
+            ->each(fn (array $set) => $this->setWriter->updateOrCreateSetFromArray($set));
     }
 
     public function getStickerPart(Part $part): ?RebrickablePart

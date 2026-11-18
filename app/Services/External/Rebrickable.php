@@ -33,7 +33,7 @@ class Rebrickable
         Cache::put($lockKey, microtime(true), now()->addSeconds(10));
     }
 
-    protected function makeApiCall(string $url, bool $firstPageOnly = false): Collection
+    protected function makeApiCall(string $url, bool $firstPageOnly = false, bool $throwOnFailure = false): Collection
     {
         $all = collect([]);
         $currentUrl = $url;
@@ -45,6 +45,9 @@ class Rebrickable
             $response = $this->makeRequest($currentUrl);
 
             if (!$response) {
+                if ($throwOnFailure) {
+                    throw new RebrickableRequestFailed("Rebrickable request failed: {$currentUrl}");
+                }
                 break;
             }
 
@@ -106,12 +109,18 @@ class Rebrickable
     }
 
 
+    /**
+     * @throws RebrickableRequestFailed so a failed or partial fetch is never cached or treated as the full list
+     */
     public function getSetParts(string $setnumber): Collection
     {
         return Cache::remember(
             "rebrickable_set_parts_{$setnumber}",
             3600,
-            fn () => $this->makeApiCall("{$this->apiUrl}/sets/{$setnumber}/parts/?inc_minifig_parts=1&inc_part_details=1&inc_color_details=0")
+            fn () => $this->makeApiCall(
+                "{$this->apiUrl}/sets/{$setnumber}/parts/?inc_minifig_parts=1&inc_part_details=1&inc_color_details=0",
+                throwOnFailure: true
+            )
         );
     }
 
