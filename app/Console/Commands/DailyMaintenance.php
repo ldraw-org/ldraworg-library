@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\UpdateRebrickable;
-use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
 use Illuminate\Console\Command;
 
@@ -37,9 +35,6 @@ class DailyMaintenance extends Command
 
             $this->info('Ensuring initial submit event exists');
             $this->call('lib:fix-initial-submit');
-
-            $this->info('Queue update of uonfficial parts without rebrickable data');
-            $this->call('lib:update-rebrickable');
 
             $this->info('Reloading colors for LDConfig');
             $this->call('lib:update-ldconfig');
