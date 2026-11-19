@@ -241,7 +241,8 @@ class ImportRebrickableParts
     protected function externalIdsChanged(object $current, array $values): bool
     {
         foreach (self::EXTERNAL_ID_COLUMNS as $column) {
-            if (($current->{$column} ?? []) !== $values[$column]) {
+            // No ids is stored as either null or an empty list
+            if (($current->{$column} ?? []) !== ($values[$column] ?? [])) {
                 return true;
             }
         }

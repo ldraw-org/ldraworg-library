@@ -103,6 +103,24 @@ it('updates changed parts, keeps stored values the downloads lack, and skips unc
         ->and($sticker->fresh()->updated_at)->toEqual($sticker->updated_at);
 });
 
+it('does not report external ids as changed when only the name changed', function () {
+    RebrickablePart::create([
+        'number' => '3001',
+        'name' => 'Old Name',
+        'bricklink' => ['3001'],
+        'brickowl' => ['771344'],
+        'lego' => ['3001', '72841'],
+        'ldraw' => [],
+        'brickset' => null,
+        'element' => '300126',
+    ]);
+
+    $result = app(ImportRebrickableParts::class)->handle();
+
+    expect($result['updated'])->toBe(1)
+        ->and($result['external_ids_changed'])->toBe([]);
+});
+
 it('replaces a stored element Rebrickable no longer lists', function () {
     RebrickablePart::create(['number' => '3001', 'name' => 'Brick 2 x 4', 'element' => '999999']);
 
