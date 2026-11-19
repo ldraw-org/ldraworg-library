@@ -3,6 +3,9 @@
 namespace App\Services\External;
 
 use Exception;
+use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -10,27 +13,34 @@ use Illuminate\Support\Facades\Log;
 
 class Rebrickable
 {
-    protected int $rateLimitSeconds = 1;
+    /**
+     * Minimum seconds between the end of one Rebrickable call and the start of the next.
+     * The API allows 1 call/sec; this must stay above 1.
+     */
+    protected const float MIN_SECONDS_BETWEEN_CALLS = 1.1;
+
+    /** Longest a call will wait for its slot (e.g. after a 429 Retry-After) before giving up. */
+    protected const int MAX_WAIT_SECONDS = 30;
+
+    protected const int CONNECT_TIMEOUT_SECONDS = 10;
+    protected const int REQUEST_TIMEOUT_SECONDS = 30;
+
+    /** Must exceed the longest time the lock is held: MAX_WAIT + CONNECT + REQUEST timeouts. */
+    protected const int LOCK_TTL_SECONDS = 90;
+
+    /** How long a caller waits to acquire the lock while other processes are calling. */
+    protected const int LOCK_BLOCK_SECONDS = 120;
+
+    protected const string LOCK_KEY = 'rebrickable_api_throttle';
+    protected const string NEXT_CALL_KEY = 'rebrickable_api_next_call_at';
+
     protected string $apiUrl = 'https://rebrickable.com/api/v3/lego';
     protected string $apiKey;
-    protected int $maxRetries = 3;
+    protected int $maxAttempts = 3;
 
     public function __construct()
     {
         $this->apiKey = config('ldraw.rebrickable_api_key', '');
-    }
-
-    protected function enforceRateLimit(): void
-    {
-        $lockKey = 'rebrickable_rate_limit_lock';
-        $last = Cache::get($lockKey, 0);
-
-        $elapsed = microtime(true) - $last;
-        if ($elapsed < $this->rateLimitSeconds) {
-            usleep((int)(($this->rateLimitSeconds - $elapsed) * 1_000_000));
-        }
-
-        Cache::put($lockKey, microtime(true), now()->addSeconds(10));
     }
 
     protected function makeApiCall(string $url, bool $firstPageOnly = false, bool $throwOnFailure = false): Collection
@@ -39,9 +49,6 @@ class Rebrickable
         $currentUrl = $url;
 
         while ($currentUrl) {
-
-            $this->enforceRateLimit();
-
             $response = $this->makeRequest($currentUrl);
 
             if (!$response) {
@@ -75,39 +82,83 @@ class Rebrickable
         return $all;
     }
 
+    /**
+     * Retries connection errors, 429s and 5xx responses. Every attempt goes through send(),
+     * so retries are rate limited like any other call.
+     */
     protected function makeRequest(string $url): ?array
     {
-        try {
-            $response = Http::withHeaders([
-                    'Authorization' => "key {$this->apiKey}",
-                ])
-                ->retry($this->maxRetries, 2000, function ($ex, $request) {
-                    return true;
-                })
-                ->timeout(30)
-                ->acceptJson()
-                ->get($url);
-
-            if (!$response->successful()) {
-                Log::warning('Rebrickable API failed', [
-                    'url'   => $url,
-                    'code'  => $response->status(),
-                    'body'  => $response->body(),
-                ]);
+        for ($attempt = 1; $attempt <= $this->maxAttempts; $attempt++) {
+            try {
+                $response = $this->send($url);
+            } catch (ConnectionException $e) {
+                Log::warning('Rebrickable connection failed', ['url' => $url, 'attempt' => $attempt, 'error' => $e->getMessage()]);
+                continue;
+            } catch (Exception $e) {
+                Log::error('Rebrickable request exception', ['url' => $url, 'error' => $e->getMessage()]);
                 return null;
             }
 
-            return $response->json();
+            if ($response->successful()) {
+                return $response->json();
+            }
 
-        } catch (Exception $e) {
-            Log::error('Rebrickable request exception', [
+            Log::warning('Rebrickable API failed', [
                 'url' => $url,
-                'error' => $e->getMessage()
+                'attempt' => $attempt,
+                'code' => $response->status(),
+                'body' => $response->body(),
             ]);
-            return null;
+
+            if ($response->status() !== 429 && !$response->serverError()) {
+                return null;
+            }
         }
+
+        return null;
     }
 
+    /**
+     * Sends a single request while holding a global lock in the cache store (Redis), so only one
+     * Rebrickable call is in flight across all processes and each starts at least
+     * MIN_SECONDS_BETWEEN_CALLS after the previous one finished.
+     *
+     * @throws LockTimeoutException
+     * @throws RebrickableRequestFailed if the required wait exceeds MAX_WAIT_SECONDS
+     * @throws ConnectionException
+     */
+    protected function send(string $url): Response
+    {
+        return Cache::lock(self::LOCK_KEY, self::LOCK_TTL_SECONDS)->block(self::LOCK_BLOCK_SECONDS, function () use ($url): Response {
+            $wait = (float) Cache::get(self::NEXT_CALL_KEY, 0) - microtime(true);
+            if ($wait > self::MAX_WAIT_SECONDS) {
+                throw new RebrickableRequestFailed("Rebrickable is backing off for {$wait} more seconds");
+            }
+            if ($wait > 0) {
+                usleep((int) ceil($wait * 1_000_000));
+            }
+
+            $retryAfter = 0;
+            try {
+                $response = Http::withHeaders(['Authorization' => "key {$this->apiKey}"])
+                    ->connectTimeout(self::CONNECT_TIMEOUT_SECONDS)
+                    ->timeout(self::REQUEST_TIMEOUT_SECONDS)
+                    ->acceptJson()
+                    ->get($url);
+                if ($response->status() === 429) {
+                    $retryAfter = max(0, (int) $response->header('Retry-After'));
+                }
+                return $response;
+            } finally {
+                // Set after the request completes so the gap between calls always exceeds the minimum
+                Cache::put(
+                    self::NEXT_CALL_KEY,
+                    microtime(true) + max(self::MIN_SECONDS_BETWEEN_CALLS, $retryAfter),
+                    now()->addHour()
+                );
+            }
+        });
+    }
 
     /**
      * @throws RebrickableRequestFailed so a failed or partial fetch is never cached or treated as the full list
@@ -211,11 +262,5 @@ class Rebrickable
         );
 
         return http_build_query($formatted);
-    }
-
-
-    public function clearRateLimit(): void
-    {
-        Cache::forget('rebrickable_rate_limit_lock');
     }
 }

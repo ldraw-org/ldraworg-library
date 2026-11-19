@@ -63,7 +63,7 @@ it('returns unpaginated set data', function () {
     expect($result->get('set_num'))->toBe('1234-1');
 });
 
-it('enforces 1 request per second globally', function () {
+it('spaces requests more than 1 second apart across instances', function () {
     Cache::flush();
 
     $timestamps = [];
@@ -75,28 +75,46 @@ it('enforces 1 request per second globally', function () {
         },
     ]);
 
-    $service = new Rebrickable();
-
-    $start = microtime(true);
-
-    $service->getSetParts('1234-1');
-    $service->getSetParts('1234-2');
-    $service->getSetParts('1234-3');
-
-    $end = microtime(true);
+    // Separate instances share the limit through the cache store
+    (new Rebrickable())->getSetParts('1234-1');
+    (new Rebrickable())->getSetParts('1234-2');
+    (new Rebrickable())->getSetParts('1234-3');
 
     expect($timestamps)->toHaveCount(3);
 
-    $intervals = [];
     for ($i = 1; $i < count($timestamps); $i++) {
-        $intervals[] = $timestamps[$i] - $timestamps[$i - 1];
+        expect($timestamps[$i] - $timestamps[$i - 1])->toBeGreaterThan(1);
     }
+});
 
-    foreach ($intervals as $interval) {
-        expect($interval)->toBeGreaterThanOrEqual(1);
-    }
+it('rate limits retries', function () {
+    Cache::flush();
 
-    expect($end - $start)->toBeGreaterThanOrEqual(count($timestamps) - 1);
+    $timestamps = [];
+
+    Http::fake([
+        '*' => function ($request) use (&$timestamps) {
+            $timestamps[] = microtime(true);
+            return count($timestamps) === 1
+                ? Http::response(null, 503)
+                : Http::response(['results' => []], 200);
+        },
+    ]);
+
+    (new Rebrickable())->getThemes();
+
+    expect($timestamps)->toHaveCount(2);
+    expect($timestamps[1] - $timestamps[0])->toBeGreaterThan(1);
+});
+
+it('does not retry client errors', function () {
+    Http::fake(['*' => Http::response(null, 404)]);
+
+    Cache::flush();
+
+    expect((new Rebrickable())->getPart('nonexistent'))->toBeEmpty();
+
+    Http::assertSentCount(1);
 });
 
 it('caches results and avoids repeated API calls', function () {
