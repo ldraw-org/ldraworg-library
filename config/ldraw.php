@@ -9,9 +9,8 @@ return [
     // Directory holding the Rebrickable CSV downloads (.csv or .csv.gz)
     'rebrickable_csv_path' => env('REBRICKABLE_CSV_PATH', storage_path('app/rebrickable-csv/all_downloads')),
 
-    // Where the Rebrickable CSV downloads are fetched from, as {url}{table}.csv.gz.
-    // Rebrickable allows each download at most once per day.
-    'rebrickable_csv_url' => env('REBRICKABLE_CSV_URL', 'https://cdn.rebrickable.com/media/downloads/'),
+    // Rebrickable's archive of every CSV download. Rebrickable allows it to be downloaded at most once per day.
+    'rebrickable_csv_url' => env('REBRICKABLE_CSV_URL', 'https://cdn.rebrickable.com/media/downloads/all_downloads.tar.gz'),
 
     // LDView debug writting to logs
     'ldview_debug' => env('LDVIEW_DEBUG', false),

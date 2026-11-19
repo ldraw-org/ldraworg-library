@@ -2,7 +2,6 @@
 
 use App\Enums\PartCategory;
 use App\Enums\PartType;
-use App\Enums\RebrickableCsvFile;
 use App\Jobs\SyncRebrickableData;
 use App\Models\LdrawColour;
 use App\Models\Omr\Set;
@@ -42,7 +41,7 @@ beforeEach(function () {
     Cache::flush();
     Storage::fake();
     Http::preventStrayRequests();
-    config(['ldraw.rebrickable_csv_url' => 'https://cdn.example.test/downloads/']);
+    config(['ldraw.rebrickable_csv_url' => 'https://cdn.example.test/downloads/all_downloads.tar.gz']);
     fakeRebrickableCsv([]);
     LdrawColour::query()->delete();
     LdrawColour::factory()->create(['code' => 4, 'rebrickable_id' => 4]);
@@ -57,11 +56,11 @@ beforeEach(function () {
 });
 
 it('downloads the CSVs and resyncs parts, links, inventories and set details', function () {
-    $responses = [];
+    $files = [];
     foreach (rebrickableDump() as $name => $lines) {
-        $responses["https://cdn.example.test/downloads/{$name}.csv.gz"] = fn () => Http::response(gzencode(implode("\r\n", $lines) . "\r\n"));
+        $files["all_downloads/{$name}.csv"] = implode("\r\n", $lines) . "\r\n";
     }
-    Http::fake($responses);
+    Http::fake(['cdn.example.test/downloads/all_downloads.tar.gz' => Http::response(rebrickableArchive($files))]);
 
     SyncRebrickableData::dispatchSync();
 
@@ -73,7 +72,7 @@ it('downloads the CSVs and resyncs parts, links, inventories and set details', f
         ->and($this->set->fresh()->name)->toBe('New Name')
         ->and($this->set->rebrickable_parts()->get()->map(fn (RebrickablePart $p) => [$p->number, $p->pivot->quantity, $p->pivot->ldraw_colour_id])->all())
         ->toBe([['3001pr0001', 2, 4]]);
-    Http::assertSentCount(count(RebrickableCsvFile::cases()));
+    Http::assertSentCount(1);
 });
 
 it('resyncs from the CSVs on disk without downloading', function () {

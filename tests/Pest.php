@@ -43,3 +43,27 @@ function fakeRebrickableCsv(array $files): void
 
     config(['ldraw.rebrickable_csv_path' => $dir]);
 }
+
+/**
+ * The bytes of a .tar.gz like Rebrickable's all_downloads archive.
+ *
+ * @param array<string, string> $files contents keyed by path inside the archive
+ */
+function rebrickableArchive(array $files): string
+{
+    $dir = storage_path('framework/testing/rebrickable-archive-' . uniqid());
+    File::ensureDirectoryExists($dir);
+
+    try {
+        $tar = new PharData("{$dir}/all_downloads.tar");
+        foreach ($files as $path => $contents) {
+            $tar->addFromString($path, $contents);
+        }
+        $tar->compress(Phar::GZ);
+
+        return file_get_contents("{$dir}/all_downloads.tar.gz");
+    } finally {
+        unset($tar);
+        File::deleteDirectory($dir);
+    }
+}

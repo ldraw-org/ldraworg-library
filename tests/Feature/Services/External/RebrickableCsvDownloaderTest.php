@@ -4,28 +4,34 @@ use App\Enums\RebrickableCsvFile;
 use App\Services\External\RebrickableCsvDownloader;
 use Illuminate\Support\Facades\Http;
 
-const DOWNLOAD_URL = 'https://cdn.example.test/downloads/';
+const DOWNLOAD_URL = 'https://cdn.example.test/downloads/all_downloads.tar.gz';
 
 /**
- * Fakes every download as a small gzipped CSV, with any overrides by base file name.
+ * Every CSV under all_downloads/, with overrides by archive path; a null override leaves the file out.
  *
- * @param array<string, mixed> $overrides
+ * @param array<string, ?string> $overrides
+ * @return array<string, string>
  */
-function fakeDownloads(array $overrides = []): void
+function archiveFiles(array $overrides = []): array
 {
-    $responses = [];
+    $files = [];
     foreach (RebrickableCsvFile::cases() as $file) {
-        // A fresh response per request, as a faked response's body can only be read once
-        $responses[DOWNLOAD_URL . "{$file->value}.csv.gz"] = $overrides[$file->value]
-            ?? fn () => Http::response(gzencode("id,name\r\n1,new {$file->value}\r\n"));
+        $files["all_downloads/{$file->value}.csv"] = "id,name\r\n1,new {$file->value}\r\n";
     }
+
+    return array_filter([...$files, ...$overrides], fn (?string $contents) => !is_null($contents));
+}
+
+function fakeArchive(string|Closure $body): void
+{
     Http::preventStrayRequests();
-    Http::fake($responses);
+    // A fresh response per request, as a faked response's body can only be read once
+    Http::fake([DOWNLOAD_URL => $body instanceof Closure ? $body : fn () => Http::response($body)]);
 }
 
 function downloader(): RebrickableCsvDownloader
 {
-    return new RebrickableCsvDownloader(baseUrl: DOWNLOAD_URL);
+    return new RebrickableCsvDownloader(url: DOWNLOAD_URL);
 }
 
 function csvDirectory(): string
@@ -37,9 +43,9 @@ beforeEach(function () {
     fakeRebrickableCsv(['parts' => ['id,name', '1,old parts']]);
 });
 
-it('downloads and unzips every file, replacing the current ones', function () {
+it('downloads the archive and extracts every file, replacing the current ones', function () {
     file_put_contents(csvDirectory() . '/parts.csv.gz', gzencode("id,name\n1,stale gz\n"));
-    fakeDownloads();
+    fakeArchive(rebrickableArchive(archiveFiles()));
 
     expect(downloader()->download())->toBeTrue();
 
@@ -48,31 +54,59 @@ it('downloads and unzips every file, replacing the current ones', function () {
     }
     expect(csvDirectory() . '/parts.csv.gz')->not->toBeFile()
         ->and(csvDirectory() . '/.staging')->not->toBeDirectory();
-    Http::assertSentCount(count(RebrickableCsvFile::cases()));
+    Http::assertSentCount(1);
+});
+
+it('finds files at the top of the archive and unzips gzipped ones', function () {
+    $files = [];
+    foreach (archiveFiles() as $path => $contents) {
+        $files[basename($path)] = $contents;
+    }
+    $files['parts.csv.gz'] = gzencode("id,name\r\n1,gzipped parts\r\n");
+    unset($files['parts.csv']);
+    fakeArchive(rebrickableArchive($files));
+
+    downloader()->download();
+
+    expect(file_get_contents(csvDirectory() . '/parts.csv'))->toBe("id,name\r\n1,gzipped parts\r\n")
+        ->and(file_get_contents(csvDirectory() . '/themes.csv'))->toBe("id,name\r\n1,new themes\r\n");
 });
 
 it('skips a download within 24 hours of the last one', function () {
-    fakeDownloads();
+    fakeArchive(rebrickableArchive(archiveFiles()));
     downloader()->download();
 
     $this->travel(23)->hours();
 
     expect(downloader()->download())->toBeFalse();
-    Http::assertSentCount(count(RebrickableCsvFile::cases()));
+    Http::assertSentCount(1);
 });
 
 it('downloads again once 24 hours have passed or when forced', function () {
-    fakeDownloads();
+    fakeArchive(rebrickableArchive(archiveFiles()));
     downloader()->download();
 
     expect(downloader()->download(force: true))->toBeTrue();
     $this->travel(25)->hours();
     expect(downloader()->download())->toBeTrue();
-    Http::assertSentCount(count(RebrickableCsvFile::cases()) * 3);
+    Http::assertSentCount(3);
 });
 
-it('keeps the current files when any download fails', function (Closure $overrides, string $message) {
-    fakeDownloads($overrides());
+it('reads each new download rather than an earlier one cached by the same process', function () {
+    $week = 1;
+    fakeArchive(function () use (&$week) {
+        return Http::response(rebrickableArchive(archiveFiles(['all_downloads/themes.csv' => "id,name\r\n1,week {$week}\r\n"])));
+    });
+
+    downloader()->download();
+    $week = 2;
+    downloader()->download(force: true);
+
+    expect(file_get_contents(csvDirectory() . '/themes.csv'))->toBe("id,name\r\n1,week 2\r\n");
+});
+
+it('keeps the current files when the download fails', function (Closure $body, string $message) {
+    fakeArchive($body());
 
     expect(fn () => downloader()->download())->toThrow(RuntimeException::class, $message);
 
@@ -81,7 +115,9 @@ it('keeps the current files when any download fails', function (Closure $overrid
         ->and(csvDirectory() . '/.staging')->not->toBeDirectory()
         ->and(downloader()->downloadedRecently())->toBeFalse();
 })->with([
-    'an HTTP error' => [fn () => ['themes' => Http::response('Payment Required', 402)], 'failed with HTTP 402'],
-    'an invalid gzip' => [fn () => ['themes' => Http::response('not gzip')], 'not a valid gzip file'],
-    'an empty mapping file' => [fn () => ['part_mappings' => Http::response(gzencode("part_num,ext_system,ext_id\n"))], 'part_mappings.csv has no rows'],
+    'an HTTP error' => [fn () => fn () => Http::response('Payment Required', 402), 'failed with HTTP 402'],
+    'an error page' => [fn () => '<html>Error, try later</html>', 'not a gzip archive'],
+    'a corrupt archive' => [fn () => gzencode('not a tar file'), 'could not be extracted'],
+    'a missing file' => [fn () => rebrickableArchive(archiveFiles(['all_downloads/themes.csv' => null])), 'has no themes.csv'],
+    'an empty mapping file' => [fn () => rebrickableArchive(archiveFiles(['all_downloads/part_mappings.csv' => "part_num,ext_system,ext_id\r\n"])), 'part_mappings.csv has no rows'],
 ]);
