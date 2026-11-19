@@ -3,6 +3,7 @@
 use App\Models\RebrickablePart;
 use App\Services\RebrickablePart\ImportRebrickableParts;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
@@ -22,7 +23,7 @@ beforeEach(function () {
             '3001,LE,3001,True,True',
             '3001,BL,3001,True,True',
             '3001,BO,771344,True,True',
-            '3001,BS,ignored,True,True',
+            '3001pr0001,BS,3001pr01,True,True',
             '3001pr0001,LD,3001p01,True,True',
             '3001pr0001,LD,3001p01,True,True',
         ],
@@ -57,7 +58,7 @@ it('creates every part with its mappings, print_of and element', function () {
             'brickowl' => ['771344'],
             'lego' => ['3001', '72841'],
             'ldraw' => [],
-            'brickset' => ['3001', '72841'],
+            'brickset' => null,
             'element' => '300126',
             'print_of' => null,
             'is_local' => false,
@@ -66,7 +67,9 @@ it('creates every part with its mappings, print_of and element', function () {
         ->and($print->name)->toBe('Brick 2 x 4 with "Logo" Print')
         ->and($print->ldraw)->toBe(['3001p01'])
         ->and($print->print_of)->toBe('3001')
-        ->and($print->element)->toBe('4111111');
+        ->and($print->element)->toBe('4111111')
+        ->and($print->brickset)->toBe(['3001pr01'])
+        ->and(DB::table('rebrickable_parts')->where('number', '3001')->value('brickset'))->toBeNull();
 });
 
 it('updates changed parts, keeps stored values the downloads lack, and skips unchanged parts', function () {
@@ -80,7 +83,7 @@ it('updates changed parts, keeps stored values the downloads lack, and skips unc
         'element' => '300121',
     ]);
     $print = RebrickablePart::firstWhere('number', '3001pr0001');
-    $print->update(['bricklink' => ['3001pb001']]);
+    $print->update(['bricklink' => ['3001pb001'], 'brickset' => ['old']]);
     $sticker = RebrickablePart::firstWhere('number', '003238');
     $this->travel(5)->minutes();
 
@@ -96,6 +99,7 @@ it('updates changed parts, keeps stored values the downloads lack, and skips unc
             'element' => '300121',
         ])
         ->and($print->fresh()->bricklink)->toBe([])
+        ->and($print->fresh()->brickset)->toBe(['3001pr01'])
         ->and($sticker->fresh()->updated_at)->toEqual($sticker->updated_at);
 });
 

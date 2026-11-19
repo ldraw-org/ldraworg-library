@@ -27,6 +27,7 @@ class ImportRebrickableParts
         'BO' => 'brickowl',
         'LE' => 'lego',
         'LD' => 'ldraw',
+        'BS' => 'brickset',
     ];
 
     /** Columns that feed a part's external site keywords */
@@ -80,7 +81,10 @@ class ImportRebrickableParts
 
                     $upserts[] = [
                         ...$values,
-                        ...array_map('json_encode', array_intersect_key($values, array_flip(self::JSON_COLUMNS))),
+                        ...array_map(
+                            fn (?array $ids) => is_null($ids) ? null : json_encode($ids),
+                            array_intersect_key($values, array_flip(self::JSON_COLUMNS))
+                        ),
                         'refreshed_at' => $now,
                     ];
                 }
@@ -121,8 +125,8 @@ class ImportRebrickableParts
             'brickowl' => $ids('brickowl'),
             'lego' => $ids('lego'),
             'ldraw' => $ids('ldraw'),
-            // Brickset ids aren't in the downloads; they are the LEGO design ids for nearly every part
-            'brickset' => $current?->brickset ?: $ids('lego'),
+            // The downloads don't map parts to Brickset, so keep any stored ids unless a mapping appears
+            'brickset' => isset($mappings['brickset'][$number]) ? $ids('brickset') : $current?->brickset,
         ];
     }
 
