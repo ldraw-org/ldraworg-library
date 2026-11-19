@@ -143,6 +143,24 @@ class LDConfigManager
         );
     }
 
+    /**
+     * LDraw colour code keyed by Rebrickable colour id. When several codes share a Rebrickable colour
+     * the first one wins.
+     *
+     * @return array<int, int>
+     */
+    public function rebrickableColoursToLdrawCodes(): array
+    {
+        $codes = [];
+        foreach ($this->ldrawColourCodesToRebrickable() as $code => $rebrickableId) {
+            if (!is_null($rebrickableId) && !isset($codes[$rebrickableId])) {
+                $codes[$rebrickableId] = $code;
+            }
+        }
+
+        return $codes;
+    }
+
     public function importAvatars(): void
     {
         $avatars = $this->getLDConfig()

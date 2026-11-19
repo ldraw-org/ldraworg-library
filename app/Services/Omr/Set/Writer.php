@@ -46,10 +46,8 @@ class Writer
                 'rb_url' => $setData['set_url'],
             ]
         );
-        if ($set->rebrickable_parts()->doesntExist() ||
-            $set->refreshed_at === null ||
-            $set->refreshed_at->lt(now()->subMonth())
-        ) {
+        // Synced sets are kept current by ImportSetInventories, so only a never synced one needs the API
+        if ($set->refreshed_at === null) {
             $this->syncParts($set);
         }
 

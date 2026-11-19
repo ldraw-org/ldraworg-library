@@ -97,7 +97,32 @@ it('writes each part once and inserts pivot rows in bulk', function () {
     expect($queries->filter(fn (string $sql) => str_starts_with($sql, 'insert into `rebrickable_parts_sets`')))->toHaveCount(1);
     expect($queries->filter(fn (string $sql) => str_starts_with($sql, 'insert into `rebrickable_parts` ')))->toHaveCount(2);
     expect($set->rebrickable_parts()->count())->toBe(4);
-    expect(RebrickablePart::firstWhere('number', '3024')->element)->toBe('302426');
+});
+
+it('creates parts newer than the CSV downloads without external ids and leaves imported parts alone', function () {
+    $set = setWithExistingPart();
+    $imported = RebrickablePart::create(['number' => '3001', 'name' => 'Imported', 'bricklink' => ['3001'], 'element' => '300121']);
+    Http::fake([
+        'rebrickable.com/*' => Http::response([
+            'results' => [
+                [...setPartRow('3001', 4), 'part' => ['part_num' => '3001', 'name' => 'API Name', 'part_cat_id' => 11, 'external_ids' => ['BrickLink' => ['api']]]],
+                [...setPartRow('99999', 4), 'part' => ['part_num' => '99999', 'name' => 'New Part', 'part_cat_id' => 14, 'part_url' => 'https://rebrickable.com/parts/99999/new-part/', 'external_ids' => ['BrickLink' => ['api'], 'Brickset' => ['api']]]],
+            ],
+            'next' => null,
+        ]),
+    ]);
+
+    app(SyncSetParts::class)->handle($set);
+
+    $new = RebrickablePart::firstWhere('number', '99999');
+    expect($imported->fresh()->only(['name', 'bricklink', 'element']))->toBe(['name' => 'Imported', 'bricklink' => ['3001'], 'element' => '300121'])
+        ->and($new->only(['name', 'rb_part_category_id', 'url', 'bricklink', 'brickset']))->toBe([
+            'name' => 'New Part',
+            'rb_part_category_id' => 14,
+            'url' => 'https://rebrickable.com/parts/99999/new-part/',
+            'bricklink' => null,
+            'brickset' => null,
+        ]);
 });
 
 it('stores regular and spare quantities separately', function () {
@@ -127,19 +152,32 @@ it('keeps existing parts and caches nothing when a page fails', function () {
     expect(Cache::has('rebrickable_set_parts_1234-1'))->toBeFalse();
 });
 
-it('does not mark a set as refreshed when the sync fails', function () {
-    $refreshedAt = now()->subYear()->startOfSecond();
-    $set = setWithExistingPart(['refreshed_at' => $refreshedAt]);
-    fakeFailureOnSecondPage();
-
-    app(Writer::class)->updateOrCreateSetFromArray([
+function setDataFor(Set $set): array
+{
+    return [
         'set_num' => $set->number,
         'name' => $set->name,
         'year' => $set->year,
         'theme_id' => $set->theme_id,
         'set_url' => $set->rb_url,
-    ]);
+    ];
+}
 
-    expect($set->fresh()->refreshed_at->equalTo($refreshedAt))->toBeTrue();
+it('does not mark a set as refreshed when the sync fails', function () {
+    $set = setWithExistingPart();
+    fakeFailureOnSecondPage();
+
+    app(Writer::class)->updateOrCreateSetFromArray(setDataFor($set));
+
+    expect($set->fresh()->refreshed_at)->toBeNull();
+    expect($set->rebrickable_parts()->pluck('number')->all())->toBe(['existing']);
+});
+
+it('leaves a synced set to the CSV import, however old its sync', function () {
+    Http::preventStrayRequests();
+    $set = setWithExistingPart(['refreshed_at' => now()->subYear()]);
+
+    app(Writer::class)->updateOrCreateSetFromArray(setDataFor($set));
+
     expect($set->rebrickable_parts()->pluck('number')->all())->toBe(['existing']);
 });
