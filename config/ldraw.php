@@ -6,6 +6,9 @@ return [
     // The library rebrickable API key
     'rebrickable_api_key' => env('REBRICKABLE_API_KEY'),
 
+    // Directory holding the Rebrickable CSV downloads (.csv or .csv.gz)
+    'rebrickable_csv_path' => env('REBRICKABLE_CSV_PATH', storage_path('app/rebrickable-csv/all_downloads')),
+
     // LDView debug writting to logs
     'ldview_debug' => env('LDVIEW_DEBUG', false),
 
