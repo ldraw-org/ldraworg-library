@@ -6,15 +6,17 @@ use App\Models\Avatar;
 use App\Models\LdrawColour;
 use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
-use App\Services\External\Rebrickable;
+use App\Enums\RebrickableCsvFile;
+use App\Services\External\RebrickableCsv;
 use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class LDConfigManager
 {
     public function __construct(
-        protected Rebrickable $rb,
+        protected RebrickableCsv $rebrickableCsv,
         protected CacheService $cache
     ) {
 
@@ -28,7 +30,7 @@ class LDConfigManager
 
     public function importColours(): void
     {
-        $rbColors = $this->rb->getColors();
+        $rbColors = $this->rebrickableColoursByLdrawCode();
         $this->getLDConfig()
             ->where('meta', 'colour')
             ->each(function (array $color) use ($rbColors) {
@@ -37,8 +39,7 @@ class LDConfigManager
                     $c->delete();
                 }
                 $params = Arr::get($color, 'material_params', []);
-                $rbId = $rbColors->where('id', '!=', '-1')->first(fn (array $rbValues) => in_array($color['code'], Arr::get($rbValues, 'external_ids.LDraw.ext_ids', [])))['id'] ?? null;
-                $rbName = $rbColors->where('id', '!=', '-1')->first(fn (array $rbValues) => in_array($color['code'], Arr::get($rbValues, 'external_ids.LDraw.ext_ids', [])))['name'] ?? null;
+                $rbColor = $rbColors->get((string) $color['code']);
                 $color = [
                     'name' => $color['name'],
                     'code' => $color['code'],
@@ -63,8 +64,8 @@ class LDConfigManager
                     'material_size' => Arr::get($params, 'size'),
                     'material_minsize' => Arr::get($params, 'minsize'),
                     'material_maxsize' => Arr::get($params, 'maxsize'),
-                    'rebrickable_id' => $rbId,
-                    'rebrickable_name' => $rbName,
+                    'rebrickable_id' => $rbColor['id'] ?? null,
+                    'rebrickable_name' => $rbColor['name'] ?? null,
                 ];
                 LdrawColour::updateOrCreate(['code' => $color['code']], $color);
             });
@@ -72,6 +73,24 @@ class LDConfigManager
         $this->cache->warm(CacheKey::LdrawColourCodes);
         $this->cache->reset(CacheKey::LdrawColourCodesToRebrickable);
         $this->cache->warm(CacheKey::LdrawColourCodesToRebrickable);
+    }
+
+    /**
+     * Rebrickable colour id and name keyed by LDraw colour code. When several Rebrickable colours map to
+     * the same code the lowest id wins, and the [Unknown] colour (-1) is never used.
+     *
+     * @return Collection<string, array{id: int, name: string}>
+     */
+    protected function rebrickableColoursByLdrawCode(): Collection
+    {
+        $names = $this->rebrickableCsv->rows(RebrickableCsvFile::Colors)->pluck('name', 'id')->all();
+
+        return $this->rebrickableCsv->rows(RebrickableCsvFile::ColorMappings)
+            ->filter(fn (array $row) => $row['ext_system'] === 'LD' && $row['id'] !== '-1' && isset($names[$row['id']]))
+            ->sortBy(fn (array $row) => (int) $row['id'])
+            ->unique('ext_id')
+            ->mapWithKeys(fn (array $row) => [$row['ext_id'] => ['id' => (int) $row['id'], 'name' => $names[$row['id']]]])
+            ->collect();
     }
 
     public function ldrawColourCodes(): array
