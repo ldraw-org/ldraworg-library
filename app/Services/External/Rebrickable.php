@@ -43,7 +43,7 @@ class Rebrickable
         $this->apiKey = config('ldraw.rebrickable_api_key', '');
     }
 
-    protected function makeApiCall(string $url, bool $firstPageOnly = false, bool $throwOnFailure = false): Collection
+    protected function makeApiCall(string $url, bool $throwOnFailure = false): Collection
     {
         $all = collect([]);
         $currentUrl = $url;
@@ -66,17 +66,7 @@ class Rebrickable
 
             $all = $all->merge($response['results']);
 
-            if (empty($response['next'])) {
-                break;
-            }
-
-            if ($firstPageOnly) {
-                if (array_key_exists('count', $response)) {
-                    $all->put('count', $response['count']);
-                }
-                break;
-            }
-            $currentUrl = $response['next'];
+            $currentUrl = $response['next'] ?? null;
         }
 
         return $all;
@@ -175,15 +165,6 @@ class Rebrickable
         );
     }
 
-    public function getColors(): Collection
-    {
-        return Cache::remember(
-            "rebrickable_colors",
-            86400,
-            fn () => $this->makeApiCall("{$this->apiUrl}/colors/")
-        );
-    }
-
     public function getSet(string $setnumber): Collection
     {
         return Cache::remember(
@@ -202,65 +183,4 @@ class Rebrickable
         );
     }
 
-    public function getThemes(bool $fresh = false): Collection
-    {
-        if ($fresh) {
-            Cache::forget('rebrickable_themes');
-        }
-
-        return Cache::remember(
-            "rebrickable_themes",
-            86400,
-            fn () => $this->makeApiCall("{$this->apiUrl}/themes/")
-        );
-    }
-
-    public function getPart(string $partnumber): Collection
-    {
-        return Cache::remember(
-            "rebrickable_part_{$partnumber}",
-            86400,
-            fn () => $this->makeApiCall("{$this->apiUrl}/parts/{$partnumber}/")
-        );
-    }
-
-    public function getParts(array $parameters, bool $firstPageOnly = false): Collection
-    {
-        $query = $this->buildQueryString($parameters);
-
-        return Cache::remember(
-            "rebrickable_parts_" . md5($query) . "_first_{$firstPageOnly}",
-            3600,
-            fn () => $this->makeApiCall("{$this->apiUrl}/parts/?{$query}", $firstPageOnly)
-        );
-    }
-
-    public function getPartColor(string $partnumber, bool $firstPageOnly = false): Collection
-    {
-        return Cache::remember(
-            "rebrickable_part_colors_{$partnumber}_first_{$firstPageOnly}",
-            86400,
-            fn () => $this->makeApiCall("{$this->apiUrl}/parts/{$partnumber}/colors/", $firstPageOnly)
-        );
-    }
-
-    public function getPartColorSets(string $partnumber, string $color_id, bool $firstPageOnly = false): Collection
-    {
-        return Cache::remember(
-            "rebrickable_part_color_sets_{$partnumber}_{$color_id}_first_{$firstPageOnly}",
-            86400,
-            fn () => $this->makeApiCall("{$this->apiUrl}/parts/{$partnumber}/colors/{$color_id}/sets", $firstPageOnly)
-        );
-    }
-
-
-    protected function buildQueryString(array $parameters): string
-    {
-        $formatted = array_map(
-            fn ($v) => is_array($v) ? implode(',', $v) : $v,
-            $parameters
-        );
-
-        return http_build_query($formatted);
-    }
 }

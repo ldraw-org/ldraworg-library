@@ -26,7 +26,7 @@ class RebrickableSync
             $part->rebrickable_part()->associate($rbPart);
             $part->save();
         } else {
-            $this->rebrickablePartWriter->findOrCreateFromPart($part);
+            $this->rebrickablePartWriter->linkPart($part);
         }
 
         $part->setExternalSiteKeywords($updateOfficial);

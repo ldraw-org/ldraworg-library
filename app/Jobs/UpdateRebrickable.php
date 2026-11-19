@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Collections\PartCollection;
 use App\Models\Part\Part;
 use App\Services\Part\RebrickableSync;
 use Illuminate\Contracts\Queue\ShouldQueue;

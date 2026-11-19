@@ -27,7 +27,7 @@ class Writer
     /**
      * Links the part to its Rebrickable part, leaving the existing link alone when nothing matches.
      */
-    public function findOrCreateFromPart(Part $part): ?RebrickablePart
+    public function linkPart(Part $part): ?RebrickablePart
     {
         $rb = $this->findForPart($part);
 

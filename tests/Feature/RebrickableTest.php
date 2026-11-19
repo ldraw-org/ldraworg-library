@@ -28,7 +28,7 @@ it('handles pagination correctly', function () {
     Http::fakeSequence()
         ->push([
             'results' => [['id' => 1]],
-            'next' => 'https://rebrickable.com/api/v3/lego/parts/?page=2'
+            'next' => 'https://rebrickable.com/api/v3/lego/sets/1234-1/parts/?page=2'
         ])
         ->push([
             'results' => [['id' => 2]],
@@ -39,7 +39,7 @@ it('handles pagination correctly', function () {
 
     $service = new Rebrickable();
 
-    $result = $service->getParts([]);
+    $result = $service->getSetParts('1234-1');
 
     expect($result)->toHaveCount(2);
     expect($result->pluck('id')->all())->toEqual([1, 2]);
@@ -101,7 +101,7 @@ it('rate limits retries', function () {
         },
     ]);
 
-    (new Rebrickable())->getThemes();
+    (new Rebrickable())->getSetParts('1234-1');
 
     expect($timestamps)->toHaveCount(2);
     expect($timestamps[1] - $timestamps[0])->toBeGreaterThan(1);
@@ -112,7 +112,7 @@ it('does not retry client errors', function () {
 
     Cache::flush();
 
-    expect((new Rebrickable())->getPart('nonexistent'))->toBeEmpty();
+    expect((new Rebrickable())->getSet('nonexistent'))->toBeEmpty();
 
     Http::assertSentCount(1);
 });
@@ -145,7 +145,7 @@ it('retries on 429 responses', function () {
     Cache::flush();
 
     $service = new Rebrickable();
-    $service->getThemes();
+    $service->getSetParts('1234-1');
 
     Http::assertSentCount(2);
 });
@@ -159,8 +159,17 @@ it('handles API failure gracefully', function () {
 
     $service = new Rebrickable();
 
-    $result = $service->getThemes();
+    $result = $service->getTheme(1);
 
     expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class);
     expect($result)->toBeEmpty();
+});
+
+it('throws rather than returning a partial set parts list when a request fails', function () {
+    Http::fake(['*' => Http::response('Server Error', 500)]);
+
+    Cache::flush();
+
+    expect(fn () => (new Rebrickable())->getSetParts('1234-1'))
+        ->toThrow(\App\Services\External\RebrickableRequestFailed::class);
 });

@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 
 #[Signature('lib:update-rebrickable {--a|all-unofficial}')]
-#[Description('Call the rebrickable API for unofficial parts')]
+#[Description('Queue linking unofficial parts to their Rebrickable parts (all of them with -a, else only the unlinked ones)')]
 class UpdateRebrickable extends Command
 {
     public function handle(): void
