@@ -594,7 +594,7 @@ class Part extends Model implements HasMedia
         }
 
         $partNum = basename($this->filename, '.dat');
-
+        $before = $this->keywords->pluck('keyword')->sort()->values()->all();
 
         $prefixes = ExternalSite::prefixes();
 
@@ -611,11 +611,9 @@ class Part extends Model implements HasMedia
         }
 
         $keywords = $this->keywords->pluck('keyword')->all();
-        $kwSet = false;
 
         if ($rbPart->number !== $partNum) {
             $keywords[] = ucfirst(ExternalSite::Rebrickable->value) . ' ' . $rbPart->number;
-            $kwSet = true;
         }
 
         foreach (ExternalSite::cases() as $site) {
@@ -626,16 +624,16 @@ class Part extends Model implements HasMedia
             $num = $this->getExternalSiteNumber($site);
             if (!is_null($num) && $num !== $partNum) {
                 $keywords[] = ucfirst($site->value) . ' ' . $num;
-                $kwSet = true;
             }
-        }
-
-        if ($this->isOfficial() && $kwSet) {
-            $this->has_minor_edit = true;
         }
 
         $this->setKeywords($keywords);
         $this->load('keywords');
+
+        // An official part's header only needs reissuing when its keywords actually changed
+        if ($this->isOfficial() && $this->keywords->pluck('keyword')->sort()->values()->all() !== $before) {
+            $this->has_minor_edit = true;
+        }
     }
 
     public function setHistory(array|SupportCollection $history): void
