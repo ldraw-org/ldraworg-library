@@ -9,7 +9,7 @@ use Filament\Actions\Action;
 use Filament\Schemas\Components\Utilities\Get;
 use App\Services\LDraw\LDrawModelMaker;
 use App\Services\LDraw\Managers\OmrModelManager;
-use App\Services\External\Rebrickable;
+use App\Services\Omr\Set\Writer as SetWriter;
 use App\Models\Mybb\MybbAttachment;
 use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
@@ -29,8 +29,8 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -120,7 +120,7 @@ class Add extends Component implements HasSchemas, HasTable, HasActions
                                         $fail('Set already exists');
                                         return;
                                     }
-                                    if ((new Rebrickable())->getSet($value)->isEmpty()) {
+                                    if (is_null(app(SetWriter::class)->setData($value))) {
                                         $fail('Set number not found at Rebrickable');
                                     }
                                 },
@@ -130,14 +130,8 @@ class Add extends Component implements HasSchemas, HasTable, HasActions
                         if (!Str::endsWith($data['number'], ['-1', '-2'])) {
                             $data['number'] .= '-1';
                         }
-                        $rb_set_data = (new Rebrickable())->getSet($data['number'])->all();
-                        return Set::create([
-                            'number' => Arr::get($rb_set_data, 'set_num'),
-                            'name' => Arr::get($rb_set_data, 'name'),
-                            'year' => Arr::get($rb_set_data, 'year'),
-                            'rb_url' => Arr::get($rb_set_data, 'set_url'),
-                            'theme_id' => Arr::get($rb_set_data, 'theme_id'),
-                        ])->id;
+                        return app(SetWriter::class)->findFromSetNumber($data['number'], createIfMissing: true)?->id
+                            ?? throw ValidationException::withMessages(['number' => 'Unable to add the set from Rebrickable']);
                     }),
                 Toggle::make('alt_model')
                     ->rules([

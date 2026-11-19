@@ -63,6 +63,22 @@ beforeEach(function () {
     Http::preventStrayRequests();
     LdrawColour::query()->delete();
     LdrawColour::factory()->create(['code' => 4, 'rebrickable_id' => 4]);
+    // No CSV downloads, so a set that needs syncing goes to the API
+    fakeRebrickableCsv([]);
+});
+
+it('syncs a never synced set from the CSV downloads without calling Rebrickable', function () {
+    $set = pbgSet(['refreshed_at' => null]);
+    pbgLdrawPart('3001', pbgRebrickablePart('3001'));
+    fakeRebrickableCsv([
+        'inventories' => ['id,version,set_num', '10,1,1234-1'],
+        'inventory_minifigs' => ['inventory_id,fig_num,quantity'],
+        'inventory_sets' => ['inventory_id,set_num,quantity'],
+        'inventory_parts' => ['inventory_id,part_num,color_id,quantity,is_spare,img_url', '10,3001,4,6,False,'],
+    ]);
+
+    expect(pbgItems(app(SetPbg::class)->pbg('1234-1')))->toBe(['3001.dat: [color=4][count=6]']);
+    expect($set->fresh()->refreshed_at->isToday())->toBeTrue();
 });
 
 it('builds a pbg from the stored parts of an old set without calling Rebrickable', function () {

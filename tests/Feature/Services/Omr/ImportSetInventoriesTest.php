@@ -147,3 +147,32 @@ it('adds the sets holding a sticker sheet when their theme is known', function (
         ->and(storedInventory($added))->toBe([['sheet1', null, 1, false]])
         ->and(Set::where('number', '7001-1')->exists())->toBeFalse();
 });
+
+it('imports a single set the same way, reading only the inventories it needs', function () {
+    $set = inventorySet('6000-1');
+    $kit = inventorySet('K100-1');
+    $importer = app(ImportSetInventories::class);
+
+    expect($importer->importSet($set))->toBeTrue()
+        ->and($importer->importSet($kit))->toBeTrue()
+        ->and(storedInventory($set))->toBe([
+            ['3001', 4, 4, false],
+            ['3001', 4, 1, true],
+            ['3002', null, 1, false],
+            ['973', 0, 2, false],
+        ])
+        ->and(storedInventory($kit))->toBe([
+            ['3001', 4, 2, false],
+            ['3002', 0, 8, false],
+            ['973', 0, 2, false],
+        ])
+        ->and($set->fresh()->refreshed_at)->not->toBeNull()
+        ->and(Set::where('number', '7000-1')->exists())->toBeFalse();
+});
+
+it('reports a single set the downloads have no inventory for', function () {
+    $set = inventorySet('9999-1');
+
+    expect(app(ImportSetInventories::class)->importSet($set))->toBeFalse()
+        ->and($set->fresh()->refreshed_at)->toBeNull();
+});

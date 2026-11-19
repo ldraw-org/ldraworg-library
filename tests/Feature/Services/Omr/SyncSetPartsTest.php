@@ -56,6 +56,8 @@ beforeEach(function () {
     Cache::flush();
     LdrawColour::query()->delete();
     LdrawColour::factory()->create(['code' => 4, 'rebrickable_id' => 4]);
+    // No CSV downloads, so these sets go to the API
+    fakeRebrickableCsv([]);
 });
 
 it('replaces set parts and stores null for colours without an LDraw mapping', function () {

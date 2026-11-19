@@ -8,6 +8,7 @@ use App\Models\Omr\Theme;
 use App\Models\RebrickablePart;
 use App\Services\External\RebrickableCsv;
 use App\Services\LDraw\Managers\LDConfigManager;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -86,6 +87,67 @@ class ImportSetInventories
     }
 
     /**
+     * Builds one set's inventory, reading only the inventories it needs, so a set missing from the database
+     * can be added during a request without the Rebrickable API.
+     *
+     * @return bool false when the downloads have no inventory for the set
+     * @throws FileNotFoundException when the downloads are missing
+     */
+    public function importSet(Set $set): bool
+    {
+        $this->latest = $this->latestInventories();
+        if (!isset($this->latest[$set->number])) {
+            return false;
+        }
+
+        $this->children = $this->children();
+        $needed = $this->inventoryTree($this->latest[$set->number]);
+        $this->inventoryParts = array_map(
+            fn (array $rows) => implode("\n", array_map(fn (array $row) => $this->line($row), $rows)),
+            $this->rebrickableCsv->inventoryParts($needed)
+        );
+
+        $quantities = $this->expand($this->latest[$set->number]);
+        $numbers = array_unique(array_map(fn (string $key) => strstr($key, "\t", true), array_keys($quantities)));
+        $partIds = DB::table('rebrickable_parts')->whereIn('number', $numbers)->pluck('id', 'number')->all();
+        $missing = [];
+        $pivots = $this->pivots($quantities, $partIds, $this->configManager->rebrickableColoursToLdrawCodes(), $missing);
+
+        $this->writePivots([$set->id => $pivots]);
+        $set->refreshed_at = now();
+        $set->save();
+
+        return true;
+    }
+
+    /**
+     * The inventory with its minifig and sub-set inventories, as deep as expand() goes.
+     *
+     * @return array<int, string>
+     */
+    protected function inventoryTree(string $inventory, int $depth = 0): array
+    {
+        $tree = [$inventory];
+        if ($depth < self::MAX_DEPTH) {
+            foreach ($this->children[$inventory] ?? [] as [$number]) {
+                if (isset($this->latest[$number])) {
+                    $tree = [...$tree, ...$this->inventoryTree($this->latest[$number], $depth + 1)];
+                }
+            }
+        }
+
+        return array_values(array_unique($tree));
+    }
+
+    /**
+     * @param array<string, ?string> $row an inventory_parts row
+     */
+    protected function line(array $row): string
+    {
+        return "{$row['part_num']}\t{$row['color_id']}\t{$row['quantity']}\t" . ($row['is_spare'] === 'True' ? 1 : 0);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function latestInventories(): array
@@ -141,7 +203,7 @@ class ImportSetInventories
                 continue;
             }
 
-            $line = "{$row['part_num']}\t{$row['color_id']}\t{$row['quantity']}\t" . ($row['is_spare'] === 'True' ? 1 : 0);
+            $line = $this->line($row);
             $this->inventoryParts[$inventory] = isset($this->inventoryParts[$inventory])
                 ? "{$this->inventoryParts[$inventory]}\n{$line}"
                 : $line;

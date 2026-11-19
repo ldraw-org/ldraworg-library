@@ -84,6 +84,50 @@ it('only reads as far as it is consumed', function () {
     expect($first['name'])->toBe('Technic');
 });
 
+function inventoryPartsFixture(): string
+{
+    $lines = ['inventory_id,part_num,color_id,quantity,is_spare,img_url'];
+    foreach (range(1, 600) as $id) {
+        if ($id % 7 === 0) {
+            continue;
+        }
+        foreach (range(1, $id % 3 + 1) as $n) {
+            $lines[] = "{$id},part{$id}-{$n},{$n},{$n},False,https://cdn.rebrickable.com/media/parts/{$id}.jpg";
+        }
+    }
+
+    return implode("\r\n", $lines) . "\r\n";
+}
+
+it('finds inventory parts by binary search, matching a full read', function () {
+    file_put_contents("{$this->dir}/inventory_parts.csv", inventoryPartsFixture());
+    $csv = new RebrickableCsv($this->dir);
+    $ids = [1, 2, 300, 301, 599, 600, 7, 0, 601];
+
+    $expected = $csv->rows(RebrickableCsvFile::InventoryParts)
+        ->filter(fn (array $row) => in_array((int) $row['inventory_id'], $ids, true))
+        ->groupBy('inventory_id')
+        ->map(fn ($rows) => $rows->values()->all())
+        ->all();
+    $found = $csv->inventoryParts($ids);
+    ksort($found);
+    ksort($expected);
+
+    expect($found)->toBe($expected)
+        // Multiples of 7 (7, 301) have no rows, and 0 and 601 are outside the file
+        ->and(array_keys($found))->toBe([1, 2, 300, 599, 600])
+        ->and($found[2])->toHaveCount(3);
+});
+
+it('reads gzipped inventory parts through', function () {
+    file_put_contents("{$this->dir}/inventory_parts.csv.gz", gzencode(inventoryPartsFixture()));
+
+    $found = (new RebrickableCsv($this->dir))->inventoryParts([2, 7, 600]);
+
+    expect(array_keys($found))->toBe([2, 600])
+        ->and(array_column($found[2], 'part_num'))->toBe(['part2-1', 'part2-2', 'part2-3']);
+});
+
 it('uses the configured directory by default', function () {
     config(['ldraw.rebrickable_csv_path' => $this->dir . '/']);
     file_put_contents("{$this->dir}/themes.csv", "id,name,parent_id\n1,Technic,\n");
