@@ -9,12 +9,15 @@ use App\Services\Cache\CacheService;
 use App\Enums\RebrickableCsvFile;
 use App\Services\External\RebrickableCsv;
 use App\Services\Parser\ParsedPartCollection;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class LDConfigManager
 {
+    protected const string LDCONFIG_PATH = 'library/official/LDConfig.ldr';
+
     public function __construct(
         protected RebrickableCsv $rebrickableCsv,
         protected CacheService $cache
@@ -24,12 +27,20 @@ class LDConfigManager
 
     public function getLDConfig(): ParsedPartCollection
     {
-        $ldconfig = Storage::get('library/official/LDConfig.ldr');
+        $ldconfig = Storage::get(self::LDCONFIG_PATH);
         return new ParsedPartCollection($ldconfig)->where('invalid', false);
     }
 
+    /**
+     * Does nothing without an LDConfig. Without the Rebrickable CSV downloads, stored Rebrickable
+     * mappings are kept and new colours are left unmapped.
+     */
     public function importColours(): void
     {
+        if (!Storage::exists(self::LDCONFIG_PATH)) {
+            return;
+        }
+
         $rbColors = $this->rebrickableColoursByLdrawCode();
         $this->getLDConfig()
             ->where('meta', 'colour')
@@ -39,7 +50,11 @@ class LDConfigManager
                     $c->delete();
                 }
                 $params = Arr::get($color, 'material_params', []);
-                $rbColor = $rbColors->get((string) $color['code']);
+                $rbColor = $rbColors?->get((string) $color['code']);
+                $rbValues = is_null($rbColors) ? [] : [
+                    'rebrickable_id' => $rbColor['id'] ?? null,
+                    'rebrickable_name' => $rbColor['name'] ?? null,
+                ];
                 $color = [
                     'name' => $color['name'],
                     'code' => $color['code'],
@@ -64,8 +79,7 @@ class LDConfigManager
                     'material_size' => Arr::get($params, 'size'),
                     'material_minsize' => Arr::get($params, 'minsize'),
                     'material_maxsize' => Arr::get($params, 'maxsize'),
-                    'rebrickable_id' => $rbColor['id'] ?? null,
-                    'rebrickable_name' => $rbColor['name'] ?? null,
+                    ...$rbValues,
                 ];
                 LdrawColour::updateOrCreate(['code' => $color['code']], $color);
             });
@@ -79,13 +93,18 @@ class LDConfigManager
      * Rebrickable colour id and name keyed by LDraw colour code. When several Rebrickable colours map to
      * the same code the lowest id wins, and the [Unknown] colour (-1) is never used.
      *
-     * @return Collection<string, array{id: int, name: string}>
+     * @return ?Collection<string, array{id: int, name: string}> null when the CSV downloads are missing
      */
-    protected function rebrickableColoursByLdrawCode(): Collection
+    protected function rebrickableColoursByLdrawCode(): ?Collection
     {
-        $names = $this->rebrickableCsv->rows(RebrickableCsvFile::Colors)->pluck('name', 'id')->all();
+        try {
+            $names = $this->rebrickableCsv->rows(RebrickableCsvFile::Colors)->pluck('name', 'id')->all();
+            $mappings = $this->rebrickableCsv->rows(RebrickableCsvFile::ColorMappings);
+        } catch (FileNotFoundException) {
+            return null;
+        }
 
-        return $this->rebrickableCsv->rows(RebrickableCsvFile::ColorMappings)
+        return $mappings
             ->filter(fn (array $row) => $row['ext_system'] === 'LD' && $row['id'] !== '-1' && isset($names[$row['id']]))
             ->sortBy(fn (array $row) => (int) $row['id'])
             ->unique('ext_id')

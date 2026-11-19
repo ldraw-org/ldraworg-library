@@ -61,3 +61,26 @@ it('maps LDConfig colours to Rebrickable colours from the CSV downloads', functi
         ->and(LdrawColour::firstWhere('code', 256)->rubber)->toBeTrue()
         ->and(app(LDConfigManager::class)->ldrawColourCodesToRebrickable())->toMatchArray([4 => 4, 256 => 0]);
 });
+
+it('does nothing without an LDConfig', function () {
+    $red = LdrawColour::factory()->create(['code' => 4, 'name' => 'Red', 'value' => '#B40000', 'rebrickable_id' => 4]);
+    fakeRebrickableCsv([]);
+
+    app(LDConfigManager::class)->importColours();
+
+    expect($red->fresh()->only(['value', 'rebrickable_id']))->toBe(['value' => '#B40000', 'rebrickable_id' => 4]);
+});
+
+it('keeps stored Rebrickable mappings and leaves new colours unmapped without the CSV downloads', function () {
+    $red = LdrawColour::factory()->create(['code' => 4, 'name' => 'Red', 'value' => '#B40000', 'rebrickable_id' => 4, 'rebrickable_name' => 'Red']);
+    Storage::put('library/official/LDConfig.ldr', implode("\n", [
+        '0 !COLOUR Red CODE 4 VALUE #C91A09 EDGE #333333',
+        '0 !COLOUR Brand_New CODE 998 VALUE #FFFFFF EDGE #000000',
+    ]));
+    fakeRebrickableCsv(['colors' => ['id,name,rgb,is_trans,num_parts,num_sets,y1,y2']]);
+
+    app(LDConfigManager::class)->importColours();
+
+    expect($red->fresh()->only(['value', 'rebrickable_id', 'rebrickable_name']))->toBe(['value' => '#C91A09', 'rebrickable_id' => 4, 'rebrickable_name' => 'Red'])
+        ->and(LdrawColour::firstWhere('code', 998)->only(['rebrickable_id', 'rebrickable_name']))->toBe(['rebrickable_id' => null, 'rebrickable_name' => null]);
+});
