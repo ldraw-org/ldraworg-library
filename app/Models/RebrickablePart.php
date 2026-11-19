@@ -24,6 +24,7 @@ class RebrickablePart extends Model
      *     'brickowl': 'array',
      *     'brickset': 'array',
      *     'lego': 'array',
+     *     'ldraw': 'array',
      *     'is_local': 'boolean',
      *     'refreshed_at': 'datetime'
      * }
@@ -35,6 +36,7 @@ class RebrickablePart extends Model
             'brickowl' => 'array',
             'brickset' => 'array',
             'lego' => 'array',
+            'ldraw' => 'array',
             'is_local' => 'boolean',
             'refreshed_at' => 'datetime',
         ];

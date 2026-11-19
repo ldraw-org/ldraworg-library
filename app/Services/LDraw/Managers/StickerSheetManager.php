@@ -5,21 +5,11 @@ namespace App\Services\LDraw\Managers;
 use App\Enums\PartCategory;
 use App\Models\Part\Part;
 use App\Models\RebrickablePart;
-use App\Services\External\Rebrickable;
-use App\Services\Omr\Set\Writer;
-use App\Services\RebrickablePart\Writer as RebrickablePartWriter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
 class StickerSheetManager
 {
-    public function __construct(
-        protected Rebrickable $rebrickable,
-        protected Writer $setWriter,
-        protected RebrickablePartWriter $rebrickablePartWriter,
-    ) {
-    }
-
     public function complete_set(RebrickablePart $sheet): Collection
     {
         if ($sheet->rb_part_category_id != 58) {
@@ -45,60 +35,6 @@ class StickerSheetManager
             });
             return $hasFormed;
         });
-    }
-
-    public function refreshStickerParts(): void
-    {
-        $stickerParts = $this->rebrickable->getParts([
-            'part_cat_id' => 58,
-            'page' => 1,
-            'page_size' => 1,
-        ], true);
-
-        $rbCount = $stickerParts->get('count');
-        $dbCount = RebrickablePart::where('rb_part_category_id', 58)
-            ->where('is_local', false)
-            ->count();
-        if ($rbCount == $dbCount) {
-            return;
-        }
-
-        $stickerParts = $this->rebrickable
-            ->getParts([
-                'part_cat_id' => 58,
-            ]);
-
-        $dbStickerParts = RebrickablePart::where('rb_part_category_id', 58)
-            ->where('is_local', false)
-            ->get();
-
-        $rbStickerNumbers = $stickerParts
-            ->pluck('part_num')
-            ->values();
-        $dbStickerNumbers = $dbStickerParts
-            ->pluck('number')
-            ->values();
-
-
-        $removedNumbers = $dbStickerNumbers->diff($rbStickerNumbers)->values()->all();
-        RebrickablePart::whereIn('number', $removedNumbers)
-            ->update(['is_local' => true]);
-
-
-        $newNumbers = $rbStickerNumbers->diff($dbStickerNumbers)->values()->all();
-        $newNumbersSet = array_flip($newNumbers);
-        $stickerParts
-            ->filter(fn (array $item) => isset($newNumbersSet[$item['part_num']]))
-            ->each(function (array $item) {
-                $rbPart  = $this->rebrickablePartWriter->updateOrCreateFromArray($item);
-                $this->refreshStickerSets($rbPart);
-            });
-    }
-
-    public function refreshStickerSets(RebrickablePart $sheet): void
-    {
-        $this->rebrickable->getPartColorSets($sheet->number, 9999)
-            ->each(fn (array $set) => $this->setWriter->updateOrCreateSetFromArray($set));
     }
 
     public function getStickerPart(Part $part): ?RebrickablePart
