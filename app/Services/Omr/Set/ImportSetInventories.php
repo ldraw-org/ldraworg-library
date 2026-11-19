@@ -8,6 +8,7 @@ use App\Models\Omr\Theme;
 use App\Models\RebrickablePart;
 use App\Services\External\RebrickableCsv;
 use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\RebrickablePart\Writer as RebrickablePartWriter;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +43,7 @@ class ImportSetInventories
     public function __construct(
         protected RebrickableCsv $rebrickableCsv,
         protected LDConfigManager $configManager,
+        protected RebrickablePartWriter $rebrickablePartWriter,
     ) {
     }
 
@@ -109,7 +111,8 @@ class ImportSetInventories
 
         $quantities = $this->expand($this->latest[$set->number]);
         $numbers = array_unique(array_map(fn (string $key) => strstr($key, "\t", true), array_keys($quantities)));
-        $partIds = DB::table('rebrickable_parts')->whereIn('number', $numbers)->pluck('id', 'number')->all();
+        // Parts not imported yet, as before the first full import, come from parts.csv rather than being left out
+        $partIds = $this->rebrickablePartWriter->idsFromDatabaseOrCsv(array_values($numbers));
         $missing = [];
         $pivots = $this->pivots($quantities, $partIds, $this->configManager->rebrickableColoursToLdrawCodes(), $missing);
 

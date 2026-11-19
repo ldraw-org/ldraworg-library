@@ -127,6 +127,26 @@ it('creates parts newer than the CSV downloads without external ids and leaves i
         ]);
 });
 
+it('takes a part missing from the database from parts.csv before the API response', function () {
+    $set = setWithExistingPart();
+    fakeRebrickableCsv(['parts' => ['part_num,name,part_cat_id,part_material', '3001,CSV Name,11,Plastic']]);
+    Http::fake([
+        'rebrickable.com/*' => Http::response([
+            'results' => [
+                [...setPartRow('3001', 4), 'part' => ['part_num' => '3001', 'name' => 'API Name', 'part_cat_id' => 99]],
+                [...setPartRow('99999', 4), 'part' => ['part_num' => '99999', 'name' => 'API Only', 'part_cat_id' => 14]],
+            ],
+            'next' => null,
+        ]),
+    ]);
+
+    app(SyncSetParts::class)->handle($set);
+
+    expect(RebrickablePart::firstWhere('number', '3001')->only(['name', 'rb_part_category_id']))->toBe(['name' => 'CSV Name', 'rb_part_category_id' => 11])
+        ->and(RebrickablePart::firstWhere('number', '99999')->name)->toBe('API Only')
+        ->and($set->rebrickable_parts()->count())->toBe(2);
+});
+
 it('stores regular and spare quantities separately', function () {
     $set = setWithExistingPart();
     Http::fake([

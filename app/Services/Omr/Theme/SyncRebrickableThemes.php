@@ -7,6 +7,7 @@ use App\Models\Omr\Set;
 use App\Models\Omr\Theme;
 use App\Services\External\Rebrickable;
 use App\Services\External\RebrickableCsv;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class SyncRebrickableThemes
 {
@@ -59,7 +60,11 @@ class SyncRebrickableThemes
             return true;
         }
 
-        $this->handle();
+        try {
+            $this->handle();
+        } catch (FileNotFoundException) {
+            // Without the downloads the API is the only source
+        }
 
         $id = $themeId;
         while (!is_null($id) && Theme::whereKey($id)->doesntExist()) {

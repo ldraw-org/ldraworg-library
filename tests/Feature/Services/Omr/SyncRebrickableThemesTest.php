@@ -64,6 +64,15 @@ it('falls back to the API for a theme and ancestors newer than the CSV downloads
     Http::assertSentCount(2);
 });
 
+it('goes to the API when the CSV downloads are missing', function () {
+    fakeRebrickableCsv([]);
+    Http::fake(['rebrickable.com/api/v3/lego/themes/50/' => Http::response(['id' => 50, 'name' => 'Town', 'parent_id' => null])]);
+
+    expect(app(SyncRebrickableThemes::class)->ensureExists(50))->toBeTrue()
+        ->and(Theme::find(50)->name)->toBe('Town');
+    Http::assertSentCount(1);
+});
+
 it('reports a theme that neither source has', function () {
     Http::fake(['rebrickable.com/*' => Http::response(['detail' => 'Not found.'], 404)]);
 

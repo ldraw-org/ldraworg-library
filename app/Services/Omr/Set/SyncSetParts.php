@@ -7,6 +7,7 @@ use App\Models\RebrickablePart;
 use App\Services\External\Rebrickable;
 use App\Services\External\RebrickableRequestFailed;
 use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\RebrickablePart\Writer as RebrickablePartWriter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -21,6 +22,7 @@ class SyncSetParts
     public function __construct(
         protected Rebrickable $rebrickable,
         protected LDConfigManager $configManager,
+        protected RebrickablePartWriter $rebrickablePartWriter,
     ) {
     }
 
@@ -32,13 +34,13 @@ class SyncSetParts
         $parts = $this->rebrickable->getSetParts($set->number);
         $colours = $this->configManager->rebrickableColoursToLdrawCodes();
 
-        // Imported parts are used as they are. A part newer than the CSV downloads gets a placeholder without
-        // external ids, which the next import fills in. Parts are written outside the transaction to avoid
-        // holding their row locks.
-        $partIds = $parts
-            ->pluck('part')
-            ->unique('part_num')
-            ->mapWithKeys(fn (array $part) => [
+        // Parts come from the database, then parts.csv, and only a part newer than the downloads from the API
+        // response. Created parts have no external ids yet; the next import fills them in. Parts are written
+        // outside the transaction to avoid holding their row locks.
+        $apiParts = $parts->pluck('part')->unique('part_num')->keyBy('part_num');
+        $partIds = collect($this->rebrickablePartWriter->idsFromDatabaseOrCsv($apiParts->keys()->all()));
+        $partIds = $partIds->union(
+            $apiParts->diffKeys($partIds)->mapWithKeys(fn (array $part) => [
                 $part['part_num'] => RebrickablePart::firstOrCreate(
                     ['number' => $part['part_num']],
                     [
@@ -47,7 +49,8 @@ class SyncSetParts
                         'url' => $part['part_url'] ?? "https://rebrickable.com/parts/{$part['part_num']}/",
                     ]
                 )->id,
-            ]);
+            ])
+        );
 
         $pivots = $parts->map(fn (array $part) => [
             'set_id' => $set->id,

@@ -170,6 +170,18 @@ it('imports a single set the same way, reading only the inventories it needs', f
         ->and(Set::where('number', '7000-1')->exists())->toBeFalse();
 });
 
+it('creates parts not yet imported from parts.csv when importing a single set', function () {
+    RebrickablePart::firstWhere('number', '973')->delete();
+    file_put_contents(config('ldraw.rebrickable_csv_path') . '/parts.csv', "part_num,name,part_cat_id,part_material\r\n973,Torso,60,Plastic\r\n");
+    $set = inventorySet('6000-1');
+
+    app(ImportSetInventories::class)->importSet($set);
+
+    $torso = RebrickablePart::firstWhere('number', '973');
+    expect($torso->only(['name', 'rb_part_category_id', 'bricklink']))->toBe(['name' => 'Torso', 'rb_part_category_id' => 60, 'bricklink' => null])
+        ->and(storedInventory($set))->toContain(['973', 0, 2, false]);
+});
+
 it('reports a single set the downloads have no inventory for', function () {
     $set = inventorySet('9999-1');
 
