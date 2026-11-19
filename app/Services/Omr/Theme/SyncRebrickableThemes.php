@@ -3,6 +3,7 @@
 namespace App\Services\Omr\Theme;
 
 use App\Enums\RebrickableCsvFile;
+use App\Models\Omr\Set;
 use App\Models\Omr\Theme;
 use App\Services\External\Rebrickable;
 use App\Services\External\RebrickableCsv;
@@ -26,6 +27,26 @@ class SyncRebrickableThemes
             ->all();
 
         Theme::upsert($themes, ['id'], ['name', 'parent_id']);
+        $this->pruneStaleThemes(array_column($themes, 'id'));
+    }
+
+    /**
+     * Deletes themes no longer in the downloads unless a set or a child theme still uses them,
+     * repeating so a chain of unused stale themes is removed from the leaves up.
+     *
+     * @param array<int, int> $currentIds
+     */
+    protected function pruneStaleThemes(array $currentIds): void
+    {
+        do {
+            $usedIds = Set::query()->distinct()->pluck('theme_id')
+                ->merge(Theme::whereNotNull('parent_id')->distinct()->pluck('parent_id'))
+                ->unique();
+            $staleIds = Theme::whereNotIn('id', $currentIds)
+                ->whereNotIn('id', $usedIds)
+                ->pluck('id');
+            Theme::whereKey($staleIds)->delete();
+        } while ($staleIds->isNotEmpty());
     }
 
     /**

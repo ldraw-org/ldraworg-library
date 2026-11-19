@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Omr\Set;
 use App\Models\Omr\Theme;
 use App\Services\Omr\Theme\SyncRebrickableThemes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,18 +21,27 @@ beforeEach(function () {
     ]);
 });
 
-it('upserts themes from the CSV downloads without deleting others', function () {
+it('upserts themes from the CSV downloads and prunes unused stale themes', function () {
     Http::preventStrayRequests();
     Theme::create(['id' => 50, 'name' => 'Old Town Name']);
+    // Stale and unused
     Theme::create(['id' => 7, 'name' => 'Fabuland']);
+    // Stale and unused chain: parent 60 only used by stale child 61
+    Theme::create(['id' => 60, 'name' => 'Old Parent']);
+    Theme::create(['id' => 61, 'name' => 'Old Child', 'parent_id' => 60]);
+    // Stale but used by a set, so it and its stale parent stay
+    Theme::create(['id' => 70, 'name' => 'Kept Parent']);
+    Theme::create(['id' => 71, 'name' => 'Kept Child', 'parent_id' => 70]);
+    Set::create(['number' => '1-1', 'name' => 'Set', 'year' => 1990, 'theme_id' => 71, 'rb_url' => '']);
 
     app(SyncRebrickableThemes::class)->handle();
 
     expect(Theme::orderBy('id')->get(['id', 'name', 'parent_id'])->toArray())->toBe([
         ['id' => 1, 'name' => 'Technic', 'parent_id' => null],
         ['id' => 3, 'name' => 'Competition', 'parent_id' => 1],
-        ['id' => 7, 'name' => 'Fabuland', 'parent_id' => null],
         ['id' => 50, 'name' => 'Town', 'parent_id' => null],
+        ['id' => 70, 'name' => 'Kept Parent', 'parent_id' => null],
+        ['id' => 71, 'name' => 'Kept Child', 'parent_id' => 70],
     ]);
 });
 
