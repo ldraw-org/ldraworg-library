@@ -2,6 +2,7 @@
 
 use App\Services\Parser\ParsedPartCollection;
 use App\Services\Check\PartChecker;
+use Illuminate\Support\Facades\File;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,3 +25,21 @@ expect()->extend('toHaveCheckResult', function (bool $expected, string $check, ?
     $result = PartChecker::singleCheck($file, $check, $filename);
     expect($result->isEmpty())->toBe($expected);
 });
+
+/**
+ * Points the Rebrickable CSV reader at a fresh directory holding the given files.
+ *
+ * @param array<string, array<int, string>> $files lines (header first) keyed by base file name, e.g. 'themes'
+ */
+function fakeRebrickableCsv(array $files): void
+{
+    $dir = storage_path('framework/testing/rebrickable-csv');
+    File::deleteDirectory($dir);
+    File::ensureDirectoryExists($dir);
+
+    foreach ($files as $name => $lines) {
+        file_put_contents("{$dir}/{$name}.csv", implode("\r\n", $lines) . "\r\n");
+    }
+
+    config(['ldraw.rebrickable_csv_path' => $dir]);
+}

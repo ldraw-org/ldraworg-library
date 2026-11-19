@@ -3,23 +3,14 @@
 use App\Models\LdrawColour;
 use App\Services\LDraw\Managers\LDConfigManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->dir = sys_get_temp_dir() . '/rebrickable-csv-test-' . uniqid();
-    File::ensureDirectoryExists($this->dir);
-    config(['ldraw.rebrickable_csv_path' => $this->dir]);
-
     Storage::fake();
     Http::preventStrayRequests();
-});
-
-afterEach(function () {
-    File::deleteDirectory($this->dir);
 });
 
 it('maps LDConfig colours to Rebrickable colours from the CSV downloads', function () {
@@ -30,25 +21,27 @@ it('maps LDConfig colours to Rebrickable colours from the CSV downloads', functi
         '0 !COLOUR Trans_Reddish_Lilac CODE 284 VALUE #E0D0E5 EDGE #B8A0C0 ALPHA 128',
         '0 !COLOUR Unmapped CODE 999 VALUE #FFFFFF EDGE #000000',
     ]));
-    file_put_contents("{$this->dir}/colors.csv", implode("\r\n", [
-        'id,name,rgb,is_trans,num_parts,num_sets,y1,y2',
-        '-1,[Unknown],0033B2,False,17,2,2000,2000',
-        '0,Black,05131D,False,1,1,1957,2027',
-        '4,Red,C91A09,False,1,1,1957,2027',
-        '236,Trans-Light Purple,96388E,True,1,1,2000,2027',
-        '1094,Trans-Reddish Lilac,E0D0E5,True,1,1,2000,2027',
-    ]) . "\r\n");
-    file_put_contents("{$this->dir}/color_mappings.csv", implode("\r\n", [
-        'id,ext_system,ext_id,ext_descr,is_export_id,is_import_id',
-        '-1,LD,999,"[""Unknown""]",True,True',
-        '0,BL,11,"[""Black""]",True,True',
-        '0,LD,256,"[""Rubber_Black""]",False,True',
-        '0,LD,0,"[""Black""]",True,True',
-        '4,BL,5,"[""Red""]",True,True',
-        '4,LD,4,"[""Red""]",True,True',
-        '1094,LD,284,"[""Trans_Reddish_Lilac""]",True,True',
-        '236,LD,284,"[""Trans_Light_Purple""]",False,True',
-    ]) . "\r\n");
+    fakeRebrickableCsv([
+        'colors' => [
+            'id,name,rgb,is_trans,num_parts,num_sets,y1,y2',
+            '-1,[Unknown],0033B2,False,17,2,2000,2000',
+            '0,Black,05131D,False,1,1,1957,2027',
+            '4,Red,C91A09,False,1,1,1957,2027',
+            '236,Trans-Light Purple,96388E,True,1,1,2000,2027',
+            '1094,Trans-Reddish Lilac,E0D0E5,True,1,1,2000,2027',
+        ],
+        'color_mappings' => [
+            'id,ext_system,ext_id,ext_descr,is_export_id,is_import_id',
+            '-1,LD,999,"[""Unknown""]",True,True',
+            '0,BL,11,"[""Black""]",True,True',
+            '0,LD,256,"[""Rubber_Black""]",False,True',
+            '0,LD,0,"[""Black""]",True,True',
+            '4,BL,5,"[""Red""]",True,True',
+            '4,LD,4,"[""Red""]",True,True',
+            '1094,LD,284,"[""Trans_Reddish_Lilac""]",True,True',
+            '236,LD,284,"[""Trans_Light_Purple""]",False,True',
+        ],
+    ]);
 
     app(LDConfigManager::class)->importColours();
 

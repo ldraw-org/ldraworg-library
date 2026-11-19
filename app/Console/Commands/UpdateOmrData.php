@@ -2,44 +2,21 @@
 
 namespace App\Console\Commands;
 
-use App\Services\External\Rebrickable;
-use App\Models\Omr\Set;
-use App\Models\Omr\Theme;
+use App\Services\Omr\Set\SyncSetMetadata;
+use App\Services\Omr\Theme\SyncRebrickableThemes;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Support\Arr;
 
+#[Signature('lib:update-omr')]
+#[Description('Update OMR themes and set details from the Rebrickable CSV downloads')]
 class UpdateOmrData extends Command
 {
-    protected $signature = 'lib:update-omr';
-
-    protected $description = 'Command description';
-
-    public function handle(): void
+    public function handle(SyncRebrickableThemes $syncThemes, SyncSetMetadata $syncSets): void
     {
-        $rb = new Rebrickable();
-        $themes = $rb->getThemes();
+        $syncThemes->handle();
+        $this->info('Themes synced');
 
-        $themes->each(function (array $theme) {
-            Theme::updateOrCreate(
-                [
-                    'id' => $theme['id']
-                ],
-                [
-                    'parent_id' => $theme['parent_id'],
-                    'name' => $theme['name']
-                ]
-            );
-        });
-
-        Set::all()->each(function (Set $set) use ($rb) {
-            $rb_set = $rb->getSet($set->number)->all();
-            if (Arr::get($rb_set, 'theme_id', '') == '') {
-                dd($rb_set, $set->number);
-            }
-            if ($set->theme_id != $rb_set['theme_id']) {
-                $set->theme_id = $rb_set['theme_id'];
-                $set->save();
-            }
-        });
+        $this->info("{$syncSets->handle()} sets updated");
     }
 }

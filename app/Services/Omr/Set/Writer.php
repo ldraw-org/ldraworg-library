@@ -3,7 +3,6 @@
 namespace App\Services\Omr\Set;
 
 use App\Models\Omr\Set;
-use App\Models\Omr\Theme;
 use App\Services\External\Rebrickable;
 use App\Services\External\RebrickableRequestFailed;
 use App\Services\Omr\Theme\SyncRebrickableThemes;
@@ -14,7 +13,8 @@ class Writer
         protected Rebrickable $rebrickable,
         protected SyncSetParts $syncSetParts,
         protected SyncRebrickableThemes $syncThemes,
-    ) {}
+    ) {
+    }
 
     public function findFromSetNumber(string $setNumber, bool $createIfMissing = false): ?Set
     {
@@ -33,7 +33,7 @@ class Writer
 
     public function updateOrCreateSetFromArray(array $setData): ?Set
     {
-        if (! $this->ensureThemeExists($setData['theme_id'])) {
+        if (! $this->syncThemes->ensureExists($setData['theme_id'])) {
             return null;
         }
 
@@ -71,16 +71,5 @@ class Writer
         $set->save();
 
         return true;
-    }
-
-    protected function ensureThemeExists(int $themeId): bool
-    {
-        if (Theme::whereKey($themeId)->exists()) {
-            return true;
-        }
-
-        $this->syncThemes->handle();
-
-        return Theme::whereKey($themeId)->exists();
     }
 }
