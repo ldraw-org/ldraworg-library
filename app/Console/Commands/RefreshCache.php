@@ -13,23 +13,19 @@ class RefreshCache extends Command
 
     public function handle(CacheService $cache): void
     {
+        $this->call('down');
         if ($this->option('optimize')) {
-            $this->call('down');
-            try {
-                $this->call('optimize:clear');
-                if (app()->environment('production')) {
-                    $this->call('optimize');
-                }
-            } finally {
-                $this->call('up');
+            $this->call('optimize:clear');
+            if (app()->environment('production')) {
+                $this->call('optimize');
             }
         }
-        $cache->warmAll();
         if (config('queue.default') == 'redis') {
             $this->call('horizon:terminate');
         } else {
             $this->call('queue:restart');
         }
-
+        $this->call('up');
+        $cache->warmAll();
     }
 }
