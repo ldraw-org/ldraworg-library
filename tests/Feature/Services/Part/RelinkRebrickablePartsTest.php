@@ -95,6 +95,31 @@ it('leaves correctly linked, unmatched and unlinked sticker parts alone', functi
         ->and(RebrickablePart::where('is_local', true)->exists())->toBeFalse();
 });
 
+it('moves stickers off local sheets once the real sheet is added', function () {
+    $local = RebrickablePart::create(['number' => 'u-004402', 'name' => 'Local', 'rb_part_category_id' => 58, 'is_local' => true]);
+    $localFormed = RebrickablePart::create(['number' => 'u-4106993a-', 'name' => 'Local', 'rb_part_category_id' => 58, 'is_local' => true]);
+    $sheet = RebrickablePart::create(['number' => '4402', 'name' => 'Sheet', 'rb_part_category_id' => 58]);
+    $byElement = RebrickablePart::create(['number' => '71469', 'name' => 'Sheet', 'rb_part_category_id' => 58, 'element' => '4106993']);
+    $sticker = relinkPart('004402a', $local, category: PartCategory::Sticker);
+    $fSticker = relinkPart('4106993a-f1', $localFormed, category: PartCategory::Sticker);
+
+    $count = app(RelinkRebrickableParts::class)->handle([]);
+
+    expect($count)->toBe(2)
+        ->and($sticker->fresh()->rebrickable_part_id)->toBe($sheet->id)
+        ->and($fSticker->fresh()->rebrickable_part_id)->toBe($byElement->id);
+});
+
+it('keeps stickers on their local sheet while no real sheet matches', function () {
+    $local = RebrickablePart::create(['number' => 'u-191905', 'name' => 'Local', 'rb_part_category_id' => 58, 'is_local' => true]);
+    RebrickablePart::create(['number' => '191906', 'name' => 'Other sheet', 'rb_part_category_id' => 58]);
+    $sticker = relinkPart('191905a', $local, category: PartCategory::Sticker);
+
+    app(RelinkRebrickableParts::class)->handle([]);
+
+    expect($sticker->fresh()->rebrickable_part_id)->toBe($local->id);
+});
+
 it('re-syncs unofficial parts without marking them minor edits', function () {
     $rb = RebrickablePart::create(['number' => '4000pr0001', 'name' => 'Print', 'bricklink' => ['4000pb01'], 'ldraw' => ['4000p01']]);
     $part = relinkPart('4000p01', official: false);
