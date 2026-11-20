@@ -19,15 +19,38 @@ CREATE TABLE `avatars` (
   UNIQUE KEY `avatars_category_unique` (`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `check_messages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `check_messages` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `part_id` bigint unsigned NOT NULL,
+  `check` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `check_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `line_number` int DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `admin_override` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `check_messages_part_id_foreign` (`part_id`),
+  KEY `check_messages_check_type_check_index` (`check_type`,`check`),
+  CONSTRAINT `check_messages_part_id_foreign` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `document_categories`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `document_categories` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `order` int NOT NULL,
+  `slug` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `document_categories_category_unique` (`category`)
+  UNIQUE KEY `document_categories_title_unique` (`title`),
+  UNIQUE KEY `document_categories_slug_unique` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `documents`;
@@ -37,7 +60,7 @@ CREATE TABLE `documents` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `nav_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `maintainer` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -47,8 +70,12 @@ CREATE TABLE `documents` (
   `order` int NOT NULL,
   `document_category_id` bigint unsigned NOT NULL,
   `rev_history` json DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'md',
+  `draft` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `documents_document_category_id_slug_unique` (`document_category_id`,`slug`),
   KEY `documents_document_category_id_foreign` (`document_category_id`),
+  KEY `documents_type_index` (`type`),
   CONSTRAINT `documents_document_category_id_foreign` FOREIGN KEY (`document_category_id`) REFERENCES `document_categories` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -269,7 +296,7 @@ CREATE TABLE `part_events` (
   `header_changes` json DEFAULT NULL,
   `vote_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `event_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `comment` mediumtext COLLATE utf8mb4_unicode_ci,
+  `comment` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `part_events_part_release_id_foreign` (`part_release_id`),
   KEY `part_events_user_id_index` (`user_id`),
@@ -366,6 +393,12 @@ CREATE TABLE `parts` (
   `category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `rebrickable_part_id` bigint unsigned DEFAULT NULL,
   `help` json DEFAULT NULL,
+  `warnings` json DEFAULT NULL,
+  `tracker_holds` json DEFAULT NULL,
+  `errors` json DEFAULT NULL,
+  `search_text` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `check_message_id` bigint unsigned DEFAULT NULL,
+  `release_highlight` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `parts_filename_part_release_id_unique` (`filename`,`part_release_id`),
   KEY `parts_part_release_id_foreign` (`part_release_id`),
@@ -383,7 +416,15 @@ CREATE TABLE `parts` (
   KEY `parts_category_index` (`category`),
   KEY `parts_rebrickable_part_id_foreign` (`rebrickable_part_id`),
   KEY `parts_created_at_index` (`created_at`),
+  KEY `parts_id_status_idx` (`id`,`part_status`),
+  KEY `parts_id_release_idx` (`id`,`part_release_id`),
+  KEY `parts_id_status_covering_idx` (`id`,`part_status`,`part_release_id`,`ready_for_admin`),
+  KEY `parts_id_base_idx` (`id`,`base_part_id`),
+  KEY `parts_status_type_idx` (`part_status`,`type`),
+  KEY `parts_check_message_id_foreign` (`check_message_id`),
+  FULLTEXT KEY `part_search_fulltext` (`search_text`) /*!50100 WITH PARSER `ngram` */ ,
   CONSTRAINT `parts_base_part_id_foreign` FOREIGN KEY (`base_part_id`) REFERENCES `parts` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `parts_check_message_id_foreign` FOREIGN KEY (`check_message_id`) REFERENCES `check_messages` (`id`) ON DELETE CASCADE,
   CONSTRAINT `parts_part_release_id_foreign` FOREIGN KEY (`part_release_id`) REFERENCES `part_releases` (`id`),
   CONSTRAINT `parts_rebrickable_part_id_foreign` FOREIGN KEY (`rebrickable_part_id`) REFERENCES `rebrickable_parts` (`id`) ON DELETE SET NULL,
   CONSTRAINT `parts_sticker_sheet_id_foreign` FOREIGN KEY (`sticker_sheet_id`) REFERENCES `sticker_sheets` (`id`) ON DELETE SET NULL,
@@ -554,8 +595,32 @@ CREATE TABLE `rebrickable_parts` (
   `brickset` json DEFAULT NULL,
   `brickowl` json DEFAULT NULL,
   `lego` json DEFAULT NULL,
+  `ldraw` json DEFAULT NULL,
+  `is_local` tinyint(1) NOT NULL DEFAULT '0',
+  `rb_part_category_id` int NOT NULL DEFAULT '11',
+  `ldraw_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `element` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ldraw_colour_id` bigint unsigned DEFAULT NULL,
+  `refreshed_at` datetime DEFAULT NULL,
+  `print_of` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `rebrickable_parts_number_unique` (`number`)
+  UNIQUE KEY `rebrickable_parts_number_unique` (`number`),
+  KEY `rebrickable_parts_ldraw_colour_id_foreign` (`ldraw_colour_id`),
+  KEY `rebrickable_parts_ldraw_index` ((cast(`ldraw` as char(64) array))),
+  CONSTRAINT `rebrickable_parts_ldraw_colour_id_foreign` FOREIGN KEY (`ldraw_colour_id`) REFERENCES `ldraw_colours` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `rebrickable_parts_sets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `rebrickable_parts_sets` (
+  `rebrickable_part_id` bigint unsigned NOT NULL,
+  `set_id` bigint unsigned NOT NULL,
+  `ldraw_colour_id` bigint unsigned DEFAULT NULL,
+  `quantity` int DEFAULT NULL,
+  `is_spare` tinyint(1) NOT NULL DEFAULT '0',
+  KEY `rebrickable_parts_sets_rebrickable_part_id_set_id_index` (`rebrickable_part_id`,`set_id`),
+  KEY `rebrickable_parts_sets_set_id_rebrickable_part_id_index` (`set_id`,`rebrickable_part_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `related_parts`;
@@ -622,6 +687,7 @@ CREATE TABLE `sets` (
   `year` year NOT NULL,
   `rb_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `theme_id` bigint unsigned NOT NULL,
+  `refreshed_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sets_number_unique` (`number`),
   KEY `sets_theme_id_foreign` (`theme_id`),
@@ -737,6 +803,10 @@ CREATE TABLE `users` (
   `is_ptadmin` tinyint(1) NOT NULL DEFAULT '0',
   `ca_confirm` tinyint(1) NOT NULL DEFAULT '0',
   `license` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `author_string` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS ((case when (`is_legacy` = 1) then `realname` when (`is_ptadmin` = 1) then concat(_utf8mb4'[',`name`,_utf8mb4']') else concat(`realname`,_utf8mb4' [',`name`,_utf8mb4']') end)) STORED,
+  `timezone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'UTC',
+  `mail_daily_digest` tinyint(1) NOT NULL DEFAULT '1',
+  `relative_time` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_name_unique` (`name`),
   UNIQUE KEY `users_email_unique` (`email`),
@@ -904,3 +974,28 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (137,'2025_10_01_03
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (138,'2025_10_02_193319_add_date_indexes',56);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (139,'2025_10_04_060416_drop_josn_columns_from_part_releases_table',57);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (140,'2025_10_06_185835_change_comment_to_mediumtext_in_part_events_table',58);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (141,'2025_10_08_043926_add_nav_title_to_document_categories_table',59);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (142,'2025_10_08_201113_add_document_type_to_documents_table',60);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (143,'2025_10_09_070220_add_draft_flag_to_documents_table',61);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (144,'2025_10_29_070801_add_tracker_holds_warnings_to_part_table',62);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (145,'2025_11_11_013847_new_indexes_for_parts_table',63);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (146,'2025_11_13_043109_add_check_messages_to_parts_table',64);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (147,'2025_11_15_083720_add_columns_to_rebrickable_parts_table',65);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (148,'2025_11_21_003948_create_rebrickable_parts_sets_table',66);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (149,'2025_11_21_074304_add_refreshed_at_to_sets_table',66);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (150,'2025_11_21_074534_add_refreshed_at_to_rebrickable_parts_table',66);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (151,'2026_01_16_174632_add_search_column_to_parts_table',67);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (152,'2026_04_06_213322_add_author_string_to_users_table',68);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (153,'2026_04_06_213323_create_part_messages_table',68);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (154,'2026_05_21_185633_alter_part_messages_table',69);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (155,'2026_05_27_202224_add_settings_columns_to_users_table',69);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (156,'2026_06_21_014504_add_indexes_to_check_messages_table',69);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (157,'2026_06_30_023058_alter_text_on_check_messages_table',70);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (158,'2026_07_14_035109_add_relative_time_to_users_table',71);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (159,'2026_08_25_233034_add_release_highlight_part_to_parts_table',72);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (160,'2026_11_13_174912_add_pbg_column_to_sets_table',73);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (161,'2026_11_18_120000_add_print_of_to_rebrickable_parts_table',74);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (162,'2026_11_18_130000_add_is_spare_to_rebrickable_parts_sets_table',75);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (163,'2026_11_18_140000_remove_pbg_column_from_sets_table',76);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (164,'2026_11_18_140100_reset_refreshed_at_on_sets_table',76);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (171,'2026_11_19_120000_add_ldraw_to_rebrickable_parts_table',77);
