@@ -1,43 +1,19 @@
 <?php
 
-namespace App\Services\LDraw\Managers;
+namespace App\Services\RebrickablePart;
 
 use App\Enums\PartCategory;
 use App\Models\Part\Part;
 use App\Models\RebrickablePart;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
-class StickerSheetManager
+/**
+ * Finds the Rebrickable sticker sheet an LDraw sticker or sticker shortcut belongs to, creating a local
+ * placeholder sheet when Rebrickable has none.
+ */
+class StickerSheetFinder
 {
-    public function complete_set(RebrickablePart $sheet): Collection
-    {
-        if ($sheet->rb_part_category_id != 58) {
-            return $sheet->parts->newCollection();
-        }
-
-        $sheet->loadMissing('parts', 'parts.parents');
-
-        $parts = $sheet->parts->whereNull('unofficial_part');
-        $filenames = $parts->pluck('filename')->values();
-
-        return $parts->reject(function (Part $p) use ($filenames) {
-            $hasShortcut = $p->parents
-                ->contains(fn (Part $parent) => $parent->category === PartCategory::StickerShortcut);
-            if ($hasShortcut) {
-                return true;
-            }
-            $basename = basename($p->filename, '.dat');
-            $patternPrefix = "parts/{$basename}c";
-
-            $hasFormed = $filenames->contains(function ($fn) use ($patternPrefix, $p) {
-                return $fn !== $p->filename && str_starts_with($fn, $patternPrefix);
-            });
-            return $hasFormed;
-        });
-    }
-
-    public function getStickerPart(Part $part): ?RebrickablePart
+    public function findForSticker(Part $part): ?RebrickablePart
     {
         if ($part->category !== PartCategory::Sticker && $part->category !== PartCategory::StickerShortcut) {
             return null;
@@ -70,7 +46,7 @@ class StickerSheetManager
             ->map(fn ($kw) => preg_replace('/^set\s+/i', '', $kw))
             ->map(fn ($setNum) => preg_match('/-\d$/', $setNum) ? $setNum : $setNum . '-1')
             ->unique();
-        $rbPart = RebrickablePart::where('rb_part_category_id', 58)
+        $rbPart = RebrickablePart::sticker_sheets()
             ->whereHas('sets', function ($query) use ($setNumbers) {
                 $query->whereIn('number', $setNumbers);
             })
@@ -87,40 +63,24 @@ class StickerSheetManager
             ], [
                 'name' => "Unknown Sticker Sheet",
             ]);
-        } else {
-            // Create local placeholder
-            return RebrickablePart::updateOrCreate([
-                'number' => "u-{$flatBase}",
-                'is_local' => true,
-                'rb_part_category_id' => 58,
-            ], [
-                'name' => "Sticker Sheet for {$flatBase}",
-            ]);
         }
 
+        // Create local placeholder
+        return RebrickablePart::updateOrCreate([
+            'number' => "u-{$flatBase}",
+            'is_local' => true,
+            'rb_part_category_id' => 58,
+        ], [
+            'name' => "Sticker Sheet for {$flatBase}",
+        ]);
     }
 
-    /**
-     * Deletes local sticker sheets that no part or set inventory refers to any more, such as placeholders
-     * whose stickers moved to the real sheet.
-     *
-     * @return int the number of sheets deleted
-     */
-    public function deleteEmptyLocalSheets(): int
-    {
-        return RebrickablePart::sticker_sheets()
-            ->where('is_local', true)
-            ->doesntHave('parts')
-            ->doesntHave('sets')
-            ->delete();
-    }
-
-    public function resolveSheetLdrawNumber(Part $part): ?string
+    protected function resolveSheetLdrawNumber(Part $part): ?string
     {
         $filename = basename($part->filename, '.dat');
 
         // Case 1 — formed sticker (ends in cNN)
-        $flat = $this->extractFlatBaseFromFormed($filename);
+        $flat = StickerSheetStickers::flatBaseOfFormed($filename);
         if ($flat && $part->category === PartCategory::Sticker) {
             return $this->stripLetterSuffix($flat);
         }
@@ -128,11 +88,8 @@ class StickerSheetManager
         // Case 2 — sticker shortcut
         if ($part->category === PartCategory::StickerShortcut) {
             if ($sticker = $this->extractStickerSubpart($part)) {
-                $flat = $this->extractFlatBaseFromFormed(basename($sticker->filename, '.dat'));
-                if (!$flat) {
-                    $flat = basename($sticker->filename, '.dat');
-                }
-                return $this->stripLetterSuffix($flat);
+                $stickerName = basename($sticker->filename, '.dat');
+                return $this->stripLetterSuffix(StickerSheetStickers::flatBaseOfFormed($stickerName) ?? $stickerName);
             }
         }
 
@@ -141,22 +98,6 @@ class StickerSheetManager
             return $this->stripLetterSuffix($filename);
         }
 
-        return null;
-    }
-
-    public function isFormed(Part $part): bool
-    {
-        if (is_null($part->rebrickable_part) || $part->rebrickable_part->rb_part_category_id !== 58) {
-            return false;
-        }
-        return !is_null($this->extractFlatBaseFromFormed(basename($part->filename, '.dat')));
-    }
-
-    protected function extractFlatBaseFromFormed(string $name): ?string
-    {
-        if (preg_match('/^(.*?)[cC]\d+$/', $name, $m)) {
-            return $m[1];
-        }
         return null;
     }
 
@@ -171,5 +112,4 @@ class StickerSheetManager
         return $part->subparts
             ?->first(fn (Part $p) => $p->category === PartCategory::Sticker);
     }
-
 }

@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Enums\PartCategory;
 use App\Models\Part\Part;
 use App\Models\RebrickablePart;
-use App\Services\LDraw\Managers\StickerSheetManager;
+use App\Services\RebrickablePart\StickerSheetStickers;
 use Illuminate\View\View;
 
 class StickerSheetShowController extends Controller
 {
     public function __construct(
-        protected StickerSheetManager $manager
+        protected StickerSheetStickers $stickers
     ) {
     }
     public function __invoke(RebrickablePart $sheet): View
@@ -22,12 +22,12 @@ class StickerSheetShowController extends Controller
         $flat = $sheet->parts
             ->whereNull('unofficial_part')
             ->where('category', PartCategory::Sticker)
-            ->filter(fn (Part $part) => !$this->manager->isFormed($part))
+            ->filter(fn (Part $part) => !$this->stickers->isFormed($part))
             ->sortBy('filename');
         $formed = $sheet->parts
             ->whereNull('unofficial_part')
             ->where('category', PartCategory::Sticker)
-            ->filter(fn (Part $part) => $this->manager->isFormed($part))
+            ->filter(fn (Part $part) => $this->stickers->isFormed($part))
             ->sortBy('filename');
         $shortcuts = $sheet->parts
             ->whereNull('unofficial_part')

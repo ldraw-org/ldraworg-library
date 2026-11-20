@@ -5,11 +5,11 @@ namespace App\Jobs;
 use App\Models\Part\Part;
 use App\Services\External\RebrickableCsvDownloader;
 use App\Services\LDraw\Managers\LDConfigManager;
-use App\Services\LDraw\Managers\StickerSheetManager;
 use App\Services\Omr\Set\ImportSetInventories;
 use App\Services\Omr\Set\SyncSetMetadata;
 use App\Services\Omr\Theme\SyncRebrickableThemes;
 use App\Services\Part\RelinkRebrickableParts;
+use App\Services\RebrickablePart\DeleteEmptyLocalStickerSheets;
 use App\Services\RebrickablePart\ImportRebrickableParts;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -47,7 +47,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         RelinkRebrickableParts $relinker,
         ImportSetInventories $inventories,
         SyncSetMetadata $setMetadata,
-        StickerSheetManager $stickerSheets,
+        DeleteEmptyLocalStickerSheets $deleteEmptySheets,
     ): void {
         $downloaded = !$this->skipDownload && $downloader->download($this->forceDownload);
 
@@ -59,7 +59,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         // Before relinking, as stickers are matched to sheets through the sets holding them
         $setResult = $inventories->handle();
         $relinked = $relinker->handle($partResult['external_ids_changed']);
-        $sheetsDeleted = $stickerSheets->deleteEmptyLocalSheets();
+        $sheetsDeleted = $deleteEmptySheets->handle();
 
         // Unofficial parts still without a Rebrickable part, mostly stickers that get a local sheet
         Part::unofficial()

@@ -7,8 +7,8 @@ use App\Enums\PartTypeQualifier;
 use App\Models\Omr\Set;
 use App\Models\Part\Part;
 use App\Models\RebrickablePart;
-use App\Services\LDraw\Managers\StickerSheetManager;
 use App\Services\Omr\Set\Writer;
+use App\Services\RebrickablePart\StickerSheetStickers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
@@ -20,7 +20,7 @@ class SetPbg
 
     public function __construct(
         public MessageBag $messages,
-        protected StickerSheetManager $stickerManager,
+        protected StickerSheetStickers $stickerSheetStickers,
         protected Writer $setWriter,
     ) {
     }
@@ -90,7 +90,7 @@ class SetPbg
     protected function partFilenames(RebrickablePart $part, Collection $printParents, Collection $knownFilenames): Collection
     {
         if ($this->isStickerSheet($part)) {
-            $stickers = $this->stickerManager->complete_set($part)->pluck('filename')->values();
+            $stickers = $this->stickerSheetStickers->completeSet($part)->pluck('filename')->values();
             if ($stickers->isNotEmpty()) {
                 return $stickers;
             }
