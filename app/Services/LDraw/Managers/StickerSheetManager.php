@@ -100,6 +100,21 @@ class StickerSheetManager
 
     }
 
+    /**
+     * Deletes local sticker sheets that no part or set inventory refers to any more, such as placeholders
+     * whose stickers moved to the real sheet.
+     *
+     * @return int the number of sheets deleted
+     */
+    public function deleteEmptyLocalSheets(): int
+    {
+        return RebrickablePart::sticker_sheets()
+            ->where('is_local', true)
+            ->doesntHave('parts')
+            ->doesntHave('sets')
+            ->delete();
+    }
+
     public function resolveSheetLdrawNumber(Part $part): ?string
     {
         $filename = basename($part->filename, '.dat');

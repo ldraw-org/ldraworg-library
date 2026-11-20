@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Part\Part;
 use App\Services\External\RebrickableCsvDownloader;
 use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDraw\Managers\StickerSheetManager;
 use App\Services\Omr\Set\ImportSetInventories;
 use App\Services\Omr\Set\SyncSetMetadata;
 use App\Services\Omr\Theme\SyncRebrickableThemes;
@@ -20,7 +21,8 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Downloads fresh Rebrickable CSVs and resyncs everything taken from them: themes, colour mappings,
- * Rebrickable parts and the library parts linked to them, set inventories and set details.
+ * Rebrickable parts and the library parts linked to them, set inventories and set details. Local sticker
+ * sheets left empty by the relink are deleted.
  */
 #[Timeout(3600)]
 #[Tries(1)]
@@ -45,6 +47,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         RelinkRebrickableParts $relinker,
         ImportSetInventories $inventories,
         SyncSetMetadata $setMetadata,
+        StickerSheetManager $stickerSheets,
     ): void {
         $downloaded = !$this->skipDownload && $downloader->download($this->forceDownload);
 
@@ -56,6 +59,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         // Before relinking, as stickers are matched to sheets through the sets holding them
         $setResult = $inventories->handle();
         $relinked = $relinker->handle($partResult['external_ids_changed']);
+        $sheetsDeleted = $stickerSheets->deleteEmptyLocalSheets();
 
         // Unofficial parts still without a Rebrickable part, mostly stickers that get a local sheet
         Part::unofficial()
@@ -71,6 +75,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
             'parts_updated' => $partResult['updated'],
             'stickers_retired' => $partResult['retired_stickers'],
             'parts_relinked' => $relinked,
+            'empty_local_sheets_deleted' => $sheetsDeleted,
             'sets_added' => $setResult['added_sets'],
             'inventories_updated' => $setResult['updated_sets'],
             'inventory_parts_missing' => $setResult['missing_parts'],

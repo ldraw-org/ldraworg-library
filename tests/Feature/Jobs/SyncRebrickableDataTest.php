@@ -85,6 +85,28 @@ it('resyncs from the CSVs on disk without downloading', function () {
     Http::assertNothingSent();
 });
 
+it('deletes local sticker sheets no part or set refers to', function () {
+    fakeRebrickableCsv(rebrickableDump());
+    $sheet = fn (string $number) => RebrickablePart::create(['number' => $number, 'name' => $number, 'rb_part_category_id' => 58, 'is_local' => true]);
+    $empty = $sheet('u-6489811');
+    $withSticker = $sheet('u-191905');
+    $inSet = $sheet('4309stk');
+    Part::factory()->official()->createQuietly([
+        'filename' => 'parts/191905a.dat',
+        'description' => 'Sticker',
+        'type' => PartType::Part,
+        'category' => PartCategory::Sticker,
+        'rebrickable_part_id' => $withSticker->id,
+    ]);
+    Set::create(['number' => '4309-1', 'name' => 'Set', 'year' => 1990, 'theme_id' => 1, 'rb_url' => ''])
+        ->rebrickable_parts()->attach($inSet->id, ['quantity' => 1]);
+
+    SyncRebrickableData::dispatchSync(skipDownload: true);
+
+    expect(RebrickablePart::whereKey([$empty->id, $withSticker->id, $inSet->id])->pluck('number')->sort()->values()->all())
+        ->toBe(['4309stk', 'u-191905']);
+});
+
 it('stops before importing anything when the download fails', function () {
     fakeRebrickableCsv(rebrickableDump());
     Http::fake(['cdn.example.test/*' => Http::response('Payment Required', 402)]);
