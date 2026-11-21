@@ -20,6 +20,8 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Layout;
 use App\Livewire\Tables\BasicTable;
 use Livewire\Attributes\Url;
@@ -32,6 +34,8 @@ class Index extends BasicTable
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Parts Tracker Activity Log')
+            ->description(fn (): HtmlString => new HtmlString(Blade::render('<x-part.unofficial-part-count />')))
             ->query(PartEvent::query()->with('part', 'part.votes', 'part.official_part'))
             ->defaultSort('created_at', 'desc')
             ->columns([

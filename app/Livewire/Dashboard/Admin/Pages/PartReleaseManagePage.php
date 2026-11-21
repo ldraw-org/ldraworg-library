@@ -24,6 +24,7 @@ class PartReleaseManagePage extends BasicResourceManagePage
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Part Release Management')
             ->query(PartRelease::query())
             ->defaultSort('created_at', 'desc')
             ->columns([

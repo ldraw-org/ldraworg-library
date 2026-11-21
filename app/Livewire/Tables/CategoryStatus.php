@@ -18,7 +18,7 @@ class CategoryStatus extends BasicTable
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Categories')
+            ->heading('Category List')
             ->records(
                 fn (?string $sortColumn, ?string $sortDirection): Collection =>
                 $this->categoryArray
