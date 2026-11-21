@@ -19,3 +19,5 @@ _ide_helper_models.php
 app/Console/Commands/Benchmark.php
 AGENTS.md
 /.claude
+.mcp.json
+boost.json
