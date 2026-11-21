@@ -5,9 +5,10 @@
     <div>
         <div class="text-3xl font-bold">
             <span>
-                Sticker Sheet {{$sheet->ldraw_number}} 
-                @if (!$sheet->is_local)
-                    - <a class="underline decoration-dotted hover:decoration-solid" href="{{$sheet->url}}">{{$sheet->name}} ({{$sheet->number}})</a>
+                @if( $sheet->is_local)
+                    {{$sheet->number}} - {{$sheet->name}}
+                @else
+                    Sticker Sheet - <a class="underline decoration-dotted hover:decoration-solid" href="{{$sheet->url}}">{{$sheet->name}} ({{$sheet->number}})</a>
                 @endif
             </span>
         </div>
