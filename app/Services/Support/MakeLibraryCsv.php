@@ -42,7 +42,7 @@ class MakeLibraryCsv
                 throw new RuntimeException("Part {$part->filename} has no category.");
             }
 
-            $media = $part->getFirstMedia('image');
+            $media = $part->media->first();
 
             yield [
                 basename($part->filename),
@@ -51,7 +51,7 @@ class MakeLibraryCsv
                     'library' => is_null($part->part_release_id) ? 'unofficial' : 'official',
                     'filename' => $part->filename,
                 ]),
-                $part->getFirstMediaUrl('image'),
+                $media?->getUrl() ?? $part->getFallbackMediaUrl('image'),
                 ($media?->created_at ?? $part->created_at)->format('Y-m-d'),
                 $part->category->value,
             ];
