@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Tables;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use App\Models\Part\UnknownPartNumber;
@@ -14,9 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use LaraZeus\Quantity\Components\Quantity;
 
-class UserUnknownNumbersTable extends BasicTable implements HasActions
+class UserUnknownNumbersTable extends BasicTable
 {
-    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table

@@ -2,8 +2,7 @@
 
 namespace App\Livewire\Tables;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
+use App\Filament\Tables\PartTable;
 use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use Filament\Tables\Filters\TernaryFilter;
@@ -11,9 +10,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
-class PartsReadyForUserTable extends BasicTable implements HasActions
+class PartsReadyForUserTable extends BasicTable
 {
-    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table

@@ -2,21 +2,18 @@
 
 namespace App\Livewire\Tables;
 
+use App\Filament\Tables\PartTable;
 use App\Enums\PartDependency;
 use App\Enums\PartLibrary;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\Part\Part;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Livewire\Attributes\Lazy;
-use Livewire\Attributes\On;
 use Illuminate\Support\Str;
 
 #[Lazy]
-class PartDependenciesTable extends BasicTable implements HasActions
+class PartDependenciesTable extends BasicTable
 {
-    use InteractsWithActions;
     public PartLibrary $library = PartLibrary::Official;
     public PartDependency $dependency = PartDependency::Subparts;
     public Part $part;

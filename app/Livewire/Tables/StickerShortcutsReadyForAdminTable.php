@@ -2,9 +2,8 @@
 
 namespace App\Livewire\Tables;
 
+use App\Filament\Tables\PartTable;
 use App\Services\Vote\VoteManager;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use App\Enums\PartCategory;
 use App\Enums\PartStatus;
@@ -15,9 +14,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
-class StickerShortcutsReadyForAdminTable extends BasicTable implements HasActions
+class StickerShortcutsReadyForAdminTable extends BasicTable
 {
-    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table

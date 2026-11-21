@@ -4,8 +4,6 @@ namespace App\Livewire\Tables;
 
 use App\Enums\EventType;
 use App\Filament\Tables\Columns\EventIconColumn;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use Filament\Support\Enums\FontFamily;
@@ -19,9 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Livewire\Attributes\Lazy;
 
 #[Lazy]
-class PartEventsTable extends BasicTable implements HasActions
+class PartEventsTable extends BasicTable
 {
-    use InteractsWithActions;
     public Part $part;
 
     public function placeholder(array $params = [])

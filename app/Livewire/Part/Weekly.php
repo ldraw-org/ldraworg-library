@@ -2,28 +2,18 @@
 
 namespace App\Livewire\Part;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\PartStatus;
 use App\Models\Part\Part;
-use App\Livewire\Tables\PartTable;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
+use App\Filament\Tables\PartTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table as Table;
 use Livewire\Attributes\Layout;
-use Livewire\Component;
+use App\Livewire\Tables\BasicTable;
+use Illuminate\Contracts\View\View;
 
-class Weekly extends Component implements HasSchemas, HasTable, HasActions
+class Weekly extends BasicTable
 {
-    use InteractsWithActions;
-    use InteractsWithSchemas;
-    use InteractsWithTable;
-
-
     public function table(Table $table): Table
     {
 
@@ -55,7 +45,7 @@ class Weekly extends Component implements HasSchemas, HasTable, HasActions
     }
 
     #[Layout('components.layout.tracker')]
-    public function render()
+    public function render(): View
     {
         return view('livewire.part.weekly');
     }

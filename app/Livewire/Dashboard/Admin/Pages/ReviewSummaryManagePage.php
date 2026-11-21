@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\CreateAction;
@@ -11,17 +9,11 @@ use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\ReviewSummary;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 
-class ReviewSummaryManagePage extends BasicResourceManagePage implements HasActions
+class ReviewSummaryManagePage extends BasicResourceManagePage
 {
-    use InteractsWithActions;
-    use InteractsWithSchemas;
-    use InteractsWithTable;
-
     public string $title = "Manage Review Summaries";
     protected string $menu = 'admin';
 

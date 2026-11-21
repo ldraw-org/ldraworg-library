@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use App\Livewire\Dashboard\BasicResourceManagePage;
@@ -12,17 +10,11 @@ use App\Models\Part\Part;
 use App\Models\Part\PartKeyword;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 
-class PartKeywordManagePage extends BasicResourceManagePage implements HasActions
+class PartKeywordManagePage extends BasicResourceManagePage
 {
-    use InteractsWithActions;
-    use InteractsWithSchemas;
-    use InteractsWithTable;
-
     public string $title = "Manage Part Keywords";
     protected string $menu = 'admin';
 

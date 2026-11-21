@@ -2,17 +2,13 @@
 
 namespace App\Livewire\Tables;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Livewire\Attributes\Reactive;
 
-class SubmittedPartsTable extends BasicTable implements HasActions
+class SubmittedPartsTable extends BasicTable
 {
-    use InteractsWithActions;
-
     #[Reactive]
     public array $parts = [];
 

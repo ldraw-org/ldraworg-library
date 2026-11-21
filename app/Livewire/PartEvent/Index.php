@@ -2,16 +2,12 @@
 
 namespace App\Livewire\PartEvent;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use App\Enums\EventType;
 use App\Enums\PartCategory;
 use App\Filament\Tables\Columns\EventIconColumn;
 use App\Filament\Tables\Columns\PartStatusColumn;
 use App\Models\Part\PartEvent;
 use App\Filament\Tables\Filters\AuthorFilter;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -20,22 +16,16 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
-use Livewire\Component;
+use App\Livewire\Tables\BasicTable;
 use Livewire\Attributes\Url;
 
-class Index extends Component implements HasSchemas, HasTable, HasActions
+class Index extends BasicTable
 {
-    use InteractsWithActions;
-    use InteractsWithTable;
-    use InteractsWithSchemas;
-
     #[Url]
     public $tableRecordsPerPage = null;
 

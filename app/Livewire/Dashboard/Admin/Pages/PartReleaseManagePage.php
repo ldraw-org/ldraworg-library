@@ -6,25 +6,16 @@ use App\Jobs\GenerateReleaseImage;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use App\Models\Part\PartRelease;
 use Filament\Actions\Action;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\ViewField;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class PartReleaseManagePage extends BasicResourceManagePage implements HasActions
+class PartReleaseManagePage extends BasicResourceManagePage
 {
-    use InteractsWithActions;
-    use InteractsWithTable;
-    use InteractsWithSchemas;
-
     public function mount(): void
     {
         $this->authorize('manage', PartRelease::class);

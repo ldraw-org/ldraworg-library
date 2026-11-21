@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Filament\Tables\PartTable;
 use App\Enums\PartCategory;
 use App\Models\Part\Part;
 use Filament\Tables\Table;

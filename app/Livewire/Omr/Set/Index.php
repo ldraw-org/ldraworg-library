@@ -2,25 +2,16 @@
 
 namespace App\Livewire\Omr\Set;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\Omr\Set;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table as Table;
 use Livewire\Attributes\Layout;
-use Livewire\Component;
+use App\Livewire\Tables\BasicTable;
+use Illuminate\Contracts\View\View;
 
-class Index extends Component implements HasSchemas, HasTable, HasActions
+class Index extends BasicTable
 {
-    use InteractsWithActions;
-    use InteractsWithSchemas;
-    use InteractsWithTable;
-
     public function table(Table $table): Table
     {
 
@@ -62,7 +53,7 @@ class Index extends Component implements HasSchemas, HasTable, HasActions
     }
 
     #[Layout('components.layout.omr')]
-    public function render()
+    public function render(): View
     {
         return view('livewire.omr.set.index');
     }

@@ -3,8 +3,6 @@
 namespace App\Livewire\Dashboard\Admin\Pages;
 
 use App\Enums\DocumentType;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Support\Enums\Width;
@@ -18,22 +16,16 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table as Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Filters\SelectFilter;
 
-class DocumentManagePage extends BasicResourceManagePage implements HasActions
+class DocumentManagePage extends BasicResourceManagePage
 {
-    use InteractsWithActions;
-    use InteractsWithSchemas;
-    use InteractsWithTable;
-
     public string $title = "Manage Documents";
     protected string $menu = 'admin';
 

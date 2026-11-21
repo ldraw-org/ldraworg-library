@@ -3,8 +3,6 @@
 namespace App\Livewire\Tables;
 
 use App\Services\Check\Enums\PartError;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use App\Filament\Actions\Part\Download\PartFileDownloadAction;
 use App\Models\Part\Part;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
@@ -13,9 +11,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class OfficialPartsWithErrorsTable extends BasicTable implements HasActions
+class OfficialPartsWithErrorsTable extends BasicTable
 {
-    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table

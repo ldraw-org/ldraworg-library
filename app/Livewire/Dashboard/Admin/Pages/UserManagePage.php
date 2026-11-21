@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Toggle;
@@ -16,20 +14,14 @@ use App\Settings\LibrarySettings;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table as Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class UserManagePage extends BasicResourceManagePage implements HasActions
+class UserManagePage extends BasicResourceManagePage
 {
-    use InteractsWithActions;
-    use InteractsWithSchemas;
-    use InteractsWithTable;
-
     public string $title = "Manage Users";
     protected string $menu = 'admin';
 

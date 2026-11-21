@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Tables;
+namespace App\Filament\Tables;
 
 use Filament\Actions\Action;
 use App\Enums\License;

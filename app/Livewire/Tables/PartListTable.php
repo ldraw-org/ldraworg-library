@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Tables;
 
+use App\Filament\Tables\PartTable;
 use App\Services\Check\Enums\CheckType;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use Filament\Support\Enums\Width;
 use App\Enums\LibraryIcon;
@@ -36,8 +36,6 @@ use Livewire\Attributes\Url;
 
 class PartListTable extends BasicTable
 {
-    use InteractsWithActions;
-
     /**
      * @var array<string, mixed> | null
      */

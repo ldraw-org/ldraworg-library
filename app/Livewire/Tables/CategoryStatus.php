@@ -5,8 +5,6 @@ namespace App\Livewire\Tables;
 use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Services\LDraw\Managers\LDConfigManager;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use App\Models\Part\Part;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -15,11 +13,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Computed;
 
-class CategoryStatus extends BasicTable implements HasActions
+class CategoryStatus extends BasicTable
 {
-    use InteractsWithActions;
-
-
     public function table(Table $table): Table
     {
         return $table

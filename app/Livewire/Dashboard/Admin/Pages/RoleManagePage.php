@@ -2,26 +2,18 @@
 
 namespace App\Livewire\Dashboard\Admin\Pages;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\CreateAction;
 use App\Livewire\Dashboard\BasicResourceManagePage;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 use Spatie\Permission\Models\Role;
 
-class RoleManagePage extends BasicResourceManagePage implements HasActions
+class RoleManagePage extends BasicResourceManagePage
 {
-    use InteractsWithActions;
-    use InteractsWithSchemas;
-    use InteractsWithTable;
-
     public string $title = "Manage Roles";
     protected string $menu = 'admin';
 

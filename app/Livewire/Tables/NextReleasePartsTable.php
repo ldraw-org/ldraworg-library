@@ -2,15 +2,13 @@
 
 namespace App\Livewire\Tables;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
+use App\Filament\Tables\PartTable;
 use App\Enums\PartStatus;
 use App\Models\Part\Part;
 use Filament\Tables\Table;
 
-class NextReleasePartsTable extends BasicTable implements HasActions
+class NextReleasePartsTable extends BasicTable
 {
-    use InteractsWithActions;
     public function table(Table $table): Table
     {
         return $table
