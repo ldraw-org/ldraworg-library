@@ -6,6 +6,7 @@ use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -49,9 +50,14 @@ describe('non bound routes', function () {
     ]);
 
     test('auth routes', function (string $routename, array $permissions) {
+        Storage::fake();
+        Storage::put('library/official/LDConfig.ldr', '0 LDraw.org Configuration File');
+        Storage::put('library/official/LDCfgalt.ldr', '0 LDraw.org Configuration File');
+        Part::factory()->official()->withBody()->create(['filename' => 'parts/76382.dat', 'description' => 'Minifig Torso Template']);
+
         $response = $this->get(route($routename));
         $response->assertRedirect('/login');
-        $user = User::query()->first();
+        $user = User::firstWhere('name', 'TestUser');
         if ($permissions) {
             $user->syncPermissions([]);
             $user->save();
@@ -103,7 +109,7 @@ describe('part bound routes', function () {
 describe('document routes', function () {
 
     test('published, unrestricted document', function () {
-        $user = User::query()->first();
+        $user = User::firstWhere('name', 'TestUser');
         $document = Document::query()->first();
         $document->published = true;
         $document->save();
@@ -118,7 +124,7 @@ describe('document routes', function () {
         $document->published = true;
         $document->save();
 
-        $user = User::query()->first();
+        $user = User::firstWhere('name', 'TestUser');
 
         $user->syncPermissions([]);
         $user->save();
@@ -136,7 +142,7 @@ describe('document routes', function () {
         $document->published = false;
         $document->save();
 
-        $user = User::query()->first();
+        $user = User::firstWhere('name', 'TestUser');
 
         $user->syncPermissions([]);
         $user->save();
