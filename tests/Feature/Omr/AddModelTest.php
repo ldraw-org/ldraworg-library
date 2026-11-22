@@ -8,6 +8,7 @@ use App\Models\Omr\Set;
 use App\Models\Omr\Theme;
 use App\Models\Part\Part;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
@@ -110,6 +111,24 @@ it('adds the uploaded model to the set', function () {
         ->and($model->getFirstMedia('file')->file_name)->toBe('6399-1.mpd')
         ->and($this->author->fresh()->hasRole('OMR Author'))->toBeTrue();
     Queue::assertPushed(GenerateOmrModelImage::class);
+});
+
+it('adds a missing set from the set field', function () {
+    fakeRebrickableCsv([
+        'sets' => ['set_num,name,year,theme_id,num_parts,img_url', '10000-1,CSV Set,1990,1,0,'],
+        'themes' => ['id,name,parent_id', '1,Town,'],
+        'inventories' => ['id,version,set_num'],
+        'inventory_minifigs' => ['inventory_id,fig_num,quantity'],
+        'inventory_sets' => ['inventory_id,set_num,quantity'],
+        'inventory_parts' => ['inventory_id,part_num,color_id,quantity,is_spare,img_url'],
+    ]);
+
+    Livewire::test(Add::class)
+        ->callAction(TestAction::make('createOption')->schemaComponent('set_id'), data: ['number' => '10000'])
+        ->assertHasNoErrors()
+        ->assertSchemaStateSet(['set_id' => Set::firstWhere('number', '10000-1')?->id]);
+
+    expect(Set::where('number', '10000-1')->exists())->toBeTrue();
 });
 
 it('refuses users who cannot approve OMR models', function () {

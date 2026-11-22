@@ -13,6 +13,8 @@ use App\Services\Omr\Set\Writer as SetWriter;
 use App\Services\OmrModel\UploadChecker;
 use Closure;
 use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -32,8 +34,9 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-class Add extends Component implements HasSchemas
+class Add extends Component implements HasActions, HasSchemas
 {
+    use InteractsWithActions;
     use InteractsWithSchemas;
     use RestrictsFileUploadsToSchemaComponents;
 
