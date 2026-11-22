@@ -32,6 +32,21 @@ beforeEach(function () {
     $this->actingAs($approver);
 });
 
+/**
+ * @param list<string> $setRows rows of the Rebrickable sets CSV
+ */
+function fakeOmrSetCsv(array $setRows = []): void
+{
+    fakeRebrickableCsv([
+        'sets' => ['set_num,name,year,theme_id,num_parts,img_url', ...$setRows],
+        'themes' => ['id,name,parent_id', '1,Town,'],
+        'inventories' => ['id,version,set_num'],
+        'inventory_minifigs' => ['inventory_id,fig_num,quantity'],
+        'inventory_sets' => ['inventory_id,set_num,quantity'],
+        'inventory_parts' => ['inventory_id,part_num,color_id,quantity,is_spare,img_url'],
+    ]);
+}
+
 function omrModelFile(string $filename = '6399-1 - Airport Shuttle.mpd', string $author = 'Model Maker [ModelMaker]'): UploadedFile
 {
     $text = implode("\r\n", [
@@ -69,12 +84,26 @@ it('marks the upload as an alternate model when the set already has a main model
         ->assertSchemaStateSet(['alt_model' => true]);
 });
 
-it('warns when the set or author cannot be found', function () {
+it('adds a set from Rebrickable that is not in the OMR yet', function () {
+    fakeOmrSetCsv(['10000-1,CSV Set,1990,1,0,']);
+
+    Livewire::test(Add::class)
+        ->fillForm(['modelfile' => omrModelFile('10000-1 - CSV Set.mpd')])
+        ->assertSchemaStateSet(['set_id' => Set::firstWhere('number', '10000-1')?->id])
+        ->assertSet('checks.warnings', ['Parts not in the official library: 99999.dat']);
+
+    expect(Set::where('number', '10000-1')->value('name'))->toBe('CSV Set');
+});
+
+it('warns when the set is not at Rebrickable or the author cannot be found', function () {
+    fakeOmrSetCsv();
+    Http::fake(['rebrickable.com/api/v3/lego/sets/10000-1/*' => Http::response(['detail' => 'Not found.'], 404)]);
+
     Livewire::test(Add::class)
         ->fillForm(['modelfile' => omrModelFile('10000-1.mpd', 'Nobody [nobody]')])
         ->assertSchemaStateSet(['set_id' => null, 'user_id' => null])
         ->assertSet('checks.warnings', [
-            'Set 10000-1 is not in the OMR yet, add it from the set field',
+            'Set 10000-1 was not found at Rebrickable, add it from the set field',
             'The author in the file header does not match a library user',
             'Parts not in the official library: 99999.dat',
         ]);
@@ -113,15 +142,16 @@ it('adds the uploaded model to the set', function () {
     Queue::assertPushed(GenerateOmrModelImage::class);
 });
 
+it('searches sets by number or name and labels them with both', function () {
+    Set::create(['number' => '6400-1', 'name' => 'Rescue Helicopter', 'year' => 1990, 'rb_url' => '', 'theme_id' => 1]);
+    $setField = Livewire::test(Add::class)->instance()->form->getComponent('set_id');
+
+    expect($setField->getSearchResults('6399'))->toBe([$this->set->id => '6399-1 - Airport Shuttle'])
+        ->and($setField->getSearchResults('Helicopter'))->toBe([Set::firstWhere('number', '6400-1')->id => '6400-1 - Rescue Helicopter']);
+});
+
 it('adds a missing set from the set field', function () {
-    fakeRebrickableCsv([
-        'sets' => ['set_num,name,year,theme_id,num_parts,img_url', '10000-1,CSV Set,1990,1,0,'],
-        'themes' => ['id,name,parent_id', '1,Town,'],
-        'inventories' => ['id,version,set_num'],
-        'inventory_minifigs' => ['inventory_id,fig_num,quantity'],
-        'inventory_sets' => ['inventory_id,set_num,quantity'],
-        'inventory_parts' => ['inventory_id,part_num,color_id,quantity,is_spare,img_url'],
-    ]);
+    fakeOmrSetCsv(['10000-1,CSV Set,1990,1,0,']);
 
     Livewire::test(Add::class)
         ->assertSeeHtml('wire:partial="action-modals"')

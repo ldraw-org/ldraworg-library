@@ -3,9 +3,9 @@
 namespace App\Services\OmrModel;
 
 use App\Models\Omr\OmrModel;
-use App\Models\Omr\Set;
 use App\Models\Part\Part;
 use App\Services\LDraw\LDrawFile;
+use App\Services\Omr\Set\Writer as SetWriter;
 use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Support\Str;
 
@@ -14,6 +14,11 @@ use Illuminate\Support\Str;
  */
 class UploadChecker
 {
+    public function __construct(
+        protected SetWriter $setWriter,
+    ) {
+    }
+
     /**
      * @return array{
      *     errors: list<string>,
@@ -52,11 +57,11 @@ class UploadChecker
         }
 
         $setNumber = $this->setNumber($file->filename) ?? $this->setNumber($submodels[0] ?? '');
-        $set = is_null($setNumber) ? null : Set::firstWhere('number', $setNumber);
+        $set = is_null($setNumber) ? null : $this->setWriter->findFromSetNumber($setNumber, createIfMissing: true);
         if (is_null($setNumber)) {
             $result['warnings'][] = 'A set number could not be found in the file name';
         } elseif (is_null($set)) {
-            $result['warnings'][] = "Set {$setNumber} is not in the OMR yet, add it from the set field";
+            $result['warnings'][] = "Set {$setNumber} was not found at Rebrickable, add it from the set field";
         } else {
             $result['set_id'] = $set->id;
             if (OmrModel::where('set_id', $set->id)->whereNull('alt_model_name')->exists()) {

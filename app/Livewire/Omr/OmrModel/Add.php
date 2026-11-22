@@ -76,8 +76,16 @@ class Add extends Component implements HasActions, HasSchemas
                     ->required(),
                 Select::make('set_id')
                     ->label('Set')
-                    ->options(fn () => Set::pluck('number', 'id'))
                     ->searchable()
+                    ->getSearchResultsUsing(fn (string $search): array => Set::query()
+                        ->whereLike('number', "{$search}%")
+                        ->orWhereLike('name', "%{$search}%")
+                        ->orderBy('number')
+                        ->limit(50)
+                        ->get()
+                        ->mapWithKeys(fn (Set $set): array => [$set->id => $this->setLabel($set)])
+                        ->all())
+                    ->getOptionLabelUsing(fn ($value): ?string => ($set = Set::find($value)) ? $this->setLabel($set) : null)
                     ->required()
                     ->live()
                     ->createOptionForm([
@@ -160,6 +168,11 @@ class Add extends Component implements HasActions, HasSchemas
         $file = collect($this->data['modelfile'] ?? [])->first();
 
         return $file instanceof TemporaryUploadedFile ? $file : null;
+    }
+
+    protected function setLabel(Set $set): string
+    {
+        return "{$set->number} - {$set->name}";
     }
 
     protected function withSetVersion(string $number): string
