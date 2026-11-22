@@ -15,6 +15,7 @@ class MenuRegistry
         return [
             ['label' => 'Library', 'children' => self::library()],
             OtherNavItem::SetList,
+            OtherNavItem::AddModel,
             LibraryNavItem::Documentation,
         ];
     }

@@ -2,16 +2,13 @@
 
 namespace App\Services\LDraw\Managers;
 
-use App\Enums\License;
 use App\Jobs\GenerateOmrModelImage;
 use App\Services\Render\LDView;
-use App\Models\Mybb\MybbAttachment;
 use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Spatie\Image\Image;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
@@ -35,24 +32,13 @@ class OmrModelManager
             ->toMediaCollection('image');
     }
 
-    public function addModelFromMybbAttachment(MybbAttachment $file, Set $set, array $data = []): void
+    /**
+     * @param array{alt_model?: bool, alt_model_name?: ?string, missing_parts?: bool, missing_patterns?: bool, missing_stickers?: bool, notes?: ?string} $data
+     */
+    public function addModel(string $contents, Set $set, User $user, array $data = []): OmrModel
     {
-        $modeltext = $file->get();
-        $user = $file->user->library_user;
-        if (is_null($user)) {
-            $user = User::create([
-                'name' => $file->user->loginname,
-                'realname' => $file->user->username,
-                'email' => $file->user->email,
-                'license' => License::CC_BY_4,
-                'forum_user_id' => $file->user->uid,
-                'password' => bcrypt(Str::random(40)),
-            ]);
-        }
-
         if (!$user->hasRole('OMR Author')) {
             $user->assignRole('OMR Author');
-            $user->save();
         }
 
         $model = OmrModel::create([
@@ -63,15 +49,15 @@ class OmrModelManager
             'missing_stickers' => Arr::get($data, 'missing_stickers', false),
             'approved' => true,
             'alt_model' => Arr::get($data, 'alt_model', false),
-            'alt_model_name' => Arr::get($data, 'alt_model_name'),
-            'notes' => ['notes' => Arr::get($data, 'notes', '')],
+            'alt_model_name' => Arr::get($data, 'alt_model', false) ? Arr::get($data, 'alt_model_name') : null,
+            'notes' => ['notes' => Arr::get($data, 'notes') ?? ''],
             'license' => $user->license,
         ]);
-        $model->addMediaFromString($modeltext)
+        $model->addMediaFromString($contents)
             ->usingFilename($model->filename())
             ->toMediaCollection('file');
         GenerateOmrModelImage::dispatch($model);
-        $file->posthash = true;
-        $file->save();
+
+        return $model;
     }
 }

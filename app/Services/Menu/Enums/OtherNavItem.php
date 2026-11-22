@@ -2,7 +2,9 @@
 
 namespace App\Services\Menu\Enums;
 
+use App\Models\Omr\OmrModel;
 use App\Services\Menu\Contracts\Navigable;
+use Illuminate\Support\Facades\Auth;
 
 enum OtherNavItem implements Navigable
 {
@@ -12,6 +14,7 @@ enum OtherNavItem implements Navigable
 
     //Omr
     case SetList;
+    case AddModel;
 
     public function label(): string
     {
@@ -19,6 +22,7 @@ enum OtherNavItem implements Navigable
             self::UnofficialPartZip => 'Download All Unofficial Parts',
             self::DailySubmitsZip => 'Download Last 24 Hours of Submits',
             self::SetList => 'Sets List',
+            self::AddModel => 'Add Model',
         };
     }
 
@@ -28,12 +32,16 @@ enum OtherNavItem implements Navigable
             self::UnofficialPartZip => asset('library/unofficial/ldrawunf.zip'),
             self::DailySubmitsZip => route('tracker.last-day'),
             self::SetList => route('omr.sets.index'),
+            self::AddModel => route('omr.add'),
         };
     }
 
     public function visible(): bool
     {
-        return true;
+        return match ($this) {
+            self::AddModel => Auth::user()?->can('create', OmrModel::class) ?? false,
+            default => true,
+        };
     }
 
 }

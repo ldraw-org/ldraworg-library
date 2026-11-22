@@ -3,120 +3,87 @@
 namespace App\Livewire\Omr\OmrModel;
 
 use App\Filament\Forms\Components\AuthorSelect;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Action;
-use Filament\Schemas\Components\Utilities\Get;
+use App\Models\Omr\OmrModel;
+use App\Models\Omr\Set;
+use App\Models\User;
+use App\Services\LDraw\LDrawFile;
 use App\Services\LDraw\LDrawModelMaker;
 use App\Services\LDraw\Managers\OmrModelManager;
 use App\Services\Omr\Set\Writer as SetWriter;
-use App\Models\Mybb\MybbAttachment;
-use App\Models\Omr\OmrModel;
-use App\Models\Omr\Set;
-use App\Services\Parser\ParsedPartCollection;
+use App\Services\OmrModel\UploadChecker;
 use Closure;
+use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Concerns\RestrictsFileUploadsToSchemaComponents;
 use Filament\Schemas\Contracts\HasSchemas;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ToggleColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Schemas\Schema;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-class Add extends Component implements HasSchemas, HasTable, HasActions
+class Add extends Component implements HasSchemas
 {
-    use InteractsWithActions;
     use InteractsWithSchemas;
-    use InteractsWithTable;
+    use RestrictsFileUploadsToSchemaComponents;
 
-    public ?array $files = [];
-    public array $parts = [];
+    public ?array $data = [];
+
+    /**
+     * @var array{errors?: list<string>, warnings?: list<string>}
+     */
+    #[Locked]
+    public array $checks = [];
 
     public function mount(): void
     {
         $this->authorize('create', OmrModel::class);
+        $this->form->fill();
     }
 
-    public function table(Table $table): Table
+    public function form(Schema $schema): Schema
     {
-        return $table
-            ->query(MybbAttachment::with('post', 'user')->omrFiles())
-            ->defaultSort('dateuploaded', 'desc')
-            ->columns([
-                TextColumn::make('dateuploaded')
-                    ->sortable()
-                    ->label('Date Uploaded')
-                    ->dateTime(),
-                TextColumn::make('filename')
-                    ->sortable(),
-                TextColumn::make('post.subject')
-                    ->wrap()
-                    ->url(fn (MybbAttachment $file): string => $file->post->url()),
-                TextColumn::make('user')
-                    ->state(fn (MybbAttachment $file): string => $file->user->library_user?->author_string ?? "{$file->user->loginname} - {$file->user->username}"),
-                IconColumn::make('set-in-omr')
-                    ->boolean()
-                    ->state(fn (MybbAttachment $file): bool => !is_null($this->getSetFromFilename($file->filename)))
-                    ->url(function (MybbAttachment $file): ?string {
-                        $set = $this->getSetFromFilename($file->filename);
-                        if (!is_null($set)) {
-                            return route('omr.sets.show', $set);
-                        }
-                        return null;
-                    }),
-                ToggleColumn::make('posthash')
-                    ->label('File Reviewed'),
-            ])
-            ->recordActions([
-                Action::make('view')
-                    ->action(function (MybbAttachment $file) {
-                        $this->parts = app(LDrawModelMaker::class)->webGl($file->get());
-                        $this->dispatch('open-modal', id: 'ldbi');
-                    }),
-                $this->AddAction(),
-
-            ])
-            ->filters([
-                Filter::make('unchecked-posts')
-                    ->query(fn (Builder $query): Builder => $query->where('posthash', '!=', 1))
-            ])
-            ->recordClasses(fn (MybbAttachment $file): string => is_null($file->user->library_user) ? '!bg-yellow-300' : '');
-    }
-
-    protected function AddAction(): Action
-    {
-        return Action::make('add')
-            ->fillForm(fn (MybbAttachment $file): array => [
-                'set_id' => $this->getSetFromFilename($file->filename)?->id,
-                'user_id' => (new ParsedPartCollection($file->get()))->authorUser()?->id ?? $file->user->library_user?->id,
-            ])
-            ->schema([
-                AuthorSelect::make(),
+        return $schema
+            ->components([
+                FileUpload::make('modelfile')
+                    ->label('Model File')
+                    ->storeFiles(false)
+                    ->previewable(false)
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(fn () => $this->checkModelFile())
+                    ->rules([
+                        fn (): Closure => function (string $attribute, $value, Closure $fail) {
+                            if (($this->checks['errors'] ?? []) !== []) {
+                                $fail('The model file has errors');
+                            }
+                        },
+                    ]),
+                AuthorSelect::make()
+                    ->required(),
                 Select::make('set_id')
-                    ->options(Set::pluck('number', 'id'))
+                    ->label('Set')
+                    ->options(fn () => Set::pluck('number', 'id'))
                     ->searchable()
                     ->required()
+                    ->live()
                     ->createOptionForm([
                         TextInput::make('number')
                             ->required()
                             ->rules([
                                 fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                                    if (!Str::endsWith($value, ['-1', '-2'])) {
-                                        $value .= '-1';
-                                    }
-                                    $set = Set::firstWhere('number', $value);
-                                    if (!is_null($set)) {
+                                    $value = $this->withSetVersion($value);
+                                    if (Set::where('number', $value)->exists()) {
                                         $fail('Set already exists');
                                         return;
                                     }
@@ -126,55 +93,119 @@ class Add extends Component implements HasSchemas, HasTable, HasActions
                                 },
                             ]),
                     ])
-                    ->createOptionUsing(function (array $data): int {
-                        if (!Str::endsWith($data['number'], ['-1', '-2'])) {
-                            $data['number'] .= '-1';
-                        }
-                        return app(SetWriter::class)->findFromSetNumber($data['number'], createIfMissing: true)?->id
-                            ?? throw ValidationException::withMessages(['number' => 'Unable to add the set from Rebrickable']);
-                    }),
+                    ->createOptionUsing(
+                        fn (array $data): int => app(SetWriter::class)->findFromSetNumber($this->withSetVersion($data['number']), createIfMissing: true)?->id
+                            ?? throw ValidationException::withMessages(['number' => 'Unable to add the set from Rebrickable'])
+                    ),
                 Toggle::make('alt_model')
+                    ->label('Alternate Model')
+                    ->live()
                     ->rules([
                         fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
                             if (!$value && OmrModel::where('set_id', $get('set_id'))->whereNull('alt_model_name')->exists()) {
                                 $fail('There is already a main model for this set');
                             }
-                        }
-                    ])
-                    ->live(),
+                        },
+                    ]),
                 TextInput::make('alt_model_name')
+                    ->label('Alternate Model Name')
                     ->requiredIfAccepted('alt_model')
+                    ->visible(fn (Get $get): bool => (bool) $get('alt_model'))
                     ->rules([
                         fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
                             if (OmrModel::where('set_id', $get('set_id'))->where('alt_model_name', $value)->exists()) {
                                 $fail('There is already an alt model with that name');
                             }
-                        }
-                    ])
-                    ->disabled(fn (Get $get): bool => !$get('alt_model'))
-                    ->live(),
+                        },
+                    ]),
                 Toggle::make('missing_parts'),
                 Toggle::make('missing_patterns'),
                 Toggle::make('missing_stickers'),
                 Textarea::make('notes')
                     ->rows(4)
+                    ->nullable(),
             ])
-            ->action(function (MybbAttachment $file, array $data) {
-                app(OmrModelManager::class)->addModelFromMybbAttachment($file, Set::firstWhere('id', $data['set_id']), $data);
-            });
+            ->statePath('data');
     }
 
-    protected function getSetFromFilename(string $filename): ?Set
+    /**
+     * Checks the uploaded file and fills in what it can work out from it, as the part submit form does on upload.
+     */
+    protected function checkModelFile(): void
     {
-        $m = preg_match('/\d{3,6}/iu', $filename, $num);
-        if ($m) {
-            return  Set::where(fn (Builder $query) => $query->orWhere('number', $num[0])->orWhere('number', "{$num[0]}-1"))->first();
+        $file = $this->uploadedFile();
+        if (is_null($file)) {
+            $this->checks = [];
+            return;
         }
-        return null;
+
+        $result = app(UploadChecker::class)->check(LDrawFile::fromUploadedFile($file));
+        $this->checks = ['errors' => $result['errors'], 'warnings' => $result['warnings']];
+
+        if ($result['errors'] !== []) {
+            return;
+        }
+
+        $this->data['set_id'] = $result['set_id'] ?? $this->data['set_id'] ?? null;
+        $this->data['user_id'] = $result['user_id'] ?? $this->data['user_id'] ?? null;
+        $this->data['alt_model'] = $result['alt_model'];
+        $this->data['missing_parts'] = $result['missing_parts'];
+    }
+
+    protected function uploadedFile(): ?TemporaryUploadedFile
+    {
+        $file = collect($this->data['modelfile'] ?? [])->first();
+
+        return $file instanceof TemporaryUploadedFile ? $file : null;
+    }
+
+    protected function withSetVersion(string $number): string
+    {
+        return Str::endsWith($number, ['-1', '-2']) ? $number : "{$number}-1";
+    }
+
+    public function preview(LDrawModelMaker $maker): void
+    {
+        $file = $this->uploadedFile();
+        if (is_null($file) || ($this->checks['errors'] ?? []) !== []) {
+            return;
+        }
+
+        $this->dispatch('open-modal', id: 'ldbi');
+        $this->dispatch(
+            'ldbi-render-model',
+            modelType: 'user',
+            mainModelName: 'model.ldr',
+            parts: $maker->webGl($file->get()),
+            force: true,
+        );
+    }
+
+    public function create(OmrModelManager $manager): void
+    {
+        $this->authorize('create', OmrModel::class);
+        $data = $this->form->getState();
+
+        /** @var TemporaryUploadedFile $file */
+        $file = $data['modelfile'];
+        $set = Set::findOrFail($data['set_id']);
+        $model = $manager->addModel($file->get(), $set, User::findOrFail($data['user_id']), $data);
+
+        Notification::make()
+            ->title("Added {$model->filename()} to {$set->number} - {$set->name}")
+            ->actions([
+                Action::make('view')
+                    ->url(route('omr.sets.show', $set)),
+            ])
+            ->success()
+            ->send();
+
+        $this->checks = [];
+        $this->form->fill();
     }
 
     #[Layout('components.layout.omr')]
-    public function render()
+    public function render(): View
     {
         return view('livewire.omr.omr-model.add');
     }
