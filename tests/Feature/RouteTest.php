@@ -21,6 +21,8 @@ beforeEach(function () {
 
 describe('non bound routes', function () {
     test('public route should return ok', function (string $routename) {
+        PartRelease::factory()->create(['enabled' => true]);
+
         $response = $this->get(route($routename));
 
         $response->assertOk();
