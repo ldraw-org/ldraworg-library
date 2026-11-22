@@ -124,6 +124,7 @@ it('adds a missing set from the set field', function () {
     ]);
 
     Livewire::test(Add::class)
+        ->assertSeeHtml('wire:partial="action-modals"')
         ->callAction(TestAction::make('createOption')->schemaComponent('set_id'), data: ['number' => '10000'])
         ->assertHasNoErrors()
         ->assertSchemaStateSet(['set_id' => Set::firstWhere('number', '10000-1')?->id]);

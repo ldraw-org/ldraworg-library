@@ -45,6 +45,7 @@
             </div>
         </form>
     </div>
+    <x-filament-actions::modals />
     <x-filament::modal id="ldbi" alignment="center" width="7xl">
         <x-slot name="heading">
             3D View
