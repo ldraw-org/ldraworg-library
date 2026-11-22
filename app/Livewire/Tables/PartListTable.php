@@ -55,7 +55,6 @@ class PartListTable extends BasicTable
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Parts List')
             ->query(Part::with('votes', 'official_part', 'unofficial_part'))
             ->columns(PartTable::columns())
             ->recordActions(PartTable::actions())

@@ -27,7 +27,6 @@ class RoleManagePage extends BasicResourceManagePage
         return $table
             ->query(Role::query())
             ->defaultSort('name')
-            ->heading('Role Management')
             ->paginated(false)
             ->columns([
                 TextColumn::make('name'),

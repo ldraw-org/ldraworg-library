@@ -43,7 +43,6 @@ class PollIndex extends BasicTable
                 )
             )
             ->defaultSort('ends_on')
-            ->heading('Current Polls')
             ->headerActions([
                 CreateAction::make()
                     ->schema($this->pollForm())

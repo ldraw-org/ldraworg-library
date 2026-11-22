@@ -18,7 +18,6 @@ class Weekly extends BasicTable
     {
 
         return $table
-            ->heading('Parts Tracker Submissions by Week')
             ->query(
                 Part::with('votes', 'official_part', 'unofficial_part')
                 ->unofficial()

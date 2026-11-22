@@ -24,7 +24,6 @@ class StickerSheetIndex extends BasicTable
                 RebrickablePart::where('rb_part_category_id', '58')
                 ->has('parts')
             )
-            ->heading('Sticker Sheets')
             ->columns([
                 TextColumn::make('number')
                     ->sortable()

@@ -28,7 +28,6 @@ class DocumentCategoryManagePage extends BasicResourceManagePage
             ->query(DocumentCategory::query())
             ->defaultSort('order')
             ->reorderable('order')
-            ->heading('Document Category Management')
             ->columns([
                 TextColumn::make('title')
                     ->sortable()

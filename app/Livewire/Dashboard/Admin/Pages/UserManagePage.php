@@ -35,7 +35,6 @@ class UserManagePage extends BasicResourceManagePage
         return $table
             ->query(User::query())
             ->defaultSort('realname')
-            ->heading('User Management')
             ->columns([
                 TextColumn::make('id')
                     ->sortable(),

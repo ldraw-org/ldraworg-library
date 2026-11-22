@@ -16,6 +16,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class PartReleaseManagePage extends BasicResourceManagePage
 {
+    public string $title = 'Manage Part Releases';
+
     public function mount(): void
     {
         $this->authorize('manage', PartRelease::class);
@@ -24,7 +26,6 @@ class PartReleaseManagePage extends BasicResourceManagePage
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Part Release Management')
             ->query(PartRelease::query())
             ->defaultSort('created_at', 'desc')
             ->columns([

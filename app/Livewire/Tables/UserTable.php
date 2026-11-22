@@ -20,7 +20,6 @@ class UserTable extends BasicTable
         return $table
             ->query(User::query()->withMax('part_events', 'created_at')->where('is_ptadmin', false)->where('is_synthetic', false))
             ->defaultSort('realname')
-            ->heading('User List')
             ->columns([
                 TextColumn::make('realname')
                     ->label('Name')

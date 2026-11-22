@@ -2,7 +2,6 @@
     <x-slot:title>
         LDraw Member Polls
     </x-slot>
-    <div>
-        <livewire:tables.poll-index />
-    </div>
+    <x-page-title>Current Polls</x-page-title>
+    <livewire:tables.poll-index />
 </x-layout.base>

@@ -28,7 +28,6 @@ class PartKeywordManagePage extends BasicResourceManagePage
         return $table
             ->query(PartKeyword::query())
             ->defaultSort('keyword')
-            ->heading('Part Keyword Management')
             ->columns([
                 TextColumn::make('keyword')
                     ->sortable()

@@ -42,7 +42,6 @@ class DocumentManagePage extends BasicResourceManagePage
                 return $query->orderBy('document_category_id')->orderBy('order');
             })
             ->reorderable('order')
-            ->heading('Document Management')
             ->columns([
                 TextColumn::make('title')
                     ->sortable()

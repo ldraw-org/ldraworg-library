@@ -16,7 +16,6 @@ class Index extends BasicTable
     {
 
         return $table
-            ->heading('OMR Model List')
             ->query(Set::with(['models', 'theme'])->has('models'))
             ->defaultSort('number')
             ->columns([

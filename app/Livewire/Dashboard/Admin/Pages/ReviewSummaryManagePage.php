@@ -28,7 +28,6 @@ class ReviewSummaryManagePage extends BasicResourceManagePage
             ->query(ReviewSummary::query())
             ->defaultSort('order')
             ->reorderable('order')
-            ->heading('Part Review Summary Management')
             ->columns([
                 TextColumn::make('header')
             ])

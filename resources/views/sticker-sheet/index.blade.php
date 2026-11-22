@@ -2,7 +2,6 @@
     <x-slot:title>
         Sticker Sheet Index
     </x-slot>
-    <div>
-        <livewire:tables.sticker-sheet-index />
-    </div>
+    <x-page-title>Sticker Sheets</x-page-title>
+    <livewire:tables.sticker-sheet-index />
 </x-layout.tracker>
