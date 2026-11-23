@@ -18,7 +18,7 @@ class SyncFixes extends Command
             ->chunk(200, function ($parts) {
                 \App\Jobs\SyncFixes::dispatch(
                     $parts->map(fn (Part $p) => $p->withoutRelations())
-                )->onQueue('maintenance');
+                );
             });
     }
 }

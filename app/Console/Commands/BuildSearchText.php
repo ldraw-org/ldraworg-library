@@ -26,6 +26,6 @@ class BuildSearchText extends Command
      */
     public function handle(): void
     {
-        BuildSearchTextJob::dispatch()->onQueue('maintenance');
+        BuildSearchTextJob::dispatch();
     }
 }
