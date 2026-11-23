@@ -44,6 +44,9 @@
                                 3D View
                             </x-filament::button>
                             <a class="rounded-lg border border-gray-200 bg-blue-500 font-bold px-4 py-2 text-white m-2 w-fit" href="{{$model->getFirstMediaUrl('file')}}">Download</a>
+                            <div class="m-2 w-fit">
+                                {{ ($this->editModelAction)(['model' => $model->id]) }}
+                            </div>
                         </div>
                     </div>
                 @empty
@@ -52,6 +55,7 @@
             </div>
         </div>
     </div>
+    <x-filament-actions::modals />
     @if($set->models->isNotEmpty())
         <x-filament::modal id="ldbi" alignment="center" width="7xl" lazy>
             <x-slot name="heading">

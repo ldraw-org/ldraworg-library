@@ -4,30 +4,6 @@
         <div class="text-2xl font-bold">
             Add Model
         </div>
-        @if(($checks['errors'] ?? []) !== [])
-            <x-message compact icon type="error">
-                <x-slot:header>
-                    The model file has errors
-                </x-slot:header>
-                <ul>
-                    @foreach($checks['errors'] as $error)
-                        <li wire:key="model-error-{{ $loop->iteration }}">{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </x-message>
-        @endif
-        @if(($checks['warnings'] ?? []) !== [])
-            <x-message compact icon type="warning">
-                <x-slot:header>
-                    Check the following before adding the model
-                </x-slot:header>
-                <ul>
-                    @foreach($checks['warnings'] as $warning)
-                        <li wire:key="model-warning-{{ $loop->iteration }}">{{ $warning }}</li>
-                    @endforeach
-                </ul>
-            </x-message>
-        @endif
         <form wire:submit="create" class="flex flex-col space-y-2">
             {{ $this->form }}
 

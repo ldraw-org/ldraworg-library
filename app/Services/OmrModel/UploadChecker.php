@@ -28,8 +28,10 @@ class UploadChecker
      *     alt_model: bool,
      *     missing_parts: bool
      * }
+     *
+     * Pass the model a file is replacing to check the file against that model's set instead of looking the set up.
      */
-    public function check(LDrawFile $file): array
+    public function check(LDrawFile $file, ?OmrModel $replacing = null): array
     {
         $result = [
             'errors' => [],
@@ -57,10 +59,13 @@ class UploadChecker
         }
 
         $setNumber = $this->setNumber($file->filename) ?? $this->setNumber($submodels[0] ?? '');
-        $set = is_null($setNumber) ? null : $this->setWriter->findFromSetNumber($setNumber, createIfMissing: true);
-        if (is_null($setNumber)) {
+        if (!is_null($replacing)) {
+            if (!is_null($setNumber) && $setNumber !== $replacing->set->number) {
+                $result['warnings'][] = "The file is for set {$setNumber}, not {$replacing->set->number}";
+            }
+        } elseif (is_null($setNumber)) {
             $result['warnings'][] = 'A set number could not be found in the file name';
-        } elseif (is_null($set)) {
+        } elseif (is_null($set = $this->setWriter->findFromSetNumber($setNumber, createIfMissing: true))) {
             $result['warnings'][] = "Set {$setNumber} was not found at Rebrickable, add it from the set field";
         } else {
             $result['set_id'] = $set->id;

@@ -47,22 +47,6 @@ function fakeOmrSetCsv(array $setRows = []): void
     ]);
 }
 
-function omrModelFile(string $filename = '6399-1 - Airport Shuttle.mpd', string $author = 'Model Maker [ModelMaker]'): UploadedFile
-{
-    $text = implode("\r\n", [
-        "0 FILE {$filename}",
-        '0 Airport Shuttle',
-        "0 Name: {$filename}",
-        "0 Author: {$author}",
-        '1 16 0 0 0 1 0 0 0 1 0 0 0 1 cabin.ldr',
-        '0 FILE cabin.ldr',
-        '1 4 0 0 0 1 0 0 0 1 0 0 0 1 3001.dat',
-        '1 4 0 0 0 1 0 0 0 1 0 0 0 1 99999.dat',
-    ]) . "\r\n";
-
-    return UploadedFile::fake()->createWithContent($filename, $text);
-}
-
 it('fills the set, author and missing parts from the uploaded model', function () {
     Livewire::test(Add::class)
         ->fillForm(['modelfile' => omrModelFile()])

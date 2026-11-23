@@ -2,6 +2,7 @@
 
 use App\Services\Parser\ParsedPartCollection;
 use App\Services\Check\PartChecker;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 
 /*
@@ -66,4 +67,23 @@ function rebrickableArchive(array $files): string
         unset($tar);
         File::deleteDirectory($dir);
     }
+}
+
+/**
+ * An OMR model file for set 6399-1 (by default) using one official part (3001.dat) and one unknown part (99999.dat).
+ */
+function omrModelFile(string $filename = '6399-1 - Airport Shuttle.mpd', string $author = 'Model Maker [ModelMaker]'): UploadedFile
+{
+    $text = implode("\r\n", [
+        "0 FILE {$filename}",
+        '0 Airport Shuttle',
+        "0 Name: {$filename}",
+        "0 Author: {$author}",
+        '1 16 0 0 0 1 0 0 0 1 0 0 0 1 cabin.ldr',
+        '0 FILE cabin.ldr',
+        '1 4 0 0 0 1 0 0 0 1 0 0 0 1 3001.dat',
+        '1 4 0 0 0 1 0 0 0 1 0 0 0 1 99999.dat',
+    ]) . "\r\n";
+
+    return UploadedFile::fake()->createWithContent($filename, $text);
 }
