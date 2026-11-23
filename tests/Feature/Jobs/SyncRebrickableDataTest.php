@@ -85,6 +85,23 @@ it('resyncs from the CSVs on disk without downloading', function () {
     Http::assertNothingSent();
 });
 
+it('raises a lower memory limit but leaves an unlimited one alone', function (string $before, string $after) {
+    $original = ini_get('memory_limit');
+    ini_set('memory_limit', $before);
+    fakeRebrickableCsv(rebrickableDump());
+
+    try {
+        SyncRebrickableData::dispatchSync(skipDownload: true);
+        expect(ini_get('memory_limit'))->toBe($after);
+    } finally {
+        ini_set('memory_limit', $original);
+    }
+})->with([
+    'lower' => ['128M', '512M'],
+    'higher' => ['1G', '1G'],
+    'unlimited' => ['-1', '-1'],
+]);
+
 it('deletes local sticker sheets no part or set refers to', function () {
     fakeRebrickableCsv(rebrickableDump());
     $sheet = fn (string $number) => RebrickablePart::create(['number' => $number, 'name' => $number, 'rb_part_category_id' => 58, 'is_local' => true]);

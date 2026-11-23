@@ -33,6 +33,9 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
 
     protected const int DISPATCH_CHUNK = 200;
 
+    /** The set inventory import holds every set's inventory at once, more than a default 128M allows */
+    protected const string MEMORY_LIMIT = '512M';
+
     public function __construct(
         public bool $forceDownload = false,
         public bool $skipDownload = false,
@@ -49,6 +52,8 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         SyncSetMetadata $setMetadata,
         DeleteEmptyLocalStickerSheets $deleteEmptySheets,
     ): void {
+        $this->raiseMemoryLimit();
+
         $downloaded = !$this->skipDownload && $downloader->download($this->forceDownload);
 
         // Themes first, as added sets and set details refer to them
@@ -81,5 +86,17 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
             'inventory_parts_missing' => $setResult['missing_parts'],
             'set_details_updated' => $setsUpdated,
         ]);
+    }
+
+    /**
+     * Raises PHP's memory limit for this job, leaving a higher or unlimited one alone.
+     */
+    protected function raiseMemoryLimit(): void
+    {
+        $current = ini_parse_quantity(ini_get('memory_limit'));
+
+        if ($current > 0 && $current < ini_parse_quantity(self::MEMORY_LIMIT)) {
+            ini_set('memory_limit', self::MEMORY_LIMIT);
+        }
     }
 }

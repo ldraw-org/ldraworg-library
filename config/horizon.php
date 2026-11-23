@@ -231,7 +231,9 @@ return [
             'maxProcesses' => 1,
             'maxTime' => 0,
             'maxJobs' => 0,
-            'memory' => 128,
+            // Well below PHP's memory_limit: PHP keeps the memory a heavy job allocated, so a worker
+            // left just under the limit would fail the next job on its first sizeable allocation
+            'memory' => 64,
             'tries' => 1,
             'timeout' => 60,
             'nice' => 0,
