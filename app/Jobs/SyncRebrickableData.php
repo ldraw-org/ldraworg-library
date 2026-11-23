@@ -33,7 +33,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
 
     protected const int DISPATCH_CHUNK = 200;
 
-    /** The set inventory import holds every set's inventory at once, more than a default 128M allows */
+    /** The set inventory import holds every set's inventory at once, so the sync needs ~100MB on top of the worker's own */
     protected const string MEMORY_LIMIT = '512M';
 
     public function __construct(
@@ -70,7 +70,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         Part::unofficial()
             ->canHaveRebrickablePart()
             ->doesntHave('rebrickable_part')
-            ->chunkById(self::DISPATCH_CHUNK, fn ($chunk) => UpdateRebrickable::dispatch($chunk));
+            ->chunkById(self::DISPATCH_CHUNK, fn ($chunk) => UpdateRebrickable::dispatch($chunk)->onQueue('maintenance'));
 
         $setsUpdated = $setMetadata->handle();
 

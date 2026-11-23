@@ -13,7 +13,7 @@ use Illuminate\Queue\Attributes\Timeout;
 
 #[DeleteWhenMissingModels]
 #[Timeout(1800)]
-#[Queue('maintenance')]
+#[Queue('library')]
 class GeneratePartImage implements ShouldQueue
 {
     use Queueable;

@@ -3,6 +3,7 @@
 use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Jobs\SyncRebrickableData;
+use App\Jobs\UpdateRebrickable;
 use App\Models\LdrawColour;
 use App\Models\Omr\Set;
 use App\Models\Omr\Theme;
@@ -11,6 +12,7 @@ use App\Models\RebrickablePart;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
@@ -83,6 +85,22 @@ it('resyncs from the CSVs on disk without downloading', function () {
     expect($this->set->fresh()->name)->toBe('New Name')
         ->and($this->part->fresh()->rebrickable_part_id)->not->toBeNull();
     Http::assertNothingSent();
+});
+
+it('queues the lookups for parts still without a Rebrickable part as maintenance work', function () {
+    Queue::fake([UpdateRebrickable::class]);
+    fakeRebrickableCsv(rebrickableDump());
+    Part::factory()->unofficial()->createQuietly([
+        'filename' => 'parts/99999.dat',
+        'description' => 'Brick Unknown',
+        'type' => PartType::Part,
+        'category' => PartCategory::Brick,
+    ]);
+
+    SyncRebrickableData::dispatchSync(skipDownload: true);
+
+    Queue::assertPushedOn('maintenance', UpdateRebrickable::class);
+    Queue::assertNotPushed(UpdateRebrickable::class, fn (UpdateRebrickable $job, ?string $queue) => $queue !== 'maintenance');
 });
 
 it('raises a lower memory limit but leaves an unlimited one alone', function (string $before, string $after) {

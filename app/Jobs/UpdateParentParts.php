@@ -17,7 +17,7 @@ use App\Models\Part\Part;
 
 #[DeleteWhenMissingModels]
 #[Timeout(1800)]
-#[Queue('maintenance')]
+#[Queue('library')]
 class UpdateParentParts implements ShouldQueue
 {
     use Dispatchable;

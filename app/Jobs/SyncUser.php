@@ -10,7 +10,7 @@ use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\Attributes\Queue;
 
 #[DeleteWhenMissingModels]
-#[Queue('maintenance')]
+#[Queue('library')]
 class SyncUser implements ShouldQueue
 {
     use Queueable;

@@ -11,7 +11,7 @@ use Illuminate\Queue\Attributes\Timeout;
 
 #[DebounceFor(300, maxWait: 1800)]
 #[Timeout(1800)]
-#[Queue('maintenance')]
+#[Queue('library')]
 class UpdateLibraryCsv implements ShouldQueue
 {
     use Queueable;

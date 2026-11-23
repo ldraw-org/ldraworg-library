@@ -66,7 +66,8 @@ return [
             'driver' => 'redis',
             'connection' => 'default',
             'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => 90,
+            // Longer than the longest job timeout (3600), or a slow job is handed out again while still running
+            'retry_after' => 3700,
             'block_for' => null,
             'after_commit' => false,
         ],

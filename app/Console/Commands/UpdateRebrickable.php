@@ -21,7 +21,7 @@ class UpdateRebrickable extends Command
                 fn (Builder $query) => $query->doesntHave('rebrickable_part')
             )
             ->chunk(200, function ($parts) {
-                \App\Jobs\UpdateRebrickable::dispatch($parts);
+                \App\Jobs\UpdateRebrickable::dispatch($parts)->onQueue('maintenance');
             });
     }
 }

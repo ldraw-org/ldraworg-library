@@ -10,7 +10,7 @@ use Illuminate\Queue\Attributes\Queue;
 use Illuminate\Queue\Attributes\Timeout;
 
 #[Timeout(1800)]
-#[Queue('maintenance')]
+#[Queue('library')]
 class UpdateZip implements ShouldQueue
 {
     use Queueable;
@@ -23,7 +23,8 @@ class UpdateZip implements ShouldQueue
     public function __construct(
         protected Part $part,
         protected ?string $oldfilename = null
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the job.

@@ -98,6 +98,10 @@ return [
 
     'waits' => [
         'redis:default' => 60,
+        'redis:media' => 0,
+        'redis:library' => 300,
+        'redis:maintenance' => 0,
+        'redis:release' => 0,
     ],
 
     /*
@@ -197,74 +201,76 @@ return [
     */
 
     'defaults' => [
+        // Mail and media library conversions: many short, light jobs
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['default'],
+            'queue' => ['default', 'media'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
-            'maxProcesses' => 1,
+            'minProcesses' => 1,
+            'maxProcesses' => 2,
             'maxTime' => 0,
             'maxJobs' => 0,
-            'memory' => 128,
+            'memory' => 96,
             'tries' => 1,
             'timeout' => 60,
             'nice' => 0,
+        ],
+        // Follow-ups to user actions (submits, header edits, renames, OMR uploads), kept clear of bulk work.
+        // One process, as UpdateZip edits the shared unofficial zip in place
+        'library-supervisor' => [
+            'connection' => 'redis',
+            'queue' => ['library'],
+            'balance' => false,
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 96,
+            'tries' => 1,
+            'timeout' => 1800,
+            'nice' => 0,
+        ],
+        // Bulk sweeps and syncs. One process, as the nightly maintenance relies on its jobs running in order;
+        // niced so they yield the CPU to requests and library jobs
+        'maint-supervisor' => [
+            'connection' => 'redis',
+            'queue' => ['maintenance'],
+            'balance' => false,
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 96,
+            'tries' => 1,
+            'timeout' => 3600,
+            'nice' => 10,
         ],
         'release-supervisor' => [
             'connection' => 'redis',
             'queue' => ['release'],
-            'balance' => 'auto',
-            'autoScalingStrategy' => 'time',
+            'balance' => false,
             'maxProcesses' => 1,
             'maxTime' => 0,
             'maxJobs' => 0,
-            'memory' => 128,
+            'memory' => 96,
             'tries' => 1,
-            'timeout' => 60,
-            'nice' => 0,
-        ],
-        'maint-supervisor' => [
-            'connection' => 'redis',
-            'queue' => ['maintenance'],
-            'balance' => 'auto',
-            'autoScalingStrategy' => 'time',
-            'maxProcesses' => 1,
-            'maxTime' => 0,
-            'maxJobs' => 0,
-            // Well below PHP's memory_limit: PHP keeps the memory a heavy job allocated, so a worker
-            // left just under the limit would fail the next job on its first sizeable allocation
-            'memory' => 64,
-            'tries' => 1,
-            'timeout' => 60,
+            'timeout' => 3600,
             'nice' => 0,
         ],
     ],
 
     'environments' => [
         'production' => [
-            'supervisor-1' => [
-                'maxProcesses' => 10,
-                'balanceMaxShift' => 1,
-                'balanceCooldown' => 3,
-            ],
-            'release-supervisor' => [
-                'maxProcesses' => 1,
-            ],
-            'maint-supervisor' => [
-                'maxProcesses' => 1,
-            ],
+            'supervisor-1' => [],
+            'library-supervisor' => [],
+            'maint-supervisor' => [],
+            'release-supervisor' => [],
         ],
 
         'local' => [
-            'supervisor-1' => [
-                'maxProcesses' => 3,
-            ],
-            'release-supervisor' => [
-                'maxProcesses' => 1,
-            ],
-            'maint-supervisor' => [
-                'maxProcesses' => 1,
-            ],
+            'supervisor-1' => [],
+            'library-supervisor' => [],
+            'maint-supervisor' => [],
+            'release-supervisor' => [],
         ],
     ],
 
