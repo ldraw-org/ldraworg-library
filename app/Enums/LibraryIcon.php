@@ -49,6 +49,7 @@ enum LibraryIcon: string
     case ViewerBfc = 'mdi-flip-to-back';
     case ViewerShowAxis = 'mdi-axis-arrow';
     case ViewerPhoto = 'mdi-camera';
+    case ViewerTexmapFallback = 'mdi-image-off';
 
     case PageFirst = 'mdi-page-first';
     case PageLast = 'mdi-page-last';

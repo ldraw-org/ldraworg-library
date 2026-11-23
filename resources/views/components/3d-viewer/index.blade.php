@@ -129,6 +129,7 @@
                 Livewire.on('ldbi-bfc-mode', () => scene?.bfc_mode());
                 Livewire.on('ldbi-stud-logos', () => scene?.toggleStudLogos());
                 Livewire.on('ldbi-show-origin', () => scene?.toggleOrigin());
+                Livewire.on('ldbi-texmap-fallback', () => scene?.toggleTexmapFallback());
             });
         })();
     </script>

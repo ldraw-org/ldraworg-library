@@ -4,5 +4,6 @@
     <x-3d-viewer.button.bfc />
     <x-3d-viewer.button.studlogo />
     <x-3d-viewer.button.showaxis />
+    <x-3d-viewer.button.texmapfallback />
     <x-3d-viewer.button.photo />
 </x-3d-viewer.button-bar>

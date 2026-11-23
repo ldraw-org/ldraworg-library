@@ -53,6 +53,13 @@ LDrawOrg.Model = function(canvas, model, options) {
     if (this.options.onProgress) { this.loader.onProgress = this.options.onProgress; }
     this.loader.physicalRenderingAge = this.options.physicalRenderingAge || 0;
 
+    // LDRLoader parses !TEXMAP FALLBACK geometry but never draws it. To show the fallback,
+    // strip the texmap meta lines before parsing so the loader reads the file the way a
+    // renderer without texmap support would.
+    this.texmapFallback = false;
+    const parse = this.loader.parse.bind(this.loader);
+    this.loader.parse = (data, defaultID) => parse(this.texmapFallback ? LDrawOrg.stripTexmaps(data) : data, defaultID);
+
     // Keep the canvas sized to its container
     if (typeof ResizeObserver !== 'undefined') {
         this._resizeObserver = new ResizeObserver(() => this.onChange());
@@ -63,7 +70,26 @@ LDrawOrg.Model = function(canvas, model, options) {
     this.setModel(model);
 };
 
-LDrawOrg.Model.prototype.setModel = function(model, reload = true) {
+// Remove "0 !TEXMAP" and texmap-only "0 !:" lines, leaving any FALLBACK geometry as ordinary lines.
+// "0 !:" lines that carry inline !DATA image content are kept so the data block still parses.
+LDrawOrg.stripTexmaps = function(data) {
+    let inData = false;
+    return data.split(/\r?\n/).filter(line => {
+        if (/^\s*0\s+!DATA(\s|$)/.test(line)) {
+            inData = true;
+            return true;
+        }
+        if (/^\s*0\s+!:/.test(line)) {
+            return inData;
+        }
+        if (line.trim() !== '') {
+            inData = false;
+        }
+        return !/^\s*0\s+!TEXMAP(\s|$)/.test(line);
+    }).join('\n');
+};
+
+LDrawOrg.Model.prototype.setModel =function(model, reload = true) {
     this._model = model;
 
     // A new model resets the whole scene, including lights and camera zoom
@@ -250,7 +276,13 @@ LDrawOrg.Model.prototype.default_mode = function() {
     // Restore the default prototypes changed in other modes
     LDR.setMode(0);
     LDR.Options.studLogo = 0;
+    this.texmapFallback = false;
     this.reload();
+};
+
+LDrawOrg.Model.prototype.toggleTexmapFallback = function() {
+    this.texmapFallback = !this.texmapFallback;
+    this.reload(); // Files are re-parsed with or without the texmap lines
 };
 
 LDrawOrg.Model.prototype.togglePhysicalRendering = function() {
