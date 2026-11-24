@@ -7,11 +7,11 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use App\Enums\PartStatus;
 use App\Filament\Tables\Columns\PartStatusColumn;
-use App\Jobs\BackupDatabaseOnly;
-use App\Jobs\MakePartRelease;
-use App\Jobs\SyncRebrickableData;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
+use App\Services\Part\Release\PartReleaseManager;
+use App\Services\Part\Release\ReleaseProgress;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -27,7 +27,6 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Bus;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -107,7 +106,7 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                         FileUpload::make('additional-files')
                     ])
                     ->action(fn (array $data) => $this->createRelease($data))
-                    ->successRedirectUrl(route('tracker.activity')),
+                    ->visible(fn (): bool => !app(ReleaseProgress::class)->isRunning()),
                 Action::make('reset-marked-parts')
                     ->action(function () {
                         Part::unofficial()->where('marked_for_release', true)->update([
@@ -121,6 +120,7 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                                 'marked_for_release' => true
                             ]);
                     })
+                    ->visible(fn (): bool => !app(ReleaseProgress::class)->isRunning()),
             ]);
     }
 
@@ -133,13 +133,15 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                 $addFiles[$afile->getClientOriginalName()] = $afile->get();
             }
         }
-        // Fresh Rebrickable data and a database backup before the release starts; a failure stops the chain.
-        // The sync goes first: as the chain's first job its unique lock is not checked, so the chain is never dropped.
-        Bus::chain([
-            new SyncRebrickableData(),
-            new BackupDatabaseOnly(),
-            new MakePartRelease(Auth::user(), $data['include-ldconfig'] ?? false, $addFiles),
-        ])->dispatch();
+        $run = app(PartReleaseManager::class)->queueRelease(Auth::user(), $data['include-ldconfig'] ?? false, $addFiles);
+        if (is_null($run)) {
+            Notification::make()
+                ->title('A release is already running')
+                ->danger()
+                ->send();
+
+            return;
+        }
         $this->redirectRoute('tracker.activity');
     }
     #[Layout('components.layout.tracker')]

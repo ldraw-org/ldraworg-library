@@ -4,12 +4,14 @@ use App\Enums\EventType;
 use App\Enums\PartCategory;
 use App\Enums\PartStatus;
 use App\Enums\PartType;
+use App\Enums\ReleaseStage;
 use App\Jobs\CheckPart;
 use App\Jobs\GeneratePartImage;
 use App\Jobs\GenerateReleaseImage;
 use App\Jobs\UpdateRebrickable;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
+use App\Models\Part\PartReleaseRun;
 use App\Models\RebrickablePart;
 use App\Models\User;
 use App\Services\Part\Release\PartReleaseManager;
@@ -57,9 +59,10 @@ it('releases marked parts, fixes and minor edits and publishes the update', func
         'part_status' => PartStatus::Certified,
         'can_release' => true,
     ]);
+    $run = PartReleaseRun::factory()->create(['user_id' => $actor->id, 'stage' => ReleaseStage::BackingUp]);
     Queue::fake([GenerateReleaseImage::class, GeneratePartImage::class, CheckPart::class, UpdateRebrickable::class]);
 
-    $release = app(PartReleaseManager::class)->createRelease($actor);
+    $release = app(PartReleaseManager::class)->createRelease($actor, run: $run);
 
     expect($release->fresh())
         ->name->toBe('2026-01')
@@ -67,6 +70,10 @@ it('releases marked parts, fixes and minor edits and publishes the update', func
         ->enabled->toBeTrue()
         ->total->toBe(2)
         ->new->toBe(1);
+    expect($run->fresh())
+        ->stage->toBe(ReleaseStage::Complete)
+        ->part_release_id->toBe($release->id)
+        ->isRunning()->toBeFalse();
     expect($release->getMedia('view')->map->getCustomProperty('filename')->all())->toBe(['parts/3001.dat']);
 
     expect($newPart->fresh())

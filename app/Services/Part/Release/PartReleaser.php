@@ -9,6 +9,7 @@ use App\Models\Part\PartRelease;
 use App\Models\User;
 use App\Services\Part\BasePartSync;
 use App\Services\Part\GenerateHeader;
+use Closure;
 
 class PartReleaser
 {
@@ -22,13 +23,21 @@ class PartReleaser
     /**
      * Make every unofficial part marked for release official.
      * Iterates by id because fixes are deleted as they are released.
+     *
+     * @param ?Closure(int): void $onProgress called with the running count after each part
      */
-    public function releaseMarkedParts(PartRelease $release, User $actor, string $stagingFolder): void
+    public function releaseMarkedParts(PartRelease $release, User $actor, string $stagingFolder, ?Closure $onProgress = null): void
     {
+        $released = 0;
         Part::unofficial()
             ->where('marked_for_release', true)
             ->lazyById()
-            ->each(fn (Part $part) => $this->releasePart($part, $release, $actor, $stagingFolder));
+            ->each(function (Part $part) use ($release, $actor, $stagingFolder, $onProgress, &$released): void {
+                $this->releasePart($part, $release, $actor, $stagingFolder);
+                if (!is_null($onProgress)) {
+                    $onProgress(++$released);
+                }
+            });
     }
 
     /**

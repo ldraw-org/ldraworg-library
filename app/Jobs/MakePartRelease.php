@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Part\PartReleaseRun;
 use App\Models\User;
 use App\Services\Part\Release\PartReleaseManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,12 +19,13 @@ class MakePartRelease implements ShouldQueue
     public function __construct(
         public User $user,
         public bool $includeLdconfig = false,
-        public array $extraFiles = []
+        public array $extraFiles = [],
+        public ?PartReleaseRun $releaseRun = null,
     ) {
     }
 
     public function handle(PartReleaseManager $releaseManager): void
     {
-        $releaseManager->createRelease($this->user, $this->includeLdconfig, $this->extraFiles);
+        $releaseManager->createRelease($this->user, $this->includeLdconfig, $this->extraFiles, $this->releaseRun);
     }
 }

@@ -7,6 +7,9 @@
                 <x-part.unofficial-part-count />
             </div>
         </div>
+        @can('create', App\Models\Part\PartRelease::class)
+            <livewire:release.progress />
+        @endcan
         <div id="activityTable"></div>
         {{ $this->table }}
     </div>

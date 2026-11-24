@@ -2,6 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Enums\ReleaseStage;
+use App\Models\Part\PartReleaseRun;
+use App\Services\Part\Release\ReleaseProgress;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Queue;
@@ -21,8 +24,14 @@ class BackupDatabaseOnly implements ShouldQueue
 {
     use Queueable;
 
-    public function handle(Config $config): void
+    public function __construct(
+        public ?PartReleaseRun $releaseRun = null,
+    ) {
+    }
+
+    public function handle(Config $config, ReleaseProgress $progress): void
     {
+        $progress->stage($this->releaseRun, ReleaseStage::BackingUp);
         BackupJobFactory::createFromConfig($config)
             ->dontBackupFilesystem()
             ->disableSignals()

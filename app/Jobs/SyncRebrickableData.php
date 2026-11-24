@@ -2,13 +2,16 @@
 
 namespace App\Jobs;
 
+use App\Enums\ReleaseStage;
 use App\Models\Part\Part;
+use App\Models\Part\PartReleaseRun;
 use App\Services\External\RebrickableCsvDownloader;
 use App\Services\LDraw\Managers\LDConfigManager;
 use App\Services\Omr\Set\ImportSetInventories;
 use App\Services\Omr\Set\SyncSetMetadata;
 use App\Services\Omr\Theme\SyncRebrickableThemes;
 use App\Services\Part\RebrickableSync;
+use App\Services\Part\Release\ReleaseProgress;
 use App\Services\Part\RelinkRebrickableParts;
 use App\Services\RebrickablePart\DeleteEmptyLocalStickerSheets;
 use App\Services\RebrickablePart\ImportRebrickableParts;
@@ -40,6 +43,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
     public function __construct(
         public bool $forceDownload = false,
         public bool $skipDownload = false,
+        public ?PartReleaseRun $releaseRun = null,
     ) {
     }
 
@@ -53,7 +57,9 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         SyncSetMetadata $setMetadata,
         DeleteEmptyLocalStickerSheets $deleteEmptySheets,
         RebrickableSync $rebrickableSync,
+        ReleaseProgress $progress,
     ): void {
+        $progress->stage($this->releaseRun, ReleaseStage::SyncingRebrickable);
         $this->raiseMemoryLimit();
 
         $downloaded = !$this->skipDownload && $downloader->download($this->forceDownload);
