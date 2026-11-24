@@ -7,7 +7,9 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Action;
 use App\Enums\PartStatus;
 use App\Filament\Tables\Columns\PartStatusColumn;
+use App\Jobs\BackupDatabaseOnly;
 use App\Jobs\MakePartRelease;
+use App\Jobs\SyncRebrickableData;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
 use Filament\Forms\Components\FileUpload;
@@ -25,6 +27,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Bus;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -53,7 +56,8 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                     ToggleColumn::make('marked_for_release')
                         ->grow(false),
                     ToggleColumn::make('release_highlight')
-                        ->disabled(fn (Part $part) =>
+                        ->disabled(
+                            fn (Part $part) =>
                             !$part->marked_for_release ||
                             !$part->type->inPartsFolder() ||
                             $part->category->isInactive() ||
@@ -122,14 +126,20 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
 
     protected function createRelease(array $data): void
     {
-        $this->authorize('store', PartRelease::class);
+        $this->authorize('create', PartRelease::class);
         $addFiles = [];
         if (!is_null($data['additional-files'])) {
             foreach ($data['additional-files'] as $afile) {
                 $addFiles[$afile->getClientOriginalName()] = $afile->get();
             }
         }
-        MakePartRelease::dispatch(Auth::user(), $data['include-ldconfig'] ?? false, $addFiles);
+        // Fresh Rebrickable data and a database backup before the release starts; a failure stops the chain.
+        // The sync goes first: as the chain's first job its unique lock is not checked, so the chain is never dropped.
+        Bus::chain([
+            new SyncRebrickableData(),
+            new BackupDatabaseOnly(),
+            new MakePartRelease(Auth::user(), $data['include-ldconfig'] ?? false, $addFiles),
+        ])->dispatch();
         $this->redirectRoute('tracker.activity');
     }
     #[Layout('components.layout.tracker')]
