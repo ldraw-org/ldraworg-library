@@ -66,10 +66,13 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         $relinked = $relinker->handle($partResult['external_ids_changed']);
         $sheetsDeleted = $deleteEmptySheets->handle();
 
-        // Unofficial parts still without a Rebrickable part, mostly stickers that get a local sheet
+        // Unofficial parts still without a Rebrickable part, mostly stickers that get a local sheet.
+        // Parts marked for release are linked by the release itself, so a queued lookup can never
+        // rewrite the header of a part the release is making official.
         Part::unofficial()
             ->canHaveRebrickablePart()
             ->doesntHave('rebrickable_part')
+            ->where('marked_for_release', false)
             ->chunkById(self::DISPATCH_CHUNK, fn ($chunk) => UpdateRebrickable::dispatch($chunk)->onQueue('maintenance'));
 
         $setsUpdated = $setMetadata->handle();

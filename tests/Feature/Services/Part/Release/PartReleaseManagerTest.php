@@ -37,7 +37,6 @@ it('releases marked parts, fixes and minor edits and publishes the update', func
         'filename' => 'parts/3001.dat',
         'type' => PartType::Part,
         'category' => PartCategory::Brick,
-        'rebrickable_part_id' => $rebrickablePart->id,
         'description' => 'Brick 2 x 4',
         'part_status' => PartStatus::Certified,
         'marked_for_release' => true,
@@ -72,6 +71,7 @@ it('releases marked parts, fixes and minor edits and publishes the update', func
     expect($newPart->fresh())
         ->part_release_id->toBe($release->id)
         ->marked_for_release->toBeFalse()
+        ->rebrickable_part_id->toBe($rebrickablePart->id)
         ->header->toContain('0 !KEYWORDS Rebrickable 3001a');
     expect($newPart->history()->pluck('comment')->last())->toBe('Official Update 2026-01');
 
