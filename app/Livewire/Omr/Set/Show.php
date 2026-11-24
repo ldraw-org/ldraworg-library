@@ -52,6 +52,24 @@ class Show extends Component implements HasActions, HasSchemas
         $this->dispatch('ldbi-render-model', modelId: $this->model_id, mainModelName: $this->model_name);
     }
 
+    public function downloadModelAction(): Action
+    {
+        return Action::make('downloadModel')
+            ->label('Download')
+            ->color('blue')
+            ->record(fn (array $arguments): ?OmrModel => $this->set->models->find($arguments['model'] ?? null))
+            ->url(fn (OmrModel $record) => $record->getFirstMediaUrl('file'));
+    }
+
+    public function viewModelAction(): Action
+    {
+        return Action::make('viewModel')
+            ->label('3D View')
+            ->color('primary')
+            ->record(fn (array $arguments): ?OmrModel => $this->set->models->find($arguments['model'] ?? null))
+            ->action(fn (OmrModel $record) => $this->openModal($record->id));
+    }
+
     public function editModelAction(): Action
     {
         return Action::make('editModel')

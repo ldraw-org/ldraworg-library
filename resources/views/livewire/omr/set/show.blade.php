@@ -39,14 +39,10 @@
                                 {{$model->notes['notes']}}
                             </div>
                         @endif
-                        <div class="flex flex-row space-x-2">
-                            <x-filament::button class="m-2 w-fit" wire:click="openModal({{$model->id}})">
-                                3D View
-                            </x-filament::button>
-                            <a class="rounded-lg border border-gray-200 bg-blue-500 font-bold px-4 py-2 text-white m-2 w-fit" href="{{$model->getFirstMediaUrl('file')}}">Download</a>
-                            <div class="m-2 w-fit">
-                                {{ ($this->editModelAction)(['model' => $model->id]) }}
-                            </div>
+                        <div class="p-2 flex flex-row space-x-2">
+                            <x-filament-action :action="($this->viewModelAction)(['model' => $model->id])" />
+                            <x-filament-action :action="($this->downloadModelAction)(['model' => $model->id])" />
+                            <x-filament-action :action="($this->editModelAction)(['model' => $model->id])" />
                         </div>
                     </div>
                 @empty
