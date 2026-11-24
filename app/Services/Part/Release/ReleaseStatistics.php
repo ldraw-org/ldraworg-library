@@ -84,7 +84,7 @@ class ReleaseStatistics
             'moved' => $moved,
             'renamed' => $renamed,
             'fixed' => $fixed,
-            'minor_edits' => Part::official()->where('has_minor_edit', true)->count(),
+            'minor_edits' => Part::releasableMinorEdits()->count(),
         ];
     }
 }

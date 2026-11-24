@@ -44,9 +44,9 @@ class PartReleaseManager
         Storage::put($notesPath, $this->notes->make($release, $statistics));
 
         Log::debug('Releasing Parts');
-        $this->partReleaser->releaseMarkedParts($release, $actor, self::STAGING_FOLDER);
+        $this->partReleaser->updateExternalSiteKeywords();
         $this->partReleaser->releaseMinorEdits($release, $actor);
-        $this->partReleaser->updateExternalSiteKeywords($release);
+        $this->partReleaser->releaseMarkedParts($release, $actor, self::STAGING_FOLDER);
 
         $this->setTrackerLocked(false);
 

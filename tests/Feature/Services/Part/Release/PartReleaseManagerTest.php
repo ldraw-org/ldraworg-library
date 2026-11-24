@@ -10,6 +10,7 @@ use App\Jobs\GenerateReleaseImage;
 use App\Jobs\UpdateRebrickable;
 use App\Models\Part\Part;
 use App\Models\Part\PartRelease;
+use App\Models\RebrickablePart;
 use App\Models\User;
 use App\Services\Part\Release\PartReleaseManager;
 use App\Settings\LibrarySettings;
@@ -31,17 +32,22 @@ it('releases marked parts, fixes and minor edits and publishes the update', func
     $previous = PartRelease::factory()->create(['name' => '2025-07', 'short' => '2507', 'created_at' => '2025-12-01', 'enabled' => true]);
     $actor = User::factory()->create();
 
+    $rebrickablePart = RebrickablePart::create(['number' => '3001a', 'name' => 'Brick 2 x 4', 'ldraw' => ['3001']]);
     $newPart = Part::factory()->unofficial()->create([
         'filename' => 'parts/3001.dat',
-        'type' => PartType::Part, 'category' => PartCategory::Brick,
+        'type' => PartType::Part,
+        'category' => PartCategory::Brick,
+        'rebrickable_part_id' => $rebrickablePart->id,
         'description' => 'Brick 2 x 4',
         'part_status' => PartStatus::Certified,
         'marked_for_release' => true,
     ]);
     $official = Part::factory()->official($previous)->withFix()->create([
         'filename' => 'parts/3002.dat',
-        'type' => PartType::Part, 'category' => PartCategory::Brick,
+        'type' => PartType::Part,
+        'category' => PartCategory::Brick,
         'description' => 'Brick 2 x 3 Old',
+        'has_minor_edit' => true,
     ]);
     $fix = $official->unofficial_part;
     $fix->update(['description' => 'Brick 2 x 3', 'type' => PartType::Part, 'category' => PartCategory::Brick, 'part_status' => PartStatus::Certified, 'marked_for_release' => true]);
@@ -65,18 +71,21 @@ it('releases marked parts, fixes and minor edits and publishes the update', func
 
     expect($newPart->fresh())
         ->part_release_id->toBe($release->id)
-        ->marked_for_release->toBeFalse();
+        ->marked_for_release->toBeFalse()
+        ->header->toContain('0 !KEYWORDS Rebrickable 3001a');
     expect($newPart->history()->pluck('comment')->last())->toBe('Official Update 2026-01');
 
     $this->assertModelMissing($fix);
     expect($official->fresh())
         ->part_release_id->toBe($release->id)
         ->description->toBe('Brick 2 x 3');
+    expect($official->history()->pluck('comment')->all())->not->toContain('Minor header edits');
     expect($official->events()->where('event_type', EventType::Release)->where('part_release_id', $release->id)->exists())->toBeTrue();
 
     expect($minorEdit->fresh())
         ->part_release_id->toBe($release->id)
-        ->has_minor_edit->toBeFalse();
+        ->has_minor_edit->toBeFalse()
+        ->header->toContain('UPDATE 2026-01');
     expect($minorEdit->history()->pluck('comment')->all())->toBe(['Minor header edits', 'Official Update 2026-01']);
 
     expect($nextCycle->fresh()->marked_for_release)->toBeTrue();

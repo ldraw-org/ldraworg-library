@@ -308,6 +308,17 @@ class Part extends Model implements HasMedia
             ->whereNotLike('description', '|%');
     }
 
+    /**
+     * Official parts with pending header-only edits that are not being superseded by a fix.
+     */
+    #[Scope]
+    protected function releasableMinorEdits(Builder $query): void
+    {
+        $query->official()
+            ->where('has_minor_edit', true)
+            ->whereDoesntHave('unofficial_part');
+    }
+
     #[Scope]
     protected function activeParts(Builder $query): void
     {

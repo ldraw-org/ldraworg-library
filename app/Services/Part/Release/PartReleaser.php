@@ -33,31 +33,35 @@ class PartReleaser
 
     /**
      * Fold official parts with pending header-only edits into the release.
+     * Must run before releaseMarkedParts(): a part whose fix is in this update
+     * is excluded only while that fix still exists.
      * Iterates by id because each part drops out of the query once released.
      */
     public function releaseMinorEdits(PartRelease $release, User $actor): void
     {
-        Part::official()
-            ->where('has_minor_edit', true)
-            ->whereDoesntHave('unofficial_part')
+        Part::releasableMinorEdits()
             ->lazyById()
             ->each(function (Part $part) use ($release, $actor): void {
                 $this->addHistoryLine($part, $actor, 'Minor header edits');
                 $this->addHistoryLine($part, $actor, "Official Update {$release->name}");
                 $part->part_release_id = $release->id;
                 $part->has_minor_edit = false;
+                $this->generateHeader->updatePartHeader($part);
                 $part->save();
             });
     }
 
     /**
-     * Refresh the external site keywords of parts changed by this release.
+     * Refresh the external site keywords of every part about to be released,
+     * so the regenerated release headers carry them.
      */
-    public function updateExternalSiteKeywords(PartRelease $release): void
+    public function updateExternalSiteKeywords(): void
     {
         Part::canHaveRebrickablePart()
             ->where(
-                fn ($query) => $query->where('part_release_id', $release->id)->orWhere('has_minor_edit', true)
+                fn ($query) => $query
+                    ->where(fn ($marked) => $marked->unofficial()->where('marked_for_release', true))
+                    ->orWhere(fn ($minorEdit) => $minorEdit->releasableMinorEdits())
             )
             ->lazyById()
             ->each(fn (Part $part) => $part->setExternalSiteKeywords(true));
