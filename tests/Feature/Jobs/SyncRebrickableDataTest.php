@@ -151,19 +151,3 @@ it('stops before importing anything when the download fails', function () {
     expect(RebrickablePart::count())->toBe(0)
         ->and($this->set->fresh()->name)->toBe('Old Name');
 });
-
-it('leaves unlinked parts marked for release to the release', function () {
-    Queue::fake([UpdateRebrickable::class]);
-    fakeRebrickableCsv(rebrickableDump());
-    Part::factory()->unofficial()->createQuietly([
-        'filename' => 'parts/99999.dat',
-        'description' => 'Brick Unknown',
-        'type' => PartType::Part,
-        'category' => PartCategory::Brick,
-        'marked_for_release' => true,
-    ]);
-
-    SyncRebrickableData::dispatchSync(skipDownload: true);
-
-    Queue::assertNotPushed(UpdateRebrickable::class);
-});

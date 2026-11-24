@@ -21,22 +21,16 @@ class RebrickableSync
             return;
         }
 
-        $this->link($part);
-        $part->setExternalSiteKeywords($updateOfficial);
-        $this->generateHeader->updatePartHeader($part);
-    }
-
-    /**
-     * Link the part to its Rebrickable part, or for a sticker its sticker sheet, without touching keywords or header.
-     */
-    public function link(Part $part): void
-    {
         if ($part->category->isSticker()) {
-            $part->rebrickable_part()->associate($this->stickerSheetFinder->findForSticker($part));
+            $rbPart = $this->stickerSheetFinder->findForSticker($part);
+            $part->rebrickable_part()->associate($rbPart);
             $part->save();
         } else {
             $this->rebrickablePartWriter->linkPart($part);
         }
+
+        $part->setExternalSiteKeywords($updateOfficial);
+        $this->generateHeader->updatePartHeader($part);
     }
 
 }

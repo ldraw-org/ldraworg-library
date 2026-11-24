@@ -9,7 +9,6 @@ use App\Models\Part\PartRelease;
 use App\Models\User;
 use App\Services\Part\BasePartSync;
 use App\Services\Part\GenerateHeader;
-use App\Services\Part\RebrickableSync;
 
 class PartReleaser
 {
@@ -17,7 +16,6 @@ class PartReleaser
         protected AddViewImage $addViewImage,
         protected GenerateHeader $generateHeader,
         protected BasePartSync $basePartSync,
-        protected RebrickableSync $rebrickableSync,
     ) {
     }
 
@@ -54,9 +52,8 @@ class PartReleaser
     }
 
     /**
-     * Refresh the external site keywords of every part about to be released, so the
-     * regenerated release headers carry them. Unlinked marked parts are linked first,
-     * as the Rebrickable sync leaves them to the release.
+     * Refresh the external site keywords of every part about to be released,
+     * so the regenerated release headers carry them.
      */
     public function updateExternalSiteKeywords(): void
     {
@@ -67,12 +64,7 @@ class PartReleaser
                     ->orWhere(fn ($minorEdit) => $minorEdit->releasableMinorEdits())
             )
             ->lazyById()
-            ->each(function (Part $part): void {
-                if ($part->isUnofficial() && is_null($part->rebrickable_part_id) && $part->canSetRebrickablePart()) {
-                    $this->rebrickableSync->link($part);
-                }
-                $part->setExternalSiteKeywords(true);
-            });
+            ->each(fn (Part $part) => $part->setExternalSiteKeywords(true));
     }
 
     protected function releasePart(Part $part, PartRelease $release, User $actor, string $stagingFolder): void
