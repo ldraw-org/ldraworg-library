@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\User;
-use App\Services\LDraw\Managers\Part\PartReleaseManager;
+use App\Services\Part\Release\PartReleaseManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Queue;
@@ -22,14 +22,8 @@ class MakePartRelease implements ShouldQueue
     ) {
     }
 
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
-    public function handle()
+    public function handle(PartReleaseManager $releaseManager): void
     {
-        $updater = new PartReleaseManager($this->user, $this->includeLdconfig, $this->extraFiles);
-        $updater->createRelease();
+        $releaseManager->createRelease($this->user, $this->includeLdconfig, $this->extraFiles);
     }
 }

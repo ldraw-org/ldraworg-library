@@ -7,64 +7,81 @@ use App\Models\Part\Part;
 use App\Models\Part\PartEvent;
 use App\Models\Part\PartRelease;
 use App\Models\User;
+use App\Services\Part\BasePartSync;
+use App\Services\Part\GenerateHeader;
 
 class PartReleaser
 {
     public function __construct(
         protected AddViewImage $addViewImage,
+        protected GenerateHeader $generateHeader,
+        protected BasePartSync $basePartSync,
     ) {
     }
 
-    public function releaseAllMarkedUnofficialParts(PartRelease $release, User $actor, string $stagingPath): void
+    /**
+     * Make every unofficial part marked for release official.
+     * Iterates by id because fixes are deleted as they are released.
+     */
+    public function releaseMarkedParts(PartRelease $release, User $actor, string $stagingFolder): void
     {
-        Part::where('marked_for_release', true)
-            ->lazy()
-            ->each(fn (Part $part) => $this->releaseUnofficialPart($part, $release, $actor, $stagingPath));
+        Part::unofficial()
+            ->where('marked_for_release', true)
+            ->lazyById()
+            ->each(fn (Part $part) => $this->releasePart($part, $release, $actor, $stagingFolder));
     }
 
+    /**
+     * Fold official parts with pending header-only edits into the release.
+     * Iterates by id because each part drops out of the query once released.
+     */
     public function releaseMinorEdits(PartRelease $release, User $actor): void
     {
         Part::official()
             ->where('has_minor_edit', true)
             ->whereDoesntHave('unofficial_part')
-            ->lazy()
-            ->each(fn (Part $part) => $this->updateOfficialMinorEdit($part, $release, $actor));
+            ->lazyById()
+            ->each(function (Part $part) use ($release, $actor): void {
+                $this->addHistoryLine($part, $actor, 'Minor header edits');
+                $this->addHistoryLine($part, $actor, "Official Update {$release->name}");
+                $part->part_release_id = $release->id;
+                $part->has_minor_edit = false;
+                $part->save();
+            });
     }
 
-    protected function updateOfficialMinorEdit(Part $part, PartRelease $release, User $actor): void
+    /**
+     * Refresh the external site keywords of parts changed by this release.
+     */
+    public function updateExternalSiteKeywords(PartRelease $release): void
     {
-        $part->history->create([
-            'user_id' => $actor->id,
-            'comment' => "Minor header edits"
-        ]);
-        $this->addReleaseHistoryLine($part, $release, $actor);
-        $part->part_release_id = $release->id;
-        $part->has_minor_edit = false;
-        $part->save();
+        Part::canHaveRebrickablePart()
+            ->where(
+                fn ($query) => $query->where('part_release_id', $release->id)->orWhere('has_minor_edit', true)
+            )
+            ->lazyById()
+            ->each(fn (Part $part) => $part->setExternalSiteKeywords(true));
     }
 
-    protected function releaseUnofficialPart(Part $part, PartRelease $release, User $actor, string $stagingPath): void
+    protected function releasePart(Part $part, PartRelease $release, User $actor, string $stagingFolder): void
     {
-        // Only unofficial parts can be released
-        if ($part->isOfficial()) {
-            return;
-        }
+        $this->addHistoryLine($part, $actor, "Official Update {$release->name}");
 
-        if ($part->isFix()) {
-            $this->releaseUnofficialFix($part, $release, $actor);
-        } else {
-            $this->releaseNewPart($part, $release, $actor, $stagingPath);
-        }
+        PartEvent::unofficial()->where('part_id', $part->id)->update(['part_release_id' => $release->id]);
 
         PartReleased::dispatch($part->id, $actor->id, $release->id, $release->name);
 
+        if ($part->isFix()) {
+            $this->releaseFix($part, $release);
+        } else {
+            $this->releaseNewPart($part, $release, $stagingFolder);
+        }
     }
 
-    protected function releaseUnofficialFix(Part $part, PartRelease $release, User $actor): void
+    protected function releaseFix(Part $part, PartRelease $release): void
     {
         $officialPart = $part->official_part;
-
-        $values = [
+        $officialPart->fill([
             'description' => $part->description,
             'filename' => $part->filename,
             'user_id' => $part->user_id,
@@ -79,43 +96,38 @@ class PartReleaser
             'header' => $part->header,
             'rebrickable_part_id' => $part->rebrickable_part_id,
             'preview' => $part->preview,
-        ];
-        $officialPart->fill($values);
+        ]);
+        $officialPart->setSubparts($part->subparts);
         $officialPart->setKeywords($part->keywords->pluck('keyword')->values()->all());
         $officialPart->setHistory($part->history);
         $officialPart->setBody($part->body);
-        $this->addReleaseHistoryLine($officialPart, $release, $actor);
-
-        PartEvent::where('part_id', $part->id)
-            ->update([
-                'part_id' => $officialPart->id,
-                'part_release_id' => $release->id,
-            ]);
+        $this->basePartSync->syncBasePart($officialPart);
+        $this->generateHeader->updatePartHeader($officialPart);
         $officialPart->save();
 
-        $part->deleteQuietly();
+        PartEvent::where('part_release_id', $release->id)
+            ->where('part_id', $part->id)
+            ->update(['part_id' => $officialPart->id]);
 
+        $part->deleteQuietly();
     }
 
-    protected function releaseNewPart(Part $part, PartRelease $release, User $actor, string $stagingPath): void
+    protected function releaseNewPart(Part $part, PartRelease $release, string $stagingFolder): void
     {
-        $part->part_release_id = $release->id;
         if ($part->type->inPartsFolder()) {
-            $this->addViewImage->handle($part, $release, $stagingPath);
+            $this->addViewImage->handle($part, $release, $stagingFolder);
         }
-        PartEvent::where('part_id', $part->id)
-            ->update([
-                'part_release_id' => $release->id,
-            ]);
+        $part->part_release_id = $release->id;
         $part->clearMediaCollection('image');
-        $this->addReleaseHistoryLine($part, $release, $actor);
+        $this->generateHeader->updatePartHeader($part);
         $part->save();
     }
-    protected function addReleaseHistoryLine(Part $part, PartRelease $release, User $actor): void
+
+    protected function addHistoryLine(Part $part, User $actor, string $comment): void
     {
-        $part->history->create([
+        $part->history()->create([
             'user_id' => $actor->id,
-            'comment' => "Official Update {$release->name}"
+            'comment' => $comment,
         ]);
     }
 }

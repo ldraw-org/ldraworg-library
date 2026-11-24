@@ -32,7 +32,7 @@ class ReleaseImageGenerator
             ->filter(fn (Media $media) => $media->getCustomProperty('highlight') === true);
         if ($images->isNotEmpty()) {
             $paths = $images
-                ->map(fn(Media $media) => $media->getPath())
+                ->map(fn (Media $media) => $media->getPath())
                 ->shuffle()
                 ->take(8)
                 ->values()
