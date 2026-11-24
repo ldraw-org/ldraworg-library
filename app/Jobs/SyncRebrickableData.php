@@ -8,6 +8,7 @@ use App\Services\LDraw\Managers\LDConfigManager;
 use App\Services\Omr\Set\ImportSetInventories;
 use App\Services\Omr\Set\SyncSetMetadata;
 use App\Services\Omr\Theme\SyncRebrickableThemes;
+use App\Services\Part\RebrickableSync;
 use App\Services\Part\RelinkRebrickableParts;
 use App\Services\RebrickablePart\DeleteEmptyLocalStickerSheets;
 use App\Services\RebrickablePart\ImportRebrickableParts;
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Downloads fresh Rebrickable CSVs and resyncs everything taken from them: themes, colour mappings,
  * Rebrickable parts and the library parts linked to them, set inventories and set details. Local sticker
- * sheets left empty by the relink are deleted.
+ * sheets left empty by the relink are deleted. Nothing is left queued, so the sync is complete when the job ends.
  */
 #[Timeout(3600)]
 #[Tries(1)]
@@ -31,7 +32,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
-    protected const int DISPATCH_CHUNK = 200;
+    protected const int UNLINKED_CHUNK = 200;
 
     /** The set inventory import holds every set's inventory at once, so the sync needs ~100MB on top of the worker's own */
     protected const string MEMORY_LIMIT = '512M';
@@ -51,6 +52,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         ImportSetInventories $inventories,
         SyncSetMetadata $setMetadata,
         DeleteEmptyLocalStickerSheets $deleteEmptySheets,
+        RebrickableSync $rebrickableSync,
     ): void {
         $this->raiseMemoryLimit();
 
@@ -66,11 +68,14 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         $relinked = $relinker->handle($partResult['external_ids_changed']);
         $sheetsDeleted = $deleteEmptySheets->handle();
 
-        // Unofficial parts still without a Rebrickable part, mostly stickers that get a local sheet
+        // Unofficial parts still without a Rebrickable part, mostly stickers that get a local sheet. Done here
+        // rather than queued, so every link, keyword and header change is in place when the job finishes
+        // and a release chained after the sync never runs alongside it.
         Part::unofficial()
             ->canHaveRebrickablePart()
             ->doesntHave('rebrickable_part')
-            ->chunkById(self::DISPATCH_CHUNK, fn ($chunk) => UpdateRebrickable::dispatch($chunk)->onQueue('maintenance'));
+            ->lazyById(self::UNLINKED_CHUNK)
+            ->each(fn (Part $part) => $rebrickableSync->syncRebrickablePart($part));
 
         $setsUpdated = $setMetadata->handle();
 

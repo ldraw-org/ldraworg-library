@@ -87,20 +87,21 @@ it('resyncs from the CSVs on disk without downloading', function () {
     Http::assertNothingSent();
 });
 
-it('queues the lookups for parts still without a Rebrickable part as maintenance work', function () {
+it('finishes the lookups for parts still without a Rebrickable part before the job ends', function () {
     Queue::fake([UpdateRebrickable::class]);
     fakeRebrickableCsv(rebrickableDump());
-    Part::factory()->unofficial()->createQuietly([
+    $unlinked = Part::factory()->unofficial()->createQuietly([
         'filename' => 'parts/99999.dat',
         'description' => 'Brick Unknown',
         'type' => PartType::Part,
         'category' => PartCategory::Brick,
+        'header' => '',
     ]);
 
     SyncRebrickableData::dispatchSync(skipDownload: true);
 
-    Queue::assertPushedOn('maintenance', UpdateRebrickable::class);
-    Queue::assertNotPushed(UpdateRebrickable::class, fn (UpdateRebrickable $job, ?string $queue) => $queue !== 'maintenance');
+    expect($unlinked->fresh()->header)->toStartWith('0 Brick Unknown');
+    Queue::assertNotPushed(UpdateRebrickable::class);
 });
 
 it('raises a lower memory limit but leaves an unlimited one alone', function (string $before, string $after) {
