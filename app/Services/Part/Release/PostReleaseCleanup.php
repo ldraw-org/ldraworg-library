@@ -26,7 +26,10 @@ class PostReleaseCleanup
     ) {
     }
 
-    public function handle(PartRelease $release): void
+    /**
+     * @param list<int> $fixedIds the official parts updated by a released fix
+     */
+    public function handle(PartRelease $release, array $fixedIds = []): void
     {
         $this->resetOfficialParts();
         $this->remarkUnofficialParts();
@@ -34,7 +37,7 @@ class PostReleaseCleanup
         Storage::delete('library/unofficial/ldrawunf.zip');
         $this->zipFiles->unofficialZip(Part::unofficial()->first());
 
-        $this->refreshAffectedParts($release);
+        $this->refreshAffectedParts($release, $fixedIds);
 
         foreach ([CacheKey::OfficialPartCount, CacheKey::PartReleaseCurrent] as $key) {
             $this->cache->reset($key);
@@ -79,12 +82,20 @@ class PostReleaseCleanup
     }
 
     /**
-     * Re-render, recheck and resync the released parts and everything that uses them.
+     * Re-render, recheck and resync every released part, and every part using a fixed one.
+     *
+     * @param list<int> $fixedIds
      */
-    protected function refreshAffectedParts(PartRelease $release): void
+    protected function refreshAffectedParts(PartRelease $release, array $fixedIds): void
     {
-        foreach (array_chunk($this->affectedPartIds($release), self::REFRESH_CHUNK) as $ids) {
-            Part::whereIn('id', $ids)->each(function (Part $part): void {
+        $ids = Part::where('part_release_id', $release->id)
+            ->pluck('id')
+            ->merge($this->partIdsUsing($fixedIds))
+            ->unique()
+            ->all();
+
+        foreach (array_chunk($ids, self::REFRESH_CHUNK) as $chunk) {
+            Part::whereIn('id', $chunk)->each(function (Part $part): void {
                 GeneratePartImage::dispatch($part->withoutRelations())->onQueue('maintenance');
                 CheckPart::dispatch($part->withoutRelations())->onQueue('maintenance');
                 $this->subpartSync->loadSubparts($part);
@@ -93,22 +104,30 @@ class PostReleaseCleanup
     }
 
     /**
-     * The ids of the released parts and every part using them, directly or not.
-     * Found in the database with a distinct recursive query: loading each released part's ancestors as models
-     * hydrates one per path, ~79,000 for a fix to a widely used primitive like 4-4edge.dat, enough to exhaust memory.
+     * The ids of every part using the given parts, directly or not.
+     * Only fixes can change what their users look like: a minor edit changes just the header, and a new part's
+     * users were already rendered with it while it was unofficial. Any fix counts, as comparing geometry is not
+     * worth it for the few fixes in a release.
+     * Found in the database with a distinct recursive query: loading ancestors as models hydrates one per path,
+     * ~79,000 for a fix to a widely used primitive like 4-4edge.dat, enough to exhaust memory.
      *
+     * @param list<int> $partIds
      * @return list<int>
      */
-    protected function affectedPartIds(PartRelease $release): array
+    protected function partIdsUsing(array $partIds): array
     {
-        $released = DB::table('parts')->select('id')->where('part_release_id', $release->id);
+        if ($partIds === []) {
+            return [];
+        }
+
+        $parents = DB::table('related_parts')->select('parent_id')->whereIn('subpart_id', $partIds);
         $users = DB::table('related_parts')
-            ->join('affected_parts', 'affected_parts.id', '=', 'related_parts.subpart_id')
+            ->join('using_parts', 'using_parts.id', '=', 'related_parts.subpart_id')
             ->select('related_parts.parent_id');
 
         return (new Part())->newQuery()->getQuery()
-            ->withRecursiveExpression('affected_parts', $released->union($users), ['id'])
-            ->from('affected_parts')
+            ->withRecursiveExpression('using_parts', $parents->union($users), ['id'])
+            ->from('using_parts')
             ->pluck('id')
             ->map(fn (mixed $id): int => (int) $id)
             ->all();

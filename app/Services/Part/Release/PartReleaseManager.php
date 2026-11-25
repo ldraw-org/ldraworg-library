@@ -87,7 +87,7 @@ class PartReleaseManager
         Log::debug('Releasing Parts');
         $this->partReleaser->updateExternalSiteKeywords();
         $this->partReleaser->releaseMinorEdits($release, $actor);
-        $this->partReleaser->releaseMarkedParts(
+        $fixedIds = $this->partReleaser->releaseMarkedParts(
             $release,
             $actor,
             self::STAGING_FOLDER,
@@ -102,7 +102,7 @@ class PartReleaseManager
 
         Log::debug('Post Release Cleanup');
         $this->progress->stage($run, ReleaseStage::Cleanup);
-        $this->cleanup->handle($release);
+        $this->cleanup->handle($release, $fixedIds);
 
         $this->progress->complete($run);
         Log::debug('Release Complete');

@@ -31,19 +31,26 @@ class PartReleaser
      * Iterates by id because fixes are deleted as they are released.
      *
      * @param ?Closure(int): void $onProgress called with the running count after each part
+     * @return list<int> the ids of the official parts updated by a released fix
      */
-    public function releaseMarkedParts(PartRelease $release, User $actor, string $stagingFolder, ?Closure $onProgress = null): void
+    public function releaseMarkedParts(PartRelease $release, User $actor, string $stagingFolder, ?Closure $onProgress = null): array
     {
         $released = 0;
+        $fixedIds = [];
         Part::unofficial()
             ->where('marked_for_release', true)
             ->lazyById(self::CHUNK)
-            ->each(function (Part $part) use ($release, $actor, $stagingFolder, $onProgress, &$released): void {
-                $this->releasePart($part, $release, $actor, $stagingFolder);
+            ->each(function (Part $part) use ($release, $actor, $stagingFolder, $onProgress, &$released, &$fixedIds): void {
+                $fixedId = $this->releasePart($part, $release, $actor, $stagingFolder);
+                if (!is_null($fixedId)) {
+                    $fixedIds[] = $fixedId;
+                }
                 if (!is_null($onProgress)) {
                     $onProgress(++$released);
                 }
             });
+
+        return $fixedIds;
     }
 
     /**
@@ -82,7 +89,10 @@ class PartReleaser
             ->each(fn (Part $part) => $part->setExternalSiteKeywords(true));
     }
 
-    protected function releasePart(Part $part, PartRelease $release, User $actor, string $stagingFolder): void
+    /**
+     * @return ?int the id of the official part a fix updated, null for a new part
+     */
+    protected function releasePart(Part $part, PartRelease $release, User $actor, string $stagingFolder): ?int
     {
         $this->addHistoryLine($part, $actor, "Official Update {$release->name}");
 
@@ -91,13 +101,18 @@ class PartReleaser
         PartReleased::dispatch($part->id, $actor->id, $release->id, $release->name);
 
         if ($part->isFix()) {
-            $this->releaseFix($part, $release);
-        } else {
-            $this->releaseNewPart($part, $release, $stagingFolder);
+            return $this->releaseFix($part, $release);
         }
+
+        $this->releaseNewPart($part, $release, $stagingFolder);
+
+        return null;
     }
 
-    protected function releaseFix(Part $part, PartRelease $release): void
+    /**
+     * @return int the id of the updated official part
+     */
+    protected function releaseFix(Part $part, PartRelease $release): int
     {
         $officialPart = $part->official_part;
         $officialPart->fill([
@@ -129,6 +144,8 @@ class PartReleaser
             ->update(['part_id' => $officialPart->id]);
 
         $part->deleteQuietly();
+
+        return $officialPart->id;
     }
 
     protected function releaseNewPart(Part $part, PartRelease $release, string $stagingFolder): void
