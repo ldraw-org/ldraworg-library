@@ -21,3 +21,4 @@ AGENTS.md
 /.claude
 .mcp.json
 boost.json
+/.build
