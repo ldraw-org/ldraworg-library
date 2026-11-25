@@ -4,10 +4,9 @@ namespace Database\Seeders;
 
 use App\Enums\License;
 use App\Models\User;
-use App\Enums\Permission;
+use App\Services\User\SyncPermissions;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Spatie\Permission\Models\Permission as PermissionModel;
 use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
@@ -19,10 +18,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        foreach (Permission::cases() as $permission) {
-            PermissionModel::findOrCreate($permission->value);
-        }
+        app(SyncPermissions::class)->handle();
         Role::findOrCreate('Super Admin');
         $user = User::updateOrCreate(
             [
