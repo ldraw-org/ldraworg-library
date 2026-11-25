@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Release;
 
+use App\Enums\ReleaseStage;
 use App\Models\Part\PartRelease;
 use App\Models\Part\PartReleaseRun;
 use App\Services\Part\Release\ReleaseProgress;
@@ -20,14 +21,14 @@ class Progress extends Component
     }
 
     /**
-     * The current run while it is running, or for a day after it finished.
+     * The current run while it is running or failed, or for a day after it completed.
      */
     #[Computed]
     public function run(): ?PartReleaseRun
     {
         $run = app(ReleaseProgress::class)->current();
 
-        return !is_null($run) && ($run->isRunning() || $run->updated_at->isAfter(now()->subDay())) ? $run : null;
+        return !is_null($run) && ($run->stage !== ReleaseStage::Complete || $run->updated_at->isAfter(now()->subDay())) ? $run : null;
     }
 
     public function render(): View

@@ -50,6 +50,21 @@ it('hides the release actions while a release is running', function () {
     Bus::assertNothingDispatched();
 });
 
+it('keeps the release actions hidden after a release failed', function () {
+    $releaser = User::factory()->create();
+    $releaser->givePermissionTo(Permission::PartReleaseCreate->value);
+    $this->actingAs($releaser);
+    PartReleaseRun::factory()->failed()->create();
+
+    Livewire::test(Create::class)
+        ->assertActionHidden(TestAction::make('create-release')->table())
+        ->assertActionHidden(TestAction::make('reset-marked-parts')->table());
+    Livewire::test(Progress::class)
+        ->assertDontSeeHtml('wire:poll')
+        ->assertSee('Making and publishing the zips failed')
+        ->assertSee('New releases are locked out until the database is rolled back.');
+});
+
 it('shows release admins the milestones of the running release', function () {
     $releaser = User::factory()->create();
     $releaser->givePermissionTo(Permission::PartReleaseCreate->value);

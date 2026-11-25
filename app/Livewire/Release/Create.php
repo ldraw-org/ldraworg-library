@@ -106,7 +106,7 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                         FileUpload::make('additional-files')
                     ])
                     ->action(fn (array $data) => $this->createRelease($data))
-                    ->visible(fn (): bool => !app(ReleaseProgress::class)->isRunning()),
+                    ->visible(fn (): bool => !app(ReleaseProgress::class)->isLockedOut()),
                 Action::make('reset-marked-parts')
                     ->action(function () {
                         Part::unofficial()->where('marked_for_release', true)->update([
@@ -120,7 +120,7 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
                                 'marked_for_release' => true
                             ]);
                     })
-                    ->visible(fn (): bool => !app(ReleaseProgress::class)->isRunning()),
+                    ->visible(fn (): bool => !app(ReleaseProgress::class)->isLockedOut()),
             ]);
     }
 
@@ -136,7 +136,7 @@ class Create extends Component implements HasSchemas, HasTable, HasActions
         $run = app(PartReleaseManager::class)->queueRelease(Auth::user(), $data['include-ldconfig'] ?? false, $addFiles);
         if (is_null($run)) {
             Notification::make()
-                ->title('A release is already running')
+                ->title('Releases are locked out while a release is running or after one has failed')
                 ->danger()
                 ->send();
 

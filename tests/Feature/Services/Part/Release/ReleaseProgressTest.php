@@ -32,8 +32,19 @@ it('refuses to start while a release is running', function () {
         ->and($running->fresh()->stage)->toBe(ReleaseStage::ReleasingParts);
 });
 
-it('replaces a failed run with a fresh one', function () {
-    PartReleaseRun::factory()->failed()->create(['progress_current' => 5, 'progress_total' => 9]);
+it('stays locked out after a release failed', function () {
+    $failed = PartReleaseRun::factory()->failed()->create();
+
+    $run = app(ReleaseProgress::class)->start(User::factory()->create());
+
+    expect($run)->toBeNull()
+        ->and(app(ReleaseProgress::class)->isLockedOut())->toBeTrue()
+        ->and($failed->fresh()->error)->toBe('The zips could not be written');
+});
+
+it('replaces a completed run with a fresh one', function () {
+    $completed = PartRelease::factory()->create();
+    PartReleaseRun::factory()->complete()->create(['part_release_id' => $completed->id, 'progress_current' => 9, 'progress_total' => 9]);
     $actor = User::factory()->create();
 
     $run = app(ReleaseProgress::class)->start($actor);
@@ -41,7 +52,7 @@ it('replaces a failed run with a fresh one', function () {
     expect($run)
         ->stage->toBe(ReleaseStage::Queued)
         ->user_id->toBe($actor->id)
-        ->error->toBeNull()
+        ->part_release_id->toBeNull()
         ->progress_current->toBeNull()
         ->progress_total->toBeNull();
     expect(PartReleaseRun::count())->toBe(1);

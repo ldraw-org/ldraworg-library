@@ -48,7 +48,8 @@
             @if ($run->hasFailed())
                 <x-message type="error">
                     <x-slot:header>{{ $run->stage->label() }} failed</x-slot:header>
-                    {{ $run->error }}
+                    <div>{{ $run->error }}</div>
+                    <div class="mt-2">New releases are locked out until the database is rolled back.</div>
                 </x-message>
             @endif
         </div>

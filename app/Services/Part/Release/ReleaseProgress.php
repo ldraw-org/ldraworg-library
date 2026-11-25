@@ -28,10 +28,19 @@ class ReleaseProgress
     }
 
     /**
-     * Claim the run for a new release, replacing a finished one.
+     * Whether new releases are locked out: one is running, or one failed and has not been cleared.
+     * A failed release is left for a manual database rollback rather than retried.
+     */
+    public function isLockedOut(): bool
+    {
+        return PartReleaseRun::incomplete()->exists();
+    }
+
+    /**
+     * Claim the run for a new release, replacing a completed one.
      * Both writes are single atomic statements, so two starts at once cannot both succeed.
      *
-     * @return ?PartReleaseRun null when a release is already running
+     * @return ?PartReleaseRun null when releases are locked out
      */
     public function start(User $actor): ?PartReleaseRun
     {
@@ -47,7 +56,7 @@ class ReleaseProgress
         ];
 
         $claimed = PartReleaseRun::insertOrIgnore(['id' => PartReleaseRun::CURRENT_ID, ...$values]) === 1
-            || PartReleaseRun::whereKey(PartReleaseRun::CURRENT_ID)->finished()->update($values) === 1;
+            || PartReleaseRun::whereKey(PartReleaseRun::CURRENT_ID)->complete()->update($values) === 1;
 
         return $claimed ? $this->current() : null;
     }

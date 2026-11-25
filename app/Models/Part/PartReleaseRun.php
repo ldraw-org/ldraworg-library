@@ -41,9 +41,18 @@ class PartReleaseRun extends Model
     }
 
     #[Scope]
-    protected function finished(Builder $query): void
+    protected function complete(Builder $query): void
     {
-        $query->where(fn (Builder $finished) => $finished->where('stage', ReleaseStage::Complete)->orWhereNotNull('error'));
+        $query->where('stage', ReleaseStage::Complete);
+    }
+
+    /**
+     * Running or failed: either way no new release may start.
+     */
+    #[Scope]
+    protected function incomplete(Builder $query): void
+    {
+        $query->where('stage', '!=', ReleaseStage::Complete);
     }
 
     public function isRunning(): bool
