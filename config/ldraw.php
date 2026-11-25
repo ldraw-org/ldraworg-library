@@ -24,6 +24,14 @@ return [
     // Local user Password
     'local_user_password' => env('LOCAL_USER_PASSWORD', null),
 
+    // The committed Inno Setup script template for the Windows installer, filled in for each release.
+    // Placeholders: @RELEASE_NAME@ (2026-12), @RELEASE_SHORT@ (2612), @APP_ID@.
+    'installer_template' => env('LDRAW_INSTALLER_TEMPLATE', resource_path('installer/LDrawParts.iss')),
+
+    // The installer's Inno Setup AppId GUID, without braces (write AppId={{@APP_ID@} in the template).
+    // Kept out of the repository; no script is written without it.
+    'installer_app_id' => env('LDRAW_INSTALLER_APP_ID'),
+
     // External Site URL Stubs
     'external_sites' => [
         'bricklink' => 'https://www.bricklink.com/v2/catalog/catalogitem.page?P=',

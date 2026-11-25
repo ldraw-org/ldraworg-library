@@ -27,6 +27,7 @@ class PartReleaseManager
         protected ReleaseArchiver $archiver,
         protected PostReleaseCleanup $cleanup,
         protected ReleaseProgress $progress,
+        protected InstallerScript $installerScript,
     ) {
     }
 
@@ -99,6 +100,7 @@ class PartReleaseManager
         Log::debug('Making Zips');
         $this->progress->stage($run, ReleaseStage::MakingZips);
         $this->archiver->publish($release, self::STAGING_FOLDER, $notesPath, $extraFiles, $includeLdconfig);
+        $this->installerScript->write($release);
 
         Log::debug('Post Release Cleanup');
         $this->progress->stage($run, ReleaseStage::Cleanup);
