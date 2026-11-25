@@ -93,6 +93,19 @@ it('tells everyone on the tracker that a release is running', function () {
         ->assertSee('A Parts Library update is in progress');
 });
 
+it('shows the release milestones to watchers who cannot create releases', function () {
+    $watcher = User::factory()->create();
+    $watcher->givePermissionTo(Permission::PartReleaseViewProgress->value);
+    $this->actingAs($watcher);
+    PartReleaseRun::factory()->create(['stage' => ReleaseStage::BackingUp]);
+
+    Livewire::test(Progress::class)->assertSee('Parts release in progress');
+    $this->get(route('tracker.activity'))
+        ->assertOk()
+        ->assertSeeLivewire(Progress::class);
+    $this->get(route('tracker.release.create'))->assertForbidden();
+});
+
 it('collapses a completed release to a line its viewer can dismiss', function () {
     $releaser = User::factory()->create();
     $releaser->givePermissionTo(Permission::PartReleaseCreate->value);

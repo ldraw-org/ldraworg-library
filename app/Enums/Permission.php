@@ -70,6 +70,7 @@ enum Permission: string
     case SiteSettingsEdit = 'site.settings.edit';
 
     case PartReleaseCreate = 'release.create';
+    case PartReleaseViewProgress = 'release.progress.view';
 
     case OmrModelSubmit = 'omr.model.submit';
     case OmrModelApprove = 'omr.model.approve';

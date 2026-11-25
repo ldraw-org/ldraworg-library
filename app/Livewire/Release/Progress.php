@@ -12,13 +12,13 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 /**
- * The milestones of the current parts release for release admins, polled while the release runs.
+ * The milestones of the current parts release for those who may watch it, polled while the release runs.
  */
 class Progress extends Component
 {
     public function mount(): void
     {
-        $this->authorize('create', PartRelease::class);
+        $this->authorize('viewProgress', PartRelease::class);
     }
 
     /** Session key holding the start time of the completed run this user dismissed */
