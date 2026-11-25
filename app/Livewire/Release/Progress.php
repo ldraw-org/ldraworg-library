@@ -21,15 +21,35 @@ class Progress extends Component
         $this->authorize('create', PartRelease::class);
     }
 
+    /** Session key holding the start time of the completed run this user dismissed */
+    protected const string DISMISSED_KEY = 'release-progress-dismissed';
+
     /**
-     * The current run while it is running or failed, or for a day after it completed.
+     * The current run while it is running or failed, or for a day after it completed unless dismissed.
      */
     #[Computed]
     public function run(): ?PartReleaseRun
     {
         $run = app(ReleaseProgress::class)->current();
 
-        return !is_null($run) && ($run->stage !== ReleaseStage::Complete || $run->updated_at->isAfter(now()->subDay())) ? $run : null;
+        if (is_null($run) || $run->stage !== ReleaseStage::Complete) {
+            return $run;
+        }
+
+        $isDismissed = session(self::DISMISSED_KEY) === $run->created_at->getTimestamp();
+
+        return !$isDismissed && $run->updated_at->isAfter(now()->subDay()) ? $run : null;
+    }
+
+    /**
+     * Hide a completed release's summary for this user; the next release shows again.
+     */
+    public function dismiss(): void
+    {
+        if ($this->run?->stage === ReleaseStage::Complete) {
+            session([self::DISMISSED_KEY => $this->run->created_at->getTimestamp()]);
+        }
+        unset($this->run);
     }
 
     public function clearLockout(): void

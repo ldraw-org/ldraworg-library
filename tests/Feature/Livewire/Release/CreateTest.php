@@ -7,6 +7,7 @@ use App\Jobs\MakePartRelease;
 use App\Jobs\SyncRebrickableData;
 use App\Livewire\Release\Create;
 use App\Livewire\Release\Progress;
+use App\Models\Part\PartRelease;
 use App\Models\Part\PartReleaseRun;
 use App\Models\User;
 use App\Services\Part\Release\ReleaseProgress;
@@ -90,6 +91,27 @@ it('tells everyone on the tracker that a release is running', function () {
     $this->get(route('tracker.activity'))
         ->assertOk()
         ->assertSee('A Parts Library update is in progress');
+});
+
+it('collapses a completed release to a line its viewer can dismiss', function () {
+    $releaser = User::factory()->create();
+    $releaser->givePermissionTo(Permission::PartReleaseCreate->value);
+    $this->actingAs($releaser);
+    $release = PartRelease::factory()->create(['name' => '2026-12']);
+    $run = PartReleaseRun::factory()->complete()->create(['part_release_id' => $release->id]);
+
+    Livewire::test(Progress::class)
+        ->assertSee('Parts release 2026-12 completed')
+        ->assertDontSee('Making and publishing the zips')
+        ->assertDontSeeHtml('wire:poll')
+        ->call('dismiss')
+        ->assertDontSee('Parts release 2026-12 completed');
+    Livewire::test(Progress::class)->assertDontSee('Parts release 2026-12 completed');
+
+    $this->travel(1)->minutes();
+    $run->update(['created_at' => now()]);
+
+    Livewire::test(Progress::class)->assertSee('Parts release 2026-12 completed');
 });
 
 it('lets a Super Admin clear the lock-out left by a failed release', function () {

@@ -1,15 +1,23 @@
 @use('App\Enums\LibraryIcon')
 @use('App\Enums\ReleaseStage')
 <div @if ($this->run?->isRunning()) wire:poll.5s.visible @endif>
-    @if ($run = $this->run)
+    @if (($run = $this->run) && $run->stage === ReleaseStage::Complete)
+        <div class="flex items-center gap-2 bg-white rounded-lg p-2">
+            <x-library-icon :icon="LibraryIcon::Certify" class="w-5" color="fill-green-600" />
+            <span class="grow">
+                Parts release {{ $run->release?->name }} completed {{ $run->updated_at->diffForHumans() }}.
+            </span>
+            <x-filament::button color="gray" size="sm" wire:click="dismiss">
+                Dismiss
+            </x-filament::button>
+        </div>
+    @elseif ($run)
         <div class="flex flex-col gap-2 bg-white rounded-lg p-4">
             <div class="text-lg font-bold">
                 @if ($run->hasFailed())
                     Parts release failed
-                @elseif ($run->isRunning())
-                    Parts release in progress
                 @else
-                    Parts release complete
+                    Parts release in progress
                 @endif
                 @if ($run->release)
                     ({{ $run->release->name }})
