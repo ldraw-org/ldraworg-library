@@ -151,7 +151,9 @@ it('substitutes the unpatterned part for a print without an LDraw part', functio
     $generator = app(SetPbg::class);
 
     expect(pbgItems($generator->pbg('1234-1')))->toBe(['3004.dat: [color=4][count=1]']);
-    expect($generator->messages->get('unpatterned'))->toBe(['3004pr0001 (3004)']);
+    expect($generator->messages->get('unpatterned'))->toBe([
+        '<a class="underline decoration-dotted hover:decoration-solid" href="https://rebrickable.com/parts/3004pr0001/">3004pr0001 (Part 3004pr0001)</a> as 3004',
+    ]);
 });
 
 it('expands a sticker sheet into its stickers using the main colour', function () {

@@ -106,7 +106,10 @@ class SetPbg
             );
 
             if ($filename !== null) {
-                $this->messages->add('unpatterned', "{$part->number} ({$this->basename($filename)})");
+                $this->messages->add(
+                    'unpatterned',
+                    $this->rebrickablePartLink($part) . ' as ' . e($this->basename($filename))
+                );
             }
         }
 
@@ -202,13 +205,18 @@ class SetPbg
 
     protected function addMissingPartMessage(RebrickablePart $part): void
     {
+        $this->messages->add('missing', $this->rebrickablePartLink($part));
+    }
+
+    /**
+     * An escaped HTML link to the part on Rebrickable labelled with its number and name
+     */
+    protected function rebrickablePartLink(RebrickablePart $part): string
+    {
         $url = e($part->url ?? "https://rebrickable.com/parts/{$part->number}/");
         $label = e("{$part->number} ({$part->name})");
 
-        $this->messages->add(
-            'missing',
-            "<a class=\"underline decoration-dotted hover:decoration-solid\" href=\"{$url}\">{$label}</a>"
-        );
+        return "<a class=\"underline decoration-dotted hover:decoration-solid\" href=\"{$url}\">{$label}</a>";
     }
 
     protected function isStickerSheet(RebrickablePart $part): bool

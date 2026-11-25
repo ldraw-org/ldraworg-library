@@ -48,12 +48,10 @@
                 @endif
                 @if($hasUnpatterned)
                     <x-message icon type="info">
-                        <div>The following Rebrickable patterned parts not in LDraw were substituted for LDraw unpattterned parts:</div>
-                        <div class="inline">
+                        <div>The following Rebrickable patterned parts not in LDraw were substituted for LDraw unpatterned parts:</div>
                         @foreach($unpatterned as $message)
-                            <span>{{$message}}, </span>
+                            <div>{!! $message !!}</div>
                         @endforeach
-                        </div>
                     </x-message>
                 @endif
             </div>
