@@ -12,12 +12,13 @@ use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
 use App\Services\Part\SyncSubparts;
 use App\Services\Support\ZipFiles;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class PostReleaseCleanup
 {
+    protected const int REFRESH_CHUNK = 500;
+
     public function __construct(
         protected ZipFiles $zipFiles,
         protected SyncSubparts $subpartSync,
@@ -56,7 +57,8 @@ class PostReleaseCleanup
             'release_highlight' => false,
         ]);
 
-        $officialIds = Part::official()->pluck('id');
+        // A subquery rather than a list of ids, which would near MySQL's 65,535 placeholder limit as the library grows
+        $officialIds = Part::official()->select('id');
         Vote::whereIn('part_id', $officialIds)->delete();
         DB::table('user_part_notifications')->whereIn('part_id', $officialIds)->delete();
     }
@@ -81,17 +83,34 @@ class PostReleaseCleanup
      */
     protected function refreshAffectedParts(PartRelease $release): void
     {
-        $affectedIds = [];
-        $release->parts()->with('ancestorsAndSelf')->each(function (Part $part) use (&$affectedIds): void {
-            $affectedIds = array_merge($affectedIds, $part->ancestorsAndSelf->pluck('id')->all());
-        });
-
-        Part::whereIn('id', array_unique($affectedIds))->chunkById(500, function (Collection $parts): void {
-            $parts->each(function (Part $part): void {
+        foreach (array_chunk($this->affectedPartIds($release), self::REFRESH_CHUNK) as $ids) {
+            Part::whereIn('id', $ids)->each(function (Part $part): void {
                 GeneratePartImage::dispatch($part->withoutRelations())->onQueue('maintenance');
                 CheckPart::dispatch($part->withoutRelations())->onQueue('maintenance');
                 $this->subpartSync->loadSubparts($part);
             });
-        });
+        }
+    }
+
+    /**
+     * The ids of the released parts and every part using them, directly or not.
+     * Found in the database with a distinct recursive query: loading each released part's ancestors as models
+     * hydrates one per path, ~79,000 for a fix to a widely used primitive like 4-4edge.dat, enough to exhaust memory.
+     *
+     * @return list<int>
+     */
+    protected function affectedPartIds(PartRelease $release): array
+    {
+        $released = DB::table('parts')->select('id')->where('part_release_id', $release->id);
+        $users = DB::table('related_parts')
+            ->join('affected_parts', 'affected_parts.id', '=', 'related_parts.subpart_id')
+            ->select('related_parts.parent_id');
+
+        return (new Part())->newQuery()->getQuery()
+            ->withRecursiveExpression('affected_parts', $released->union($users), ['id'])
+            ->from('affected_parts')
+            ->pluck('id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
     }
 }

@@ -13,6 +13,12 @@ use Closure;
 
 class PartReleaser
 {
+    /**
+     * Parts per query: each part keeps its body (16.5KB on average, up to 2.6MB for a texmap), history and
+     * keywords loaded until its chunk is done.
+     */
+    protected const int CHUNK = 100;
+
     public function __construct(
         protected AddViewImage $addViewImage,
         protected GenerateHeader $generateHeader,
@@ -31,7 +37,7 @@ class PartReleaser
         $released = 0;
         Part::unofficial()
             ->where('marked_for_release', true)
-            ->lazyById()
+            ->lazyById(self::CHUNK)
             ->each(function (Part $part) use ($release, $actor, $stagingFolder, $onProgress, &$released): void {
                 $this->releasePart($part, $release, $actor, $stagingFolder);
                 if (!is_null($onProgress)) {
@@ -49,7 +55,7 @@ class PartReleaser
     public function releaseMinorEdits(PartRelease $release, User $actor): void
     {
         Part::releasableMinorEdits()
-            ->lazyById()
+            ->lazyById(self::CHUNK)
             ->each(function (Part $part) use ($release, $actor): void {
                 $this->addHistoryLine($part, $actor, 'Minor header edits');
                 $this->addHistoryLine($part, $actor, "Official Update {$release->name}");
@@ -72,7 +78,7 @@ class PartReleaser
                     ->where(fn ($marked) => $marked->unofficial()->where('marked_for_release', true))
                     ->orWhere(fn ($minorEdit) => $minorEdit->releasableMinorEdits())
             )
-            ->lazyById()
+            ->lazyById(self::CHUNK)
             ->each(fn (Part $part) => $part->setExternalSiteKeywords(true));
     }
 

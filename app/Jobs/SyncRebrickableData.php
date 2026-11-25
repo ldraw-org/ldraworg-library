@@ -15,6 +15,7 @@ use App\Services\Part\Release\ReleaseProgress;
 use App\Services\Part\RelinkRebrickableParts;
 use App\Services\RebrickablePart\DeleteEmptyLocalStickerSheets;
 use App\Services\RebrickablePart\ImportRebrickableParts;
+use App\Services\Support\MemoryLimit;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -58,9 +59,10 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
         DeleteEmptyLocalStickerSheets $deleteEmptySheets,
         RebrickableSync $rebrickableSync,
         ReleaseProgress $progress,
+        MemoryLimit $memoryLimit,
     ): void {
         $progress->stage($this->releaseRun, ReleaseStage::SyncingRebrickable);
-        $this->raiseMemoryLimit();
+        $memoryLimit->raiseTo(self::MEMORY_LIMIT);
 
         $downloaded = !$this->skipDownload && $downloader->download($this->forceDownload);
 
@@ -97,17 +99,5 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
             'inventory_parts_missing' => $setResult['missing_parts'],
             'set_details_updated' => $setsUpdated,
         ]);
-    }
-
-    /**
-     * Raises PHP's memory limit for this job, leaving a higher or unlimited one alone.
-     */
-    protected function raiseMemoryLimit(): void
-    {
-        $current = ini_parse_quantity(ini_get('memory_limit'));
-
-        if ($current > 0 && $current < ini_parse_quantity(self::MEMORY_LIMIT)) {
-            ini_set('memory_limit', self::MEMORY_LIMIT);
-        }
     }
 }
