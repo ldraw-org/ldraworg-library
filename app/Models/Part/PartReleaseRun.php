@@ -24,6 +24,9 @@ class PartReleaseRun extends Model
     /** The id of the single kept row */
     public const int CURRENT_ID = 1;
 
+    /** Longer than the longest release job timeout (an hour) */
+    public const int STALLED_AFTER_MINUTES = 120;
+
     /**
      * @return array{stage: 'App\Enums\ReleaseStage'}
      */
@@ -63,5 +66,21 @@ class PartReleaseRun extends Model
     public function hasFailed(): bool
     {
         return !is_null($this->error);
+    }
+
+    /**
+     * Running, but silent for longer than any release job may run, so its worker must have died.
+     */
+    public function hasStalled(): bool
+    {
+        return $this->isRunning() && $this->updated_at->isBefore(now()->subMinutes(self::STALLED_AFTER_MINUTES));
+    }
+
+    /**
+     * Whether its lock-out may be cleared, normally after the database has been rolled back.
+     */
+    public function isClearable(): bool
+    {
+        return $this->hasFailed() || $this->hasStalled();
     }
 }

@@ -9,6 +9,7 @@ use App\Livewire\Release\Create;
 use App\Livewire\Release\Progress;
 use App\Models\Part\PartReleaseRun;
 use App\Models\User;
+use App\Services\Part\Release\ReleaseProgress;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -89,4 +90,48 @@ it('tells everyone on the tracker that a release is running', function () {
     $this->get(route('tracker.activity'))
         ->assertOk()
         ->assertSee('A Parts Library update is in progress');
+});
+
+it('lets a Super Admin clear the lock-out left by a failed release', function () {
+    $this->actingAs(User::factory()->create()->assignRole('Super Admin'));
+    PartReleaseRun::factory()->failed()->create();
+
+    Livewire::test(Progress::class)
+        ->assertSee('Clear release lock-out')
+        ->call('clearLockout')
+        ->assertDontSee('Clear release lock-out');
+
+    expect(PartReleaseRun::count())->toBe(0)
+        ->and(app(ReleaseProgress::class)->isLockedOut())->toBeFalse();
+});
+
+it('keeps the lock-out clearing from release admins who are not Super Admins', function () {
+    $releaser = User::factory()->create();
+    $releaser->givePermissionTo(Permission::PartReleaseCreate->value);
+    $this->actingAs($releaser);
+    PartReleaseRun::factory()->failed()->create();
+
+    Livewire::test(Progress::class)
+        ->assertDontSee('Clear release lock-out')
+        ->call('clearLockout')
+        ->assertForbidden();
+
+    expect(PartReleaseRun::count())->toBe(1);
+});
+
+it('lets a stalled release be cleared but not one still making progress', function () {
+    $this->actingAs(User::factory()->create()->assignRole('Super Admin'));
+    $run = PartReleaseRun::factory()->create(['stage' => ReleaseStage::MakingZips]);
+
+    Livewire::test(Progress::class)
+        ->assertDontSee('Clear release lock-out')
+        ->call('clearLockout');
+    expect($run->fresh())->not->toBeNull();
+
+    $this->travel(PartReleaseRun::STALLED_AFTER_MINUTES + 1)->minutes();
+
+    Livewire::test(Progress::class)
+        ->assertSee('No progress for over 2 hours')
+        ->call('clearLockout');
+    expect($run->fresh())->toBeNull();
 });

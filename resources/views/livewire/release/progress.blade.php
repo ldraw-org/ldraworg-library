@@ -51,6 +51,24 @@
                     <div>{{ $run->error }}</div>
                     <div class="mt-2">New releases are locked out until the database is rolled back.</div>
                 </x-message>
+            @elseif ($run->hasStalled())
+                <x-message type="warning">
+                    <x-slot:header>No progress for over {{ $run::STALLED_AFTER_MINUTES / 60 }} hours</x-slot:header>
+                    The release has most likely stopped. New releases are locked out until the database is rolled back.
+                </x-message>
+            @endif
+            @if ($run->isClearable())
+                @can('clearLockout', App\Models\Part\PartRelease::class)
+                    <div>
+                        <x-filament::button
+                            color="danger"
+                            wire:click="clearLockout"
+                            wire:confirm="Clear the release lock-out? Only do this once the database has been rolled back."
+                        >
+                            Clear release lock-out
+                        </x-filament::button>
+                    </div>
+                @endcan
             @endif
         </div>
     @endif

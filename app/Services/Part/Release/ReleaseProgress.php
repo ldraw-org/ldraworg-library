@@ -90,6 +90,23 @@ class ReleaseProgress
         $this->stage($run, ReleaseStage::Complete);
     }
 
+    /**
+     * Lift the lock-out left by a failed or stalled release by removing its run.
+     *
+     * @return bool false when there is no such run to clear
+     */
+    public function clearLockout(): bool
+    {
+        $run = $this->current();
+        if (is_null($run) || !$run->isClearable()) {
+            return false;
+        }
+
+        $run->delete();
+
+        return true;
+    }
+
     public function fail(int $runId, string $error): void
     {
         PartReleaseRun::whereKey($runId)->update(['error' => Str::limit($error, 1000)]);

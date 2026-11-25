@@ -11,4 +11,12 @@ class PartReleasePolicy
     {
         return $user->can(Permission::PartReleaseCreate);
     }
+
+    /**
+     * Clearing a failed or stalled release's lock-out is for Super Admins only, who pass through Gate::before.
+     */
+    public function clearLockout(User $user): bool
+    {
+        return false;
+    }
 }
