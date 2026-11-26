@@ -4,7 +4,7 @@ namespace App\Filament\Traits;
 
 use App\Models\Omr\OmrModel;
 use App\Services\LDraw\LDrawFile;
-use App\Services\OmrModel\UploadChecker;
+use App\Services\Omr\OmrModel\UploadChecker;
 use Closure;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;

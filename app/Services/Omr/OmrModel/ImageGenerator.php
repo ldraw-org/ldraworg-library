@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\OmrModel;
+namespace App\Services\Omr\OmrModel;
 
 use App\Models\Omr\OmrModel;
 use App\Services\Render\LDView;

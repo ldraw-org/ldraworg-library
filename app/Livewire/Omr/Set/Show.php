@@ -8,7 +8,7 @@ use App\Filament\Traits\HasOmrModelFormFields;
 use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
 use App\Models\User;
-use App\Services\OmrModel\Updater;
+use App\Services\Omr\OmrModel\Updater;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;

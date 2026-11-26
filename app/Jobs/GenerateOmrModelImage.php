@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Omr\OmrModel;
-use App\Services\OmrModel\ImageGenerator;
+use App\Services\Omr\OmrModel\ImageGenerator;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Queue\Queueable;
