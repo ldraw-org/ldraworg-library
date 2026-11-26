@@ -1,5 +1,8 @@
 <?php
 
+use App\Enums\PartCategory;
+use App\Enums\PartType;
+use App\Models\Part\Part;
 use App\Services\Parser\ParsedPartCollection;
 use App\Services\Check\PartChecker;
 use Illuminate\Http\UploadedFile;
@@ -86,4 +89,35 @@ function omrModelFile(string $filename = '6399-1 - Airport Shuttle.mpd', string 
     ]) . "\r\n";
 
     return UploadedFile::fake()->createWithContent($filename, $text);
+}
+
+/**
+ * An official torso shortcut template (76382.dat) using a 973 torso and an arm (3818.dat) with one official pattern,
+ * plus the official torso 973p01.dat to make a shortcut for.
+ *
+ * @return array{template: Part, torso: Part, arm: Part, armPattern: Part}
+ */
+function torsoShortcutParts(): array
+{
+    $official = fn (string $filename, string $description, PartCategory $category): Part => Part::factory()->official()->createQuietly([
+        'filename' => $filename,
+        'description' => $description,
+        'type' => PartType::Part,
+        'category' => $category,
+    ]);
+
+    $torso = $official('parts/973p01.dat', 'Minifig Torso with Logo Pattern', PartCategory::MinifigTorso);
+    $blankTorso = $official('parts/973.dat', 'Minifig Torso', PartCategory::MinifigTorso);
+    $arm = $official('parts/3818.dat', 'Minifig Arm Right', PartCategory::MinifigArm);
+    $armPattern = $official('parts/3818p01.dat', 'Minifig Arm Right with Stripe', PartCategory::MinifigArm);
+    $armPattern->forceFill(['base_part_id' => $arm->id, 'is_pattern' => true])->saveQuietly();
+
+    $template = $official('parts/76382.dat', 'Minifig Torso Assembly', PartCategory::MinifigUpper);
+    $template->body->forceFill(['body' => implode("\n", [
+        '1 16 0 0 0 1 0 0 0 1 0 0 0 1 973.dat',
+        '1 16 -15 8 0 1 0 0 0 1 0 0 0 1 3818.dat',
+    ])])->save();
+    $template->subparts()->attach([$blankTorso->id, $arm->id]);
+
+    return compact('template', 'torso', 'arm', 'armPattern');
 }
