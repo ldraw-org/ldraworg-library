@@ -10,6 +10,8 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\Attributes\Queue;
 use Illuminate\Queue\Attributes\Timeout;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 #[DeleteWhenMissingModels]
 #[Timeout(1800)]
@@ -20,22 +22,24 @@ class GeneratePartImage implements ShouldQueue
 
     protected Collection $parts;
 
-    public function __construct(
-        Part|Collection $parts,
-        protected bool $onlyMissing = false
-    ) {
+    public function __construct(Part|Collection $parts)
+    {
         $this->parts = $parts instanceof Part
             ? new Collection([$parts])
             : $parts;
     }
 
     /**
-     * Execute the job.
+     * Render each part's image. A part that fails is logged and skipped so it can't block the rest of the batch.
      */
     public function handle(ImageGenerator $imageGenerator): void
     {
-        $this->parts
-            ->reject(fn (Part $part) => $this->onlyMissing && file_exists($part->getFirstMediaPath('image')))
-            ->each(fn (Part $part) => $imageGenerator->regenerateImage($part));
+        $this->parts->each(function (Part $part) use ($imageGenerator): void {
+            try {
+                $imageGenerator->regenerateImage($part);
+            } catch (Throwable $e) {
+                Log::error('Part image generation failed', ['part_id' => $part->id, 'filename' => $part->filename, 'exception' => $e]);
+            }
+        });
     }
 }

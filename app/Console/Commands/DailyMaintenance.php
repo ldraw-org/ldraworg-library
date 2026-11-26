@@ -59,7 +59,7 @@ class DailyMaintenance extends Command
             $this->call('lib:render-models', ['--missing' => true]);
         } else {
             $this->info('Queueing missing images');
-            $this->call('lib:render-parts', ['--unofficial-only', '--missing' => true]);
+            $this->call('lib:render-parts', ['--unofficial-only' => true, '--missing' => true]);
         }
 
         $this->info('Pruning failed jobs');

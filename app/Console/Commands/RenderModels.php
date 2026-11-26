@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Jobs\GenerateOmrModelImage;
 use App\Models\Omr\OmrModel;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\LazyCollection;
 
 class RenderModels extends Command
 {
@@ -12,17 +14,26 @@ class RenderModels extends Command
 
     protected $description = 'Refresh Omr Model Images';
 
+    /**
+     * Queue OMR model images in batches. With --missing, only models whose image file doesn't exist are queued.
+     */
     public function handle(): void
     {
+        $onlyMissing = (bool) $this->option('missing');
+        $queued = 0;
 
-        $this->info("Queueing omr model images");
-        $onlyMissing = $this->option('missing');
         OmrModel::query()
-            ->chunk(200, function ($models) use ($onlyMissing) {
-                GenerateOmrModelImage::dispatch(
-                    $models->map(fn (OmrModel $m) => $m->withoutRelations()),
-                    $onlyMissing
-                )->onQueue('maintenance');
+            ->lazyById(500)
+            ->when($onlyMissing, fn (LazyCollection $models) => $models->reject(
+                fn (OmrModel $model): bool => file_exists((string) $model->getFirstMedia('image')?->getPath())
+            ))
+            ->chunk(200)
+            ->each(function (LazyCollection $models) use (&$queued): void {
+                GenerateOmrModelImage::dispatch(new Collection($models->map->withoutRelations()->values()->all()))
+                    ->onQueue('maintenance');
+                $queued += $models->count();
             });
+
+        $this->info("Queued {$queued} OMR model images");
     }
 }

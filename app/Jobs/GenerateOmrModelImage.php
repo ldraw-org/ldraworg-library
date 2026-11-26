@@ -10,6 +10,8 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\Attributes\Queue;
 use Illuminate\Queue\Attributes\Timeout;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 #[DeleteWhenMissingModels]
 #[Timeout(1800)]
@@ -20,23 +22,24 @@ class GenerateOmrModelImage implements ShouldQueue
 
     protected Collection $omrModels;
 
-    public function __construct(
-        OmrModel|Collection $omrModels,
-        protected bool $onlyMissing = false
-    ) {
+    public function __construct(OmrModel|Collection $omrModels)
+    {
         $this->omrModels = $omrModels instanceof OmrModel
             ? new Collection([$omrModels])
             : $omrModels;
-
     }
 
     /**
-     * Execute the job.
+     * Render each model's image. A model that fails is logged and skipped so it can't block the rest of the batch.
      */
     public function handle(ImageGenerator $imageGenerator): void
     {
-        $this->omrModels
-            ->reject(fn (OmrModel $part) => $this->onlyMissing && file_exists($part->getFirstMediaPath('image')))
-            ->each(fn (OmrModel $part) => $imageGenerator->regenerateImage($part));
+        $this->omrModels->each(function (OmrModel $model) use ($imageGenerator): void {
+            try {
+                $imageGenerator->regenerateImage($model);
+            } catch (Throwable $e) {
+                Log::error('OMR model image generation failed', ['omr_model_id' => $model->id, 'exception' => $e]);
+            }
+        });
     }
 }
