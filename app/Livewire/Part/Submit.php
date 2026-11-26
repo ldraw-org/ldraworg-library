@@ -2,29 +2,25 @@
 
 namespace App\Livewire\Part;
 
-use App\Services\Check\Enums\PartError;
-use App\Services\Part\Submit\Registrar;
-use App\Services\Part\Submit\Validator;
-use Filament\Schemas\Schema;
-use App\Enums\Permission;
-use App\Services\LDraw\LDrawFile;
 use App\Models\Part\Part;
-use App\Models\User;
 use App\Services\Check\CheckMessage;
 use App\Services\Check\CheckMessageCollection;
-use Closure;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
+use App\Services\Check\Enums\PartError;
+use App\Services\LDraw\LDrawFile;
+use App\Services\Part\Submit\Registrar;
+use App\Services\Part\Submit\Validator;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Illuminate\Support\Collection;
-use Livewire\Component;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Schemas\Schema;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
+use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class Submit extends Component implements HasSchemas
@@ -33,6 +29,12 @@ class Submit extends Component implements HasSchemas
 
     public ?array $data = [];
 
+    /**
+     * Validation results shown to the user, keyed by uploaded filename. Display only: create() re-validates every file.
+     *
+     * @var array<string, array{messages: CheckMessageCollection, hasErrors: bool, hasWarnings: bool, hasTrackerHolds: bool}>
+     */
+    #[Locked]
     public array $fileStates = [];
 
     #[Locked]
@@ -58,23 +60,11 @@ class Submit extends Component implements HasSchemas
                     ->storeFiles(false)
                     ->previewable(false)
                     ->live()
-                    ->required()
-                    ->rules([
-                        fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                            $totalFiles = count($this->data['partfiles'] ?? []);
-                            $filesWithErrors = collect($this->fileStates)
-                                ->filter(fn ($state) => $state['hasErrors'] ?? false)
-                                ->count();
-
-                            if ($filesWithErrors >= $totalFiles) {
-                                $fail('There are no files without errors');
-                            }
-                        },
-                    ]),
+                    ->required(),
                 Toggle::make('replace')
                     ->label('Replace existing file(s)')
                     ->live()
-                    ->afterStateUpdated(function (?bool $state) {
+                    ->afterStateUpdated(function (?bool $state): void {
                         if ($state) {
                             $this->removeErrorFromAllFiles(PartError::ReplaceNotSelected);
                         } else {
@@ -84,38 +74,36 @@ class Submit extends Component implements HasSchemas
                 Toggle::make('official_fix')
                     ->label('Official File Fix')
                     ->live()
-                    ->afterStateUpdated(function (?bool $state) {
+                    ->afterStateUpdated(function (?bool $state): void {
                         if ($state) {
                             $this->removeErrorFromAllFiles(PartError::FixNotSelected);
                         } else {
                             $this->checkFiles();
                         }
                     }),
-              Select::make('user_id')
-                    ->relationship(name: 'user')
-                    ->getOptionLabelFromRecordUsing(fn (User $u) => "{$u->realname} [{$u->name}]")
-                    ->searchable()
-                    ->preload()
-                    ->default(Auth::user()->id)
-                    ->selectablePlaceholder(false)
-                    ->label('Proxy User')
-                    ->visible(Auth::user()->can(Permission::PartSubmitProxy)),
                 Textarea::make('comments')
                     ->rows(5)
                     ->nullable(),
             ])
-            ->statePath('data')
-            ->model(Part::class);
+            ->statePath('data');
     }
 
     protected function findUploadedFile(string $filename): ?TemporaryUploadedFile
     {
         /** @var Collection<int, TemporaryUploadedFile> $files */
-        $files = collect($this->data['partfiles']);
+        $files = collect($this->data['partfiles'] ?? []);
 
         return $files->first(
-            fn (TemporaryUploadedFile $file) =>
-            $file->getClientOriginalName() === $filename
+            fn (TemporaryUploadedFile $file): bool => $file->getClientOriginalName() === $filename
+        );
+    }
+
+    protected function validateFile(LDrawFile $file, Validator $submitFileValidator): CheckMessageCollection
+    {
+        return $submitFileValidator->validate(
+            file: $file,
+            replace: (bool) ($this->data['replace'] ?? false),
+            officialFix: (bool) ($this->data['official_fix'] ?? false),
         );
     }
 
@@ -128,14 +116,16 @@ class Submit extends Component implements HasSchemas
                 state: true,
                 filename: $filename
             );
+
             return;
         }
 
-        $this->fileStates[$filename]['messages'] = $collection;
-
-        $this->fileStates[$filename]['hasErrors'] = $collection->hasErrors();
-        $this->fileStates[$filename]['hasWarnings'] = $collection->hasWarnings();
-        $this->fileStates[$filename]['hasTrackerHolds'] = $collection->hasTrackerHolds();
+        $this->fileStates[$filename] = [
+            'messages' => $collection,
+            'hasErrors' => $collection->hasErrors(),
+            'hasWarnings' => $collection->hasWarnings(),
+            'hasTrackerHolds' => $collection->hasTrackerHolds(),
+        ];
 
         $this->dispatch(
             'setFileState',
@@ -152,111 +142,72 @@ class Submit extends Component implements HasSchemas
             return;
         }
 
-        $ldrawFile = LDrawFile::fromUploadedFile($uploaded);
-        $messages = $submitFileValidator->validate(
-            file: $ldrawFile,
-            replace: $this->data['replace'] ?? false,
-            officialFix: $this->data['official_fix'] ?? false,
+        $this->storeFileValidationState(
+            $filename,
+            $this->validateFile(LDrawFile::fromUploadedFile($uploaded), $submitFileValidator)
         );
-
-        $this->storeFileValidationState($filename, $messages);
     }
 
     protected function checkFiles(): void
     {
         $submitFileValidator = app(Validator::class);
-        foreach ($this->data['partfiles'] as $file) {
-            $fileName = $file->getClientOriginalName();
-            $this->checkFile($fileName, $submitFileValidator);
+
+        foreach ($this->data['partfiles'] ?? [] as $file) {
+            $this->checkFile($file->getClientOriginalName(), $submitFileValidator);
         }
     }
 
-    protected function removeErrorFromFile(
-        string $filename,
-        PartError $error
-    ): void {
-
+    protected function removeErrorFromFile(string $filename, PartError $error): void
+    {
         if (! isset($this->fileStates[$filename])) {
             return;
         }
 
         $collection = $this->fileStates[$filename]['messages']
-            ->reject(
-                fn (CheckMessage $message) =>
-                $message->check === $error
-            );
+            ->reject(fn (CheckMessage $message): bool => $message->check === $error);
 
-        $this->storeFileValidationState(
-            $filename,
-            $collection
-        );
+        $this->storeFileValidationState($filename, $collection);
     }
 
-    protected function removeErrorFromAllFiles(
-        PartError $error
-    ): void {
-
+    protected function removeErrorFromAllFiles(PartError $error): void
+    {
         foreach (array_keys($this->fileStates) as $filename) {
-
-            $this->removeErrorFromFile(
-                $filename,
-                $error
-            );
+            $this->removeErrorFromFile($filename, $error);
         }
     }
 
-    public function create(): void
+    public function create(Validator $submitFileValidator, Registrar $registrar): void
     {
         $this->rejected_files = null;
         $this->submitted_parts = [];
-        $registrar = app(Registrar::class);
+        $this->fileStates = [];
         $data = $this->form->getState();
 
-        if (
-            array_key_exists('user_id', $data)
-            && Auth::user()->can(Permission::PartSubmitProxy)
-        ) {
-            $user = User::find($data['user_id']);
-        } else {
-            $user = Auth::user();
+        /** @var Collection<string, LDrawFile> $files */
+        $files = collect($data['partfiles'])
+            ->mapWithKeys(fn (TemporaryUploadedFile $file): array => [
+                $file->getClientOriginalName() => LDrawFile::fromUploadedFile($file),
+            ]);
+
+        $accepted = $files->filter(function (LDrawFile $file, string $filename) use ($submitFileValidator): bool {
+            $messages = $this->validateFile($file, $submitFileValidator);
+            $this->storeFileValidationState($filename, $messages);
+
+            return ! $messages->hasErrors();
+        });
+
+        if ($accepted->isEmpty()) {
+            $this->addError('data.partfiles', 'There are no files without errors');
+
+            return;
         }
 
-        $files = collect($data['partfiles'] ?? [])
-            ->reject(function (TemporaryUploadedFile $file) {
+        $parts = $registrar->submit($accepted->values(), Auth::user(), $data['comments'] ?? null)->load('media');
 
-                $filename = $file->getClientOriginalName();
-
-                return ($this->fileStates[$filename]['hasErrors'] ?? false)
-                    || ! $file->get();
-            })
-            ->map(
-                fn (TemporaryUploadedFile $file) =>
-                LDrawFile::fromUploadedFile($file)
-            );
-        $parts = $registrar->submit($files, $user, $data['comments'])->load('media');
-
-        $submittedNames = $parts
-            ->pluck('filename')
-            ->map(
-                fn (string $filename) =>
-                basename($filename)
-            )
-            ->values()
-            ->all();
-
-        $this->rejected_files = collect($data['partfiles'] ?? [])
-            ->map(
-                fn (TemporaryUploadedFile $file) =>
-                $file->getClientOriginalName()
-            )
-            ->reject(
-                fn (string $filename) =>
-                in_array($filename, $submittedNames)
-            )
-            ->implode(', ');
+        $this->rejected_files = $files->keys()->diff($accepted->keys())->implode(', ');
 
         $this->submitted_parts = $parts
-            ->map(fn (Part $p) => [
+            ->map(fn (Part $p): array => [
                 'image' => $p->getFirstMediaUrl('image', 'thumb'),
                 'description' => $p->description,
                 'filename' => $p->filename,

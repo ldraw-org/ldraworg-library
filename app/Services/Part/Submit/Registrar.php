@@ -19,6 +19,7 @@ use App\Services\Part\Validator;
 use App\Services\Part\Writer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Registrar
@@ -36,19 +37,24 @@ class Registrar
 
     public function submit(SupportCollection $files, User $user, ?string $comments = null): Collection
     {
-        $parts = Part::make()->newCollection();
+        // Create every part or none; finalizing runs after commit so its queued jobs see the saved parts
+        $parts = DB::transaction(function () use ($files, $user): Collection {
+            $parts = Part::make()->newCollection();
 
-        foreach ($files as $file) {
-            $part = match($file->mimetype) {
-                'image/png'  => $this->makePartFromImage($file, $user, $this->guessPartType($file->filename, $files)),
-                'text/plain' => $this->makePartFromText($file),
-                default => null,
-            };
+            foreach ($files as $file) {
+                $part = match($file->mimetype) {
+                    'image/png'  => $this->makePartFromImage($file, $user, $this->guessPartType($file->filename, $files)),
+                    'text/plain' => $this->makePartFromText($file),
+                    default => null,
+                };
 
-            if ($part) {
-                $parts->push($part);
+                if ($part) {
+                    $parts->push($part);
+                }
             }
-        }
+
+            return $parts;
+        });
 
         $this->finalizer->handle($parts);
         $parts->each(function (Part $part) use ($user, $comments) {

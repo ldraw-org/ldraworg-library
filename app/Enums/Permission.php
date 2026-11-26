@@ -5,7 +5,6 @@ namespace App\Enums;
 enum Permission: string
 {
     case PartSubmitRegular = 'part.submit.regular';
-    case PartSubmitProxy = 'part.submit.proxy';
     case PartSubmitFix = 'part.submit.fix';
 
     case PartEditHeader = 'part.edit.header';

@@ -62,14 +62,12 @@
 
         $wire.on('setFileState', (params) => {
             let fileInput = null;
-            console.log(params);
             const status = params.state ? 'processing-complete' : 'error';
+            // FilePond exposes no item lookup by name, so match the rendered filename label
             const el = [...document.querySelectorAll('.filepond--file-info-main')]
                 .find(e => e.textContent.trim() === params.filename);
-            console.log(el);
             if (el) {
                 fileInput = el.closest('.filepond--item');
-                console.log(fileInput);
             }
 
             if (fileInput) {
