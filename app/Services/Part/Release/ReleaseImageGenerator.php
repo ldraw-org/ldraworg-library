@@ -4,6 +4,7 @@ namespace App\Services\Part\Release;
 
 use App\Models\Part\PartRelease;
 use App\Services\UpdateImageGenerator;
+use Spatie\Image\Image;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
@@ -20,6 +21,7 @@ class ReleaseImageGenerator
         }
         $imagePath = $tempDir->path("{$release->short}.png");
         file_put_contents($imagePath, $image);
+        Image::load($imagePath)->optimize()->save($imagePath);
         $release->clearMediaCollection('image');
         $release->addMedia($imagePath)->toMediaCollection('image');
     }

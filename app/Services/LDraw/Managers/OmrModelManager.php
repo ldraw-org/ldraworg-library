@@ -3,33 +3,17 @@
 namespace App\Services\LDraw\Managers;
 
 use App\Jobs\GenerateOmrModelImage;
-use App\Services\Render\LDView;
 use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
 use App\Models\User;
 use App\Settings\LibrarySettings;
 use Illuminate\Support\Arr;
-use Spatie\Image\Image;
-use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class OmrModelManager
 {
     public function __construct(
-        public LDView $render,
         protected LibrarySettings $settings
     ) {
-    }
-
-    public function updateImage(OmrModel $model): void
-    {
-        $image = $this->render->render($model);
-        $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
-        $imagePath = $dir->path(substr($model->filename(), 0, -4) . '.png');
-        imagepng($image, $imagePath);
-        Image::load($imagePath)->optimize()->save($imagePath);
-        $model->clearMediaCollection('image');
-        $model->addMedia($imagePath)
-            ->toMediaCollection('image');
     }
 
     /**

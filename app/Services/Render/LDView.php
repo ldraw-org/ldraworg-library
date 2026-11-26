@@ -12,21 +12,17 @@ use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Image\Image;
 use Spatie\Image\Enums\Fit;
-use Spatie\ImageOptimizer\OptimizerChain;
-use Spatie\ImageOptimizer\Optimizers\Optipng;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class LDView
 {
     protected readonly bool $debug;
-    protected OptimizerChain $optimizer;
 
     public function __construct(
         protected LibrarySettings $settings,
         protected LDrawModelMaker $modelmaker,
     ) {
         $this->debug = config('ldraw.ldview_debug', false);
-        $this->optimizer = (new OptimizerChain())->addOptimizer(new Optipng([]));
     }
 
     public function render(string|Part|OmrModel $part): GDImage
@@ -116,7 +112,6 @@ class LDView
         } else {
             Image::load($imagepath)
                 ->fit(Fit::Contain, $width, $height)
-                ->optimize($this->optimizer)
                 ->save();
         }
 
