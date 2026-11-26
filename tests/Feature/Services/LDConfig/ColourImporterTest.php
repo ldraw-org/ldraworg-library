@@ -85,3 +85,17 @@ it('keeps stored Rebrickable mappings and leaves new colours unmapped without th
     expect($red->fresh()->only(['value', 'rebrickable_id', 'rebrickable_name']))->toBe(['value' => '#C91A09', 'rebrickable_id' => 4, 'rebrickable_name' => 'Red'])
         ->and(LdrawColour::firstWhere('code', 998)->only(['rebrickable_id', 'rebrickable_name']))->toBe(['rebrickable_id' => null, 'rebrickable_name' => null]);
 });
+
+it('refreshes the cached colour options', function () {
+    LdrawColour::factory()->create(['code' => 4, 'name' => 'Red', 'value' => '#B40000']);
+    app(ColourLookup::class)->options();
+    Storage::put('library/official/LDConfig.ldr', implode("\n", [
+        '0 !COLOUR Red CODE 4 VALUE #B40000 EDGE #333333',
+        '0 !COLOUR Brand_New CODE 998 VALUE #FFFFFF EDGE #000000',
+    ]));
+    fakeRebrickableCsv([]);
+
+    app(ColourImporter::class)->import();
+
+    expect(app(ColourLookup::class)->options())->toHaveKeys([4, 998]);
+});

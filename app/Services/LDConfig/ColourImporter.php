@@ -72,10 +72,10 @@ class ColourImporter
                 ];
                 LdrawColour::updateOrCreate(['code' => $color['code']], $color);
             });
-        $this->cache->reset(CacheKey::LdrawColourCodes);
-        $this->cache->warm(CacheKey::LdrawColourCodes);
-        $this->cache->reset(CacheKey::LdrawColourCodesToRebrickable);
-        $this->cache->warm(CacheKey::LdrawColourCodesToRebrickable);
+        foreach ([CacheKey::LdrawColourCodes, CacheKey::LdrawColourOptions, CacheKey::LdrawColourCodesToRebrickable] as $key) {
+            $this->cache->reset($key);
+            $this->cache->warm($key);
+        }
     }
 
     /**
