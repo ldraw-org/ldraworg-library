@@ -14,14 +14,12 @@ use App\Services\Part\BasePartSync;
 use App\Services\Part\Finalizer;
 use App\Services\Part\ImageGenerator;
 use App\Services\Part\SyncSubparts;
+use App\Services\Part\TexmapOptimizer;
 use App\Services\Part\Validator;
 use App\Services\Part\Writer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Str;
-use Spatie\ImageOptimizer\OptimizerChain;
-use Spatie\ImageOptimizer\Optimizers\Optipng;
-use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class Registrar
 {
@@ -32,6 +30,7 @@ class Registrar
         protected BasePartSync   $basePartSync,
         protected Finalizer      $finalizer,
         protected Writer $writer,
+        protected TexmapOptimizer $texmapOptimizer,
     ) {
     }
 
@@ -96,29 +95,8 @@ class Registrar
         ];
         return $this->writer->createOrUpdate(
             $attributes,
-            base64_encode($this->optimizeLosslessly($file->contents)),
+            base64_encode($this->texmapOptimizer->optimize($file->contents)),
         );
-    }
-
-    /**
-     * Losslessly optimize a texmap PNG. Submission is the only time a texmap body changes,
-     * so this is the only place it is optimized. The original is kept if optimization fails or doesn't shrink it.
-     */
-    protected function optimizeLosslessly(string $png): string
-    {
-        $dir = TemporaryDirectory::make()->deleteWhenDestroyed();
-        $path = $dir->path('texmap.png');
-        file_put_contents($path, $png);
-
-        (new OptimizerChain())
-            ->addOptimizer(new Optipng(['-i0', '-o2', '-quiet']))
-            ->optimize($path);
-
-        $optimized = file_get_contents($path);
-
-        return $optimized !== false && $optimized !== '' && strlen($optimized) < strlen($png)
-            ? $optimized
-            : $png;
     }
 
     protected function makePartFromText(LDrawFile $file): Part
