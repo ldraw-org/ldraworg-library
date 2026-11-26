@@ -110,7 +110,7 @@ enum PartError: string implements CheckItem, HasLabel
             self::IdenticalPoints => 'Identical points',
             self::PointsColinear => 'Points are colinear',
             self::QuadNotConvex => 'Quad is concave or bowtie',
-            self::QuadNotCoplanar,
+            self::QuadNotCoplanar => 'Quad is not coplanar',
             self::DecimalPrecision,
             self::TrailingZeros,
             self::LeadingZeros => $this->description(),
