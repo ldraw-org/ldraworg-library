@@ -229,7 +229,7 @@ LDrawOrg.Model.prototype.onChange = function(eleW, eleH) {
     this.camera.bottom = -h / 2;
 
     if (!this._zoomSet) {
-        this.camera.zoom = Math.min(h / this.size.diam, w / this.size.diam);
+        this.camera.zoom = this.fitZoom(w, h);
         this._zoomSet = true;
     }
 
@@ -270,6 +270,37 @@ LDrawOrg.Model.prototype.harlequin_mode = function() {
 LDrawOrg.Model.prototype.bfc_mode = function() {
     LDR.setMode(1);
     this.onLoad();
+};
+
+// Zoom that fits the model in a w x h canvas as seen from the camera. The model's largest
+// dimension is not enough: from the diagonal default view a box looks wider than any one side.
+LDrawOrg.Model.prototype.fitZoom = function(w, h) {
+    const b = this.mc.boundingBox;
+    if (!b) {
+        return Math.min(h, w) / this.size.diam;
+    }
+
+    this.orbitControls.update(); // Points the camera at the target so its view matrix is current
+    this.camera.updateMatrixWorld();
+
+    // The model is centered on the origin (see onLoad), so measure the box around its center
+    const center = new THREE.Vector3();
+    b.getCenter(center);
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const x of [b.min.x, b.max.x]) {
+        for (const y of [b.min.y, b.max.y]) {
+            for (const z of [b.min.z, b.max.z]) {
+                const p = new THREE.Vector3(x, y, z).sub(center).applyMatrix4(this.camera.matrixWorldInverse);
+                minX = Math.min(minX, p.x);
+                maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y);
+                maxY = Math.max(maxY, p.y);
+            }
+        }
+    }
+
+    const margin = 0.9;
+    return margin * Math.min(w / Math.max(maxX - minX, 1), h / Math.max(maxY - minY, 1));
 };
 
 LDrawOrg.Model.prototype.default_mode = function() {
