@@ -21,7 +21,7 @@ class WeeklyPartsController extends Controller
         }
         $date->setTime(0, 0, 0);
         $date->setDaysFromStartOfWeek(0, CarbonInterface::SUNDAY);
-        $parts = Part::doesntHave('official_part')->partsFolderOnly()->where('week', $date->format('Y-m-d'))->get();
+        $parts = Part::with('media')->doesntHave('official_part')->partsFolderOnly()->where('week', $date->format('Y-m-d'))->get();
         return PartsResource::collection($parts);
     }
 

@@ -19,7 +19,7 @@ class UserVotesTable extends BasicTable
     {
         return $table
             ->query(
-                Vote::with('part', 'part.votes', 'part.official_part')->where('user_id', Auth::user()->id)
+                Vote::with('part', 'part.media', 'part.votes', 'part.official_part')->where('user_id', Auth::user()->id)
             )
             ->defaultSort('created_at', 'desc')
             ->heading('My Votes')

@@ -233,7 +233,7 @@ class Submit extends Component implements HasSchemas
                 fn (TemporaryUploadedFile $file) =>
                 LDrawFile::fromUploadedFile($file)
             );
-        $parts = $registrar->submit($files, $user, $data['comments']);
+        $parts = $registrar->submit($files, $user, $data['comments'])->load('media');
 
         $submittedNames = $parts
             ->pluck('filename')

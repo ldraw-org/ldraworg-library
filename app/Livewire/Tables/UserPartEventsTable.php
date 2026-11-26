@@ -20,7 +20,7 @@ class UserPartEventsTable extends BasicTable
     {
         return $table
             ->query(
-                PartEvent::with('part', 'part.votes', 'part.official_part')
+                PartEvent::with('part', 'part.media', 'part.votes', 'part.official_part')
                     ->unofficial()
                     ->whereHas(
                         'part',

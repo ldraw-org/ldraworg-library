@@ -24,6 +24,6 @@ class ReviewSummary extends Model
             }
         }
 
-        return Part::doesntHave('unofficial_part')->whereIn('filename', $parts)->get();
+        return Part::with('media')->doesntHave('unofficial_part')->whereIn('filename', $parts)->get();
     }
 }

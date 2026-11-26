@@ -40,6 +40,7 @@ class MenuItem extends Component
     private function getPartsSearch(Builder $query, int $limit): array
     {
         return $query->select(['id', 'filename', 'description'])
+            ->with('media')
             ->searchFull($this->tableSearch)
             ->orderBy('filename')
             ->take($limit)
@@ -57,6 +58,7 @@ class MenuItem extends Component
     {
         return Set::query()
             ->select(['sets.id', 'sets.name', 'sets.number'])
+            ->with('models')
             ->has('models')
             ->where(function (Builder $q) {
                 $search = "%{$this->tableSearch}%";

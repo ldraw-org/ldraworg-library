@@ -32,7 +32,7 @@ class Index extends BasicTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(PartEvent::query()->with('part', 'part.votes', 'part.official_part'))
+            ->query(PartEvent::query()->with('part', 'part.media', 'part.votes', 'part.official_part'))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 Split::make([

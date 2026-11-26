@@ -61,15 +61,21 @@ class CategoryStatus extends BasicTable
     public function categoryArray(): Collection
     {
         $parts = app(LDConfigManager::class)->avatarParts();
+        $avatarParts = Part::with('media')
+            ->whereIn('filename', array_map(fn (?string $number): string => "parts/{$number}", $parts))
+            ->get()
+            // Official parts sort last so keyBy() prefers them over an unofficial update
+            ->sortBy(fn (Part $part): bool => $part->isOfficial())
+            ->keyBy('filename');
         return collect(PartCategory::cases())
             ->map(
-                function (PartCategory $cat) use ($parts): array {
+                function (PartCategory $cat) use ($parts, $avatarParts): array {
                     $status = Part::select('category', 'part_status')
                         ->where('category', $cat)
                         ->doesntHave('unofficial_part')
                         ->get()
                         ->countBy('part_status');
-                    $image = Part::firstWhere('filename', 'parts/'. Arr::get($parts, $cat->value, ''))?->getFirstMediaUrl('image', 'thumb') ?? asset('images/pending-thumb.png');
+                    $image = $avatarParts->get('parts/' . Arr::get($parts, $cat->value, ''))?->getFirstMediaUrl('image', 'thumb') ?? asset('images/pending-thumb.png');
                     return [
                         'category' => $cat->value,
                         'image' => $image,

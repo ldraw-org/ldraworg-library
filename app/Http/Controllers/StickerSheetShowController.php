@@ -19,6 +19,7 @@ class StickerSheetShowController extends Controller
         if ($sheet->rb_part_category_id !== 58) {
             abort(404, 'Not a sticker sheet');
         }
+        $sheet->load('parts.media');
         $flat = $sheet->parts
             ->whereNull('unofficial_part')
             ->where('category', PartCategory::Sticker)

@@ -11,7 +11,7 @@ class LatestPartsController extends Controller
 {
     public function __invoke(): ResourceCollection
     {
-        $parts = PartEvent::with(['part'])
+        $parts = PartEvent::with(['part.media'])
             ->where('initial_submit', true)
             ->whereHas(
                 'part',

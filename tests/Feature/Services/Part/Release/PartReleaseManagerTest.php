@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Services\Part\Release\PartReleaseManager;
 use App\Settings\LibrarySettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
@@ -53,6 +54,7 @@ it('releases marked parts, fixes and minor edits and publishes the update', func
     ]);
     $fix = $official->unofficial_part;
     $fix->update(['description' => 'Brick 2 x 3', 'type' => PartType::Part, 'category' => PartCategory::Brick, 'part_status' => PartStatus::Certified, 'marked_for_release' => true]);
+    $fixImage = $fix->addMedia(UploadedFile::fake()->image('3002.png'))->toMediaCollection('image');
     $minorEdit = Part::factory()->official($previous)->create(['filename' => 'parts/3003.dat', 'has_minor_edit' => true]);
     $nextCycle = Part::factory()->unofficial()->create([
         'filename' => 'parts/3004.dat',
@@ -83,6 +85,8 @@ it('releases marked parts, fixes and minor edits and publishes the update', func
     expect($newPart->history()->pluck('comment')->last())->toBe('Official Update 2026-01');
 
     $this->assertModelMissing($fix);
+    $this->assertModelMissing($fixImage);
+    Storage::disk(config('media-library.disk_name'))->assertMissing($fixImage->getPathRelativeToRoot());
     expect($official->fresh())
         ->part_release_id->toBe($release->id)
         ->description->toBe('Brick 2 x 3');

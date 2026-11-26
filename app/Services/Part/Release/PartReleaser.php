@@ -143,6 +143,7 @@ class PartReleaser
             ->where('part_id', $part->id)
             ->update(['part_id' => $officialPart->id]);
 
+        $part->deleteAllMedia();
         $part->deleteQuietly();
 
         return $officialPart->id;
