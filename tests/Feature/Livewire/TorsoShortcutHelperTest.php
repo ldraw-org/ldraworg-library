@@ -50,7 +50,22 @@ it('rebuilds the part fields, name and description and clears part choices when 
         ->assertDontSee('3818 - Minifig Arm Right')
         ->assertSet('data.name', '16360p01.dat')
         ->assertSet('data.description', 'Minifig Torso Assembly Short Arms with Logo Pattern')
-        ->assertSet('data.parts', []);
+        ->assertSet('data.parts', [0 => ['variation' => null, 'color' => 16]]);
+});
+
+it('defaults each part to the main colour', function () {
+    Livewire::test(TorsoShortcutHelper::class)
+        ->assertSet('data.parts', [1 => ['variation' => null, 'color' => 16]]);
+});
+
+it('requires a colour for each part', function () {
+    Livewire::test(TorsoShortcutHelper::class)
+        ->set('data.torso', $this->parts['torso']->id)
+        ->set('data.keywords', 'Set 6399')
+        ->set('data.bricklink', '973p01c01')
+        ->set('data.parts.1.color', null)
+        ->call('submitFile')
+        ->assertHasErrors(['data.parts.1.color' => 'required']);
 });
 
 it('rejects a name without .dat that matches an existing part', function () {

@@ -70,6 +70,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
     {
         $this->authorize('create', Part::class);
         $this->form->fill();
+        $this->data['parts'] = $this->defaultPartState();
     }
 
     public function form(Schema $schema): Schema
@@ -110,7 +111,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                 ->required()
                                 ->afterStateUpdated(function (Set $set): void {
                                     unset($this->template);
-                                    $set('parts', []);
+                                    $set('parts', $this->defaultPartState());
                                     $this->setNameAndDescription($set);
                                 }),
                         ]),
@@ -253,7 +254,8 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                     ->searchable();
             }
             $partOptions[] = LDrawColourSelect::make('color')
-                ->label('Color');
+                ->label('Color')
+                ->required();
             $name = basename($part['name'], '.dat');
             $partFields[] = Fieldset::make("{$name} - {$part['description']}")
                 ->key("part{$index}")
@@ -262,6 +264,20 @@ class TorsoShortcutHelper extends Component implements HasSchemas
         }
 
         return $partFields;
+    }
+
+    /**
+     * No variation and main colour (16) for each non-torso part of the selected template.
+     * Set on mount and template change, since Filament only applies field defaults when the form is first filled.
+     *
+     * @return array<int, array{variation: null, color: int}>
+     */
+    protected function defaultPartState(): array
+    {
+        return collect($this->template['parts'] ?? [])
+            ->reject(fn (array $part): bool => $this->maker()->isTorso($part['name']))
+            ->map(fn (): array => ['variation' => null, 'color' => 16])
+            ->all();
     }
 
     /**
