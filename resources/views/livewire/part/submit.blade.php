@@ -6,15 +6,15 @@
         Parts Tracker File Submit Form
     </div>
     <div wire:key="fileStates-wrapper">
-        @if(count($fileStates) > 0)
+        @if(count($this->filesWithMessages) > 0)
             <div wire:key='fileStates-list' class="flex flex-col relative p-2 my-2 space-y-2 border border-gray-200 rounded-lg">
                 <h2 class="absolute top-0 left-2 transform -translate-y-1/2 bg-white px-2 text-md font-semibold text-gray-700">
                     There were file errors/warnings
                 </h2>
-                @foreach($fileStates as $filename => $state)
-                    <div wire:key="file-errors-{{ $filename }}">
-                        <div class="font-bold">{{ $filename }}</div>
-                        <x-message.submit-validation filename="{{$filename}}" :$state />
+                @foreach($this->filesWithMessages as $key => $state)
+                    <div wire:key="file-errors-{{ $key }}">
+                        <div class="font-bold">{{ $state['filename'] }}</div>
+                        <x-message.submit-validation :filename="$state['filename']" :$state />
                     </div>
                 @endforeach
             </div>
@@ -53,27 +53,28 @@
 
     @script
     <script type="text/javascript">
-        $wire.on('FilePond:processfile', (e) => {
-            $wire.checkFile(e.file.filename);
-        });
-        $wire.on('FilePond:removefile', (e) => {
-            $wire.removeFile(e.file.filename);
+        // The server validates each file as Filament finishes uploading it; this only colours the FilePond items.
+        // FilePond's own error state discards the file, so the state attribute is set directly to keep the
+        // file submittable once the replace/fix toggles clear its error.
+        let pond = null;
+
+        const paintFileStates = () => {
+            for (const file of pond?.getFiles() ?? []) {
+                const state = $wire.fileStates[file.serverId];
+                const item = document.getElementById(`filepond--item-${file.id}`);
+
+                if (state && item) {
+                    item.dataset.filepondItemState = state.hasErrors ? 'error' : 'processing-complete';
+                }
+            }
+        };
+
+        $wire.on('FilePond:processfile', (detail) => {
+            pond = detail.pond;
+            paintFileStates();
         });
 
-        $wire.on('setFileState', (params) => {
-            let fileInput = null;
-            const status = params.state ? 'processing-complete' : 'error';
-            // FilePond exposes no item lookup by name, so match the rendered filename label
-            const el = [...document.querySelectorAll('.filepond--file-info-main')]
-                .find(e => e.textContent.trim() === params.filename);
-            if (el) {
-                fileInput = el.closest('.filepond--item');
-            }
-
-            if (fileInput) {
-                fileInput.dataset.filepondItemState = status;
-            }
-        });
+        $wire.$watch('fileStates', paintFileStates);
     </script>
     @endscript
 </div>

@@ -30,9 +30,18 @@ function texmapUpload(string $name = 'texture.png'): UploadedFile
     return UploadedFile::fake()->createWithContent($name, uncompressedTexmapPng());
 }
 
-function invalidPartUpload(): UploadedFile
+function invalidPartUpload(string $name = 'bad.dat'): UploadedFile
 {
-    return UploadedFile::fake()->createWithContent('bad.dat', "0 Not an LDraw part\r\n1 16 garbage\r\n");
+    return UploadedFile::fake()->createWithContent($name, "0 Not an LDraw part\r\n1 16 garbage\r\n");
+}
+
+/**
+ * @param  array<string, array{filename: string, hasErrors: bool}>  $fileStates
+ * @return array<string, bool> whether each file has errors, keyed by filename
+ */
+function errorsByFilename(array $fileStates): array
+{
+    return collect($fileStates)->mapWithKeys(fn (array $state): array => [$state['filename'] => $state['hasErrors']])->all();
 }
 
 it('forbids users who have not confirmed the contributor agreement', function () {
@@ -42,6 +51,38 @@ it('forbids users who have not confirmed the contributor agreement', function ()
     Livewire::actingAs($user)
         ->test(Submit::class)
         ->assertForbidden();
+});
+
+it('validates files as they are uploaded and shows only those with messages', function () {
+    $component = Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [texmapUpload(), invalidPartUpload()]])
+        ->assertSee('bad.dat')
+        ->assertDontSee('texture.png');
+
+    expect(errorsByFilename($component->get('fileStates')))->toBe(['texture.png' => false, 'bad.dat' => true]);
+});
+
+it('tracks uploads that share a filename separately', function () {
+    $component = Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [texmapUpload('texture.png'), invalidPartUpload('texture.png')]]);
+
+    expect(collect($component->get('fileStates'))->pluck('hasErrors')->all())->toBe([false, true]);
+});
+
+it('forgets the validation state of a removed upload', function () {
+    $component = Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [texmapUpload(), invalidPartUpload()]]);
+
+    $badKey = collect($component->get('fileStates'))->search(fn (array $state): bool => $state['filename'] === 'bad.dat');
+
+    $component
+        ->call('callSchemaComponentMethod', 'form.partfiles', 'removeUploadedFile', ['fileKey' => $badKey])
+        ->assertDontSee('bad.dat');
+
+    expect(errorsByFilename($component->get('fileStates')))->toBe(['texture.png' => false]);
 });
 
 it('submits a valid file as the signed in user', function () {
@@ -61,12 +102,10 @@ it('submits a valid file as the signed in user', function () {
         ->user_id->toBe($user->id);
 });
 
-it('rejects a file with errors even after the client clears its error state', function () {
+it('submits only the files that pass validation and lists the rest as rejected', function () {
     Livewire::actingAs(submitter())
         ->test(Submit::class)
         ->fillForm(['partfiles' => [texmapUpload(), invalidPartUpload()]])
-        ->call('checkFile', 'bad.dat')
-        ->call('removeFile', 'bad.dat')
         ->call('create')
         ->assertSet('rejected_files', 'bad.dat')
         ->assertCount('submitted_parts', 1);
@@ -82,7 +121,7 @@ it('refuses the submission when every file has errors', function () {
         ->assertHasErrors(['data.partfiles' => 'There are no files without errors'])
         ->assertNotDispatched('open-modal');
 
-    expect($component->get('fileStates')['bad.dat']['hasErrors'])->toBeTrue()
+    expect(errorsByFilename($component->get('fileStates')))->toBe(['bad.dat' => true])
         ->and(Part::count())->toBe(0);
 });
 
@@ -97,18 +136,19 @@ it('clears and restores the replace error as the replace toggle changes', functi
 
     $component = Livewire::actingAs(submitter())
         ->test(Submit::class)
-        ->fillForm(['partfiles' => [texmapUpload()]])
-        ->call('checkFile', 'texture.png');
+        ->fillForm(['partfiles' => [texmapUpload()]]);
 
-    $replaceErrors = fn (): array => collect($component->get('fileStates')['texture.png']['messages'] ?? [])
+    $replaceErrorCount = fn (): int => collect($component->get('fileStates'))
+        ->flatMap(fn (array $state) => $state['messages'])
         ->filter(fn ($message): bool => $message->check === PartError::ReplaceNotSelected)
-        ->all();
+        ->count();
 
-    expect($replaceErrors())->toHaveCount(1);
+    expect($replaceErrorCount())->toBe(1);
 
     $component->fillForm(['replace' => true]);
-    expect($component->get('fileStates'))->toBe([]);
+    expect($replaceErrorCount())->toBe(0)
+        ->and(errorsByFilename($component->get('fileStates')))->toBe(['texture.png' => false]);
 
     $component->fillForm(['replace' => false]);
-    expect($replaceErrors())->toHaveCount(1);
+    expect($replaceErrorCount())->toBe(1);
 });
