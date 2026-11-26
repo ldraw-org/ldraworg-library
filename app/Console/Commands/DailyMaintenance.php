@@ -51,6 +51,9 @@ class DailyMaintenance extends Command
             $this->info('Regenerate library.csv');
             $this->call('lib:refresh-csv');
 
+            $this->info('Deleting orphaned media');
+            $this->call('lib:delete-orphan-media');
+
             $this->info('Queueing missing images');
             $this->call('lib:render-parts', ['--missing' => true]);
             $this->call('lib:render-models', ['--missing' => true]);
