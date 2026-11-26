@@ -112,6 +112,8 @@ LDrawOrg.Model.prototype.setPhysicalRenderingAge = function(physicalRenderingAge
 
 LDrawOrg.Model.prototype.reload = function() {
     this.loader.partTypes = {};
+    // Forget the previous main model too, or the re-parse treats its first FILE line as a second file
+    delete this.loader.mainModel;
     LDR.Studs.makeGenerators('', LDR.Options.studHighContrast, LDR.Options.studLogo);
     this.loader.load(this._model);
 };
