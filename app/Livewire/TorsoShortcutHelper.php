@@ -103,6 +103,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                     }
                                 }),
                             Select::make('templateId')
+                                ->label('Template')
                                 ->options($this->templateOptions)
                                 ->default(fn (): ?int => Part::firstWhere('filename', 'parts/76382.dat')?->id)
                                 ->selectablePlaceholder(false)
@@ -141,6 +142,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                             $this->externalsSiteSection(),
                             TextInput::make('keywords')
                                 ->required()
+                                ->helperText('Comma separated. External site numbers are added from the fields above.')
                                 ->extraAttributes(['class' => 'font-mono'])
                                 ->rules(fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get): void {
                                     if (blank($get('description')) || blank($get('name'))) {
@@ -154,12 +156,14 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                 }),
                             Section::make('Parts')
                                 ->key('partFields')
+                                ->columns(2)
                                 ->schema(fn (): array => $this->partFields()),
                         ])
                         ->afterValidation(function (Set $set): void {
                             $fileText = $this->torsoText($this->form->getState());
                             $set('new_part', $fileText);
-                            $this->dispatch('ldbi-render-model', parts: app(LDrawModelMaker::class)->webGl($fileText));
+                            // Forced because every generated file is model.ldr, which the viewer would otherwise skip as unchanged
+                            $this->dispatch('ldbi-render-model', parts: app(LDrawModelMaker::class)->webGl($fileText), force: true);
                         }),
                     Step::make('Review and Submit')
                         ->key('torsoReviewStep')
@@ -167,8 +171,10 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                             Grid::make(2)
                                 ->schema([
                                     Textarea::make('new_part')
+                                        ->label('Generated file')
                                         ->autosize()
                                         ->readOnly()
+                                        ->extraInputAttributes(['wrap' => 'off'])
                                         ->extraAttributes(['class' => 'font-mono']),
                                     View::make('filament.forms.3d-viewer'),
                                 ]),
@@ -220,6 +226,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                 'value'
             );
             $externalSiteFields[] = TextInput::make($site->value)
+                ->label($site->name)
                 ->string()
                 ->requiredWithoutAll($otherSites)
                 ->extraAttributes(['class' => 'font-mono']);
@@ -251,6 +258,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             if ($part['variations'] !== []) {
                 $partOptions[] = Select::make('variation')
                     ->options($part['variations'])
+                    ->placeholder('None (plain part)')
                     ->searchable();
             }
             $partOptions[] = LDrawColourSelect::make('color')

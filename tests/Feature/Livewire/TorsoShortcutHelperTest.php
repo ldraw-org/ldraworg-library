@@ -4,6 +4,7 @@ use App\Enums\PartCategory;
 use App\Enums\PartType;
 use App\Enums\Permission;
 use App\Livewire\TorsoShortcutHelper;
+use App\Models\LdrawColour;
 use App\Models\Part\Part;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -56,6 +57,19 @@ it('rebuilds the part fields, name and description and clears part choices when 
 it('defaults each part to the main colour', function () {
     Livewire::test(TorsoShortcutHelper::class)
         ->assertSet('data.parts', [1 => ['variation' => null, 'color' => 16]]);
+});
+
+it('generates the file and forces the viewer to re-render on reaching the review step', function () {
+    LdrawColour::factory()->create(['code' => 16, 'name' => 'Main_Colour']);
+
+    Livewire::test(TorsoShortcutHelper::class)
+        ->set('data.torso', $this->parts['torso']->id)
+        ->set('data.keywords', 'Set 6399')
+        ->set('data.bricklink', '973p01c01')
+        ->goToWizardStep(3)
+        ->assertHasNoErrors()
+        ->assertSet('data.new_part', fn (string $text): bool => str_contains($text, '973p01.dat'))
+        ->assertDispatched('ldbi-render-model', fn (string $event, array $params): bool => $params['force'] === true);
 });
 
 it('requires a colour for each part', function () {
