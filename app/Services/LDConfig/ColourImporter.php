@@ -1,48 +1,37 @@
 <?php
 
-namespace App\Services\LDraw\Managers;
+namespace App\Services\LDConfig;
 
-use App\Models\Avatar;
+use App\Enums\RebrickableCsvFile;
 use App\Models\LdrawColour;
 use App\Services\Cache\CacheKey;
 use App\Services\Cache\CacheService;
-use App\Enums\RebrickableCsvFile;
 use App\Services\External\RebrickableCsv;
-use App\Services\Parser\ParsedPartCollection;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 
-class LDConfigManager
+class ColourImporter
 {
-    protected const string LDCONFIG_PATH = 'library/official/LDConfig.ldr';
-
     public function __construct(
+        protected LDConfigFile $ldconfig,
         protected RebrickableCsv $rebrickableCsv,
-        protected CacheService $cache
+        protected CacheService $cache,
     ) {
-
-    }
-
-    public function getLDConfig(): ParsedPartCollection
-    {
-        $ldconfig = Storage::get(self::LDCONFIG_PATH);
-        return new ParsedPartCollection($ldconfig)->where('invalid', false);
     }
 
     /**
      * Does nothing without an LDConfig. Without the Rebrickable CSV downloads, stored Rebrickable
      * mappings are kept and new colours are left unmapped.
      */
-    public function importColours(): void
+    public function import(): void
     {
-        if (!Storage::exists(self::LDCONFIG_PATH)) {
+        if (!$this->ldconfig->exists()) {
             return;
         }
 
         $rbColors = $this->rebrickableColoursByLdrawCode();
-        $this->getLDConfig()
+        $this->ldconfig->entries()
             ->where('meta', 'colour')
             ->each(function (array $color) use ($rbColors) {
                 $c = LdrawColour::where('name', $color['name'])->where('code', '!=', $color['code'])->first();
@@ -110,82 +99,5 @@ class LDConfigManager
             ->unique('ext_id')
             ->mapWithKeys(fn (array $row) => [$row['ext_id'] => ['id' => (int) $row['id'], 'name' => $names[$row['id']]]])
             ->collect();
-    }
-
-    public function ldrawColourCodes(): array
-    {
-        return $this->cache->remember(
-            CacheKey::LdrawColourCodes,
-            fn () => LdrawColour::pluck('code')->all()
-        );
-    }
-
-    public function ldrawColourOptions(): array
-    {
-        return $this->cache->remember(
-            CacheKey::LdrawColourOptions,
-            fn () => LdrawColour::select('id', 'code', 'name', 'value')
-                ->orderBy('code')
-                ->get()
-                ->mapWithKeys(
-                    fn (LdrawColour $color) =>
-                    [$color->code => "<span class=\"{$color->labelTextColor()} rounded px-2 py-1\" style=\"background-color: {$color->value}\">{$color->code} - {$color->name}</span>"]
-                )
-                ->all()
-        );
-    }
-
-    public function ldrawColourCodesToRebrickable(): array
-    {
-        return $this->cache->remember(
-            CacheKey::LdrawColourCodesToRebrickable,
-            fn () => LdrawColour::pluck('rebrickable_id', 'code')->all()
-        );
-    }
-
-    /**
-     * LDraw colour code keyed by Rebrickable colour id. When several codes share a Rebrickable colour
-     * the first one wins.
-     *
-     * @return array<int, int>
-     */
-    public function rebrickableColoursToLdrawCodes(): array
-    {
-        $codes = [];
-        foreach ($this->ldrawColourCodesToRebrickable() as $code => $rebrickableId) {
-            if (!is_null($rebrickableId) && !isset($codes[$rebrickableId])) {
-                $codes[$rebrickableId] = $code;
-            }
-        }
-
-        return $codes;
-    }
-
-    public function importAvatars(): void
-    {
-        $avatars = $this->getLDConfig()
-            ->where('meta', 'avatar')
-            ->map(function (array $avatar) {
-                return [
-                    'category' => $avatar['category'],
-                    'description' => $avatar['description'],
-                    'part' => $avatar['file'],
-                    'matrix' => "{$avatar['a']} {$avatar['b']} {$avatar['c']} " .
-                                "{$avatar['d']} {$avatar['e']} {$avatar['f']} " .
-                                "{$avatar['g']} {$avatar['h']} {$avatar['i']}"
-                ];
-            })
-            ->all();
-        Avatar::upsert($avatars, uniqueBy: 'category', update: ['part', 'matrix', 'description']);
-        CacheKey::AvatarParts->reset();
-        CacheKey::AvatarParts->warm();
-    }
-
-    public function avatarParts(): array
-    {
-        return $this->cache->remember(
-            CacheKey::AvatarParts,
-            fn () => Avatar::pluck('part', 'category')->all()
-        );
     }
 }

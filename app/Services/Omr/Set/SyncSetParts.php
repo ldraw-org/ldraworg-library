@@ -6,7 +6,7 @@ use App\Models\Omr\Set;
 use App\Models\RebrickablePart;
 use App\Services\External\Rebrickable;
 use App\Services\External\RebrickableRequestFailed;
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\ColourLookup;
 use App\Services\RebrickablePart\Writer as RebrickablePartWriter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +21,7 @@ class SyncSetParts
 
     public function __construct(
         protected Rebrickable $rebrickable,
-        protected LDConfigManager $configManager,
+        protected ColourLookup $colourLookup,
         protected RebrickablePartWriter $rebrickablePartWriter,
     ) {
     }
@@ -32,7 +32,7 @@ class SyncSetParts
     public function handle(Set $set): void
     {
         $parts = $this->rebrickable->getSetParts($set->number);
-        $colours = $this->configManager->rebrickableColoursToLdrawCodes();
+        $colours = $this->colourLookup->rebrickableToCodes();
 
         // Parts come from the database, then parts.csv, and only a part newer than the downloads from the API
         // response. Created parts have no external ids yet; the next import fills them in. Parts are written

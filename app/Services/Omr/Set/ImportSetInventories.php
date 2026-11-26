@@ -7,7 +7,7 @@ use App\Models\Omr\Set;
 use App\Models\Omr\Theme;
 use App\Models\RebrickablePart;
 use App\Services\External\RebrickableCsv;
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\ColourLookup;
 use App\Services\RebrickablePart\Writer as RebrickablePartWriter;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Collection;
@@ -42,7 +42,7 @@ class ImportSetInventories
 
     public function __construct(
         protected RebrickableCsv $rebrickableCsv,
-        protected LDConfigManager $configManager,
+        protected ColourLookup $colourLookup,
         protected RebrickablePartWriter $rebrickablePartWriter,
     ) {
     }
@@ -59,7 +59,7 @@ class ImportSetInventories
 
         $result = ['added_sets' => $this->addSets($stickerSets), 'updated_sets' => 0, 'unchanged_sets' => 0, 'missing_parts' => []];
         $partIds = DB::table('rebrickable_parts')->pluck('id', 'number')->all();
-        $colours = $this->configManager->rebrickableColoursToLdrawCodes();
+        $colours = $this->colourLookup->rebrickableToCodes();
         $missing = [];
 
         Set::withoutEagerLoads()
@@ -114,7 +114,7 @@ class ImportSetInventories
         // Parts not imported yet, as before the first full import, come from parts.csv rather than being left out
         $partIds = $this->rebrickablePartWriter->idsFromDatabaseOrCsv(array_values($numbers));
         $missing = [];
-        $pivots = $this->pivots($quantities, $partIds, $this->configManager->rebrickableColoursToLdrawCodes(), $missing);
+        $pivots = $this->pivots($quantities, $partIds, $this->colourLookup->rebrickableToCodes(), $missing);
 
         $this->writePivots([$set->id => $pivots]);
         $set->refreshed_at = now();

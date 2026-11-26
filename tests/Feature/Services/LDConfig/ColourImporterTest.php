@@ -1,7 +1,8 @@
 <?php
 
 use App\Models\LdrawColour;
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\ColourImporter;
+use App\Services\LDConfig\ColourLookup;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -43,7 +44,7 @@ it('maps LDConfig colours to Rebrickable colours from the CSV downloads', functi
         ],
     ]);
 
-    app(LDConfigManager::class)->importColours();
+    app(ColourImporter::class)->import();
 
     $mapped = LdrawColour::whereIn('code', [0, 4, 256, 284, 999])
         ->orderBy('code')
@@ -59,14 +60,14 @@ it('maps LDConfig colours to Rebrickable colours from the CSV downloads', functi
         999 => [null, null],
     ])
         ->and(LdrawColour::firstWhere('code', 256)->rubber)->toBeTrue()
-        ->and(app(LDConfigManager::class)->ldrawColourCodesToRebrickable())->toMatchArray([4 => 4, 256 => 0]);
+        ->and(app(ColourLookup::class)->codesToRebrickable())->toMatchArray([4 => 4, 256 => 0]);
 });
 
 it('does nothing without an LDConfig', function () {
     $red = LdrawColour::factory()->create(['code' => 4, 'name' => 'Red', 'value' => '#B40000', 'rebrickable_id' => 4]);
     fakeRebrickableCsv([]);
 
-    app(LDConfigManager::class)->importColours();
+    app(ColourImporter::class)->import();
 
     expect($red->fresh()->only(['value', 'rebrickable_id']))->toBe(['value' => '#B40000', 'rebrickable_id' => 4]);
 });
@@ -79,7 +80,7 @@ it('keeps stored Rebrickable mappings and leaves new colours unmapped without th
     ]));
     fakeRebrickableCsv(['colors' => ['id,name,rgb,is_trans,num_parts,num_sets,y1,y2']]);
 
-    app(LDConfigManager::class)->importColours();
+    app(ColourImporter::class)->import();
 
     expect($red->fresh()->only(['value', 'rebrickable_id', 'rebrickable_name']))->toBe(['value' => '#C91A09', 'rebrickable_id' => 4, 'rebrickable_name' => 'Red'])
         ->and(LdrawColour::firstWhere('code', 998)->only(['rebrickable_id', 'rebrickable_name']))->toBe(['rebrickable_id' => null, 'rebrickable_name' => null]);

@@ -4,7 +4,7 @@ namespace App\Livewire\Tables;
 
 use App\Enums\PartCategory;
 use App\Enums\PartStatus;
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\AvatarLookup;
 use App\Models\Part\Part;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -60,7 +60,7 @@ class CategoryStatus extends BasicTable
     #[Computed]
     public function categoryArray(): Collection
     {
-        $parts = app(LDConfigManager::class)->avatarParts();
+        $parts = app(AvatarLookup::class)->parts();
         $avatarParts = Part::with('media')
             ->whereIn('filename', array_map(fn (?string $number): string => "parts/{$number}", $parts))
             ->get()

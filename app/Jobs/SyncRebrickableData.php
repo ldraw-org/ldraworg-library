@@ -6,7 +6,7 @@ use App\Enums\ReleaseStage;
 use App\Models\Part\Part;
 use App\Models\Part\PartReleaseRun;
 use App\Services\External\RebrickableCsvDownloader;
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\ColourImporter;
 use App\Services\Omr\Set\ImportSetInventories;
 use App\Services\Omr\Set\SyncSetMetadata;
 use App\Services\Omr\Theme\SyncRebrickableThemes;
@@ -51,7 +51,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
     public function handle(
         RebrickableCsvDownloader $downloader,
         SyncRebrickableThemes $themes,
-        LDConfigManager $configManager,
+        ColourImporter $colourImporter,
         ImportRebrickableParts $parts,
         RelinkRebrickableParts $relinker,
         ImportSetInventories $inventories,
@@ -68,7 +68,7 @@ class SyncRebrickableData implements ShouldQueue, ShouldBeUnique
 
         // Themes first, as added sets and set details refer to them
         $themes->handle();
-        $configManager->importColours();
+        $colourImporter->import();
 
         $partResult = $parts->handle();
         // Before relinking, as stickers are matched to sheets through the sets holding them

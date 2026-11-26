@@ -7,7 +7,8 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use App\Enums\Permission;
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\AvatarImporter;
+use App\Services\LDConfig\ColourImporter;
 use App\Services\Parser\ParsedPartCollection;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
@@ -90,8 +91,8 @@ class LdconfigEdit extends Component implements HasSchemas
         if ($data['ldconfig-text'] != $old_ldconfig) {
             app(BackupFile::class)->handle('LDConfig.ldr', $old_ldconfig);
             Storage::put('library/official/LDConfig.ldr', $data['ldconfig-text']);
-            app(LDConfigManager::class)->importColours();
-            app(LDConfigManager::class)->importAvatars();
+            app(ColourImporter::class)->import();
+            app(AvatarImporter::class)->import();
         }
         if ($data['ldcfgalt-text'] != $old_ldcfgalt) {
             app(BackupFile::class)->handle('LDCfgalt.ldr', $old_ldcfgalt);

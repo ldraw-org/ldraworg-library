@@ -2,7 +2,8 @@
 
 namespace App\Services\Cache;
 
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\AvatarLookup;
+use App\Services\LDConfig\ColourLookup;
 use App\Services\LibraryStatisticsService;
 use App\Services\PartReleaseService;
 use App\Services\User\UserList;
@@ -33,16 +34,16 @@ enum CacheKey: string
             app(LibraryStatisticsService::class)->officialPartCount(),
 
             self::LdrawColourCodes =>
-            app(LDConfigManager::class)->ldrawColourCodes(),
+            app(ColourLookup::class)->codes(),
 
             self::LdrawColourOptions =>
-            app(LDConfigManager::class)->ldrawColourOptions(),
+            app(ColourLookup::class)->options(),
 
             self::LdrawColourCodesToRebrickable =>
-            app(LDConfigManager::class)->ldrawColourCodesToRebrickable(),
+            app(ColourLookup::class)->codesToRebrickable(),
 
             self::AvatarParts =>
-            app(LDConfigManager::class)->avatarParts(),
+            app(AvatarLookup::class)->parts(),
 
             self::UserOptions =>
             app(UserList::class)->userOptions(),

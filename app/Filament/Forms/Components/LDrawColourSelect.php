@@ -2,7 +2,7 @@
 
 namespace App\Filament\Forms\Components;
 
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\ColourLookup;
 use Filament\Forms\Components\Select;
 
 class LDrawColourSelect
@@ -14,6 +14,6 @@ class LDrawColourSelect
             ->preload()
             ->placeholder('Select a color')
             ->allowHtml()
-            ->options(app(LDConfigManager::class)->ldrawColourOptions());
+            ->options(app(ColourLookup::class)->options());
     }
 }

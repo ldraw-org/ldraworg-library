@@ -4,7 +4,7 @@ namespace App\Services\Check\PartChecks;
 
 use App\Services\Check\Enums\PartError;
 use App\Services\Check\Enums\PartWarning;
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\ColourLookup;
 use App\Services\VectorMath;
 use App\Services\Check\BaseCheck;
 use Illuminate\Support\Arr;
@@ -25,7 +25,7 @@ class ValidLines extends BaseCheck
             yield $this->error(PartError::LineInvalid, line_number: $line['line_number'], text: $line['text']);
         }
 
-        $codes = app(LDConfigManager::class)->ldrawColourCodes();
+        $codes = app(ColourLookup::class)->codes();
         foreach ($this->part->bodyLines()->whereIn('linetype', [0,1,2,3,4,5]) as $line) {
             if ($line['linetype'] == 0 && Arr::get($line, 'meta') != 'texmap_geometry') {
                 continue;

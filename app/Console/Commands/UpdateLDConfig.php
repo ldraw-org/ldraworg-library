@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Services\LDraw\Managers\LDConfigManager;
+use App\Services\LDConfig\AvatarImporter;
+use App\Services\LDConfig\ColourImporter;
 use Illuminate\Console\Command;
 
 class UpdateLDConfig extends Command
@@ -11,9 +12,9 @@ class UpdateLDConfig extends Command
 
     protected $description = 'Update colours and avatars from the current LDConfig';
 
-    public function handle(LDConfigManager $manager): void
+    public function handle(ColourImporter $colours, AvatarImporter $avatars): void
     {
-        $manager->importColours();
-        $manager->importAvatars();
+        $colours->import();
+        $avatars->import();
     }
 }
