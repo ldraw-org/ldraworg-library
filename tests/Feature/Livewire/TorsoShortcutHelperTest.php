@@ -34,21 +34,23 @@ it('does not error when the torso is cleared', function () {
         ->assertSet('data.name', '76382p01.dat');
 });
 
-it('refreshes the name and description and clears part choices when the template changes', function () {
-    $otherTemplate = Part::factory()->official()->createQuietly([
-        'filename' => 'parts/16360.dat',
-        'description' => 'Minifig Torso Assembly Short Arms',
-        'type' => PartType::Part,
-        'category' => PartCategory::MinifigUpper,
-    ]);
+it('rebuilds the part fields, name and description and clears part choices when the template changes', function () {
+    $partFactory = fn (array $attributes): Part => Part::factory()->official()->createQuietly($attributes + ['type' => PartType::Part]);
+    $hand = $partFactory(['filename' => 'parts/3820.dat', 'description' => 'Minifig Hand', 'category' => PartCategory::MinifigHand]);
+    $otherTemplate = $partFactory(['filename' => 'parts/16360.dat', 'description' => 'Minifig Torso Assembly Short Arms', 'category' => PartCategory::MinifigUpper]);
+    $otherTemplate->body->forceFill(['body' => '1 16 -15 8 0 1 0 0 0 1 0 0 0 1 3820.dat'])->save();
+    $otherTemplate->subparts()->attach($hand->id);
 
     Livewire::test(TorsoShortcutHelper::class)
+        ->assertSee('3818 - Minifig Arm Right')
         ->set('data.torso', $this->parts['torso']->id)
-        ->set('data.part_1_part', '3818p01.dat')
+        ->set('data.parts.1.variation', '3818p01.dat')
         ->set('data.templateId', $otherTemplate->id)
+        ->assertSee('3820 - Minifig Hand')
+        ->assertDontSee('3818 - Minifig Arm Right')
         ->assertSet('data.name', '16360p01.dat')
         ->assertSet('data.description', 'Minifig Torso Assembly Short Arms with Logo Pattern')
-        ->assertSet('data.part_1_part', null);
+        ->assertSet('data.parts', []);
 });
 
 it('rejects a name without .dat that matches an existing part', function () {

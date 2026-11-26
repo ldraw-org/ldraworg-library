@@ -75,8 +75,10 @@ it('builds the shortcut file with the torso, chosen variations, colours and exte
         'keywords' => 'Set 6399',
         'bricklink' => '973p01c01',
         'rebrickable' => '',
-        'part_0_color' => 4,
-        'part_1_part' => '3818p01.dat',
+        'parts' => [
+            0 => ['color' => 4],
+            1 => ['variation' => '3818p01.dat', 'color' => null],
+        ],
     ], $torso, $user);
 
     expect(explode("\n", $text))

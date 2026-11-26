@@ -114,7 +114,7 @@ class TorsoShortcutMaker
 
     /**
      * @param Template $template
-     * @param array<string, mixed> $data form state: description, name, keywords, external site numbers and part_{index}_part/part_{index}_color
+     * @param array<string, mixed> $data form state: description, name, keywords, external site numbers and parts.{index}.variation/color
      */
     public function text(array $template, array $data, Part $torso, User $user): string
     {
@@ -129,10 +129,10 @@ class TorsoShortcutMaker
 
         $text = [$this->header($data['description'], $data['name'], implode(', ', $keywords), $user)];
         foreach ($template['parts'] as $index => $part) {
-            $color = Arr::get($data, "part_{$index}_color") ?? 16;
+            $color = Arr::get($data, "parts.{$index}.color") ?? 16;
             $file = $this->isTorso($part['name'])
                 ? $torso->meta_name
-                : Arr::get($data, "part_{$index}_part") ?? $part['name'];
+                : Arr::get($data, "parts.{$index}.variation") ?? $part['name'];
             $text[] = "1 {$color} {$part['position']} {$file}";
         }
         $text[] = '';

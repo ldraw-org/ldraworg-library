@@ -30,7 +30,6 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -90,6 +89,7 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                 ->preload()
                                 ->searchable()
                                 ->required()
+                                ->live()
                                 ->afterStateUpdated(function (Set $set): void {
                                     unset($this->torso);
                                     if (is_null($this->torso)) {
@@ -110,56 +110,51 @@ class TorsoShortcutHelper extends Component implements HasSchemas
                                 ->required()
                                 ->afterStateUpdated(function (Set $set): void {
                                     unset($this->template);
-                                    foreach (array_keys($this->data) as $key) {
-                                        if (Str::startsWith($key, 'part_')) {
-                                            $this->data[$key] = null;
-                                        }
-                                    }
+                                    $set('parts', []);
                                     $this->setNameAndDescription($set);
                                 }),
                         ]),
                     Step::make('New Shortcut Details')
                         ->key('torsoEditStep')
-                        ->schema(
-                            Schema::make()
-                            ->components([
-                                TextInput::make('description')
-                                    ->required()
-                                    ->extraAttributes(['class' => 'font-mono'])
-                                    ->rules([
-                                        fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
-                                            if (Part::where('description', $value)->partsFolderOnly()->exists()) {
-                                                $fail('A part with that description already exists');
-                                            }
-                                        },
-                                    ]),
-                                TextInput::make('name')
-                                    ->required()
-                                    ->rules([
-                                        fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
-                                            $filename = 'parts/' . $this->maker()->normalizeName($value);
-                                            if (Part::where('filename', $filename)->exists()) {
-                                                $fail('A part with that name already exists');
-                                            }
-                                        },
-                                    ]),
-                                $this->externalsSiteSection(),
-                                TextInput::make('keywords')
-                                    ->required()
-                                    ->extraAttributes(['class' => 'font-mono'])
-                                    ->rules(fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get): void {
-                                        if (blank($get('description')) || blank($get('name'))) {
-                                            return;
+                        ->schema([
+                            TextInput::make('description')
+                                ->required()
+                                ->extraAttributes(['class' => 'font-mono'])
+                                ->rules([
+                                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
+                                        if (Part::where('description', $value)->partsFolderOnly()->exists()) {
+                                            $fail('A part with that description already exists');
                                         }
-                                        $header = $this->maker()->header($get('description'), $get('name'), $value, Auth::user());
-                                        $errors = app(PartChecker::class)->runSingle(PatternHasSetKeyword::class, new ParsedPartCollection($header));
-                                        if ($errors->isNotEmpty()) {
-                                            $fail($errors->first()->message());
+                                    },
+                                ]),
+                            TextInput::make('name')
+                                ->required()
+                                ->rules([
+                                    fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
+                                        $filename = 'parts/' . $this->maker()->normalizeName($value);
+                                        if (Part::where('filename', $filename)->exists()) {
+                                            $fail('A part with that name already exists');
                                         }
-                                    }),
-                                $this->partInputs(),
-                            ])->deferLoading()
-                        )
+                                    },
+                                ]),
+                            $this->externalsSiteSection(),
+                            TextInput::make('keywords')
+                                ->required()
+                                ->extraAttributes(['class' => 'font-mono'])
+                                ->rules(fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get): void {
+                                    if (blank($get('description')) || blank($get('name'))) {
+                                        return;
+                                    }
+                                    $header = $this->maker()->header($get('description'), $get('name'), $value, Auth::user());
+                                    $errors = app(PartChecker::class)->runSingle(PatternHasSetKeyword::class, new ParsedPartCollection($header));
+                                    if ($errors->isNotEmpty()) {
+                                        $fail($errors->first()->message());
+                                    }
+                                }),
+                            Section::make('Parts')
+                                ->key('partFields')
+                                ->schema(fn (): array => $this->partFields()),
+                        ])
                         ->afterValidation(function (Set $set): void {
                             $fileText = $this->torsoText($this->form->getState());
                             $set('new_part', $fileText);
@@ -237,7 +232,14 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             ->schema($externalSiteFields);
     }
 
-    protected function partInputs(): Section
+    /**
+     * A variation and colour choice for each non-torso part of the selected template, stored under parts.{index}.
+     * Built from a closure so Filament rebuilds it on render after the template changes, rather than reusing
+     * the fields it cached for the previous template earlier in the same request.
+     *
+     * @return list<Fieldset>
+     */
+    protected function partFields(): array
     {
         $partFields = [];
         foreach ($this->template['parts'] ?? [] as $index => $part) {
@@ -246,19 +248,20 @@ class TorsoShortcutHelper extends Component implements HasSchemas
             }
             $partOptions = [];
             if ($part['variations'] !== []) {
-                $partOptions[] = Select::make("part_{$index}_part")
+                $partOptions[] = Select::make('variation')
                     ->options($part['variations'])
-                    ->label('Variation');
+                    ->searchable();
             }
-            $partOptions[] = LDrawColourSelect::make("part_{$index}_color")
+            $partOptions[] = LDrawColourSelect::make('color')
                 ->label('Color');
             $name = basename($part['name'], '.dat');
             $partFields[] = Fieldset::make("{$name} - {$part['description']}")
+                ->key("part{$index}")
+                ->statePath("parts.{$index}")
                 ->schema($partOptions);
         }
-        return Section::make('Parts')
-            ->schema($partFields)
-            ->key('partFields');
+
+        return $partFields;
     }
 
     /**
