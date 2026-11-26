@@ -8,7 +8,7 @@ use App\Filament\Traits\HasOmrModelFormFields;
 use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
 use App\Models\User;
-use App\Services\LDraw\Managers\OmrModelManager;
+use App\Services\OmrModel\Updater;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -100,12 +100,12 @@ class Show extends Component implements HasActions, HasSchemas
                     ->required(),
                 ...$this->modelDetailFields($record),
             ])
-            ->action(function (array $data, OmrModel $record, OmrModelManager $manager): void {
+            ->action(function (array $data, OmrModel $record, Updater $updater): void {
                 $this->authorize('update', $record);
 
                 /** @var ?TemporaryUploadedFile $file */
                 $file = $this->uploadedFile($data['modelfile'] ?? null);
-                $manager->updateModel($record, User::findOrFail($data['user_id']), $data, $file?->get());
+                $updater->update($record, User::findOrFail($data['user_id']), $data, $file?->get());
 
                 $this->checks = [];
                 $this->model_id = null;

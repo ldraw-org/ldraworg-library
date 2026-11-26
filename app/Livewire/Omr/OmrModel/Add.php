@@ -8,7 +8,7 @@ use App\Models\Omr\OmrModel;
 use App\Models\Omr\Set;
 use App\Models\User;
 use App\Services\LDraw\LDrawModelMaker;
-use App\Services\LDraw\Managers\OmrModelManager;
+use App\Services\OmrModel\Creator;
 use App\Services\Omr\Set\Writer as SetWriter;
 use Closure;
 use Filament\Actions\Action;
@@ -117,7 +117,7 @@ class Add extends Component implements HasActions, HasSchemas
         );
     }
 
-    public function create(OmrModelManager $manager): void
+    public function create(Creator $creator): void
     {
         $this->authorize('create', OmrModel::class);
         $data = $this->form->getState();
@@ -125,7 +125,7 @@ class Add extends Component implements HasActions, HasSchemas
         /** @var TemporaryUploadedFile $file */
         $file = $data['modelfile'];
         $set = Set::findOrFail($data['set_id']);
-        $model = $manager->addModel($file->get(), $set, User::findOrFail($data['user_id']), $data);
+        $model = $creator->create($file->get(), $set, User::findOrFail($data['user_id']), $data);
 
         Notification::make()
             ->title("Added {$model->filename()} to {$set->number} - {$set->name}")
