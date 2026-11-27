@@ -57,10 +57,11 @@ class LibraryStatisticsService
      * (the last snapshot of a day wins).
      *
      * Needs1MoreVote and Needs2MoreVotes are combined into the Needs1MoreVote series.
-     * Legacy snapshots store duplicated counts that are skipped:
-     * - until June 2023 the Needs2MoreVotes key repeats the UncertifiedSubfiles count
-     * - from June 2023 (when UncertifiedSubfiles stopped being a status) until November 2025
-     *   the UncertifiedSubfiles key repeats the ErrorsFound count
+     *
+     * Snapshots taken before the November 2025 status renumbering used 3 = NeedsMoreVotes,
+     * 4 = UncertifiedSubfiles (until June 2023) and 5 = ErrorsFound. The renumbering copied
+     * 5 to 6 and 4 to 5 without removing the originals, so those rows always contain key 5
+     * and keys 4 and 5 hold stale copies.
      *
      * @return array{dates: list<string>, counts: array<string, list<int>>}
      */
@@ -81,18 +82,15 @@ class LibraryStatisticsService
         foreach (TrackerHistory::query()->oldest()->oldest('id')->toBase()->cursor() as $row) {
             $data = json_decode($row->history_data, true);
             $count = fn (PartStatus $status): int => (int) Arr::get($data, $status->value, 0);
-            $uncertifiedSubfiles = Arr::has($data, PartStatus::UncertifiedSubfiles->value)
-                ? $count(PartStatus::UncertifiedSubfiles)
-                : null;
-            $needs2MoreVotes = $count(PartStatus::Needs2MoreVotes) === $uncertifiedSubfiles
-                ? 0
-                : $count(PartStatus::Needs2MoreVotes);
+            $beforeRenumbering = Arr::has($data, PartStatus::UncertifiedSubfiles->value);
             $days[substr($row->created_at, 0, 10)] = [
                 PartStatus::ErrorsFound->name => $count(PartStatus::ErrorsFound),
-                PartStatus::UncertifiedSubfiles->name => $uncertifiedSubfiles === $count(PartStatus::ErrorsFound)
-                    ? 0
-                    : (int) $uncertifiedSubfiles,
-                PartStatus::Needs1MoreVote->name => $count(PartStatus::Needs1MoreVote) + $needs2MoreVotes,
+                PartStatus::UncertifiedSubfiles->name => $beforeRenumbering
+                    ? $count(PartStatus::Needs2MoreVotes)
+                    : $count(PartStatus::UncertifiedSubfiles),
+                PartStatus::Needs1MoreVote->name => $beforeRenumbering
+                    ? $count(PartStatus::Needs1MoreVote)
+                    : $count(PartStatus::Needs1MoreVote) + $count(PartStatus::Needs2MoreVotes),
                 PartStatus::AwaitingAdminReview->name => $count(PartStatus::AwaitingAdminReview),
                 PartStatus::Certified->name => $count(PartStatus::Certified),
             ];
