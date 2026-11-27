@@ -98,7 +98,6 @@ class Registrar
             'filename' => $filename,
             'description' => "{$type->description()} {$filename}",
             'type' => $type,
-            'header' => '',
             'missing_parts' => [],
         ];
         return $this->writer->createOrUpdate(
@@ -125,7 +124,6 @@ class Registrar
             'cmdline' => $part->cmdline(),
             'preview' => $part->previewRotation() ?? PreviewRotation::Default,
             'help' => $part->help(),
-            'header' => '',
             'missing_parts' => [],
         ];
         return $this->writer->createOrUpdate(

@@ -76,6 +76,8 @@ class HeaderEdit
         }
 
         if (count($changes['new']) > 0) {
+            // The check reads the full file text, so the header has to be current first
+            $this->generateHeader->updatePartHeader($part);
             $part->save();
             $validator->checkPart($part);
 
@@ -83,7 +85,6 @@ class HeaderEdit
             PartHeaderEdited::dispatch($part, Auth::user(), $changes, $data['editcomment'] ?? null);
             Auth::user()->notification_parts()->syncWithoutDetaching([$part->id]);
             UpdateZip::dispatch($part);
-            app(GenerateHeader::class)->updatePartHeader($part);
         }
 
         return $part;
@@ -234,7 +235,7 @@ class HeaderEdit
         if ($normalizedOldHelp !== $normalizedNewHelp) {
             $changes['old']['help'] = $oldHelp ? "0 !HELP " . implode("\n0 !HELP ", $oldHelp) : '';
             $changes['new']['help'] = $newHelp ? "0 !HELP " . implode("\n0 !HELP ", $newHelp) : '';
-            $part->help = $newHelp;  // Update the part's help
+            $part->help = $newHelp === [] ? null : $newHelp;
         }
 
         return $changes;
@@ -306,7 +307,8 @@ class HeaderEdit
     {
         $changes = ['old' => [], 'new' => []];
 
-        $newCmd = Arr::get($data, 'cmdline');
+        $newCmd = trim(Arr::get($data, 'cmdline') ?? '');
+        $newCmd = $newCmd === '' ? null : $newCmd;
         if ($part->cmdline !== $newCmd) {
             $changes['old']['cmdline'] = $part->cmdline ?? '';
             $changes['new']['cmdline'] = $newCmd ?? '';

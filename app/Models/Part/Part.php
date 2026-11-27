@@ -26,10 +26,7 @@ use App\Models\Traits\HasPartRelease;
 use App\Models\Traits\HasUser;
 use App\Models\User;
 use App\Models\Vote;
-use App\Observers\PartObserver;
-use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,13 +46,11 @@ use Znck\Eloquent\Traits\BelongsToThrough as BelongsToThroughTrait;
  * @method static \Staudenmeir\LaravelAdjacencyList\Eloquent\Builder<static>|Part official()
  * @method static \Staudenmeir\LaravelAdjacencyList\Eloquent\Builder<static>|Part unofficial()
  */
-#[ObservedBy([PartObserver::class])]
 #[CollectedBy(PartCollection::class)]
 #[Unguarded]
 class Part extends Model implements HasMedia
 {
     use InteractsWithMedia;
-    use PivotEventTrait;
     use HasGraphRelationships;
     use BelongsToThroughTrait;
     use HasPartRelease;

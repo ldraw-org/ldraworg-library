@@ -15,7 +15,6 @@
         "ext-gd": "*",
         "ext-zip": "*",
         "blade-ui-kit/blade-icons": "^1.10.1",
-        "fico7489/laravel-pivot": "^3.0",
         "filament/filament": "^5.7.6",
         "filament/spatie-laravel-media-library-plugin": "^5.7.6",
         "http-interop/http-factory-guzzle": ">=1.2.1",

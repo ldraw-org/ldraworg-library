@@ -12,8 +12,9 @@ use App\Services\Parser\ParsedPartCollection;
 class PartMover
 {
     public function __construct(
-        protected Finalizer    $finalizer,
-        protected Writer       $writer,
+        protected Finalizer      $finalizer,
+        protected Writer         $writer,
+        protected GenerateHeader $generateHeader,
     ) {
     }
 
@@ -128,6 +129,7 @@ class PartMover
                     );
                     if ($newDescription !== null && $newDescription !== $p->description) {
                         $p->description = $newDescription;
+                        $this->generateHeader->updatePartHeader($p);
                         $p->save();
                     }
                 }
@@ -178,7 +180,6 @@ class PartMover
             'license' => $user->license,
             'bfc' => $newPart->bfc,
             'category' => PartCategory::Moved,
-            'header' => '',
             'preview' => $oldPart->preview,
         ];
         $bodyText = "1 16 0 0 0 1 0 0 0 1 0 0 0 1 {$newPart->meta_name}\n";

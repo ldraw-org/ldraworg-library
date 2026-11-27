@@ -23,6 +23,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use App\Enums\LibraryIcon;
 use App\Models\Part\Part;
+use App\Services\Part\Remover;
 use App\Models\Vote;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -348,6 +349,11 @@ class Show extends Component implements HasSchemas, HasActions
     {
         return DeleteAction::make('delete')
             ->record($this->part)
+            ->using(function (Part $record): bool {
+                app(Remover::class)->delete($record, Auth::user());
+
+                return true;
+            })
             ->visible(
                 $this->part->isUnofficial() &&
                 (!is_null($this->part->official_part) || $this->part->parents->count() === 0) &&

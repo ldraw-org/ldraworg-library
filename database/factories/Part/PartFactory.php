@@ -81,7 +81,7 @@ class PartFactory extends Factory
     {
         return $this->afterCreating(function (Part $part) use ($body): void {
             $part->body->body = $body;
-            $part->save();
+            $part->body->save();
         });
     }
 
