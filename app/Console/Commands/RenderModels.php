@@ -27,7 +27,7 @@ class RenderModels extends Command
             ->when($onlyMissing, fn (LazyCollection $models) => $models->reject(
                 fn (OmrModel $model): bool => file_exists((string) $model->getFirstMedia('image')?->getPath())
             ))
-            ->chunk(200)
+            ->chunk(50)
             ->each(function (LazyCollection $models) use (&$queued): void {
                 GenerateOmrModelImage::dispatch(new Collection($models->map->withoutRelations()->values()->all()))
                     ->onQueue('maintenance');
