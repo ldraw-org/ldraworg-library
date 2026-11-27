@@ -22,11 +22,12 @@ use Illuminate\Support\Facades\File;
 pest()->extend(Tests\TestCase::class)->in('Feature');
 
 expect()->extend('toHaveCheckResult', function (bool $expected, string $check, ?string $filename = null) {
-    $file = new ParsedPartCollection($this->value);
-    $check_namespace = '\\App\\Services\\Check\\PartChecks\\';
-    $check = $check_namespace . $check;
-    $check = new $check();
-    $result = PartChecker::singleCheck($file, $check, $filename);
+    $result = app(PartChecker::class)->runSingle(
+        "App\\Services\\Check\\PartChecks\\{$check}",
+        new ParsedPartCollection($this->value),
+        $filename,
+    );
+
     expect($result->isEmpty())->toBe($expected);
 });
 

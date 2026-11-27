@@ -9,7 +9,7 @@ class LibraryApprovedName extends BaseCheck
 {
     public function check(): iterable
     {
-        if (! preg_match('~^[^\p{C}\p{Zl}\p{Zp}]+$~u', $this->part->name(), $matches)) {
+        if (! preg_match('~^[\\\\a-z0-9_-]+\.(?:dat|png)$~', $this->part->name(), $matches)) {
             yield $this->error(PartError::PartNameInvalid);
         }
     }

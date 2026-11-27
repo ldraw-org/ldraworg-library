@@ -69,9 +69,9 @@ describe('part check', function () {
         'non-pattern' => ["3001s01.dat", "This Is A Test Description", true],
     ]);
 
-    test('check AuthorInUsers', function (string $input, bool $expected) {
-        $text = "0 Author: {$input}";
-        expect($text)->toHaveCheckResult($expected, 'AuthorInUsers');
+    test('check author is registered', function (string $input, bool $expected) {
+        $text = "0 Test\n0 Name: test.dat\n0 Author: {$input}\n0 !LDRAW_ORG Unofficial_Part\n0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt";
+        expect($text)->toHaveCheckResult($expected, 'HasRequiredHeaderMeta');
     })->with([
         'not in users' => ['Ole Kirk Christiansen [DaOGLego]', false],
         'only real name' => ['Test User', true],
@@ -296,6 +296,8 @@ describe('part check', function () {
         'valid' => ["test.dat", true],
         'valid with forward slash' => ["s\\1001.dat", true],
         'invalid' => ["!!.dat", false],
+        'invalid, upper case' => ["3001A.dat", false],
+        'invalid, space' => ["30 01.dat", false],
     ]);
 
     test('check NameFileNameMatch', function (string $name, string $filename, bool $expected) {
@@ -316,12 +318,12 @@ describe('part check', function () {
     ]);
 
     test('check line allowed body meta', function (string $input, bool $expected) {
-        $text = "0 Test\n0 Name: 123.dat\n0 BFC CERTIFY CCW\n{$input}";
+        $text = "0 Test\n0 Name: 123.dat\n0 BFC CERTIFY CCW\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 test.dat\n{$input}";
         expect($text)->toHaveCheckResult($expected, 'ValidBodyMeta');
     })->with([
-        'not approved' => ['0 WRITE blah blah', false],
+        'header meta in body' => ['0 !KEYWORDS blah', false],
+        'name in body' => ['0 Name: 456.dat', false],
         'approved Comment' => ['0 // blah blah blah', true],
-        'unapproved Comment' => ['0 blah blah blah', false],
         'approved BFC' => ['0 BFC NOCLIP', true],
     ]);
 
@@ -330,12 +332,13 @@ describe('part check', function () {
         expect($text)->toHaveCheckResult($expected, 'ValidLines');
     })->with([
         'valid type 0' => ["0 // Free for comment 112341904.sfsfkajf", true],
-        'valid type 0 empty' => ["0", false],
-        'valid type 1' => ["1  16  0.01 -.01 1  10 0 0 0 1.0 0 0 0 10  test.dat", true],
-        'valid type 2' => ["2  0x2123456  1 0.01 -0.01  1 0.23456789 -.12341234", true],
-        'valid type 3' => ["3  16  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0", true],
-        'valid type 4' => ["4  16  0 0 0  1 -.01 0  1 10 0  0 1.0 0", true],
-        'valid type 5' => ["5  24  1 0.01 -0.01  1 0.23456789 -.12341234  1 0 0  0 0 0", true],
+        'empty type 0 is treated as blank' => ["0", true],
+        'valid type 1' => ["1  16  0.01 -.01 1  10 0 0 0 1 0 0 0 10  test.dat", true],
+        'valid type 1, direct colour' => ["1  0x2123456  0.01 -.01 1  10 0 0 0 1 0 0 0 10  test.dat", true],
+        'valid type 2' => ["2  24  1 0.01 -0.01  1 0.23456 -.12341", true],
+        'valid type 3' => ["3  16  1 0.01 -0.01  1 0.23456 -.12341  1 0 0", true],
+        'valid type 4' => ["4  16  0 0 0  1 -.01 0  1 10 0  0 1 0", true],
+        'valid type 5' => ["5  24  1 0.01 -0.01  1 0.23456 -.12341  1 0 0  0 0 0", true],
         'valid blank line' => ["", true],
         'invalid type 1' => ["1  16  0.01 -0.01 1  0.23456789 -.12341234 1  0 0 0 0 0 0 0 test.dat", false],
         'invalid type 2' => ["2  24  0.01 -0.01 1  0.23456789 -.12341234 1  0", false],
