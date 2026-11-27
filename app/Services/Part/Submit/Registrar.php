@@ -10,12 +10,8 @@ use App\Models\Part\Part;
 use App\Models\User;
 use App\Services\LDraw\LDrawFile;
 use App\Services\Parser\ParsedPartCollection;
-use App\Services\Part\BasePartSync;
 use App\Services\Part\Finalizer;
-use App\Services\Part\ImageGenerator;
-use App\Services\Part\SyncSubparts;
 use App\Services\Part\TexmapOptimizer;
-use App\Services\Part\Validator;
 use App\Services\Part\Writer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
@@ -25,11 +21,7 @@ use Illuminate\Support\Str;
 class Registrar
 {
     public function __construct(
-        protected SyncSubparts   $subpartSync,
-        protected ImageGenerator $imageGenerator,
-        protected Validator      $validator,
-        protected BasePartSync   $basePartSync,
-        protected Finalizer      $finalizer,
+        protected Finalizer $finalizer,
         protected Writer $writer,
         protected TexmapOptimizer $texmapOptimizer,
     ) {
@@ -69,7 +61,7 @@ class Registrar
     public function guessPartType(string $filename, SupportCollection $files): PartType
     {
         // Check if part exists and return that type
-        $p = Part::firstWhere('filename', 'LIKE', "%/textures%/{$filename}");
+        $p = Part::query()->byName($filename)->first();
         if (!is_null($p)) {
             return $p->type;
         }

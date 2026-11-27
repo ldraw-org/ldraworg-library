@@ -131,6 +131,37 @@ it('does not let the client change the file validation state', function () {
         ->set('fileStates', []);
 })->throws(CannotUpdateLockedPropertyException::class);
 
+it('rejects a part file whose Name: line does not match its filename', function () {
+    User::factory()->create(['name' => 'TestUser', 'realname' => 'Test User']);
+    $contents = implode("\r\n", [
+        '0 Brick  2 x  4',
+        '0 Name: 3001.dat',
+        '0 Author: Test User [TestUser]',
+        '0 !LDRAW_ORG Unofficial_Part',
+        '0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt',
+    ]);
+
+    $component = Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [UploadedFile::fake()->createWithContent('3001a.dat', $contents)]]);
+
+    $checks = collect($component->get('fileStates'))
+        ->flatMap(fn (array $state) => $state['messages'])
+        ->map(fn ($message) => $message->check);
+
+    expect($checks)->toContain(PartError::NameAndFilenameNotEqual);
+});
+
+it('does not ask to replace a texture whose name only ends with the uploaded filename', function () {
+    Part::factory()->unofficial()->create(['filename' => 'parts/textures/xtexture.png']);
+
+    $component = Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [texmapUpload()]]);
+
+    expect(errorsByFilename($component->get('fileStates')))->toBe(['texture.png' => false]);
+});
+
 it('clears and restores the replace error as the replace toggle changes', function () {
     Part::factory()->unofficial()->create(['filename' => 'parts/textures/texture.png']);
 

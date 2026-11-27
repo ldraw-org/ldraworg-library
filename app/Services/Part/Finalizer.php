@@ -3,7 +3,6 @@
 namespace App\Services\Part;
 
 use App\Collections\PartCollection;
-use App\Jobs\CheckPart;
 use App\Jobs\GeneratePartImage;
 use App\Jobs\UpdateLibraryCsv;
 use App\Jobs\UpdateParentParts;
@@ -35,14 +34,13 @@ class Finalizer
                 $this->subpartSync->updateUnofficialWithOfficialFix($p->official_part);
             }
             $this->basePartSync->syncBasePart($p);
-            $this->validator->checkPart($p);
-            $p->updateReadyForAdmin();
-            $this->imageGenerator->regenerateImage($p);
+            // The header must exist before checking, as the checks read the full file text
             $this->generateHeader->updatePartHeader($p);
+            $this->validator->checkPart($p);
+            $this->imageGenerator->regenerateImage($p);
             $ancestors->push(...$p->ancestors);
             UpdateParentParts::dispatch($p->withoutRelations());
             UpdateRebrickable::dispatch($p->withoutRelations());
-            CheckPart::dispatch($p->withoutRelations());
 
         });
 

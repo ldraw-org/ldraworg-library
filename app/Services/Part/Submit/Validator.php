@@ -42,9 +42,7 @@ class Validator
             }
         } elseif ($file->mimetype === 'image/png') {
 
-            $parts = Part::query()
-                ->whereLike('filename', "%{$file->filename}")
-                ->get();
+            $parts = Part::query()->byName($file->filename)->get();
 
             $unofficialExists = $parts->unofficial()->isNotEmpty();
             $officialExists   = $parts->official()->isNotEmpty();

@@ -32,7 +32,9 @@ class PartChecker
     protected array $submitOnlyChecks = [
         \App\Services\Check\PartChecks\HasRequiredHeaderMeta::class,
 
+        \App\Services\Check\PartChecks\NameFileNameMatch::class,
         \App\Services\Check\PartChecks\NoSelfReference::class,
+        \App\Services\Check\PartChecks\ValidBodyMeta::class,
 
         \App\Services\Check\PartChecks\LibraryApprovedLicense::class,
         \App\Services\Check\PartChecks\NewPartNotPhysicalColor::class,
