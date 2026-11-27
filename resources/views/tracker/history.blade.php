@@ -18,41 +18,36 @@
             @endforeach
         </div>
     </div>
-    <div class="relative h-[32rem]">
-        <canvas id="ptHistory" role="img" aria-label="Stacked area chart of daily unofficial part counts by status"></canvas>
+    <div id="ptHistoryContainer" class="relative">
+        <canvas id="ptHistory" role="img" aria-label="Stacked bar chart of daily unofficial part counts by status"></canvas>
     </div>
     @push('scripts')
         <script type="module">
-            const dates = @js($dates);
-            const series = @js($datasets);
+            const dates = @js($dates).reverse();
+            const series = @js($datasets).map((dataset) => ({ ...dataset, data: dataset.data.reverse() }));
+            const container = document.getElementById('ptHistoryContainer');
+            const setHeight = (days) => container.style.height = Math.min(days, 4875) + 'px';
+            setHeight(dates.length);
             const chart = new Chart(document.getElementById('ptHistory'), {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: dates,
-                    datasets: series.map((dataset, index) => ({
-                        ...dataset,
-                        fill: index === 0 ? 'origin' : '-1',
-                        borderColor: '#ffffff',
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        pointHoverRadius: 0,
-                    })),
+                    datasets: series.map((dataset) => ({ ...dataset, data: [...dataset.data], barThickness: 1 })),
                 },
                 options: {
+                    indexAxis: 'y',
                     maintainAspectRatio: false,
                     animation: false,
                     normalized: true,
-                    interaction: { mode: 'index', intersect: false },
+                    interaction: { mode: 'index', axis: 'y', intersect: false },
                     scales: {
-                        x: { ticks: { maxTicksLimit: 10, maxRotation: 0 }, grid: { display: false } },
-                        y: { stacked: true, beginAtZero: true, grid: { color: '#e5e7eb' } },
+                        x: { stacked: true },
+                        y: { stacked: true },
                     },
                     plugins: {
-                        legend: { reverse: true },
                         tooltip: {
-                            itemSort: (a, b) => b.datasetIndex - a.datasetIndex,
                             callbacks: {
-                                footer: (items) => 'Total: ' + items.reduce((sum, item) => sum + item.parsed.y, 0).toLocaleString(),
+                                footer: (items) => 'Total: ' + items.reduce((sum, item) => sum + item.parsed.x, 0).toLocaleString(),
                             },
                         },
                     },
@@ -61,15 +56,17 @@
 
             const buttons = document.querySelectorAll('#ptHistoryRange button');
             buttons.forEach((button) => button.addEventListener('click', () => {
-                let start = 0;
+                let end = dates.length;
                 if (button.dataset.years) {
                     const cutoff = new Date();
                     cutoff.setFullYear(cutoff.getFullYear() - Number(button.dataset.years));
                     const cutoffDate = cutoff.toISOString().slice(0, 10);
-                    start = Math.max(0, dates.findIndex((date) => date >= cutoffDate));
+                    const firstOlder = dates.findIndex((date) => date < cutoffDate);
+                    end = firstOlder === -1 ? dates.length : firstOlder;
                 }
-                chart.data.labels = dates.slice(start);
-                chart.data.datasets.forEach((dataset, index) => dataset.data = series[index].data.slice(start));
+                chart.data.labels = dates.slice(0, end);
+                chart.data.datasets.forEach((dataset, index) => dataset.data = series[index].data.slice(0, end));
+                setHeight(end);
                 chart.update();
                 buttons.forEach((other) => other.setAttribute('aria-pressed', other === button ? 'true' : 'false'));
             }));
