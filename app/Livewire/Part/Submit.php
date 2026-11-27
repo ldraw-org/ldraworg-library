@@ -60,6 +60,8 @@ class Submit extends Component implements HasSchemas
                     ->label('Files')
                     ->multiple()
                     ->maxFiles(15)
+                    // KB; the largest library file is about 1.9 MB
+                    ->maxSize(5120)
                     ->storeFiles(false)
                     ->previewable(false)
                     ->live()

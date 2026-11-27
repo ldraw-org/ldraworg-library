@@ -223,6 +223,22 @@ it('checks texmap filenames once lowercased', function (string $filename, bool $
     'other character' => ['texture#1.png', true],
 ]);
 
+it('refuses files larger than 5 MB', function (int $kilobytes, bool $refused) {
+    $component = Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [UploadedFile::fake()->create('big.dat', $kilobytes)]])
+        ->call('create');
+
+    // A fake file is never a valid part, so only the size message tells the cases apart
+    $sizeMessage = 'The files must not be greater than 5120 kilobytes.';
+    $refused
+        ? $component->assertHasErrors(['data.partfiles' => $sizeMessage])
+        : $component->assertHasNoErrors(['data.partfiles' => $sizeMessage]);
+})->with([
+    'just over' => [5121, true],
+    'at the limit' => [5120, false],
+]);
+
 it('refuses to submit once the user may no longer submit', function () {
     $user = submitter();
     $component = Livewire::actingAs($user)
