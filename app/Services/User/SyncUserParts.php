@@ -8,21 +8,26 @@ use App\Models\User;
 
 class SyncUserParts
 {
+    /**
+     * Brings the user's parts in line with a change to the user.
+     *
+     * @param  array<string, mixed>  $changes  the user's changed attributes, keyed by name, as getChanges() returns them
+     */
     public function handle(User $user, array $changes): void
     {
-        $relevantFields = ['name', 'real_name', 'license'];
-        if (empty(array_intersect($relevantFields, array_keys($changes)))) {
+        $changed = array_keys($changes);
+        if (empty(array_intersect(['name', 'realname', 'license'], $changed))) {
             return;
         }
 
-        if (in_array('license', $changes)) {
+        if (in_array('license', $changed, true)) {
             $user->parts()->update(['license' => $user->license]);
         }
 
         $partIds = $user->parts()->pluck('id')->toArray();
 
-        $shouldSyncHistory = (in_array('name', $changes) && !$user->is_synthetic) ||
-            (in_array('real_name', $changes) && $user->is_synthetic);
+        // History lines name synthetic users by real name and everyone else by username
+        $shouldSyncHistory = in_array($user->is_synthetic ? 'realname' : 'name', $changed, true);
 
         if ($shouldSyncHistory) {
             $historyIds = $user->part_history()->pluck('part_id')->toArray();
