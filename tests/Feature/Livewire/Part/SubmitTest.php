@@ -4,8 +4,11 @@ use App\Enums\Permission;
 use App\Livewire\Part\Submit;
 use App\Models\Part\Part;
 use App\Models\User;
+use App\Services\Check\CheckMessage;
+use App\Services\Check\Contracts\CheckItem;
 use App\Services\Check\Enums\PartError;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
@@ -131,25 +134,46 @@ it('does not let the client change the file validation state', function () {
         ->set('fileStates', []);
 })->throws(CannotUpdateLockedPropertyException::class);
 
-it('rejects a part file whose Name: line does not match its filename', function () {
+function brickPartUpload(string $filename = '3001.dat'): UploadedFile
+{
     User::factory()->create(['name' => 'TestUser', 'realname' => 'Test User']);
-    $contents = implode("\r\n", [
+
+    return UploadedFile::fake()->createWithContent($filename, implode("\r\n", [
         '0 Brick  2 x  4',
         '0 Name: 3001.dat',
         '0 Author: Test User [TestUser]',
         '0 !LDRAW_ORG Unofficial_Part',
         '0 !LICENSE Licensed under CC BY 4.0 : see CAreadme.txt',
-    ]);
+    ]));
+}
+
+/**
+ * @param  array<string, array{messages: iterable<CheckMessage>}>  $fileStates
+ * @return Collection<int, CheckItem>
+ */
+function checksIn(array $fileStates): Collection
+{
+    return collect($fileStates)
+        ->flatMap(fn (array $state) => $state['messages'])
+        ->map(fn (CheckMessage $message): CheckItem => $message->check);
+}
+
+it('rejects a part file whose Name: line does not match its filename', function () {
+    $component = Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [brickPartUpload('3001a.dat')]]);
+
+    expect(checksIn($component->get('fileStates')))->toContain(PartError::NameAndFilenameNotEqual);
+});
+
+it('rejects a part whose name is already used in the other parts folder', function () {
+    Part::factory()->create(['filename' => 'p/3001.dat']);
 
     $component = Livewire::actingAs(submitter())
         ->test(Submit::class)
-        ->fillForm(['partfiles' => [UploadedFile::fake()->createWithContent('3001a.dat', $contents)]]);
+        ->fillForm(['partfiles' => [brickPartUpload()]]);
 
-    $checks = collect($component->get('fileStates'))
-        ->flatMap(fn (array $state) => $state['messages'])
-        ->map(fn ($message) => $message->check);
-
-    expect($checks)->toContain(PartError::NameAndFilenameNotEqual);
+    expect(checksIn($component->get('fileStates')))->toContain(PartError::DuplicateFile);
 });
 
 it('does not ask to replace a texture whose name only ends with the uploaded filename', function () {
@@ -160,6 +184,56 @@ it('does not ask to replace a texture whose name only ends with the uploaded fil
         ->fillForm(['partfiles' => [texmapUpload()]]);
 
     expect(errorsByFilename($component->get('fileStates')))->toBe(['texture.png' => false]);
+});
+
+it('rejects every file that would be saved under the same name until only one is left', function () {
+    $component = Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [texmapUpload('texture.png'), texmapUpload('Texture.png')]]);
+
+    $states = collect($component->get('fileStates'));
+    expect($states->pluck('hasErrors')->all())->toBe([true, true])
+        ->and(checksIn($component->get('fileStates'))->unique()->values()->all())->toBe([PartError::DuplicateInSubmission]);
+
+    $component->call('callSchemaComponentMethod', 'form.partfiles', 'removeUploadedFile', ['fileKey' => $states->keys()->first()]);
+
+    expect(collect($component->get('fileStates'))->pluck('hasErrors')->all())->toBe([false]);
+});
+
+it('submits nothing when every file shares its name with another', function () {
+    Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [texmapUpload('texture.png'), texmapUpload('texture.png')]])
+        ->call('create')
+        ->assertHasErrors(['data.partfiles' => 'There are no files without errors']);
+
+    expect(Part::count())->toBe(0);
+});
+
+it('checks texmap filenames once lowercased', function (string $filename, bool $hasErrors) {
+    $component = Livewire::actingAs(submitter())
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [texmapUpload($filename)]]);
+
+    expect(errorsByFilename($component->get('fileStates')))->toBe([$filename => $hasErrors]);
+})->with([
+    'valid' => ['texture-1_a.png', false],
+    'upper case' => ['Texture.PNG', false],
+    'space' => ['my texture.png', true],
+    'other character' => ['texture#1.png', true],
+]);
+
+it('refuses to submit once the user may no longer submit', function () {
+    $user = submitter();
+    $component = Livewire::actingAs($user)
+        ->test(Submit::class)
+        ->fillForm(['partfiles' => [texmapUpload()]]);
+
+    $user->ca_confirm = false;
+    $user->save();
+
+    $component->call('create')->assertForbidden();
+    expect(Part::count())->toBe(0);
 });
 
 it('clears and restores the replace error as the replace toggle changes', function () {

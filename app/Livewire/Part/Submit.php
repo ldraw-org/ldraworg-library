@@ -35,7 +35,7 @@ class Submit extends Component implements HasSchemas
      * Validation results for every uploaded file, keyed by the upload's key (the FilePond item's serverId).
      * Display only: create() re-validates every file.
      *
-     * @var array<string, array{filename: string, messages: CheckMessageCollection, hasErrors: bool, hasWarnings: bool, hasTrackerHolds: bool}>
+     * @var array<string, array{filename: string, name: ?string, messages: CheckMessageCollection, hasErrors: bool, hasWarnings: bool, hasTrackerHolds: bool}>
      */
     #[Locked]
     public array $fileStates = [];
@@ -95,7 +95,7 @@ class Submit extends Component implements HasSchemas
     /**
      * Files whose validation produced messages, for the results panel.
      *
-     * @return array<string, array{filename: string, messages: CheckMessageCollection, hasErrors: bool, hasWarnings: bool, hasTrackerHolds: bool}>
+     * @return array<string, array{filename: string, name: ?string, messages: CheckMessageCollection, hasErrors: bool, hasWarnings: bool, hasTrackerHolds: bool}>
      */
     #[Computed]
     public function filesWithMessages(): array
@@ -130,9 +130,10 @@ class Submit extends Component implements HasSchemas
         $submitFileValidator = app(Validator::class);
 
         foreach (array_diff_key($uploads, $this->fileStates) as $key => $upload) {
-            $file = LDrawFile::fromUploadedFile($upload);
-            $this->storeFileValidationState($key, $file->filename, $this->validateFile($file, $submitFileValidator));
+            $this->validateAndStoreFile($key, LDrawFile::fromUploadedFile($upload), $submitFileValidator);
         }
+
+        $this->flagDuplicateNames();
     }
 
     protected function checkFiles(): void
@@ -141,19 +142,40 @@ class Submit extends Component implements HasSchemas
         $this->syncFileStates();
     }
 
-    protected function validateFile(LDrawFile $file, Validator $submitFileValidator): CheckMessageCollection
+    protected function validateAndStoreFile(int|string $key, LDrawFile $file, Validator $submitFileValidator): void
     {
-        return $submitFileValidator->validate(
+        $messages = $submitFileValidator->validate(
             file: $file,
             replace: (bool) ($this->data['replace'] ?? false),
             officialFix: (bool) ($this->data['official_fix'] ?? false),
         );
+
+        $this->storeFileValidationState($key, $file->filename, $submitFileValidator->submittedName($file), $messages);
     }
 
-    protected function storeFileValidationState(string $key, string $filename, CheckMessageCollection $messages): void
+    /**
+     * Rejects every file that would be saved under the same name as another file in the submission.
+     */
+    protected function flagDuplicateNames(): void
+    {
+        $duplicateNames = collect($this->fileStates)->pluck('name')->filter()->duplicates()->unique()->all();
+
+        foreach ($this->fileStates as $key => $state) {
+            $messages = $state['messages']->reject(fn (CheckMessage $message): bool => $message->check === PartError::DuplicateInSubmission);
+
+            if (in_array($state['name'], $duplicateNames, true)) {
+                $messages->push(CheckMessage::fromArray(['check' => PartError::DuplicateInSubmission, 'value' => $state['name']]));
+            }
+
+            $this->storeFileValidationState($key, $state['filename'], $state['name'], $messages);
+        }
+    }
+
+    protected function storeFileValidationState(int|string $key, string $filename, ?string $name, CheckMessageCollection $messages): void
     {
         $this->fileStates[$key] = [
             'filename' => $filename,
+            'name' => $name,
             'messages' => $messages,
             'hasErrors' => $messages->hasErrors(),
             'hasWarnings' => $messages->hasWarnings(),
@@ -167,6 +189,7 @@ class Submit extends Component implements HasSchemas
             $this->storeFileValidationState(
                 $key,
                 $state['filename'],
+                $state['name'],
                 $state['messages']->reject(fn (CheckMessage $message): bool => $message->check === $error)
             );
         }
@@ -174,6 +197,9 @@ class Submit extends Component implements HasSchemas
 
     public function create(Validator $submitFileValidator, Registrar $registrar): void
     {
+        // The page may have been open since before the user lost the right to submit
+        $this->authorize('create', Part::class);
+
         $this->rejected_files = null;
         $this->submitted_parts = [];
         $this->fileStates = [];
@@ -183,11 +209,10 @@ class Submit extends Component implements HasSchemas
         $files = collect($data['partfiles'])
             ->map(fn (TemporaryUploadedFile $file): LDrawFile => LDrawFile::fromUploadedFile($file));
 
-        $accepted = $files->filter(function (LDrawFile $file, int|string $key) use ($submitFileValidator): bool {
-            $this->storeFileValidationState($key, $file->filename, $this->validateFile($file, $submitFileValidator));
+        $files->each(fn (LDrawFile $file, int|string $key) => $this->validateAndStoreFile($key, $file, $submitFileValidator));
+        $this->flagDuplicateNames();
 
-            return ! $this->fileStates[$key]['hasErrors'];
-        });
+        $accepted = $files->reject(fn (LDrawFile $file, int|string $key): bool => $this->fileStates[$key]['hasErrors']);
 
         if ($accepted->isEmpty()) {
             $this->addError('data.partfiles', 'There are no files without errors');

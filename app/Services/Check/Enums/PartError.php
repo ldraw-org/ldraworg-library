@@ -14,6 +14,7 @@ enum PartError: string implements CheckItem, HasLabel
 
     case InvalidFileFormat = 'fileformat';
     case DuplicateFile = 'duplicate';
+    case DuplicateInSubmission = 'duplicate.submission';
 
     case ReplaceNotSelected = 'replace';
     case FixNotSelected = 'fix.checked';
@@ -132,6 +133,7 @@ enum PartError: string implements CheckItem, HasLabel
         return match($this) {
             self::InvalidFileFormat => 'Files can only be text or png images',
             self::DuplicateFile => 'A :value already exists with this name',
+            self::DuplicateInSubmission => 'More than one submitted file is named :value; submit only one of them',
             self::ReplaceNotSelected => 'To submit a change to a part already on the Parts Tracker, you must check "Replace existing file(s)"',
             self::FixNotSelected => '"New version of official file(s)" must be checked to submit official part updates',
             self::MissingHeaderMeta => 'Required header META :value missing or invalid',
