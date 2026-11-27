@@ -290,6 +290,16 @@ class Part extends Model implements HasMedia
     }
 
     #[Scope]
+    protected function orderByStatus(Builder $query, string $direction = 'asc'): void
+    {
+        $statuses = array_column(PartStatus::cases(), 'value');
+        $query->orderByRaw(
+            'FIELD(part_status, ' . implode(', ', array_fill(0, count($statuses), '?')) . ') ' . ($direction === 'desc' ? 'desc' : 'asc'),
+            $statuses
+        );
+    }
+
+    #[Scope]
     protected function partsFolderOnly(Builder $query): void
     {
         $query->whereIn('type', PartType::partsFolderTypes());

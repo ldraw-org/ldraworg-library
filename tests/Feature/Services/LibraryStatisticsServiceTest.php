@@ -8,11 +8,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('maps tracker snapshots to daily series, skipping legacy duplicated counts', function () {
-    TrackerHistory::create(['created_at' => '2010-06-01 19:00:00', 'history_data' => ['1' => '710', '2' => '513', '3' => '1080', '4' => '1266', '5' => '1266', '6' => '369']]);
-    TrackerHistory::create(['created_at' => '2024-01-01 16:00:00', 'history_data' => ['1' => 31, '2' => 615, '3' => 6055, '5' => 399, '6' => 399]]);
-    TrackerHistory::create(['created_at' => '2026-03-01 15:00:00', 'history_data' => ['1' => 90, '2' => 560, '3' => 1460, '4' => 6120, '6' => 460]]);
-    TrackerHistory::create(['created_at' => '2026-03-01 16:00:00', 'history_data' => ['1' => 95, '2' => 561, '3' => 1462, '4' => 6126, '6' => 464]]);
+it('maps tracker snapshots to daily series, combining all needs votes counts', function () {
+    TrackerHistory::create(['created_at' => '2010-06-01 19:00:00', 'history_data' => ['certified' => 710, 'awaiting_admin_review' => 513, 'needs_more_votes' => 1080, 'uncertified_subfiles' => 1266, 'errors_found' => 369]]);
+    TrackerHistory::create(['created_at' => '2024-01-01 16:00:00', 'history_data' => ['certified' => 31, 'awaiting_admin_review' => 615, 'needs_more_votes' => 6055, 'errors_found' => 399]]);
+    TrackerHistory::create(['created_at' => '2026-03-01 15:00:00', 'history_data' => ['certified' => 90, 'awaiting_admin_review' => 560, 'needs_1_more_vote' => 1460, 'needs_2_more_votes' => 6120, 'errors_found' => 460]]);
+    TrackerHistory::create(['created_at' => '2026-03-01 16:00:00', 'history_data' => ['certified' => 95, 'awaiting_admin_review' => 561, 'needs_1_more_vote' => 1462, 'needs_2_more_votes' => 6126, 'errors_found' => 464]]);
 
     $history = app(LibraryStatisticsService::class)->trackerHistory();
 
@@ -38,6 +38,6 @@ it('records a snapshot of unofficial part counts and refreshes the cached histor
     $statistics->recordTrackerHistory();
 
     expect(TrackerHistory::sole()->history_data->getArrayCopy())
-        ->toEqual([PartStatus::Certified->value => 1, PartStatus::ErrorsFound->value => 2])
+        ->toEqual(['certified' => 1, 'errors_found' => 2])
         ->and($statistics->trackerHistory()['counts'][PartStatus::ErrorsFound->name])->toBe([2]);
 });

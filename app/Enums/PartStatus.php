@@ -4,17 +4,20 @@ namespace App\Enums;
 
 use App\Enums\Traits\CanBeOption;
 
-enum PartStatus: int
+/**
+ * Cases are declared in workflow order, which Part::orderByStatus() sorts by.
+ */
+enum PartStatus: string
 {
     use CanBeOption;
 
-    case Official = 0;
-    case Certified = 1;
-    case AwaitingAdminReview = 2;
-    case Needs1MoreVote = 3;
-    case Needs2MoreVotes = 4;
-    case UncertifiedSubfiles = 5;
-    case ErrorsFound = 6;
+    case Official = 'official';
+    case Certified = 'certified';
+    case AwaitingAdminReview = 'awaiting_admin_review';
+    case Needs1MoreVote = 'needs_1_more_vote';
+    case Needs2MoreVotes = 'needs_2_more_votes';
+    case UncertifiedSubfiles = 'uncertified_subfiles';
+    case ErrorsFound = 'errors_found';
 
     public function iconColor(): string
     {

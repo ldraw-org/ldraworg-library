@@ -56,12 +56,9 @@ class LibraryStatisticsService
      * Daily unofficial part counts per chart series, oldest first, one entry per day
      * (the last snapshot of a day wins).
      *
-     * Needs1MoreVote and Needs2MoreVotes are combined into the Needs1MoreVote series.
-     *
-     * Snapshots taken before the November 2025 status renumbering used 3 = NeedsMoreVotes,
-     * 4 = UncertifiedSubfiles (until June 2023) and 5 = ErrorsFound. The renumbering copied
-     * 5 to 6 and 4 to 5 without removing the originals, so those rows always contain key 5
-     * and keys 4 and 5 hold stale copies.
+     * Snapshots are keyed by PartStatus value. Those taken before Needs More Votes was split
+     * (November 2025) use the 'needs_more_votes' key instead of the two Needs* statuses; all
+     * three are combined into the Needs1MoreVote series.
      *
      * @return array{dates: list<string>, counts: array<string, list<int>>}
      */
@@ -82,15 +79,12 @@ class LibraryStatisticsService
         foreach (TrackerHistory::query()->oldest()->oldest('id')->toBase()->cursor() as $row) {
             $data = json_decode($row->history_data, true);
             $count = fn (PartStatus $status): int => (int) Arr::get($data, $status->value, 0);
-            $beforeRenumbering = Arr::has($data, PartStatus::UncertifiedSubfiles->value);
             $days[substr($row->created_at, 0, 10)] = [
                 PartStatus::ErrorsFound->name => $count(PartStatus::ErrorsFound),
-                PartStatus::UncertifiedSubfiles->name => $beforeRenumbering
-                    ? $count(PartStatus::Needs2MoreVotes)
-                    : $count(PartStatus::UncertifiedSubfiles),
-                PartStatus::Needs1MoreVote->name => $beforeRenumbering
-                    ? $count(PartStatus::Needs1MoreVote)
-                    : $count(PartStatus::Needs1MoreVote) + $count(PartStatus::Needs2MoreVotes),
+                PartStatus::UncertifiedSubfiles->name => $count(PartStatus::UncertifiedSubfiles),
+                PartStatus::Needs1MoreVote->name => (int) Arr::get($data, 'needs_more_votes', 0)
+                    + $count(PartStatus::Needs1MoreVote)
+                    + $count(PartStatus::Needs2MoreVotes),
                 PartStatus::AwaitingAdminReview->name => $count(PartStatus::AwaitingAdminReview),
                 PartStatus::Certified->name => $count(PartStatus::Certified),
             ];

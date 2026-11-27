@@ -38,7 +38,7 @@ class PartTable
                     fn (Builder $q) => $q->unofficial()
                 )
             )
-            ->defaultSort(fn (Builder $q) => $q->orderBy('part_status', 'asc')->orderBy('part_type_id', 'asc')->orderBy('description', 'asc'))
+            ->defaultSort(fn (Builder $q) => $q->orderByStatus()->orderBy('part_type_id', 'asc')->orderBy('description', 'asc'))
             ->columns(self::columns())
             ->filters(self::filters($official), layout: FiltersLayout::AboveContent)
             ->recordActions(self::actions())
@@ -72,7 +72,7 @@ class PartTable
                     ->extraHeaderAttributes(['class' => 'hidden'])
                 ])->alignment(Alignment::Start),
                 PartStatusColumn::make('part_status')
-                    ->sortable()
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderByStatus($direction))
                     ->grow(false)
                     ->label('Status')
             ])->from('md'),
