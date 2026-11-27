@@ -8,7 +8,6 @@ use App\Enums\PartType;
 use App\Enums\PartTypeQualifier;
 use App\Enums\PreviewRotation;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
@@ -81,7 +80,7 @@ class ParsedPartCollection extends Collection
         if (is_null($author)) {
             return null;
         }
-        return User::firstWhere(fn (Builder $query) => $query->orWhere('name', $author['username'])->orWhere('realname', $author['realname']));
+        return User::query()->fromAuthor($author['username'], $author['realname'])->first();
     }
 
     public function type(): ?PartType

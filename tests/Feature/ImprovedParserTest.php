@@ -246,8 +246,9 @@ describe('author parse', function () {
             ->id->toBe($user->id);
     })->with([
         'both real and user names' => 'Test User [TestUser]',
-        'correct real and incorrect user name' => 'Test User [TestUse]',
         'correct user and incorrect real name' => 'Test Use [TestUser]',
+        'only user name' => '[TestUser]',
+        'only real name' => 'Test User',
     ]);
 
     it('fails author user lookup', function (string $input) {
@@ -255,7 +256,8 @@ describe('author parse', function () {
         expect($file->authorUser())
             ->toBeNull();
     })->with([
-        'Ole Kirk Christiansen [DaOGLego]',
+        'unregistered' => 'Ole Kirk Christiansen [DaOGLego]',
+        'correct real and incorrect user name' => 'Test User [TestUse]',
     ]);
 
 });

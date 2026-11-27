@@ -78,7 +78,7 @@ describe('part check', function () {
         'only user name' => ['[TestUser]', true],
         'in users, both' => ['Test User [TestUser]', true],
         'in users, realname wrong' => ['Test Tool [TestUser]', true],
-        'in users, userame wrong' => ['Test User [TestTool]', true],
+        'username wrong, realname of a user' => ['Test User [TestTool]', false],
     ]);
 
     test('check NameAndPartType', function (string $name, PartType $type, bool $expected) {

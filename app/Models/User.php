@@ -85,12 +85,20 @@ class User extends Authenticatable
         return $this->belongsToMany(Part::class, 'user_part_notifications');
     }
 
+    /**
+     * Matches the user named on an Author: line: by username when the line has one, otherwise by real name
+     * (legacy authors have no username). An Author: line with neither matches nobody.
+     */
     #[Scope]
-    protected function fromAuthor(Builder $query, string $username, ?string $realname = null): void
+    protected function fromAuthor(Builder $query, ?string $username, ?string $realname = null): void
     {
-        $query->where(function (Builder $q) use ($username, $realname) {
-            $q->orWhere('realname', $realname)->orWhere('name', $username);
-        });
+        if (! is_null($username)) {
+            $query->where('name', $username);
+        } elseif (! is_null($realname)) {
+            $query->where('realname', $realname);
+        } else {
+            $query->whereKey([]);
+        }
     }
 
     public function historyString(): string
