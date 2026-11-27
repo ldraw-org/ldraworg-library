@@ -350,7 +350,8 @@ class Part extends Model implements HasMedia
         return $this
             ->descendants()
             ->whereIn('part_status', [PartStatus::AwaitingAdminReview, PartStatus::Needs2MoreVotes, PartStatus::Needs1MoreVote, PartStatus::ErrorsFound])
-            ->get();
+            ->get()
+            ->unique();
     }
 
     public function attributionEditors(): Collection
