@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "228c0da830136fb5266325a55efe3431",
+    "content-hash": "dabfc53178ea596cdb78d881faa504bc",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2767,75 +2767,6 @@
             },
             "time": "2025-12-15T11:28:16+00:00",
             "published-time": "2025-12-15T11:29:39+00:00"
-        },
-        {
-            "name": "icehouse-ventures/laravel-chartjs",
-            "version": "v5.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/icehouse-ventures/laravel-chartjs.git",
-                "reference": "5f292c2e7b912b95d0cdfa69942cbf196e373d3a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/icehouse-ventures/laravel-chartjs/zipball/5f292c2e7b912b95d0cdfa69942cbf196e373d3a",
-                "reference": "5f292c2e7b912b95d0cdfa69942cbf196e373d3a",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/support": "^12.0|^13.0",
-                "php": "^8.2"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.30",
-                "orchestra/testbench": "^10.11|^11.1",
-                "pestphp/pest": "^3.8|^4.7|^5.0",
-                "pestphp/pest-plugin-laravel": "^3.2|^4.1|^5.0",
-                "phpstan/phpstan": "^2.2"
-            },
-            "suggest": {
-                "livewire/livewire": "Required for reactive chart components; release-tested with Livewire 4."
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "Chartjs": "IcehouseVentures\\LaravelChartjs\\Facades\\Chartjs"
-                    },
-                    "providers": [
-                        "IcehouseVentures\\LaravelChartjs\\Providers\\ChartjsServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "IcehouseVentures\\LaravelChartjs\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Icehouse Ventures",
-                    "email": "tech@icehouseventures.co.nz"
-                }
-            ],
-            "description": "Simple package to facilitate and automate the use of charts in Laravel using the Chart.js library",
-            "keywords": [
-                "chartjs",
-                "charts",
-                "graphs",
-                "icehouseventures",
-                "laravel"
-            ],
-            "support": {
-                "issues": "https://github.com/icehouse-ventures/laravel-chartjs/issues",
-                "source": "https://github.com/icehouse-ventures/laravel-chartjs/tree/v5.0.0"
-            },
-            "time": "2026-07-29T00:44:55+00:00",
-            "published-time": "2026-07-29T00:45:33+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",

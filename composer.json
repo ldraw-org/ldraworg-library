@@ -19,7 +19,6 @@
         "filament/filament": "^5.7.6",
         "filament/spatie-laravel-media-library-plugin": "^5.7.6",
         "http-interop/http-factory-guzzle": ">=1.2.1",
-        "icehouse-ventures/laravel-chartjs": "^5.0.0",
         "lara-zeus/quantity": "^3.0.2",
         "laravel/framework": "^13.24",
         "laravel/head": "^0.3.0",
