@@ -13,5 +13,5 @@ it('renders the tracker history chart with labelled status series', function () 
     $response->assertOk()
         ->assertSee('2026-03-01')
         ->assertSee('Needs More Votes')
-        ->assertDontSee('Uncertified');
+        ->assertSee('Uncertified Subfiles');
 });

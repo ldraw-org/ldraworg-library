@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('maps tracker snapshots to daily series, ignoring duplicated uncertified subfile counts', function () {
+it('maps tracker snapshots to daily series, skipping legacy duplicated counts', function () {
     TrackerHistory::create(['created_at' => '2010-06-01 19:00:00', 'history_data' => ['1' => '710', '2' => '513', '3' => '1080', '4' => '1266', '5' => '1266', '6' => '369']]);
     TrackerHistory::create(['created_at' => '2024-01-01 16:00:00', 'history_data' => ['1' => 31, '2' => 615, '3' => 6055, '5' => 399, '6' => 399]]);
     TrackerHistory::create(['created_at' => '2026-03-01 15:00:00', 'history_data' => ['1' => 90, '2' => 560, '3' => 1460, '4' => 6120, '6' => 460]]);
@@ -20,7 +20,8 @@ it('maps tracker snapshots to daily series, ignoring duplicated uncertified subf
         'dates' => ['2010-06-01', '2024-01-01', '2026-03-01'],
         'counts' => [
             PartStatus::ErrorsFound->name => [369, 399, 464],
-            PartStatus::Needs1MoreVote->name => [2346, 6055, 7588],
+            PartStatus::UncertifiedSubfiles->name => [1266, 0, 0],
+            PartStatus::Needs1MoreVote->name => [1080, 6055, 7588],
             PartStatus::AwaitingAdminReview->name => [513, 615, 561],
             PartStatus::Certified->name => [710, 31, 95],
         ],
