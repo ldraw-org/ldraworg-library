@@ -22,9 +22,8 @@ enum PartStatus: string
     public function iconColor(): string
     {
         return match ($this) {
-            PartStatus::Official => 'fill-blue-800',
+            PartStatus::Official, PartStatus::AwaitingAdminReview => 'fill-blue-800',
             PartStatus::Certified => 'fill-lime-400',
-            PartStatus::AwaitingAdminReview => 'fill-blue-800',
             PartStatus::Needs1MoreVote => 'fill-gray-400',
             PartStatus::Needs2MoreVotes => 'fill-gray-600',
             PartStatus::UncertifiedSubfiles => 'fill-yellow-300',
@@ -43,11 +42,9 @@ enum PartStatus: string
     public function chartColor(): string
     {
         return match ($this) {
-            PartStatus::Official => '#1e40af',
+            PartStatus::Official, PartStatus::AwaitingAdminReview => '#1e40af',
             PartStatus::Certified => '#a3e635',
-            PartStatus::AwaitingAdminReview => '#1e40af',
-            PartStatus::Needs1MoreVote => '#9ca3af',
-            PartStatus::Needs2MoreVotes => '#9ca3af',
+            PartStatus::Needs1MoreVote, PartStatus::Needs2MoreVotes => '#9ca3af',
             PartStatus::UncertifiedSubfiles => '#fde047',
             PartStatus::ErrorsFound => '#ef4444',
         };
