@@ -2,8 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Part\Part;
-use App\Models\TrackerHistory;
+use App\Services\LibraryStatisticsService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Queue;
@@ -15,17 +14,8 @@ class UpdateTrackerHistory implements ShouldQueue
 {
     use Queueable;
 
-    public function handle(): void
+    public function handle(LibraryStatisticsService $statistics): void
     {
-        $stats = Part::query()
-            ->unofficial()
-            ->selectRaw('part_status, count(*) as count')
-            ->groupBy('part_status')
-            ->pluck('count', 'part_status')
-            ->all();
-
-        TrackerHistory::create([
-            'history_data' => $stats,
-        ]);
+        $statistics->recordTrackerHistory();
     }
 }

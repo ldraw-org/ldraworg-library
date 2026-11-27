@@ -18,6 +18,7 @@ enum CacheKey: string
     case LdrawColourCodesToRebrickable = 'ldraw_colour_codes_to_rebrickable';
     case AvatarParts = 'avatar_parts';
     case UserOptions = 'user_options';
+    case TrackerHistory = 'tracker_history';
 
     public function reset(): void
     {
@@ -47,6 +48,9 @@ enum CacheKey: string
 
             self::UserOptions =>
             app(UserList::class)->userOptions(),
+
+            self::TrackerHistory =>
+            app(LibraryStatisticsService::class)->trackerHistory(),
         };
     }
 
