@@ -5,6 +5,7 @@ namespace App\Services\Part\Submit;
 use App\Enums\PartType;
 use App\Enums\PreviewRotation;
 use App\Events\PartSubmitted;
+use App\Jobs\FinalizeParts;
 use App\Jobs\UpdateZip;
 use App\Models\Part\Part;
 use App\Models\User;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 class Registrar
 {
@@ -29,8 +31,8 @@ class Registrar
 
     public function submit(SupportCollection $files, User $user, ?string $comments = null): Collection
     {
-        // Create every part or none; finalizing runs after commit so its queued jobs see the saved parts
-        $parts = DB::transaction(function () use ($files, $user): Collection {
+        // Save every part with its submit event, or none of them. Only these can't be rebuilt from the saved part later.
+        $parts = DB::transaction(function () use ($files, $user, $comments): Collection {
             $parts = Part::make()->newCollection();
 
             foreach ($files as $file) {
@@ -45,15 +47,23 @@ class Registrar
                 }
             }
 
+            $parts->each(function (Part $part) use ($user, $comments): void {
+                $user->notification_parts()->syncWithoutDetaching([$part->id]);
+                PartSubmitted::dispatch($part, $user, $comments);
+            });
+
             return $parts;
         });
 
-        $this->finalizer->handle($parts);
-        $parts->each(function (Part $part) use ($user, $comments) {
-            $user->notification_parts()->syncWithoutDetaching([$part->id]);
-            UpdateZip::dispatch($part);
-            PartSubmitted::dispatch($part, $user, $comments);
-        });
+        // Everything from here is derived from the saved parts, so a failure is reported and retried rather than failing the submit
+        try {
+            $this->finalizer->handle($parts);
+        } catch (Throwable $e) {
+            report($e);
+            FinalizeParts::dispatch($parts);
+        }
+
+        $parts->each(fn (Part $part) => UpdateZip::dispatch($part));
 
         return $parts;
     }

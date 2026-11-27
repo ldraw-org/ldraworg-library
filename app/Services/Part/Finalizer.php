@@ -13,43 +13,40 @@ class Finalizer
 {
     public function __construct(
         protected SyncSubparts   $subpartSync,
-        protected ImageGenerator $imageGenerator,
         protected Validator      $validator,
         protected BasePartSync   $basePartSync,
         protected GenerateHeader $generateHeader,
     ) {
     }
 
+    /**
+     * Rebuilds everything derived from the parts' saved header data and body. Safe to run again on the same parts.
+     */
     public function handle(PartCollection $parts): void
     {
         $parts->load('official_part', 'ancestors');
 
         $parts->each(fn (Part $p) => $this->subpartSync->loadSubparts($p, true));
 
-        $ancestors = collect();
+        $imageParts = collect();
 
-        $parts->each(function (Part $p) use ($ancestors) {
+        $parts->each(function (Part $p) use ($imageParts) {
             $p->updatePartStatus();
             if ($p->official_part !== null) {
                 $this->subpartSync->updateUnofficialWithOfficialFix($p->official_part);
             }
             $this->basePartSync->syncBasePart($p);
-            // The header must exist before checking, as the checks read the full file text
+            // Regenerated before checking so the checked file text has the now-attached keywords and history
             $this->generateHeader->updatePartHeader($p);
             $this->validator->checkPart($p);
-            $this->imageGenerator->regenerateImage($p);
-            $ancestors->push(...$p->ancestors);
+            $imageParts->push($p, ...$p->ancestors);
             UpdateParentParts::dispatch($p->withoutRelations());
             UpdateRebrickable::dispatch($p->withoutRelations());
-
         });
 
-        $partIds = $parts->pluck('id');
-
-        $ancestors
+        $imageParts
             ->unique('id')
-            ->reject(fn (Part $ancestor) => $partIds->contains($ancestor->id))
-            ->each(fn (Part $ancestor) => GeneratePartImage::dispatch($ancestor->withoutRelations()));
+            ->each(fn (Part $part) => GeneratePartImage::dispatch($part->withoutRelations()));
 
         UpdateLibraryCsv::dispatch();
     }
