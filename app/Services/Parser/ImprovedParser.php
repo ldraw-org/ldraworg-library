@@ -180,8 +180,10 @@ class ImprovedParser
         if ($match['invalid'] === true) {
             return $match;
         }
-        $command = Arr::get($match, 'bfc');
-        $winding = Arr::get($match, 'winding');
+        $command = strtoupper($match['bfc']);
+        $winding = is_null(Arr::get($match, 'winding')) ? null : strtoupper($match['winding']);
+        $match['bfc'] = $command;
+        $match['winding'] = $winding;
 
         if (!in_array($command, ['CERTIFY', 'CLIP']) && !is_null($winding)) {
             $match['invalid'] = true;

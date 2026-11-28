@@ -371,6 +371,9 @@ describe('bfc parse', function () {
         'cw' => ["0 BFC CW", false, 'CW', null],
         'ccw' => ["0 BFC CCW", false, 'CCW', null],
         'invert' => ["0 BFC INVERTNEXT", false, 'INVERTNEXT', null],
+        'lower case cert, ccw' => ["0 BFC certify ccw", true, 'CERTIFY', 'CCW'],
+        'mixed case clip cw' => ["0 BFC Clip Cw", false, 'CLIP', 'CW'],
+        'lower case nocert' => ["0 BFC nocertify", true, 'NOCERTIFY', null],
     ]);
 
     it('fails bfc parse', function (string $input) {
@@ -394,6 +397,7 @@ describe('bfc parse', function () {
         'cert, ccw' => ["0 BFC CERTIFY CCW", 'CCW'],
         'cert, cw' => ["0 BFC CERTIFY CW", 'CW'],
         'nocert' => ["0 BFC NOCERTIFY", 'none'],
+        'lower case cert, ccw' => ["0 BFC certify ccw", 'CCW'],
     ]);
 
     test('fails header bfc parse', function (string $input) {
@@ -585,6 +589,7 @@ describe('type 1 parse', function () {
     })->with([
         'bad number' => "1 16 a 0 0 1 0 0 0 1 0 0 0 1 test.dat",
         'too few numbers' => "1 16 0 0 1 0 0 0 1 0 0 0 1 test.dat",
+        'no space before file' => "1 16 0 0 0 1 0 0 0 1 0 0 0 13001.dat",
     ]);
 
     it('subparts parse', function (string $input, ?array $expected) {
