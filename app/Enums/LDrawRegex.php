@@ -16,7 +16,7 @@ enum LDrawRegex: string
     case Description = '#^\h*(?<linetype>0)\h+(?P<description>(?:(?P<prefix>[~_=|]+)\h*)?(?P<category>[^\h]+).*?)\h*$#u';
 
     case Name = '~^\h*(?<linetype>0)\h+Name:\h*(?P<name>[^\h]+)\h*$~u';
-    case Basepart = '~^^(?<basepart>[uts]?\d+(?:[a-d][a-z]|[a-oq-z])?)~i';
+    case Basepart = '~^(?<basepart>[uts]?\d+(?:[a-d][a-z]|[a-oq-z])?)$~i';
     case SuffixValidate = '~(?<suffix>(?:(?:p[a-z0-9]{2,4}|c[0-9a-z]{2}|d[0-9a-z]{2}|k[0-9a-z]{2})+)?(?:-f[0-9a-z])?)$~i';
     case SuffixExtract = '~p(?:\d{4}|[cd][0-9a-z][0-9a-l]|[0-9a-z]{2})|c[a-z0-9]{2}|d[a-z0-9]{2}|k[0-9a-z]{2}|-f[0-9a-z]~i';
 

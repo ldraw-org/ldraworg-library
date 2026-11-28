@@ -168,6 +168,7 @@ describe('name parse', function () {
         'u prefix with letters' => 'uaaaaa.dat',
         't prefix with letters' => 'taaaaa.dat',
         's prefix with letters' => 'saaaaa.dat',
+        'trailing p' => '6142622p.dat',
     ]);
 
     it('passes basepart with suffix parse', function (string $input, string $basepart, array $suffixes) {
@@ -184,7 +185,9 @@ describe('name parse', function () {
         'pNNNN suffix' => ['33333p0100.dat', '33333', ['p0100']],
         'cXX suffix' => ['33333c01.dat', '33333', ['c01']],
         'dXX suffix' => ['33333d01.dat', '33333', ['d01']],
-        'dXX suffix' => ['33333k01.dat', '33333', ['k01']],
+        'kXX suffix' => ['33333k01.dat', '33333', ['k01']],
+        'dXX suffix with letter' => ['11291dy0.dat', '11291', ['dy0']],
+        'dXX suffix with letters' => ['11477dya.dat', '11477', ['dya']],
         '-fN suffix' => ['33333-f1.dat', '33333', ['-f1']],
         'multiple' => ['33333p0100c01d01k01.dat', '33333', ['p0100', 'c01', 'd01', 'k01']],
         'multiple with -f1' => ['33333p0100c01d01k01-f1.dat', '33333', ['p0100', 'c01', 'd01', 'k01', '-f1']],

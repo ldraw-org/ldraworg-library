@@ -246,16 +246,16 @@ class ImprovedParser
 
         $filename = basename(str_replace('\\', '/', Arr::get($match, 'name')), '.dat');
         $s = [];
-        LDrawRegex::Basepart->match($filename, $bp);
         LDrawRegex::SuffixValidate->match($filename, $s);
-        $suffixes = Arr::get($s, 'suffix', '');
-        $basepart = str_replace($suffixes, '', $filename);
-        if ($basepart . $suffixes != $filename) {
+        $suffixes = Arr::get($s, 'suffix') ?? '';
+        $basepart = substr($filename, 0, strlen($filename) - strlen($suffixes));
+        if (! LDrawRegex::Basepart->hasMatches($basepart)) {
             $match['basepart'] = null;
             $match['suffixes'] = null;
             $match['suffixes_invalid'] = true;
             return $match;
-        } if ($suffixes != '') {
+        }
+        if ($suffixes != '') {
             preg_match_all(LDrawRegex::SuffixExtract->value, $suffixes, $matches);
             $match['basepart'] = $basepart;
             if (implode('', Arr::get($matches, 0, [])) == $suffixes) {
@@ -268,7 +268,7 @@ class ImprovedParser
         } else {
             $match['basepart'] = $basepart;
             $match['suffixes'] = null;
-            $match['suffix_invalid'] = false;
+            $match['suffixes_invalid'] = false;
         }
         return $match;
     }
