@@ -114,12 +114,13 @@ class ParsedPartCollection extends Collection
 
     public function bfc(): ?array
     {
+        $bodyStartLine = $this->bodyStartLine();
         $bfc = $this
             ->where('meta', 'bfc')
             ->where('invalid', false)
             ->map(fn (array $bfc) => [
                 'line_number' => Arr::get($bfc, 'line_number'),
-                'in_header' => Arr::get($bfc, 'line_number') < $this->bodyStartLine(),
+                'in_header' => Arr::get($bfc, 'line_number') < $bodyStartLine,
                 'command' => Arr::get($bfc, 'bfc'),
                 'winding' => Arr::get($bfc, 'winding'),
             ])
@@ -147,7 +148,7 @@ class ParsedPartCollection extends Collection
             return PartCategory::tryFrom(Arr::get($meta, 'category'));
         }
 
-        return PartCategory::tryFrom(Arr::get($this->getFirstMeta('description'), 'category'));
+        return PartCategory::tryFrom(Arr::get($this->getFirstMeta('description') ?? [], 'category') ?? '');
     }
 
     public function keywords(): ?array

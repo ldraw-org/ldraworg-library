@@ -394,6 +394,16 @@ describe('bfc parse', function () {
         'empty file' => "",
     ]);
 
+    it('marks each bfc line as header or body', function () {
+        $file = new ParsedPartCollection(
+            "0 Test Description\n0 Name: 3001.dat\n0 BFC CERTIFY CCW\n"
+            . "0 BFC INVERTNEXT\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 s/3001s01.dat\n"
+            . "0 BFC NOCLIP\n0 BFC INVERTNEXT\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 s/3001s01.dat\n"
+        );
+        expect(collect($file->bfc())->map(fn (array $bfc) => [$bfc['line_number'], $bfc['in_header']])->all())
+            ->toBe([[3, true], [4, false], [6, false], [7, false]]);
+    });
+
     it('passes header bfc parse', function (string $input, string $expected) {
         $file = new ParsedPartCollection($input);
         $bfc = $file->headerBfc();
@@ -439,6 +449,15 @@ describe('category parse', function () {
         'blank' => "0 !CATEGORY",
         'empty file' => "",
     ]);
+
+    it('returns null without a deprecation when there is no description', function () {
+        set_error_handler(fn (int $errno, string $errstr) => throw new ErrorException($errstr, 0, $errno));
+        try {
+            expect((new ParsedPartCollection("0 Name: 3001.dat"))->category())->toBeNull();
+        } finally {
+            restore_error_handler();
+        }
+    });
 });
 
 
