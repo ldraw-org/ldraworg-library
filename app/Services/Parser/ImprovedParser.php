@@ -8,6 +8,25 @@ use Illuminate\Support\Collection;
 
 class ImprovedParser
 {
+    /**
+     * Meta commands, keyed by first word, that need no handling beyond their regex.
+     *
+     * @var array<string, LDrawRegex>
+     */
+    protected const META_COMMANDS = [
+        'Author:' => LDrawRegex::Author,
+        '!LICENSE' => LDrawRegex::License,
+        '!HELP' => LDrawRegex::Help,
+        '!CATEGORY' => LDrawRegex::Category,
+        '!KEYWORDS' => LDrawRegex::Keywords,
+        '!CMDLINE' => LDrawRegex::Cmdline,
+        '!PREVIEW' => LDrawRegex::Preview,
+        '!HISTORY' => LDrawRegex::History,
+        '!TEXMAP' => LDrawRegex::Texmap,
+        '//' => LDrawRegex::Comment,
+        '!AVATAR' => LDrawRegex::Avatar,
+    ];
+
     public static function fixEncoding(string $text): string
     {
         $old_encode = mb_detect_encoding($text, ['UTF-8', 'ISO-8859-1', 'ASCII']);
@@ -56,87 +75,9 @@ class ImprovedParser
                     'invalid' => false,
                 ];
             } else {
-                $m = match ($line[0]) {
-                    '0' => LDrawRegex::LineType0->match($line, $match),
-                    '1' => LDrawRegex::LineType1->match($line, $match),
-                    '2' => LDrawRegex::LineType2->match($line, $match),
-                    '3' => LDrawRegex::LineType3->match($line, $match),
-                    '4' => LDrawRegex::LineType4->match($line, $match),
-                    '5' => LDrawRegex::LineType5->match($line, $match),
-                    default => false
-                };
-                if ($m) {
+                if ($this->lineTypeRegex($line[0])?->match($line, $match)) {
                     $match['invalid'] = false;
-                    if ($line[0] === '0') {
-                        if (strtoupper($match['first_word']) === 'BFC') {
-                            $match['first_word'] = 'BFC';
-                        }
-                        switch ($match['first_word']) {
-                            case 'Name:':
-                                $match = $this->matchNameCommand($line);
-                                break;
-                            case 'Author:':
-                                $match = $this->matchMetaCommand(LDrawRegex::Author, $line);
-                                break;
-                            case '!LDRAW_ORG':
-                                $match = $this->matchLDrawOrgCommand($line);
-                                break;
-                            case '!LICENSE':
-                                $line = preg_replace('#\h+#u', ' ', $line);
-                                $match = $this->matchMetaCommand(LDrawRegex::License, $line);
-                                break;
-                            case '!HELP':
-                                $line = preg_replace('#\h+#u', ' ', $line);
-                                $match = $this->matchMetaCommand(LDrawRegex::Help, $line);
-                                break;
-                            case 'BFC':
-                                $match = $this->matchBfcCommand($line);
-                                break;
-                            case '!CATEGORY':
-                                $line = preg_replace('#\h+#u', ' ', $line);
-                                $match = $this->matchMetaCommand(LDrawRegex::Category, $line);
-                                break;
-                            case '!KEYWORDS':
-                                $line = preg_replace('#\h+#u', ' ', $line);
-                                $match = $this->matchMetaCommand(LDrawRegex::Keywords, $line);
-                                break;
-                            case '!CMDLINE':
-                                $line = preg_replace('#\h+#u', ' ', $line);
-                                $match = $this->matchMetaCommand(LDrawRegex::Cmdline, $line);
-                                break;
-                            case '!PREVIEW':
-                                $match = $this->matchMetaCommand(LDrawRegex::Preview, $line);
-                                break;
-                            case '!HISTORY':
-                                $line = preg_replace('#\h+#u', ' ', $line);
-                                $match = $this->matchMetaCommand(LDrawRegex::History, $line);
-                                break;
-                            case '!TEXMAP':
-                                $match = $this->matchMetaCommand(LDrawRegex::Texmap, $line);
-                                break;
-                            case '//':
-                                $line = preg_replace('#\h+#u', ' ', $line);
-                                $match = $this->matchMetaCommand(LDrawRegex::Comment, $line);
-                                break;
-                            case '!:':
-                                $match = $this->matchTextureGeometryCommand($line);
-                                break;
-                            case '!COLOUR':
-                                $match = $this->matchColourCommand($line);
-                                break;
-                            case '!AVATAR':
-                                $match = $this->matchMetaCommand(LDrawRegex::Avatar, $line);
-                                break;
-                            default:
-                                if ($lineNumber === 1) {
-                                    $match = $this->matchMetaCommand(LDrawRegex::Description, $line);
-                                } else {
-                                    $match['meta'] = null;
-                                    $match['invalid'] = true;
-                                }
-                        }
-                    }
-                    $data = $match;
+                    $data = $line[0] === '0' ? $this->matchLineType0($match, $line, $lineNumber) : $match;
                 } else {
                     $data = [
                         'linetype' => 'invalid',
@@ -150,6 +91,44 @@ class ImprovedParser
             $matches[] = $data;
         }
         return collect($matches);
+    }
+
+    protected function lineTypeRegex(string $lineType): ?LDrawRegex
+    {
+        return match ($lineType) {
+            '0' => LDrawRegex::LineType0,
+            '1' => LDrawRegex::LineType1,
+            '2' => LDrawRegex::LineType2,
+            '3' => LDrawRegex::LineType3,
+            '4' => LDrawRegex::LineType4,
+            '5' => LDrawRegex::LineType5,
+            default => null,
+        };
+    }
+
+    /**
+     * Match a type 0 line against the meta command named by its first word.
+     *
+     * @param array<string, string|bool|null> $match The LineType0 match for the line
+     */
+    protected function matchLineType0(array $match, string $line, int $lineNumber): array
+    {
+        $firstWord = strtoupper($match['first_word']) === 'BFC' ? 'BFC' : $match['first_word'];
+
+        if (array_key_exists($firstWord, self::META_COMMANDS)) {
+            return $this->matchMetaCommand(self::META_COMMANDS[$firstWord], $line);
+        }
+
+        return match ($firstWord) {
+            'Name:' => $this->matchNameCommand($line),
+            '!LDRAW_ORG' => $this->matchLDrawOrgCommand($line),
+            'BFC' => $this->matchBfcCommand($line),
+            '!:' => $this->matchTextureGeometryCommand($line),
+            '!COLOUR' => $this->matchColourCommand($line),
+            default => $lineNumber === 1
+                ? $this->matchMetaCommand(LDrawRegex::Description, $line)
+                : [...$match, 'meta' => null, 'invalid' => true],
+        };
     }
 
     public function matchMetaCommand(LDrawRegex $regex, string $line): array
@@ -202,15 +181,7 @@ class ImprovedParser
             return $match;
         }
         $lmatch = [];
-        $m = match ($match['tex_line'][0]) {
-            '1' => LDrawRegex::LineType1->match($match['tex_line'], $lmatch),
-            '2' => LDrawRegex::LineType2->match($match['tex_line'], $lmatch),
-            '3' => LDrawRegex::LineType3->match($match['tex_line'], $lmatch),
-            '4' => LDrawRegex::LineType4->match($match['tex_line'], $lmatch),
-            '5' => LDrawRegex::LineType5->match($match['tex_line'], $lmatch),
-            default => false
-        };
-        if (!$m) {
+        if (! $this->lineTypeRegex($match['tex_line'][0])?->match($match['tex_line'], $lmatch)) {
             $match['invalid'] = true;
             return $match;
         }

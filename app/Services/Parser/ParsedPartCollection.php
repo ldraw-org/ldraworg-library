@@ -317,7 +317,7 @@ class ParsedPartCollection extends Collection
         return $this
             ->headerLines()
             ->pluck('text')
-            ->implode("\n") ?? '';
+            ->implode("\n");
     }
 
     public function bodyLines(): self
@@ -331,7 +331,7 @@ class ParsedPartCollection extends Collection
         return $this
             ->bodyLines()
             ->pluck('text')
-            ->implode("\n") ?? '';
+            ->implode("\n");
     }
 
     public function lastSuffixStartsWith(string $letter): bool
