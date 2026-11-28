@@ -374,6 +374,8 @@ describe('bfc parse', function () {
         'lower case cert, ccw' => ["0 BFC certify ccw", true, 'CERTIFY', 'CCW'],
         'mixed case clip cw' => ["0 BFC Clip Cw", false, 'CLIP', 'CW'],
         'lower case nocert' => ["0 BFC nocertify", true, 'NOCERTIFY', null],
+        'lower case keyword' => ["0 bfc CERTIFY CCW", true, 'CERTIFY', 'CCW'],
+        'mixed case keyword and values' => ["0 Bfc invertnext", false, 'INVERTNEXT', null],
     ]);
 
     it('fails bfc parse', function (string $input) {

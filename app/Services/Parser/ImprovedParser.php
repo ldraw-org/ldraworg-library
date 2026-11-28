@@ -68,6 +68,9 @@ class ImprovedParser
                 if ($m) {
                     $match['invalid'] = false;
                     if ($line[0] === '0') {
+                        if (strtoupper($match['first_word']) === 'BFC') {
+                            $match['first_word'] = 'BFC';
+                        }
                         switch ($match['first_word']) {
                             case 'Name:':
                                 $match = $this->matchNameCommand($line);
